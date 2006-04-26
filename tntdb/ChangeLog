@@ -1,0 +1,40 @@
+2006-04-12 tommi@tntnet.org
+
+  - fix mysql-driver-bug: crashed when fetching some datatypes, because the api
+    seems to return too small length-values (or I misunderstand the api;-) )
+
+2006-03-27 tommi@tntnet.org
+
+  - allow date-, datetime- and time-classes to be null, when passed to statements
+
+2006-03-01 tommi@tntnet.org
+
+  - declare cursor in postgresql with hold to enable cursor outside transactions
+
+2006-02-13 tommi@tntnet.org
+
+  - new method Statement::clear()
+
+2006-01-21 tommi@tntnet.org
+
+  - connectionpool
+
+2006-01-13 tommi@tntnet.org
+
+  - add missing include/tntdb/sqlite/impl/connectionmanager.h
+
+2005-12-26 tommi@tntnet.org
+
+  - new Sqlite-driver
+
+2005-11-12 tommi@tntnet.org
+
+  - use PQexec with PREPARE when PQprepare is not found (postgresql prior 8.0)
+
+2005-11-11 tommi@tntnet.org
+
+  - make drivers for mysql and postgresql optional in configure
+
+2005-10-26 tommi@tntnet.org
+
+  - fixed handling of MYSQL_TYPE_LONGLONG

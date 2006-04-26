@@ -1,0 +1,53 @@
+Source: tntdb
+Priority: optional
+Maintainer: Tommi Maekitalo <tommi@tntnet.org>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, libmysqlclient15-dev, libpq-dev, libsqlite3-dev
+Standards-Version: 3.6.1
+Section: libs
+
+Package: libtntdb1
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libcxxtools
+Recommends: libtntdb1-backend (= ${Source-Version})
+Description: c++-library for database-abstraction
+ Tntdb is a c++-library for easy and safe database-access. Drivers
+ for databases are loaded dynamically at runtime.
+
+Package: libtntdb1-mysql
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libtntdb1 (= ${Source-Version})
+Provides: libtntdb1-backend
+Description: c++-library for database-abstraction
+ Tntdb is a c++-library for easy and safe database-access. Drivers
+ for databases are loaded dynamically at runtime.
+ .
+ This package contains the MySQL support
+
+Package: libtntdb1-postgresql
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libtntdb1 (= ${Source-Version})
+Provides: libtntdb1-backend
+Description: c++-library for database-abstraction
+ Tntdb is a c++-library for easy and safe database-access. Drivers
+ for databases are loaded dynamically at runtime.
+ .
+ This package contains the PostgreSQL support
+
+Package: libtntdb1-sqlite
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libtntdb1 (= ${Source-Version})
+Provides: libtntdb1-backend
+Description: c++-library for database-abstraction
+ Tntdb is a c++-library for easy and safe database-access. Drivers
+ for databases are loaded dynamically at runtime.
+ .
+ This package contains the SQLite support
+
+Package: libtntdb-dev
+Architecture: all
+Depends: libtntdb1 (= ${Source-Version})
+Description: c++-library for database-abstraction - development files
+ Tntdb is a c++-library for easy and safe database-access. Drivers
+ for databases are loaded dynamically at runtime.
+ .
+ This package includes the development-files

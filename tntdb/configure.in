@@ -1,0 +1,171 @@
+AC_INIT(tntdb, 0.6.2, [Tommi Maekitalo <tommi@tntnet.org>])
+AM_INIT_AUTOMAKE
+
+abi_current=0
+abi_revision=0
+abi_age=0
+sonumber=${abi_current}:${abi_revision}:${abi_age}
+AC_SUBST(sonumber)
+
+unset CDPATH
+
+AC_CONFIG_HEADERS([src/config.h])
+AC_CONFIG_SRCDIR([src/sqlite/connection.cpp])
+
+AC_PROG_CXX
+AC_LANG(C++)
+AC_DISABLE_STATIC
+AC_PROG_LIBTOOL
+
+#
+# Cxxtools
+#
+AC_PATH_PROGS(CXXTOOLS_CONFIG, cxxtools-config)
+if ! test -x "$CXXTOOLS_CONFIG"; then
+  AC_MSG_ERROR([cxxtools configuration script was not found])
+fi
+
+CXXTOOLS_CXXFLAGS=`$CXXTOOLS_CONFIG --cxxflags`
+CXXTOOLS_LDFLAGS=`$CXXTOOLS_CONFIG --libs`
+CXXFLAGS="$CXXFLAGS $CXXTOOLS_CXXFLAGS"
+LDFLAGS="$CXXFLAGS $CXXTOOLS_LDFLAGS"
+
+AC_CHECK_HEADER([cxxtools/log.h], , AC_MSG_ERROR([cxxtools-logging not found]))
+
+AC_MSG_CHECKING([for cxxtools usability])
+AC_COMPILE_IFELSE(
+  [#include <cxxtools/thread.h>
+   void t() { cxxtools::AttachedThread* p; }
+  ],
+  AC_MSG_RESULT(yes),
+  [
+    AC_MSG_RESULT(no)
+    AC_MSG_ERROR(please check your cxxtools-installation - maybe you need an upgrade)
+  ]
+  )
+
+AC_SUBST(CXXTOOLS_CONFIG)
+AC_SUBST(CXXTOOLS_CXXFLAGS)
+AC_SUBST(CXXTOOLS_LDFLAGS)
+
+#
+# Postgresql
+#
+AC_ARG_WITH(
+  [postgresql],
+  AS_HELP_STRING([--with-postgresql],
+                 [build postgresql-driver]),
+  [with_postgresql=$withval],
+  [with_postgresql=yes])
+
+if test "$with_postgresql" = yes -o "$with_postgresql" = static; then
+  AC_PATH_PROGS(PG_CONFIG, pg_config)
+  if ! test -x "$PG_CONFIG"; then
+    AC_MSG_ERROR([postgresql configuration script pg_config was not found])
+  fi
+
+  PG_CXXFLAGS=-I`$PG_CONFIG --includedir`
+  PG_LDFLAGS="-L`$PG_CONFIG --libdir` -lpq"
+  AC_SUBST(PG_CONFIG)
+  AC_SUBST(PG_CXXFLAGS)
+  AC_SUBST(PG_LDFLAGS)
+
+  AC_MSG_CHECKING([for PQprepare in libpq-fe.h])
+  save_CXXFLAGS=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS $PG_CXXFLAGS"
+  AC_COMPILE_IFELSE([#include <libpq-fe.h>
+      void t() { PQprepare(0, 0, 0, 0, 0); }],
+    [AC_DEFINE(HAVE_PQPREPARE, 1, [Defined if postgresql supports PQprepare])
+     AC_MSG_RESULT(yes)
+    ],
+     AC_MSG_RESULT(no))
+  CXXFLAGS=$save_CXXFLAGS
+fi
+
+if test "$with_postgresql" = static; then
+  AC_DEFINE(WITH_STATIC_POSTGRESQL, 1, [Defined if postgresql is linked with libtntdb])
+fi
+
+AM_CONDITIONAL(MAKE_POSTGRESQL, test "$with_postgresql" = yes -o "$with_postgresql" = static)
+AM_CONDITIONAL(MAKE_POSTGRESQL_STATIC, test "$with_postgresql" = static)
+AM_CONDITIONAL(MAKE_POSTGRESQL_DYNAMIC, test "$with_postgresql" = yes)
+
+#
+# mysql
+#
+AC_ARG_WITH(
+  [mysql],
+  AS_HELP_STRING([--with-mysql],
+                 [build mysql-driver]),
+  [ with_mysql=$withval ],
+  [ with_mysql=yes ])
+
+if test "$with_mysql" = yes -o "$with_mysql" = static; then
+  AC_PATH_PROGS(MYSQL_CONFIG, mysql_config)
+  if ! test -x "$MYSQL_CONFIG"; then
+    AC_MSG_ERROR([mysql configuration script was not found])
+  fi
+
+  # TODO check form MYSQL_BIND
+
+  MYSQL_CFLAGS=`$MYSQL_CONFIG --cflags`
+  MYSQL_LDFLAGS=`$MYSQL_CONFIG --libs_r`
+
+  AC_SUBST(MYSQL_CONFIG)
+  AC_SUBST(MYSQL_CFLAGS)
+  AC_SUBST(MYSQL_LDFLAGS)
+fi
+
+if test "$with_mysql" = static; then
+  AC_DEFINE(WITH_STATIC_MYSQL, 1, [Defined if mysql is linked with libtntdb])
+fi
+
+AM_CONDITIONAL(MAKE_MYSQL, test "$with_mysql" = yes -o "$with_mysql" = static)
+AM_CONDITIONAL(MAKE_MYSQL_STATIC, test "$with_mysql" = static)
+AM_CONDITIONAL(MAKE_MYSQL_DYNAMIC, test "$with_mysql" = yes)
+
+#
+# Sqlite
+#
+AC_ARG_WITH(
+  [sqlite],
+  AS_HELP_STRING([--with-sqlite],
+                 [build sqlite-driver]),
+  [with_sqlite=$withval],
+  [with_sqlite=yes])
+
+if test "$with_sqlite" = yes -o "$with_sqlite" = static; then
+  AC_CHECK_HEADER([sqlite3.h], , AC_MSG_ERROR([header for sqlite3 not found]))
+
+  # check for sqlite3_transfer_bindings
+  AC_COMPILE_IFELSE([#include <sqlite3.h>
+      void t() { sqlite3_transfer_bindings(0, 0); }],
+    [AC_MSG_RESULT(yes)],
+    [AC_MSG_ERROR([sqlite3_transfer_bindings is missing])])
+
+fi
+
+if test "$with_sqlite" = static; then
+  AC_DEFINE(WITH_STATIC_SQLITE, 1, [Defined if sqlite is linked with libtntdb])
+fi
+
+AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes -o "$with_sqlite" = static)
+AM_CONDITIONAL(MAKE_SQLITE_STATIC, test "$with_sqlite" = static)
+AM_CONDITIONAL(MAKE_SQLITE_DYNAMIC, test "$with_sqlite" = yes)
+
+#
+# check header
+#
+AC_CHECK_HEADER([cxxtools/log.h], AC_DEFINE(HAVE_CXXTOOLS_LOG_H, ,[cxxtools/log.h found]), AC_MSG_ERROR([cxxtools-logging not found]))
+
+AC_CONFIG_FILES([
+  Makefile
+  src/Makefile
+  src/mysql/Makefile
+  src/postgresql/Makefile
+  src/sqlite/Makefile
+  include/Makefile
+  demo/Makefile
+  ])
+
+AC_OUTPUT
