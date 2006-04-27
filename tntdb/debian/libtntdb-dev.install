@@ -1,0 +1,7 @@
+usr/include/
+usr/lib/libtntdb*.a
+usr/lib/libtntdb*.la
+usr/lib/libtntdb*.so
+usr/lib/tnt/tntdb-*.a
+usr/lib/tnt/tntdb-*.la
+usr/lib/tnt/tntdb-*.so

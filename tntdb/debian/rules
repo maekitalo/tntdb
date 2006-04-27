@@ -8,7 +8,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=/usr/ --enable-postgresql --enable-mysql --enable-sqlite
+	./configure --prefix=/usr/
 	-$(MAKE)
 
 	touch build-stamp
@@ -35,6 +35,10 @@ install: build
 	# install the examples
 	mkdir -p $(TMP)/usr/share/doc/libtntdb-dev/examples
 	cp -f demo/*.{cpp,h} $(TMP)/usr/share/doc/libtntdb-dev/examples/
+
+	# create /usr/lib/tnt/
+	mkdir -p $(TMP)/usr/lib/tnt
+	mv -f $(TMP)/usr/lib/tntdb* $(TMP)/usr/lib/tnt/
 
 	dh_install --sourcedir=$(TMP)
 
