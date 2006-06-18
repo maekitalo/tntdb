@@ -81,6 +81,7 @@ namespace tntdb
   class SmartPtr : public ownershipPolicy<objectType>
   {
       objectType* object;
+      typedef ownershipPolicy<objectType> ownershipPolicyType;
 
     public:
       SmartPtr()
@@ -88,18 +89,18 @@ namespace tntdb
         {}
       SmartPtr(objectType* ptr)
         : object(ptr)
-        { link(*this, ptr); }
+        { ownershipPolicyType::link(*this, ptr); }
       SmartPtr(const SmartPtr& ptr)
         : object(ptr.object)
-        { link(ptr, ptr.object); }
+        { ownershipPolicyType::link(ptr, ptr.object); }
       ~SmartPtr()
-        { unlink(object); }
+        { ownershipPolicyType::unlink(object); }
 
       SmartPtr& operator= (const SmartPtr& ptr)
       {
-        unlink(object);
+        ownershipPolicyType::unlink(object);
         object = ptr.object;
-        link(ptr, object);
+        ownershipPolicyType::link(ptr, object);
         return *this;
       }
 
