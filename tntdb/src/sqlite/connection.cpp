@@ -102,11 +102,11 @@ namespace tntdb
     {
       char* errmsg;
 
-      log_debug("sqlite_exec(" << db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
+      log_debug("sqlite3_exec(" << db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
 
       int ret = ::sqlite3_exec(db, query.c_str(), 0, 0, &errmsg);
 
-      log_debug("sqlite_exec ret=" << ret);
+      log_debug("sqlite3_exec ret=" << ret);
 
       if (ret != SQLITE_OK)
         throw Execerror("sqlite3_exec", ret, errmsg, true);
@@ -118,13 +118,13 @@ namespace tntdb
     {
       char* errmsg;
 
-      log_debug("sqlite_exec(" << db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
+      log_debug("sqlite3_exec(" << db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
 
       ResultImpl* r = new ResultImpl();
       Result result(r);
       int ret = ::sqlite3_exec(db, query.c_str(), select_callback, r, &errmsg);
 
-      log_debug("sqlite_exec ret=" << ret);
+      log_debug("sqlite3_exec ret=" << ret);
 
       if (ret != SQLITE_OK)
         throw Execerror("sqlite3_exec", ret, errmsg, true);

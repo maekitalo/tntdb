@@ -296,7 +296,11 @@ namespace tntdb
         throw SqliteError("sqlite3_step", msg.str());
       }
 
-      return ::sqlite3_changes(::sqlite3_db_handle(stmt));
+      int n = ::sqlite3_changes(::sqlite3_db_handle(stmt));
+
+      reset();
+
+      return n;
     }
 
     Result Statement::select()
