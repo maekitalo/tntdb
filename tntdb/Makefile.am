@@ -32,18 +32,4 @@ SUBDIRS += \
 
 EXTRA_DIST = \
 	doc/Doxyfile \
-	doc/tntdb.odt \
-	debian/changelog \
-	debian/compat \
-	debian/control \
-	debian/copyright \
-	debian/dirs \
-	debian/docs \
-	debian/rules \
-	debian/shlibs.local \
-	debian/tntdb1.dirs \
-	debian/tntdb1.install \
-	debian/tntdb-dev.dirs \
-	debian/tntdb-dev.install \
-	debian/tntdb1-pg.dirs \
-	debian/tntdb1-pg.install
+	doc/tntdb.odt
