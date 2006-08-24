@@ -31,5 +31,7 @@ SUBDIRS += \
     demo
 
 EXTRA_DIST = \
+	COPYING.GPL \
+	LICENSE.OpenSSL \
 	doc/Doxyfile \
 	doc/tntdb.odt
