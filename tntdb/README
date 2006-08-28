@@ -31,11 +31,6 @@ performancepenalty compared to direct access to the C-API.
 The project started already some years ago as a postgresql-wrapper. Later I
 added a sqlite-3-wrapper.
 
-The current status is, that there is a working mysql- and
-postgresql-driver-class. The sqlite-3-wrapper is included here, but it is just
-a early design-study. It works, but it is not dynamically loaded like the other
-drivers.
-
 The public headers include documentation, which can be generated using Doxygen.
 Also there are some small examples in the demo-directory.
 

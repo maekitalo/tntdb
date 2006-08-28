@@ -1,4 +1,4 @@
-AC_INIT(tntdb, 0.6.3, [Tommi Maekitalo <tommi@tntnet.org>])
+AC_INIT(tntdb, 0.9, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 
 abi_current=0
@@ -10,7 +10,7 @@ AC_SUBST(sonumber)
 unset CDPATH
 
 AC_CONFIG_HEADERS([src/config.h])
-AC_CONFIG_SRCDIR([src/sqlite/connection.cpp])
+AC_CONFIG_SRCDIR([src/connect.cpp])
 
 AC_PROG_CXX
 AC_LANG(C++)
@@ -166,6 +166,8 @@ AC_CONFIG_FILES([
   src/sqlite/Makefile
   include/Makefile
   demo/Makefile
+  doc/Makefile
+  doc/tntdb.doxygen
   ])
 
 AC_OUTPUT

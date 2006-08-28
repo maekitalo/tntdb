@@ -1,3 +1,11 @@
+2006-08-25 tommi@tntnet.org
+
+  - fix smartpointer to support self-assignment
+
+2006-08-24 tommi@tntnet.org
+
+  - change license to LGPL
+
 2006-07-21 tommi@tntnet.org
 
   - extend license to allow linking with openssl due to postgresql

@@ -28,10 +28,11 @@ endif
 
 SUBDIRS += \
     include \
-    demo
+    demo \
+    doc
 
 EXTRA_DIST = \
-	COPYING.GPL \
-	LICENSE.OpenSSL \
+	COPYING \
 	doc/Doxyfile \
-	doc/tntdb.odt
+	doc/tntdb.odt \
+	doc/tntdb.pdf
