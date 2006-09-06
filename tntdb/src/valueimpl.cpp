@@ -111,21 +111,21 @@ namespace tntdb
   {
     if (null)
       throw NullValue();
-    Date::fromIso(data);
+    return Date::fromIso(data);
   }
 
   Time ValueImpl::getTime() const
   {
     if (null)
       throw NullValue();
-    Time::fromIso(data);
+    return Time::fromIso(data);
   }
 
   Datetime ValueImpl::getDatetime() const
   {
     if (null)
       throw NullValue();
-    Datetime::fromIso(data);
+    return Datetime::fromIso(data);
   }
 
 }
