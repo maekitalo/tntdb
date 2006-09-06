@@ -24,7 +24,7 @@ namespace tntdb
 {
   std::string Time::getIso() const
   {
-    // format hh:mm:ss.sssss
+    // format hh:mm:ss.sss
     //        0....+....1....+
     char ret[14];
     ret[0] = '0' + hour / 10;
@@ -42,10 +42,8 @@ namespace tntdb
     ret[10] = '0' + n % 10;
     n /= 10;
     ret[9] = '0' + n % 10;
-    ret[12] = '0';
-    ret[13] = '0';
 
-    return std::string(ret, 14);
+    return std::string(ret, 12);
   }
 
   inline unsigned short getNumber2(const char* s)

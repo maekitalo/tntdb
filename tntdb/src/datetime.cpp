@@ -24,7 +24,7 @@ namespace tntdb
 {
   std::string Datetime::getIso() const
   {
-    // format YYYY-MM-DD hh:mm:ss.sssss
+    // format YYYY-MM-DD hh:mm:ss.sss
     //        0....+....1....+....2....+
     char ret[25];
     unsigned short n = year;
@@ -57,10 +57,8 @@ namespace tntdb
     ret[21] = '0' + n % 10;
     n /= 10;
     ret[20] = '0' + n % 10;
-    ret[23] = '0';
-    ret[24] = '0';
 
-    return std::string(ret, 25);
+    return std::string(ret, 23);
   }
 
   inline unsigned short getNumber2(const char* s)
