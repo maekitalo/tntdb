@@ -154,6 +154,30 @@ AM_CONDITIONAL(MAKE_SQLITE_STATIC, test "$with_sqlite" = static)
 AM_CONDITIONAL(MAKE_SQLITE_DYNAMIC, test "$with_sqlite" = yes)
 
 #
+# Doxygen-documentation
+#
+AC_ARG_WITH(
+  [doxygen],
+  AS_HELP_STRING([--with-doxygen],
+                 [generate doxygen documentation]),
+  [DOXYGEN=$withval],
+  [DOXYGEN=doxygen])
+
+if test "$DOXYGEN" = "no"
+  then
+    DOXYGEN=
+  else
+    AC_DEFINE(WITH_DOXYGEN, 1, [build doxygen documentation])
+    if test "$DOXYGEN" = "yes"
+      then
+        DOXYGEN=doxygen
+      fi
+  fi
+
+AM_CONDITIONAL(MAKE_DOXYGEN, test -n "$DOXYGEN")
+AC_SUBST(DOXYGEN)
+
+#
 # check header
 #
 AC_CHECK_HEADER([cxxtools/log.h], AC_DEFINE(HAVE_CXXTOOLS_LOG_H, ,[cxxtools/log.h found]), AC_MSG_ERROR([cxxtools-logging not found]))

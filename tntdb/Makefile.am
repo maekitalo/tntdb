@@ -32,7 +32,4 @@ SUBDIRS += \
     doc
 
 EXTRA_DIST = \
-	COPYING \
-	doc/Doxyfile \
-	doc/tntdb.odt \
-	doc/tntdb.pdf
+	COPYING
