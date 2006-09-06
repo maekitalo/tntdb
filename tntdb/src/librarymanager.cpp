@@ -19,6 +19,10 @@
 #include <tntdb/librarymanager.h>
 #include <cxxtools/log.h>
 
+#ifndef PKGLIBDIR
+#define PKGLIBDIR "tntdb"
+#endif
+
 log_define("tntdb.librarymanager");
 
 namespace tntdb
@@ -26,9 +30,42 @@ namespace tntdb
   static const std::string libraryPrefix = "tntdb-";
 
   LibraryManager::LibraryManager(const std::string& driverName)
-    : lib((libraryPrefix + driverName).c_str()),
-      connectionManager(static_cast<IConnectionManager*>(lib.sym(("connectionManager_" + driverName).c_str()).getSym()))
   {
+    const SearchPathType& path = getSearchPath();
+
+    SearchPathType::const_iterator it;
+    for (it = path.begin(); it != path.end(); ++it)
+    {
+      std::string d = *it + '/' + libraryPrefix + driverName;
+      try
+      {
+        log_debug("loading library \"" << d << '"');
+        lib = cxxtools::dl::Library(d.c_str());
+        break;
+      }
+      catch (const cxxtools::dl::DlopenError&)
+      {
+        log_debug("library \"" << d << "\" not found");
+      }
+    }
+
+    if (it == path.end())
+    {
+      std::string d = libraryPrefix + driverName;
+      log_debug("loading library \"" << d << '"');
+      lib = cxxtools::dl::Library(d.c_str());
+    }
+
+    connectionManager = static_cast<IConnectionManager*>(lib.sym(("connectionManager_" + driverName).c_str()).getSym());
+
     log_debug("driver " << driverName << " loaded (" << lib.getHandle() << ") connectionManager=" << connectionManager);
+  }
+
+  LibraryManager::SearchPathType& LibraryManager::getSearchPath()
+  {
+    static LibraryManager::SearchPathType searchPath;
+    if (searchPath.empty())
+      searchPath.push_back(PKGLIBDIR);
+    return searchPath;
   }
 }

@@ -13,7 +13,7 @@ libtntdb_postgresql_la_LDFLAGS = @PG_LDFLAGS@ -version-info @sonumber@
 
 else
 
-lib_LTLIBRARIES = tntdb-postgresql.la
+pkglib_LTLIBRARIES = tntdb-postgresql.la
 
 tntdb_postgresql_la_SOURCES = $(sources)
 tntdb_postgresql_la_LDFLAGS = @PG_LDFLAGS@ -module -version-info @sonumber@

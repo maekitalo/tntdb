@@ -23,6 +23,7 @@
 #include <tntdb/bits/connection.h>
 #include <cxxtools/dlloader.h>
 #include <string>
+#include <vector>
 
 namespace tntdb
 {
@@ -38,6 +39,9 @@ namespace tntdb
       LibraryManager(const std::string& libname);
       Connection connect(const std::string url)
         { return connectionManager->connect(url); }
+
+      typedef std::vector<std::string> SearchPathType;
+      static SearchPathType& getSearchPath();
   };
 
 }
