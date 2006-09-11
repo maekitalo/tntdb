@@ -1,3 +1,8 @@
+2006-09-11 tommi@tntnet.org
+
+  - fix handling of binary data in sqlite3-driver
+  - move drivers to separate directory specified in configure with "--with-driverdir=..."
+
 2006-08-25 tommi@tntnet.org
 
   - fix smartpointer to support self-assignment
