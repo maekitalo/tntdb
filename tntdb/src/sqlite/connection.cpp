@@ -113,40 +113,17 @@ namespace tntdb
 
     tntdb::Result Connection::select(const std::string& query)
     {
-      char* errmsg;
-
-      log_debug("sqlite3_exec(" << db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
-
-      ResultImpl* r = new ResultImpl();
-      Result result(r);
-      int ret = ::sqlite3_exec(db, query.c_str(), select_callback, r, &errmsg);
-
-      log_debug("sqlite3_exec ret=" << ret);
-
-      if (ret != SQLITE_OK)
-        throw Execerror("sqlite3_exec", ret, errmsg, true);
-
-      return result;
+      return prepare(query).select();
     }
 
     tntdb::Row Connection::selectRow(const std::string& query)
     {
-      log_debug("selectRow(\"" << query << "\")");
-      tntdb::Result result = select(query);
-      if (result.empty())
-        throw NotFound();
-
-      return result.getRow(0);
+      return prepare(query).selectRow();
     }
 
     tntdb::Value Connection::selectValue(const std::string& query)
     {
-      log_debug("selectValue(\"" << query << "\")");
-      Row t = selectRow(query);
-      if (t.empty())
-        throw NotFound();
-
-      return t.getValue(0);
+      return prepare(query).selectValue();
     }
 
     tntdb::Statement Connection::prepare(const std::string& query)

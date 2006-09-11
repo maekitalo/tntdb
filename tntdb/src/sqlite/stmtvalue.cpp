@@ -53,7 +53,7 @@ namespace tntdb
 
     float StmtValue::getFloat() const
     {
-      return static_cast<float>(getInt());
+      return static_cast<float>(getDouble());
     }
 
     double StmtValue::getDouble() const
@@ -64,17 +64,19 @@ namespace tntdb
 
     char StmtValue::getChar() const
     {
-      log_debug("sqlite3_column_text(" << getStmt() << ", " << iCol << ')');
-      const unsigned char* ret = ::sqlite3_column_text(getStmt(), iCol);
-      return static_cast<char>(*ret);
+      log_debug("sqlite3_column_blob(" << getStmt() << ", " << iCol << ')');
+      const void* ret = ::sqlite3_column_blob(getStmt(), iCol);
+      return *static_cast<const char*>(ret);
     }
 
     std::string StmtValue::getString() const
     {
       log_debug("sqlite3_column_bytes(" << getStmt() << ", " << iCol << ')');
       int bytes = ::sqlite3_column_bytes(getStmt(), iCol);
-      log_debug("sqlite3_column_text(" << getStmt() << ", " << iCol << ')');
-      const unsigned char* ret = ::sqlite3_column_text(getStmt(), iCol);
+
+      log_debug("sqlite3_column_blob(" << getStmt() << ", " << iCol << ')');
+      const void* ret = ::sqlite3_column_blob(getStmt(), iCol);
+
       return std::string(reinterpret_cast<const char*>(ret), bytes);
     }
 

@@ -252,12 +252,12 @@ namespace tntdb
       {
         reset();
 
-        log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
+        log_debug("sqlite3_bind_blob(" << stmt << ", " << idx << ", " << data
           << ", " << data.size() << ", SQLITE_TRANSIENT)");
-        int ret = ::sqlite3_bind_text(stmt, idx, data.c_str(), data.size(), SQLITE_TRANSIENT);
+        int ret = ::sqlite3_bind_blob(stmt, idx, data.c_str(), data.size(), SQLITE_TRANSIENT);
 
         if (ret != SQLITE_OK)
-          throw Execerror("sqlite3_bind_text", stmt, ret);
+          throw Execerror("sqlite3_bind_blob", stmt, ret);
       }
     }
 
@@ -323,11 +323,15 @@ namespace tntdb
           r->add(Row(row));
           for (int i = 0; i < count; ++i)
           {
-            log_debug("sqlite3_column_text(" << stmt << ", " << i << ')');
-            const unsigned char* txt = sqlite3_column_text(stmt, i);
+            log_debug("sqlite3_column_bytes(" << stmt << ", " << i << ')');
+            int n = sqlite3_column_bytes(stmt, i);
+
+            log_debug("sqlite3_column_blob(" << stmt << ", " << i << ')');
+            const void* txt = sqlite3_column_blob(stmt, i);
             Value v;
             if (txt)
-              v = Value(new ValueImpl(reinterpret_cast<const char*>(txt)));
+              v = Value(new ValueImpl(
+                std::string(static_cast<const char*>(txt), n)));
             row->add(v);
           }
         }
@@ -363,11 +367,15 @@ namespace tntdb
         Row row(r);
         for (int i = 0; i < count; ++i)
         {
-          log_debug("sqlite3_column_text(" << stmt << ", " << i << ')');
-          const unsigned char* txt = sqlite3_column_text(stmt, i);
+          log_debug("sqlite3_column_bytes(" << stmt << ", " << i << ')');
+          int n = sqlite3_column_bytes(stmt, i);
+
+          log_debug("sqlite3_column_blob(" << stmt << ", " << i << ')');
+          const void* txt = sqlite3_column_blob(stmt, i);
           Value v;
           if (txt)
-            v = Value(new ValueImpl(reinterpret_cast<const char*>(txt)));
+            v = Value(new ValueImpl(
+              std::string(static_cast<const char*>(txt), n)));
           r->add(v);
         }
         return row;
@@ -399,11 +407,15 @@ namespace tntdb
         if (count == 0)
           throw NotFound();
 
-        log_debug("sqlite3_column_text(" << stmt << ", 0)");
-        const unsigned char* txt = sqlite3_column_text(stmt, 0);
+        log_debug("sqlite3_column_bytes(" << stmt << ", 0)");
+        int n = sqlite3_column_bytes(stmt, 0);
+
+        log_debug("sqlite3_column_blob(" << stmt << ", 0)");
+        const void* txt = sqlite3_column_blob(stmt, 0);
         Value v;
         if (txt)
-          v = Value(new ValueImpl(reinterpret_cast<const char*>(txt)));
+          v = Value(new ValueImpl(
+            std::string(static_cast<const char*>(txt), n)));
         return v;
       }
       else
