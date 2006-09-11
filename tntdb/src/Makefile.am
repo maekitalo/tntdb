@@ -22,7 +22,7 @@ libtntdb_la_SOURCES = \
 	valueimpl.cpp
 
 libtntdb_la_LDFLAGS = -version-info @sonumber@
-libtntdb_la_CXXFLAGS = -DPKGLIBDIR=\"@pkglibdir@\"
+libtntdb_la_CXXFLAGS = -DDRIVERDIR=\"@driverdir@\"
 
 if MAKE_POSTGRESQL_STATIC
 libtntdb_la_LIBADD = $(top_builddir)/src/postgresql/libtntdb-postgresql.la

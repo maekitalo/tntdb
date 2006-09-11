@@ -19,8 +19,8 @@
 #include <tntdb/librarymanager.h>
 #include <cxxtools/log.h>
 
-#ifndef PKGLIBDIR
-#define PKGLIBDIR "tntdb"
+#ifndef DRIVERDIR
+#define DRIVERDIR "tntdb"
 #endif
 
 log_define("tntdb.librarymanager");
@@ -65,7 +65,7 @@ namespace tntdb
   {
     static LibraryManager::SearchPathType searchPath;
     if (searchPath.empty())
-      searchPath.push_back(PKGLIBDIR);
+      searchPath.push_back(DRIVERDIR);
     return searchPath;
   }
 }

@@ -177,18 +177,18 @@ if test "$DOXYGEN" = "no"
 AM_CONDITIONAL(MAKE_DOXYGEN, test -n "$DOXYGEN")
 AC_SUBST(DOXYGEN)
 
-# pkglibdir
+# driverlibdir
 AC_ARG_WITH(
-  [pkglibdir],
-  AS_HELP_STRING([--with-pkglibdir=dir],
-                 [specify directory for driver files (default LIBDIR/tntdb)]),
-  [pkglibdir=$withval],
-  [pkglibdir=$libdir/tntdb])
-AC_SUBST(pkglibdir)
+  [driverdir],
+  AS_HELP_STRING([--with-driverdir=dir],
+                 [specify directory for driver files [[LIBDIR/tntdb]] ]),
+  [driverdir=$withval],
+  [driverdir=$libdir/tntdb])
+AC_SUBST(driverdir)
 
-if test "$pkglibdir" == "yes"
+if test "$driverdir" == "yes"
   then
-    pkglibdir=$libdir/tntdb
+    driverdir=$libdir/tntdb
   fi
 
 #

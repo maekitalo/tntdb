@@ -13,9 +13,10 @@ libtntdb_postgresql_la_LDFLAGS = @PG_LDFLAGS@ -version-info @sonumber@
 
 else
 
-pkglib_LTLIBRARIES = tntdb-postgresql.la
+driver_LTLIBRARIES = tntdb-postgresql.la
 
 tntdb_postgresql_la_SOURCES = $(sources)
 tntdb_postgresql_la_LDFLAGS = @PG_LDFLAGS@ -module -version-info @sonumber@
+tntdb_postgresql_la_LIBADD = $(top_builddir)/src/libtntdb.la
 
 endif

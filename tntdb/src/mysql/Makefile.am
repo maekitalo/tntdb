@@ -13,9 +13,10 @@ libtntdb_mysql_la_LDFLAGS = @MYSQL_LDFLAGS@ -version-info @sonumber@
 
 else
 
-pkglib_LTLIBRARIES = tntdb-mysql.la
+driver_LTLIBRARIES = tntdb-mysql.la
 
 tntdb_mysql_la_SOURCES = $(sources)
 tntdb_mysql_la_LDFLAGS = @MYSQL_LDFLAGS@ -module -version-info @sonumber@
+tntdb_mysql_la_LIBADD = $(top_builddir)/src/libtntdb.la
 
 endif
