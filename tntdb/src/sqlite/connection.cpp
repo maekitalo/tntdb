@@ -30,30 +30,6 @@
 
 log_define("tntdb.sqlite.connection");
 
-namespace
-{
-  int select_callback(void *pArg, int argc, char ** argv, char **columnNames)
-  {
-    log_debug("select_callback with " << argc << " columns");
-    tntdb::ResultImpl* res = static_cast<tntdb::ResultImpl*>(pArg);
-
-    tntdb::RowImpl::data_type data;
-
-    for (int i = 0; i < argc; ++i)
-    {
-      tntdb::Value v;
-      if (argv[i])
-        v = tntdb::Value(new tntdb::ValueImpl(argv[i]));
-      data.push_back(v);
-    }
-
-    res->add(tntdb::Row(new tntdb::RowImpl(data)));
-
-    return SQLITE_OK;
-  }
-}
-
-
 namespace tntdb
 {
   namespace sqlite
