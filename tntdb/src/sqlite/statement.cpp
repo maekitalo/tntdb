@@ -94,6 +94,8 @@ namespace tntdb
           }
         }
       }
+      else if (needReset)
+        reset();
 
       return stmt;
     }
