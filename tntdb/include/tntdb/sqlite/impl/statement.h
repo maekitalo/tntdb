@@ -33,7 +33,7 @@ namespace tntdb
     {
         sqlite3_stmt* stmt;
         sqlite3_stmt* stmtInUse;
-        SmartPtr<Connection, InternalRefCounted> conn;
+        Connection* conn;
         const std::string query;
 
         sqlite3_stmt* getBindStmt();
