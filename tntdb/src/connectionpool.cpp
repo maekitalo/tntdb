@@ -27,6 +27,7 @@ namespace tntdb
 {
   Connection* ConnectionPool::Connector::operator() ()
   {
+    log_debug("create new connection for url \"" << url << '"');
     return new Connection(tntdb::connect(url));
   }
 
