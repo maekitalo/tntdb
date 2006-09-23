@@ -1,3 +1,8 @@
+2006-09-20 tommi@tntnet.org
+
+  - fix cached prepared statements in sqlite: reset before reuse
+  - version 0.9.1
+
 2006-09-11 tommi@tntnet.org
 
   - fix handling of binary data in sqlite3-driver
