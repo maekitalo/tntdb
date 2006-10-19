@@ -167,14 +167,15 @@ if test "$DOXYGEN" = "no"
   then
     DOXYGEN=
   else
-    AC_DEFINE(WITH_DOXYGEN, 1, [build doxygen documentation])
-    if test "$DOXYGEN" = "yes"
+    AC_CHECK_PROG(DOXYGEN, doxygen, doxygen)
+    if test -z "$DOXYGEN"
       then
-        DOXYGEN=doxygen
+        AC_MSG_ERROR([doxygen not found])
       fi
+    AC_DEFINE(WITH_DOXYGEN, 1, [build doxygen documentation])
   fi
 
-AM_CONDITIONAL(MAKE_DOXYGEN, test -n "$DOXYGEN")
+AM_CONDITIONAL(MAKE_DOXYGEN, test -z "$DOXYGEN")
 AC_SUBST(DOXYGEN)
 
 # driverlibdir
