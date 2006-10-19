@@ -28,4 +28,21 @@ namespace tntdb
   {
     log_debug("Error: " << what());
   }
+
+  NotFound::NotFound()
+    : Error("not found")
+  { }
+
+  NullValue::NullValue()
+    : Error("null value")
+    { }
+
+  TypeError::TypeError(const std::string& msg)
+    : Error(msg)
+    { }
+
+  SqlError::SqlError(const std::string& sql_, const std::string& msg)
+    : Error(msg),
+      sql(sql_)
+    { }
 }

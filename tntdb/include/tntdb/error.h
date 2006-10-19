@@ -40,9 +40,7 @@ namespace tntdb
   class NotFound : public Error
   {
     public:
-      NotFound()
-        : Error("not found")
-        { }
+      NotFound();
   };
 
   /**
@@ -52,9 +50,7 @@ namespace tntdb
   class NullValue : public Error
   {
     public:
-      NullValue()
-        : Error("null value")
-        { }
+      NullValue();
   };
 
   /**
@@ -63,9 +59,7 @@ namespace tntdb
   class TypeError : public Error
   {
     public:
-      explicit TypeError(const std::string& msg = "type error")
-        : Error(msg)
-        { }
+      explicit TypeError(const std::string& msg = "type error");
   };
 
   /**
@@ -76,10 +70,7 @@ namespace tntdb
       std::string sql;
 
     public:
-      explicit SqlError(const std::string& sql_, const std::string& msg = "sql error")
-        : Error(msg),
-          sql(sql_)
-        { }
+      explicit SqlError(const std::string& sql_, const std::string& msg = "sql error");
       ~SqlError() throw()
         { }
 
