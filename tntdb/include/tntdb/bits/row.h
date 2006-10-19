@@ -80,6 +80,12 @@ namespace tntdb
         { return getValue(field_num).getChar(); }
 	  std::string getString(size_type field_num) const
         { return getValue(field_num).getString(); }
+      Date getDate(size_type field_num) const
+        { return getValue(field_num).getDate(); }
+      Time getTime(size_type field_num) const
+        { return getValue(field_num).getTime(); }
+      Datetime getDatetime(size_type field_num) const
+        { return getValue(field_num).getDatetime(); }
       //@}
 
       /// Returns a iterator to the first column
