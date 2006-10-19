@@ -399,9 +399,15 @@ namespace tntdb
       int ret = sqlite3_step(stmt);
 
       if (ret == SQLITE_ERROR)
+      {
+        log_debug("sqlite3_step returned SQLITE_ERROR");
         throw Execerror("sqlite3_step", stmt, ret);
+      }
       else if (ret == SQLITE_DONE)
+      {
+        log_debug("sqlite3_step returned SQLITE_DONE => NotFound");
         throw NotFound();
+      }
       else if (ret == SQLITE_ROW)
       {
         log_debug("sqlite3_column_count(" << stmt << ')');
