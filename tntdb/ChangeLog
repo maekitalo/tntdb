@@ -1,7 +1,20 @@
+2006-10-21 tommi@tntnet.org
+
+  - add fetchsize-parameter (with default 100) to tntdb::Statement::begin to
+    pass a hint to the implementing cursor
+
+2006-10-12 tommi@tntnet.org
+
+  - don't inline constuctors of error-classes to help compiler matching the
+    right type in catch-block (a problem with gcc 4.1 at least)
+
+2006-10-07 tommi@tntnet.org
+
+  - add getDate-, getTime- and getDatetime-methods to tntdb::Row
+
 2006-09-20 tommi@tntnet.org
 
   - fix cached prepared statements in sqlite: reset before reuse
-  - version 0.9.1
 
 2006-09-11 tommi@tntnet.org
 

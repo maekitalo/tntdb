@@ -390,7 +390,7 @@ namespace tntdb
       return t.getValue(0);
     }
 
-    ICursor* Statement::createCursor()
+    ICursor* Statement::createCursor(unsigned fetchsize)
     {
       return new Cursor(this);
     }

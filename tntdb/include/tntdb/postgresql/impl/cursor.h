@@ -40,7 +40,7 @@ namespace tntdb
         unsigned fetchSize;
 
       public:
-        Cursor(Statement* statement);
+        Cursor(Statement* statement, unsigned fetchSize);
         ~Cursor();
 
         // method for ICursor

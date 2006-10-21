@@ -193,7 +193,7 @@ namespace tntdb
       /**
        * This methods creates a cursor and fetches the first row.
        */
-      const_iterator begin() const;
+      const_iterator begin(unsigned fetchsize = 100) const;
       /**
        * A empty iterator is returned. Every const_iterator, which reaches the
        * end is equal with this.

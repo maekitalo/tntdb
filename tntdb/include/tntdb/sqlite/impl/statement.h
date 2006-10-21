@@ -65,7 +65,7 @@ namespace tntdb
         virtual tntdb::Result select();
         virtual tntdb::Row selectRow();
         virtual tntdb::Value selectValue();
-        virtual ICursor* createCursor();
+        virtual ICursor* createCursor(unsigned fetchsize);
 
         // specific methods of sqlite-driver
         sqlite3_stmt* getStmt() const   { return stmt; }

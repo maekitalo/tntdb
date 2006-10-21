@@ -434,7 +434,7 @@ namespace tntdb
       }
     }
 
-    ICursor* Statement::createCursor()
+    ICursor* Statement::createCursor(unsigned fetchsize)
     {
       stmtInUse = getBindStmt();
       stmt = 0;

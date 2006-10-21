@@ -56,7 +56,7 @@ namespace tntdb
       virtual Result select() = 0;
       virtual Row selectRow() = 0;
       virtual Value selectValue() = 0;
-      virtual ICursor* createCursor() = 0;
+      virtual ICursor* createCursor(unsigned fetchsize) = 0;
   };
 }
 

@@ -64,7 +64,7 @@ namespace tntdb
         tntdb::Result select();
         tntdb::Row selectRow();
         tntdb::Value selectValue();
-        ICursor* createCursor();
+        ICursor* createCursor(unsigned fetchsize);
 
         // specfic methods
 

@@ -50,9 +50,9 @@ namespace tntdb
     return stmt->selectValue();
   }
 
-  Statement::const_iterator Statement::begin() const
+  Statement::const_iterator Statement::begin(unsigned fetchsize) const
   {
-    return const_iterator(stmt->createCursor());
+    return const_iterator(stmt->createCursor(fetchsize));
   }
 
   Statement::const_iterator Statement::end() const

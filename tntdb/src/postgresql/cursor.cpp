@@ -29,10 +29,10 @@ namespace tntdb
 {
   namespace postgresql
   {
-    Cursor::Cursor(Statement* statement)
+    Cursor::Cursor(Statement* statement, unsigned fetchSize_)
       : tntdbStmt(statement),
         stmt(statement),
-        fetchSize(100)
+        fetchSize(fetchSize_)
     { }
 
     Cursor::~Cursor()
