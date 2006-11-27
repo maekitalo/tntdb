@@ -4,8 +4,6 @@ EXTRA_DIST = @PACKAGE@.doxygen.in \
 
 if MAKE_DOXYGEN
 
-htmldir = $(datadir)/@PACKAGE@/html
-
 html_DATA = html/index.html
 
 html/index.html: @PACKAGE@.doxygen
