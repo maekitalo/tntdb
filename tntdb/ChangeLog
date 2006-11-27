@@ -5,7 +5,7 @@
 
 2006-10-12 tommi@tntnet.org
 
-  - don't inline constuctors of error-classes to help compiler matching the
+  - don't inline constructors of error-classes to help compiler matching the
     right type in catch-block (a problem with gcc 4.1 at least)
 
 2006-10-07 tommi@tntnet.org
