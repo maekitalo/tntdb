@@ -63,7 +63,7 @@ namespace tntdb
   };
 
   /**
-   * Exception to indicate, that a value couldn't be converted to a requested type
+   * Exception, which is a direct result of a sql-statement
    */
   class SqlError : public Error
   {
