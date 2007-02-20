@@ -24,15 +24,17 @@ log_define("tntdb.statement.iterator")
 namespace tntdb
 {
   Statement::const_iterator::const_iterator(ICursor* cursor_)
+    : cursor(cursor_)
   {
     if (cursor_)
     {
       log_debug("initial fetch");
       current = cursor_->fetch();
       if (!current)
+      {
+        current = 0;
         log_debug("no row fetched");
-      else
-        cursor = cursor_;
+      }
     }
   }
 
