@@ -19,9 +19,11 @@
 #ifndef TNTDB_REFCOUNTED_H
 #define TNTDB_REFCOUNTED_H
 
+#include <tntdb/noncopyable.h>
+
 namespace tntdb
 {
-  class RefCounted
+  class RefCounted : private NonCopyable
   {
       unsigned refs;
 

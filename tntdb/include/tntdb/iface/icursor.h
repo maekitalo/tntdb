@@ -20,13 +20,12 @@
 #define TNTDB_IFACE_ICURSOR_H
 
 #include <tntdb/refcounted.h>
-#include <tntdb/noncopyable.h>
 
 namespace tntdb
 {
   class Row;
 
-  class ICursor : public RefCounted, private NonCopyable
+  class ICursor : public RefCounted
   {
     public:
       virtual Row fetch() = 0;

@@ -21,7 +21,6 @@
 
 #include <tntdb/refcounted.h>
 #include <tntdb/smartptr.h>
-#include <tntdb/noncopyable.h>
 #include <string>
 #include <map>
 
@@ -33,7 +32,7 @@ namespace tntdb
   class Statement;
   class IStatement;
 
-  class IConnection : public RefCounted, private NonCopyable
+  class IConnection : public RefCounted
   {
     public:
       typedef unsigned size_type;

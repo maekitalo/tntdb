@@ -20,20 +20,17 @@
 #define TNTDB_IFACE_IRESULT_H
 
 #include <tntdb/refcounted.h>
-#include <tntdb/noncopyable.h>
 
 namespace tntdb
 {
   class Row;
 
   /// common inteface for resultset
-  class IResult : public RefCounted, private NonCopyable
+  class IResult : public RefCounted
   {
     public:
       typedef unsigned size_type;
       typedef Row value_type;
-
-      virtual ~IResult()  { }
 
       virtual Row getRow(size_type tup_num) const = 0;
       virtual size_type size() const = 0;

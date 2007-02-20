@@ -20,7 +20,6 @@
 #define TNTDB_IFACE_ISTATEMENT_H
 
 #include <tntdb/refcounted.h>
-#include <tntdb/noncopyable.h>
 #include <string>
 
 namespace tntdb
@@ -33,7 +32,7 @@ namespace tntdb
   class Datetime;
   class ICursor;
 
-  class IStatement : public RefCounted, private NonCopyable
+  class IStatement : public RefCounted
   {
     public:
       typedef unsigned size_type;

@@ -20,7 +20,6 @@
 #define TNTDB_IFACE_IVALUE_H
 
 #include <tntdb/refcounted.h>
-#include <tntdb/noncopyable.h>
 #include <string>
 
 namespace tntdb
@@ -30,7 +29,7 @@ namespace tntdb
   class Datetime;
 
   /// common inteface for resultvalues
-  class IValue : public RefCounted, private NonCopyable
+  class IValue : public RefCounted
   {
     public:
       virtual bool isNull() const = 0;

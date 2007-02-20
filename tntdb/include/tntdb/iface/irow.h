@@ -20,14 +20,13 @@
 #define TNTDB_IFACE_IROW_H
 
 #include <tntdb/refcounted.h>
-#include <tntdb/noncopyable.h>
 
 namespace tntdb
 {
   class Value;
 
   /// common interface for row-types
-  class IRow : public RefCounted, private NonCopyable
+  class IRow : public RefCounted
   {
     public:
       typedef unsigned size_type;
