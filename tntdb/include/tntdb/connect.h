@@ -65,6 +65,24 @@ namespace tntdb
    * the given number of connections.
    */
   void dropCached(const std::string& url, unsigned keep = 0);
+
+  /**
+   * Sets the maximum pool-size of new connectionpools.
+   *
+   * When the maximum number of connections to a specific url is reached,
+   * connectCached blocks until a connection is available.
+   * The setting do not affect pools with active connections. You should
+   * release all connections and drop clear the pool to your url with
+   * dropCached(url), which recreates the pool.
+   */
+  void setMaxPoolSize(unsigned max);
+
+  /**
+   * Returns the current setting for maximum pools size.
+   *
+   * The maximum pools size is used, when a new pool is created
+   */
+  unsigned getMaxPoolSize();
 }
 
 #endif // TNTDB_CONNECT_H

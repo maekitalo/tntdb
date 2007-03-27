@@ -207,7 +207,7 @@ namespace tntdb
       if (::mysql_rollback(&mysql) != 0)
         throw MysqlError("mysql_rollback", &mysql);
 
-      log_debug("mysql_autocomit(" << &mysql << ", " << 1 << ')');
+      log_debug("mysql_autocommit(" << &mysql << ", " << 1 << ')');
       if (::mysql_autocommit(&mysql, 1) != 0)
         throw MysqlError("mysql_autocommit", &mysql);
     }
@@ -255,6 +255,13 @@ namespace tntdb
     tntdb::Statement Connection::prepare(const std::string& query)
     {
       return tntdb::Statement(new Statement(tntdb::Connection(this), &mysql, query));
+    }
+
+    bool Connection::ping()
+    {
+      int ret = ::mysql_ping(&mysql);
+      log_debug("mysql_ping() => " << ret);
+      return ret == 0;
     }
 
     my_ulonglong Connection::getInsertId()

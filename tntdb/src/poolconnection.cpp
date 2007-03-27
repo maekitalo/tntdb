@@ -99,4 +99,9 @@ namespace tntdb
   {
     return connection->clearStatementCache();
   }
+
+  bool PoolConnection::ping()
+  {
+    return connection->ping();
+  }
 }

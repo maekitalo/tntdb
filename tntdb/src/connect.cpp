@@ -108,4 +108,13 @@ namespace tntdb
     connectionPool.drop(url, keep);
   }
 
+  void setMaxPoolSize(unsigned max)
+  {
+    connectionPool.setMaxSize(max);
+  }
+
+  unsigned getMaxPoolSize()
+  {
+    return connectionPool.getMaxSize();
+  }
 }

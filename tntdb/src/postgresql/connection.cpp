@@ -132,5 +132,19 @@ namespace tntdb
       log_debug("prepare(\"" << query << "\")");
       return tntdb::Statement(new Statement(this, query));
     }
+
+    bool Connection::ping()
+    {
+      log_debug("ping()");
+      try
+      {
+        select("select 1");
+        return true;
+      }
+      catch (const PgError&)
+      {
+        return false;
+      }
+    }
   }
 }

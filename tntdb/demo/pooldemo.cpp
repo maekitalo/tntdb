@@ -32,18 +32,31 @@ int main(int argc, char* argv[])
 
     log_debug("logging initialized");
 
+    if (argc <= 1)
+    {
+      std::cerr << "usage: " << argv[0] << " connectionstring" << std::endl;
+      return 1;
+    }
+
     const std::string database = argv[1];
     log_debug("database=" << database);
 
+    log_debug("create connection 1");
     tntdb::Connection conn1 = tntdb::connectCached(database);
     std::cout << "conn1=" << conn1.getImpl() << std::endl;
 
+    log_debug("create connection 2");
     tntdb::Connection conn2 = tntdb::connectCached(database);
     std::cout << "conn2=" << conn2.getImpl() << std::endl;
 
+    log_debug("drop connection 1");
+    conn1 = tntdb::Connection();
+
+    log_debug("create connection 1");
     conn1 = tntdb::connectCached(database);
     std::cout << "conn1=" << conn1.getImpl() << std::endl;
 
+    log_debug("drop connection 2 and replace with new");
     conn2 = tntdb::connectCached(database);
     std::cout << "conn2=" << conn2.getImpl() << std::endl;
   }

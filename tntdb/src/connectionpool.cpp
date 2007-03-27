@@ -49,17 +49,26 @@ namespace tntdb
       it = pools.find(url);
       if (it == pools.end())
       {
-        log_debug("create pool for url \"" << url << "\"");
+        log_debug("create pool for url \"" << url << "\" with " << maxcount << " connections");
         PoolType* pool = new PoolType(maxcount, Connector(url));
         it = pools.insert(PoolsType::value_type(url, pool)).first;
       }
       else
-        //log_debug("pool for url \"" << url << "\" found; current size=" << it->second->getCurrentSize());
         log_debug("pool for url \"" << url << "\" found");
     }
 
     log_debug("current pool-size " << it->second->getCurrentSize());
 
+    while (it->second->getCurrentSize() > 0)
+    {
+      log_debug("fetch connection from pool");
+      Connection conn(new PoolConnection(it->second->get()));
+      if (conn.ping())
+        return conn;
+      log_warn("drop dead connection from pool");
+    }
+
+    log_debug("create new connection in pool");
     return Connection(new PoolConnection(it->second->get()));
   }
 
@@ -107,5 +116,13 @@ namespace tntdb
     PoolsType::const_iterator it = pools.find(url);
     return it == pools.end() ? 0
                              : it->second->getCurrentSize();
+  }
+
+  void ConnectionPool::setMaxSize(unsigned m)
+  {
+    cxxtools::MutexLock lock(mutex);
+    maxcount = m;
+    for (PoolsType::const_iterator it = pools.begin(); it != pools.end(); ++it)
+      it->second->setMaximumSize(m);
   }
 }

@@ -136,6 +136,11 @@ namespace tntdb
       void clearStatementCache()         { conn->clearStatementCache(); }
 
       /**
+       * returns true, if connection is alive
+       */
+      bool ping()                        { return conn->ping(); }
+
+      /**
        * Returns true, when there is no connection established.
        */
       bool operator!() const             { return !conn; }

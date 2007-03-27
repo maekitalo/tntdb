@@ -108,5 +108,9 @@ namespace tntdb
       return tntdb::Statement(new Statement(this, query));
     }
 
+    bool Connection::ping()
+    {
+      return db != 0;
+    }
   }
 }

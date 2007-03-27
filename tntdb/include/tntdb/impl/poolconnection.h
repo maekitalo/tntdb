@@ -44,6 +44,7 @@ namespace tntdb
       virtual Statement prepare(const std::string& query);
       virtual Statement prepareCached(const std::string& query);
       virtual void clearStatementCache();
+      virtual bool ping();
   };
 }
 

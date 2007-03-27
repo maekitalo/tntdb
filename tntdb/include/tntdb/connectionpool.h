@@ -69,6 +69,8 @@ namespace tntdb
        */
       void drop(const std::string& url, unsigned keep = 0);
 
+      unsigned getMaxSize()            { return maxcount; }
+      void setMaxSize(unsigned m);
       unsigned getCurrentSize(const std::string& url) const;
   };
 
