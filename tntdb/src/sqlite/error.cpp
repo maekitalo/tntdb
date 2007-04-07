@@ -17,6 +17,7 @@
  */
 
 #include <tntdb/sqlite/error.h>
+#include <cstdlib>
 
 namespace tntdb
 {

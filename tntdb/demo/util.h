@@ -5,6 +5,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <algorithm>
 #include <iostream>
 #include <tntdb/value.h>
 #include <tntdb/row.h>
