@@ -49,4 +49,12 @@ namespace tntdb
     }
     return *this;
   }
+
+  Statement::const_iterator& Statement::const_iterator::operator++(int)
+  {
+    Statement::const_iterator tmp = *this;
+    operator++();
+    return tmp;
+  }
+
 }
