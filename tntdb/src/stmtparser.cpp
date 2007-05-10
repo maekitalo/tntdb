@@ -18,6 +18,7 @@
 
 #include <tntdb/stmtparser.h>
 #include <cxxtools/log.h>
+#include <cctype>
 
 log_define("tntdb.stmtparser")
 
