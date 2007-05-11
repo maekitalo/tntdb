@@ -65,6 +65,8 @@ namespace tntdb
       Connection conn(new PoolConnection(it->second->get()));
       if (conn.ping())
         return conn;
+
+      // a pool-connection don't put itself back into the pool after a failed ping
       log_warn("drop dead connection from pool");
     }
 

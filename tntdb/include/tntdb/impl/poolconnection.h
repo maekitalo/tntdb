@@ -28,6 +28,7 @@ namespace tntdb
   {
       ConnectionPool::PoolObjectType connection;
       bool inTransaction;
+      bool drop;
 
     public:
       PoolConnection(ConnectionPool::PoolObjectType connection);

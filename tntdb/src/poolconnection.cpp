@@ -29,7 +29,8 @@ namespace tntdb
 {
   PoolConnection::PoolConnection(ConnectionPool::PoolObjectType connection_)
     : connection(connection_),
-      inTransaction(false)
+      inTransaction(false),
+      drop(false)
   {
     log_debug("PoolConnection " << this << " for connection " << connection->getImpl());
   }
@@ -38,10 +39,10 @@ namespace tntdb
   {
     // don't put the connection back to the free pool, when there is a
     // pending transaction
-    if (inTransaction)
+    if (inTransaction || drop)
     {
-      log_debug("don't reuse connection" << connection->getImpl());
-      connection.release();
+      log_debug("don't reuse connection " << connection->getImpl());
+      connection.release(false);
     }
     else
       log_debug("reuse connection " << connection->getImpl());
@@ -102,6 +103,9 @@ namespace tntdb
 
   bool PoolConnection::ping()
   {
-    return connection->ping();
+    bool ok = connection->ping();
+    if (!ok)
+      drop = true;
+    return ok;
   }
 }
