@@ -10,6 +10,6 @@ html/index.html: @PACKAGE@.doxygen
 	@DOXYGEN@ @PACKAGE@.doxygen
 
 install-data-hook:
-	cp -dpR html/* $(DESTDIR)$(htmldir)
+	cp -pR html/* $(DESTDIR)$(htmldir)
 
 endif
