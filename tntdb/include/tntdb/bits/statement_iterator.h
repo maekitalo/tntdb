@@ -56,7 +56,7 @@ namespace tntdb
        * and removed from this class.
        */
       const_iterator& operator++();
-      const_iterator& operator++(int);
+      const_iterator operator++(int);
 
       /**
        * Returns the current tntdb::Row-object.
