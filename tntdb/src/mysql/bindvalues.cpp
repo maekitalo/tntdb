@@ -22,7 +22,7 @@
 #include <cxxtools/log.h>
 #include <algorithm>
 
-log_define("tntdb.mysql.bindvalues");
+log_define("tntdb.mysql.bindvalues")
 
 namespace tntdb
 {

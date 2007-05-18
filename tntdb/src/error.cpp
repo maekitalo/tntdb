@@ -19,7 +19,7 @@
 #include <tntdb/error.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.error");
+log_define("tntdb.error")
 
 namespace tntdb
 {

@@ -28,7 +28,7 @@
 #include <tntdb/bits/statement.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.sqlite.connection");
+log_define("tntdb.sqlite.connection")
 
 namespace tntdb
 {

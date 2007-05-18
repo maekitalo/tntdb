@@ -23,7 +23,7 @@
 #include <tntdb/bits/value.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.poolconnection");
+log_define("tntdb.poolconnection")
 
 namespace tntdb
 {

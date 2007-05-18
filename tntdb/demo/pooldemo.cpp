@@ -22,7 +22,7 @@
 #include <cxxtools/log.h>
 #include <tntdb/connect.h>
 
-log_define("pooldemo");
+log_define("pooldemo")
 
 int main(int argc, char* argv[])
 {

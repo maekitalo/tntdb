@@ -38,7 +38,7 @@
 # include <tntdb/sqlite/impl/connectionmanager.h>
 #endif
 
-log_define("tntdb.connect");
+log_define("tntdb.connect")
 
 namespace tntdb
 {

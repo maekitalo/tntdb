@@ -21,7 +21,7 @@
 #include <tntdb/impl/poolconnection.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.connectionpool");
+log_define("tntdb.connectionpool")
 
 namespace tntdb
 {

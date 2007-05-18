@@ -30,7 +30,7 @@
 #include <cxxtools/log.h>
 #include "config.h"
 
-log_define("tntdb.postgresql.statement");
+log_define("tntdb.postgresql.statement")
 
 #ifdef HAVE_PQPREPARE
 #  define SET_TYPE(pos, type)

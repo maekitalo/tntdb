@@ -26,7 +26,7 @@
 #include <new>
 #include <sstream>
 
-log_define("tntdb.postgresql.connection");
+log_define("tntdb.postgresql.connection")
 
 namespace tntdb
 {

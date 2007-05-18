@@ -23,7 +23,7 @@
 #include <tntdb/datetime.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.mysql.boundvalue");
+log_define("tntdb.mysql.boundvalue")
 
 namespace tntdb
 {

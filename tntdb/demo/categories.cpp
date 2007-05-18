@@ -12,7 +12,7 @@
 
 #include "util.h"
 
-log_define("categories");
+log_define("categories")
 
 int main(int argc, char* argv[])
 {

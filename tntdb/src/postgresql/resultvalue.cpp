@@ -21,7 +21,7 @@
 #include <sstream>
 #include <cxxtools/log.h>
 
-log_define("tntdb.postgresql.resultvalue");
+log_define("tntdb.postgresql.resultvalue")
 
 namespace tntdb
 {

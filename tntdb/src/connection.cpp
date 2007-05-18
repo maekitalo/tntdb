@@ -23,7 +23,7 @@
 #include <tntdb/statement.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.connection");
+log_define("tntdb.connection")
 
 namespace tntdb
 {

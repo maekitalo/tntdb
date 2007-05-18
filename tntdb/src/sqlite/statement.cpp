@@ -32,7 +32,7 @@
 #include <sstream>
 #include <cxxtools/log.h>
 
-log_define("tntdb.sqlite.statement");
+log_define("tntdb.sqlite.statement")
 
 namespace tntdb
 {

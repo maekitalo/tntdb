@@ -23,7 +23,7 @@
 #define DRIVERDIR "tntdb"
 #endif
 
-log_define("tntdb.librarymanager");
+log_define("tntdb.librarymanager")
 
 namespace tntdb
 {

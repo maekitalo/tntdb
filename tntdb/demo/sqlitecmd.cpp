@@ -13,7 +13,7 @@
 
 #include "util.h"
 
-log_define("sqlitecmd.main");
+log_define("sqlitecmd.main")
 
 namespace db
 {

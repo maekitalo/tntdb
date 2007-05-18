@@ -23,7 +23,7 @@
 #include <tntdb/bits/value.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.postgresql.resultrow");
+log_define("tntdb.postgresql.resultrow")
 
 namespace tntdb
 {

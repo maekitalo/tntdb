@@ -31,7 +31,7 @@
 #include <sstream>
 #include <cxxtools/log.h>
 
-log_define("tntdb.mysql.statement");
+log_define("tntdb.mysql.statement")
 
 namespace tntdb
 {

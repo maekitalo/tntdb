@@ -20,7 +20,7 @@
 #include <sstream>
 #include <cxxtools/log.h>
 
-log_define("tntdb.postgresql.error");
+log_define("tntdb.postgresql.error")
 
 namespace tntdb
 {

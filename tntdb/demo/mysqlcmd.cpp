@@ -14,7 +14,7 @@
 #include <algorithm>
 #include "util.h"
 
-log_define("mysqlcmd.main");
+log_define("mysqlcmd.main")
 
 int main(int argc, char* argv[])
 {

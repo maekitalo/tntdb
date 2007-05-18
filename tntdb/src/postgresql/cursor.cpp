@@ -23,7 +23,7 @@
 #include <cxxtools/log.h>
 #include <sstream>
 
-log_define("tntdb.postgresql.cursor");
+log_define("tntdb.postgresql.cursor")
 
 namespace tntdb
 {

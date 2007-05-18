@@ -33,7 +33,7 @@
 
 #include "util.h"
 
-log_define("sqlcmd.main");
+log_define("sqlcmd.main")
 
 int main(int argc, char* argv[])
 {

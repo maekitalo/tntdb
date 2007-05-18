@@ -25,7 +25,7 @@
 
 #include <cxxtools/log.h>
 
-log_define("tntdb.mysql.connection");
+log_define("tntdb.mysql.connection")
 
 namespace tntdb
 {

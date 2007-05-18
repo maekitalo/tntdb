@@ -22,7 +22,7 @@
 #include <tntdb/row.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.sqlite.cursor");
+log_define("tntdb.sqlite.cursor")
 
 namespace tntdb
 {

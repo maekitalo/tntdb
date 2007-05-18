@@ -23,7 +23,7 @@
 #include <cxxtools/log.h>
 #include <sstream>
 
-log_define("tntdb.mysql.rowvalue");
+log_define("tntdb.mysql.rowvalue")
 
 namespace tntdb
 {

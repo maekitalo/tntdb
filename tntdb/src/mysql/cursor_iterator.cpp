@@ -21,7 +21,7 @@
 #include <cxxtools/log.h>
 #include <mysql.h>
 
-log_define("tntdb.mysql.cursor.iterator");
+log_define("tntdb.mysql.cursor.iterator")
 
 namespace tntdb
 {

@@ -21,7 +21,7 @@
 #include <tntdb/bits/value.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.mysql.resultrow");
+log_define("tntdb.mysql.resultrow")
 
 namespace tntdb
 {

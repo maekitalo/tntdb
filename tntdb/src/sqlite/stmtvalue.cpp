@@ -22,7 +22,7 @@
 #include <tntdb/datetime.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.sqlite.stmtvalue");
+log_define("tntdb.sqlite.stmtvalue")
 
 namespace tntdb
 {

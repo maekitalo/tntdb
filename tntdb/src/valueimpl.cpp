@@ -24,7 +24,7 @@
 #include <cxxtools/log.h>
 #include <sstream>
 
-log_define("tntdb.value");
+log_define("tntdb.value")
 
 namespace
 {
