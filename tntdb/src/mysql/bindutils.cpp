@@ -93,6 +93,61 @@ namespace tntdb
           else
             return *static_cast<short int*>(bind.buffer);
 
+        case MYSQL_TYPE_INT24:
+        {
+          unsigned char* ptr = reinterpret_cast<unsigned char*>(bind.buffer);
+          if (bind.is_unsigned)
+          {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+            return (static_cast<int_type>(ptr[0]))
+                 + (static_cast<int_type>(ptr[1]) << 8)
+                 + (static_cast<int_type>(ptr[2]) << 16);
+#else
+            return (static_cast<int_type>(ptr[2]))
+                 + (static_cast<int_type>(ptr[1]) << 8)
+                 + (static_cast<int_type>(ptr[0]) << 16);
+#endif
+          }
+          else
+          {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+            if (ptr[2] < 128)
+            {
+              return static_cast<int_type>(ptr[0])
+                  + (static_cast<int_type>(ptr[1]) << 8)
+                  + (static_cast<int_type>(ptr[2]) << 16);
+            }
+            else
+            {
+              int32_t val;
+              unsigned char* vptr = reinterpret_cast<unsigned char*>(&val);
+              vptr[0] = ptr[0];
+              vptr[1] = ptr[1];
+              vptr[2] = ptr[2];
+              vptr[3] = '\xff';
+              return static_cast<int_type>(val);
+            }
+#else
+            if (ptr[2] < 128)
+            {
+              return (static_cast<int_type>(ptr[2]))
+                   + (static_cast<int_type>(ptr[1]) << 8)
+                   + (static_cast<int_type>(ptr[0]) << 16);
+            }
+            else
+            {
+              int32_t val;
+              unsigned char* vptr = reinterpret_cast<unsigned char*>(&val);
+              vptr[0] = '\xff';
+              vptr[1] = ptr[0];
+              vptr[2] = ptr[1];
+              vptr[3] = ptr[2];
+              return static_cast<int_type>(val);
+            }
+#endif
+          }
+        }
+
         case MYSQL_TYPE_LONG:
           if (bind.is_unsigned)
             return *static_cast<unsigned int*>(bind.buffer);
@@ -134,22 +189,10 @@ namespace tntdb
       switch (bind.buffer_type)
       {
         case MYSQL_TYPE_TINY:
-          if (bind.is_unsigned)
-            return *static_cast<unsigned char*>(bind.buffer);
-          else
-            return *static_cast<signed char*>(bind.buffer);
-
         case MYSQL_TYPE_SHORT:
-          if (bind.is_unsigned)
-            return *static_cast<unsigned short int*>(bind.buffer);
-          else
-            return *static_cast<short int*>(bind.buffer);
-
+        case MYSQL_TYPE_INT24:
         case MYSQL_TYPE_LONG:
-          if (bind.is_unsigned)
-            return *static_cast<unsigned int*>(bind.buffer);
-          else
-            return *static_cast<int*>(bind.buffer);
+          return getInteger<int>(bind);
 
         case MYSQL_TYPE_FLOAT:
           return *static_cast<float*>(bind.buffer);
@@ -387,24 +430,13 @@ namespace tntdb
           switch (bind.buffer_type)
           {
             case MYSQL_TYPE_TINY:
-              if (bind.is_unsigned)
-                ret << static_cast<unsigned>(*static_cast<unsigned char*>(bind.buffer));
-              else
-                ret << static_cast<int>(*static_cast<signed char*>(bind.buffer));
-              break;
-
             case MYSQL_TYPE_SHORT:
-              if (bind.is_unsigned)
-                ret << *static_cast<unsigned short int*>(bind.buffer);
-              else
-                ret << *static_cast<short int*>(bind.buffer);
-              break;
-
+            case MYSQL_TYPE_INT24:
             case MYSQL_TYPE_LONG:
               if (bind.is_unsigned)
-                ret << *static_cast<unsigned int*>(bind.buffer);
+                ret << getInteger<unsigned int>(bind);
               else
-                ret << *static_cast<int*>(bind.buffer);
+                ret << getInteger<int>(bind);
               break;
 
             case MYSQL_TYPE_LONGLONG:
