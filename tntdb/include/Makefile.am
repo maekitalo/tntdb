@@ -66,3 +66,12 @@ nobase_noinst_HEADERS = \
 	tntdb/impl/row.h \
 	tntdb/impl/value.h \
 	tntdb/stmtparser.h
+	tntdb/oracle/connection.h \
+	tntdb/oracle/connectionmanager.h \
+	tntdb/oracle/cursor.h \
+	tntdb/oracle/datetime.h \
+	tntdb/oracle/error.h \
+	tntdb/oracle/result.h \
+	tntdb/oracle/row.h \
+	tntdb/oracle/statement.h \
+	tntdb/oracle/value.h

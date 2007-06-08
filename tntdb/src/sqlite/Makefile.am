@@ -4,14 +4,7 @@ sources = connection.cpp connectionmanager.cpp cursor.cpp error.cpp statement.cp
 
 AM_CXXFLAGS = $(PTHREAD_CFLAGS)
 
-if MAKE_SQLITE_STATIC
-
-lib_LTLIBRARIES = libtntdb-sqlite.la
-
-libtntdb_sqlite_la_SOURCES = $(sources)
-libtntdb_sqlite_la_LDFLAGS = -lsqlite3 -module -version-info @sonumber@ $(PTHREAD_LIBS)
-
-else
+if MAKE_SQLITE
 
 driver_LTLIBRARIES = tntdb-sqlite.la
 

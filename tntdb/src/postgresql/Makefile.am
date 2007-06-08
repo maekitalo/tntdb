@@ -5,14 +5,7 @@ sources = connection.cpp connectionmanager.cpp cursor.cpp error.cpp result.cpp r
 AM_CPPFLAGS = @PG_CXXFLAGS@
 AM_CXXFLAGS = $(PTHREAD_CFLAGS)
 
-if MAKE_POSTGRESQL_STATIC
-
-lib_LTLIBRARIES = libtntdb-postgresql.la
-
-libtntdb_postgresql_la_SOURCES = $(sources)
-libtntdb_postgresql_la_LDFLAGS = @PG_LDFLAGS@ -version-info @sonumber@ $(PTHREAD_LIBS)
-
-else
+if MAKE_POSTGRESQL
 
 driver_LTLIBRARIES = tntdb-postgresql.la
 

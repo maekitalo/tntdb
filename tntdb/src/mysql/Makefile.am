@@ -5,14 +5,7 @@ sources = bindutils.cpp bindvalues.cpp boundrow.cpp boundvalue.cpp connection.cp
 AM_CPPFLAGS = @MYSQL_CFLAGS@
 AM_CXXFLAGS = $(PTHREAD_CFLAGS)
 
-if MAKE_MYSQL_STATIC
-
-lib_LTLIBRARIES = libtntdb-mysql.la
-
-libtntdb_mysql_la_SOURCES = $(sources)
-libtntdb_mysql_la_LDFLAGS = @MYSQL_LDFLAGS@ -version-info @sonumber@ $(PTHREAD_LIBS)
-
-else
+if MAKE_MYSQL
 
 driver_LTLIBRARIES = tntdb-mysql.la
 

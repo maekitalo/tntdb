@@ -23,15 +23,3 @@ libtntdb_la_SOURCES = \
 
 libtntdb_la_LDFLAGS = -version-info @sonumber@ $(PTHREAD_LIBS)
 libtntdb_la_CXXFLAGS = -DDRIVERDIR=\"@driverdir@\" $(PTHREAD_CFLAGS)
-
-if MAKE_POSTGRESQL_STATIC
-libtntdb_la_LIBADD = $(top_builddir)/src/postgresql/libtntdb-postgresql.la
-endif
-
-if MAKE_MYSQL_STATIC
-libtntdb_la_LIBADD = $(top_builddir)/src/mysql/libtntdb-mysql.la
-endif
-
-if MAKE_SQLITE_STATIC
-libtntdb_la_LIBADD = $(top_builddir)/src/sqlite/libtntdb-sqlite.la
-endif

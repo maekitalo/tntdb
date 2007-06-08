@@ -56,11 +56,12 @@ AC_SUBST(CXXTOOLS_LDFLAGS)
 AC_ARG_WITH(
   [postgresql],
   AS_HELP_STRING([--with-postgresql],
-                 [build postgresql-driver]),
+                 [build postgresql-driver (default: yes)]),
   [with_postgresql=$withval],
   [with_postgresql=yes])
 
-if test "$with_postgresql" = yes -o "$with_postgresql" = static; then
+if test "$with_postgresql" = yes
+then
   AC_PATH_PROGS(PG_CONFIG, pg_config)
   if ! test -x "$PG_CONFIG"; then
     AC_MSG_ERROR([postgresql configuration script pg_config was not found])
@@ -84,13 +85,7 @@ if test "$with_postgresql" = yes -o "$with_postgresql" = static; then
   CXXFLAGS=$save_CXXFLAGS
 fi
 
-if test "$with_postgresql" = static; then
-  AC_DEFINE(WITH_STATIC_POSTGRESQL, 1, [Defined if postgresql is linked with libtntdb])
-fi
-
-AM_CONDITIONAL(MAKE_POSTGRESQL, test "$with_postgresql" = yes -o "$with_postgresql" = static)
-AM_CONDITIONAL(MAKE_POSTGRESQL_STATIC, test "$with_postgresql" = static)
-AM_CONDITIONAL(MAKE_POSTGRESQL_DYNAMIC, test "$with_postgresql" = yes)
+AM_CONDITIONAL(MAKE_POSTGRESQL, test "$with_postgresql" = yes)
 
 #
 # mysql
@@ -98,11 +93,12 @@ AM_CONDITIONAL(MAKE_POSTGRESQL_DYNAMIC, test "$with_postgresql" = yes)
 AC_ARG_WITH(
   [mysql],
   AS_HELP_STRING([--with-mysql],
-                 [build mysql-driver]),
+                 [build mysql-driver (default: yes)]),
   [ with_mysql=$withval ],
   [ with_mysql=yes ])
 
-if test "$with_mysql" = yes -o "$with_mysql" = static; then
+if test "$with_mysql" = yes
+then
   AC_PATH_PROGS(MYSQL_CONFIG, mysql_config)
   if ! test -x "$MYSQL_CONFIG"; then
     AC_MSG_ERROR([mysql configuration script was not found])
@@ -118,13 +114,7 @@ if test "$with_mysql" = yes -o "$with_mysql" = static; then
   AC_SUBST(MYSQL_LDFLAGS)
 fi
 
-if test "$with_mysql" = static; then
-  AC_DEFINE(WITH_STATIC_MYSQL, 1, [Defined if mysql is linked with libtntdb])
-fi
-
-AM_CONDITIONAL(MAKE_MYSQL, test "$with_mysql" = yes -o "$with_mysql" = static)
-AM_CONDITIONAL(MAKE_MYSQL_STATIC, test "$with_mysql" = static)
-AM_CONDITIONAL(MAKE_MYSQL_DYNAMIC, test "$with_mysql" = yes)
+AM_CONDITIONAL(MAKE_MYSQL, test "$with_mysql" = yes)
 
 #
 # Sqlite
@@ -132,11 +122,12 @@ AM_CONDITIONAL(MAKE_MYSQL_DYNAMIC, test "$with_mysql" = yes)
 AC_ARG_WITH(
   [sqlite],
   AS_HELP_STRING([--with-sqlite],
-                 [build sqlite-driver]),
+                 [build sqlite-driver (default: yes)]),
   [with_sqlite=$withval],
   [with_sqlite=yes])
 
-if test "$with_sqlite" = yes -o "$with_sqlite" = static; then
+if test "$with_sqlite" = yes
+then
   AC_CHECK_HEADER([sqlite3.h], , AC_MSG_ERROR([header for sqlite3 not found]))
 
   # check for sqlite3_transfer_bindings
@@ -147,13 +138,24 @@ if test "$with_sqlite" = yes -o "$with_sqlite" = static; then
 
 fi
 
-if test "$with_sqlite" = static; then
-  AC_DEFINE(WITH_STATIC_SQLITE, 1, [Defined if sqlite is linked with libtntdb])
+AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes)
+
+#
+# Oracle
+#
+AC_ARG_WITH(
+  [oracle],
+  AS_HELP_STRING([--with-oracle],
+                 [build oracle-driver (default: no)]),
+  [with_oracle=$withval],
+  [with_oracle=no])
+
+if test "$with_oracle" = yes
+then
+  AC_CHECK_HEADER([oci.h], , AC_MSG_ERROR([header for oracle not found]))
 fi
 
-AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes -o "$with_sqlite" = static)
-AM_CONDITIONAL(MAKE_SQLITE_STATIC, test "$with_sqlite" = static)
-AM_CONDITIONAL(MAKE_SQLITE_DYNAMIC, test "$with_sqlite" = yes)
+AM_CONDITIONAL(MAKE_ORACLE, test "$with_oracle" = yes)
 
 #
 # Doxygen-documentation
@@ -203,6 +205,7 @@ AC_CONFIG_FILES([
   src/mysql/Makefile
   src/postgresql/Makefile
   src/sqlite/Makefile
+  src/oracle/Makefile
   include/Makefile
   demo/Makefile
   doc/Makefile
