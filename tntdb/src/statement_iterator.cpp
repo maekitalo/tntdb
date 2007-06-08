@@ -32,7 +32,7 @@ namespace tntdb
       current = cursor_->fetch();
       if (!current)
       {
-        current = 0;
+        cursor = 0;
         log_debug("no row fetched");
       }
     }
