@@ -21,7 +21,7 @@
 
 #include <tntdb/iface/irow.h>
 #include <tntdb/value.h>
-#include <tntdb/oracle/impl/statement.h>
+#include <tntdb/oracle/statement.h>
 #include <vector>
 
 namespace tntdb

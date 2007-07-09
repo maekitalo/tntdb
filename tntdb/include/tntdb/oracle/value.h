@@ -20,6 +20,7 @@
 #define TNTDB_ORACLE_VALUE_H
 
 #include <tntdb/iface/ivalue.h>
+#include <tntdb/oracle/datetime.h>
 #include <cxxtools/dynbuffer.h>
 #include <oci.h>
 
@@ -38,7 +39,7 @@ namespace tntdb
         ub2 nullind;
 
         cxxtools::Dynbuffer<char> data;
-        Datetime datetime;
+        oracle::Datetime datetime;
         long longValue;
         double doubleValue;
 

@@ -16,7 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <tntdb/oracle/impl/value.h>
+#include <tntdb/oracle/value.h>
+#include <tntdb/oracle/statement.h>
 #include <tntdb/error.h>
 #include <sstream>
 #include <cxxtools/log.h>
