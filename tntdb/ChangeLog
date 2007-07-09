@@ -1,6 +1,5 @@
 2007-06-08 tommi@tntnet.org
-  - bugfix: tntdb crashed, when iterating over a statement which returns in no
-    rows
+  - bugfix: tntdb crashed, when iterating over a statement which returns no rows
 
 2007-05-23 tommi@tntnet.org
   - driver for oracle
