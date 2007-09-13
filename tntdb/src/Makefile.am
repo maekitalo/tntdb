@@ -21,5 +21,5 @@ libtntdb_la_SOURCES = \
 	time.cpp \
 	valueimpl.cpp
 
-libtntdb_la_LDFLAGS = -version-info @sonumber@ $(PTHREAD_LIBS)
+libtntdb_la_LDFLAGS = -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
 libtntdb_la_CXXFLAGS = -DDRIVERDIR=\"@driverdir@\" $(PTHREAD_CFLAGS)

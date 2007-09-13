@@ -100,11 +100,11 @@ namespace tntdb
     return data.at(0);
   }
 
-  std::string ValueImpl::getString() const
+  void ValueImpl::getString(std::string& ret) const
   {
     if (null)
       throw NullValue();
-    return data;
+    ret.assign(data);
   }
 
   Date ValueImpl::getDate() const

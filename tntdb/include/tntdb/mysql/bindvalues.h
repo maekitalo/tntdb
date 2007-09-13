@@ -91,8 +91,8 @@ namespace tntdb
           { return mysql::getDouble(values[n]); }
         char getChar(unsigned n) const
           { return mysql::getChar(values[n]); }
-        std::string getString(unsigned n) const
-          { return mysql::getString(values[n]); }
+        void getString(unsigned n, std::string& ret) const
+          { mysql::getString(values[n], ret); }
 
         void initOutBuffer(unsigned n, MYSQL_FIELD& f);
     };

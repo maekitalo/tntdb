@@ -69,15 +69,15 @@ namespace tntdb
       return *static_cast<const char*>(ret);
     }
 
-    std::string StmtValue::getString() const
+    void StmtValue::getString(std::string& ret) const
     {
       log_debug("sqlite3_column_bytes(" << getStmt() << ", " << iCol << ')');
       int bytes = ::sqlite3_column_bytes(getStmt(), iCol);
 
       log_debug("sqlite3_column_blob(" << getStmt() << ", " << iCol << ')');
-      const void* ret = ::sqlite3_column_blob(getStmt(), iCol);
+      const void* data = ::sqlite3_column_blob(getStmt(), iCol);
 
-      return std::string(reinterpret_cast<const char*>(ret), bytes);
+      ret.assign(reinterpret_cast<const char*>(data), bytes);
     }
 
     Date StmtValue::getDate() const

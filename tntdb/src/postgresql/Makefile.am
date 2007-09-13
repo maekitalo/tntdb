@@ -10,7 +10,7 @@ if MAKE_POSTGRESQL
 driver_LTLIBRARIES = tntdb-postgresql.la
 
 tntdb_postgresql_la_SOURCES = $(sources)
-tntdb_postgresql_la_LDFLAGS = @PG_LDFLAGS@ -module -version-info @sonumber@ $(PTHREAD_LIBS)
+tntdb_postgresql_la_LDFLAGS = @PG_LDFLAGS@ -module -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
 tntdb_postgresql_la_LIBADD = $(top_builddir)/src/libtntdb.la
 
 endif

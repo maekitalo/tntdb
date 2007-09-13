@@ -81,11 +81,11 @@ namespace tntdb
       return *value;
     }
 
-    std::string ResultValue::getString() const
+    void ResultValue::getString(std::string& ret) const
     {
       char* value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
       int len = PQgetlength(getPGresult(), row->getRowNumber(), tup_num);
-      return std::string(value, len);
+      ret.assign(value, len);
     }
 
     Date ResultValue::getDate() const

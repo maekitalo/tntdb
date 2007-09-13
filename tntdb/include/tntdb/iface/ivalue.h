@@ -39,7 +39,7 @@ namespace tntdb
       virtual float getFloat() const = 0;
       virtual double getDouble() const = 0;
       virtual char getChar() const = 0;
-      virtual std::string getString() const = 0;
+      virtual void getString(std::string& ret) const = 0;
       virtual Date getDate() const = 0;
       virtual Time getTime() const = 0;
       virtual Datetime getDatetime() const = 0;

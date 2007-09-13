@@ -388,7 +388,7 @@ namespace tntdb
       }
     }
 
-    std::string getString(const MYSQL_BIND& bind)
+    void getString(const MYSQL_BIND& bind, std::string& ret)
     {
       if (isNull(bind))
         throw NullValue();
@@ -401,32 +401,36 @@ namespace tntdb
         case MYSQL_TYPE_BLOB:
         case MYSQL_TYPE_MEDIUM_BLOB:
         case MYSQL_TYPE_LONG_BLOB:
-          return std::string(static_cast<const char*>(bind.buffer),
+          ret.assign(static_cast<const char*>(bind.buffer),
                              *bind.length);
+          break;
 
         case MYSQL_TYPE_DATE:
         {
           MYSQL_TIME* ts = static_cast<MYSQL_TIME*>(bind.buffer);
-          return Date(ts->year, ts->month, ts->day).getIso();
+          ret.assign(Date(ts->year, ts->month, ts->day).getIso());
+          break;
         }
 
         case MYSQL_TYPE_TIME:
         {
           MYSQL_TIME* ts = static_cast<MYSQL_TIME*>(bind.buffer);
-          return Time(ts->hour, ts->minute, ts->second).getIso();
+          ret.assign(Time(ts->hour, ts->minute, ts->second).getIso());
+          break;
         }
 
         case MYSQL_TYPE_DATETIME:
         case MYSQL_TYPE_TIMESTAMP:
         {
           MYSQL_TIME* ts = static_cast<MYSQL_TIME*>(bind.buffer);
-          return Datetime(ts->year, ts->month, ts->day,
-                          ts->hour, ts->minute, ts->second, ts->second_part).getIso();
+          ret.assign(Datetime(ts->year, ts->month, ts->day,
+                          ts->hour, ts->minute, ts->second, ts->second_part).getIso());
+          break;
         }
 
         default:
         {
-          std::ostringstream ret;
+          std::ostringstream s;
           switch (bind.buffer_type)
           {
             case MYSQL_TYPE_TINY:
@@ -434,31 +438,31 @@ namespace tntdb
             case MYSQL_TYPE_INT24:
             case MYSQL_TYPE_LONG:
               if (bind.is_unsigned)
-                ret << getInteger<unsigned int>(bind);
+                s << getInteger<unsigned int>(bind);
               else
-                ret << getInteger<int>(bind);
+                s << getInteger<int>(bind);
               break;
 
             case MYSQL_TYPE_LONGLONG:
               if (bind.is_unsigned)
-                ret << *static_cast<long long unsigned*>(bind.buffer);
+                s << *static_cast<long long unsigned*>(bind.buffer);
               else
-                ret << *static_cast<long long int*>(bind.buffer);
+                s << *static_cast<long long int*>(bind.buffer);
               break;
 
             case MYSQL_TYPE_FLOAT:
-              ret << *static_cast<float*>(bind.buffer);
+              s << *static_cast<float*>(bind.buffer);
               break;
 
             case MYSQL_TYPE_DOUBLE:
-              ret << *static_cast<double*>(bind.buffer);
+              s << *static_cast<double*>(bind.buffer);
               break;
 
             default:
               log_error("type-error in getString, type=" << bind.buffer_type);
               throw TypeError("type-error in getString");
           }
-          return ret.str();
+          ret.assign(s.str());
         }
       }
     }

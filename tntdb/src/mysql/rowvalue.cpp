@@ -80,9 +80,9 @@ namespace tntdb
       return row[col][0];
     }
 
-    std::string RowValue::getString() const
+    void RowValue::getString(std::string& ret) const
     {
-      return std::string(row[col], len);
+      ret.assign(row[col], len);
     }
 
     Date RowValue::getDate() const

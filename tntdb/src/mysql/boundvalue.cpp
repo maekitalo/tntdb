@@ -64,9 +64,9 @@ namespace tntdb
       return mysql::getChar(mysql_bind);
     }
 
-    std::string BoundValue::getString() const
+    void BoundValue::getString(std::string& ret) const
     {
-      return mysql::getString(mysql_bind);
+      mysql::getString(mysql_bind, ret);
     }
 
     Date BoundValue::getDate() const

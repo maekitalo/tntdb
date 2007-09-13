@@ -10,7 +10,7 @@ if MAKE_MYSQL
 driver_LTLIBRARIES = tntdb-mysql.la
 
 tntdb_mysql_la_SOURCES = $(sources)
-tntdb_mysql_la_LDFLAGS = @MYSQL_LDFLAGS@ -module -version-info @sonumber@ $(PTHREAD_LIBS)
+tntdb_mysql_la_LDFLAGS = @MYSQL_LDFLAGS@ -module -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
 tntdb_mysql_la_LIBADD = $(top_builddir)/src/libtntdb.la
 
 endif

@@ -51,7 +51,7 @@ namespace tntdb
     float        getFloat(const MYSQL_BIND& value);
     double       getDouble(const MYSQL_BIND& value);
     char         getChar(const MYSQL_BIND& value);
-    std::string  getString(const MYSQL_BIND& value);
+    void         getString(const MYSQL_BIND& value, std::string& ret);
     Date         getDate(const MYSQL_BIND& value);
     Time         getTime(const MYSQL_BIND& value);
     Datetime     getDatetime(const MYSQL_BIND& value);

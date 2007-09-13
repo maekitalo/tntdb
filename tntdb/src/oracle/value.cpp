@@ -309,7 +309,7 @@ namespace tntdb
       }
     }
 
-    std::string Value::getString() const
+    void Value::getString(std::string& ret) const
     {
       if (isNull())
         throw NullValue();
@@ -320,18 +320,21 @@ namespace tntdb
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          return datetime.getDatetime().getIso();
+          ret = datetime.getDatetime().getIso();
+          break;
 
         case SQLT_INT:
         case SQLT_UIN:
-          return toString(longValue);
+          ret = toString(longValue);
+          break;
 
         case SQLT_FLT:
         case SQLT_NUM:
-          return toString(doubleValue);
+          ret = toString(doubleValue);
+          break;
 
         default:
-          return data.data();
+          ret = data.data();
       }
     }
 

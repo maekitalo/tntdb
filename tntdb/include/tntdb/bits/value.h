@@ -65,7 +65,7 @@ namespace tntdb
       /// returns the first character of the texte-representation.
 	  char getChar() const                { return value->getChar(); }
       /// returns the value as a string.
-	  std::string getString() const       { return value->getString(); }
+	  std::string getString() const       { std::string ret; value->getString(ret); return ret; }
       /// returns the value as a Date.
       Date getDate() const                { return value->getDate(); }
       /// returns the value as a Time.
@@ -87,7 +87,7 @@ namespace tntdb
       operator float() const              { return value->getFloat(); }
       operator double() const             { return value->getDouble(); }
       operator char() const               { return value->getChar(); }
-      operator std::string() const        { return value->getString(); }
+      operator std::string() const        { std::string ret; value->getString(ret); return ret; }
       operator Date() const               { return value->getDate(); }
       operator Time() const               { return value->getTime(); }
       operator Datetime() const           { return value->getDatetime(); }
