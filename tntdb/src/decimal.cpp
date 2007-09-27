@@ -86,7 +86,7 @@ namespace tntdb
 
   bool Decimal::isNaN() const
   {
-    return (flags & NaN)
+    return (flags & NaN);
   }
   
   bool Decimal::isZero() const
@@ -94,7 +94,7 @@ namespace tntdb
     if (flags & (infinity | NaN))
       return false;
     else
-      return (mantissa == 0)
+      return (mantissa == 0);
   }
 
   std::string Decimal::toString() const
