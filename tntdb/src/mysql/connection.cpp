@@ -88,7 +88,7 @@ namespace tntdb
         state_key,
         state_value,
         state_port,
-        state_flag,
+        state_flag
       } state = state_key;
 
       std::string key;

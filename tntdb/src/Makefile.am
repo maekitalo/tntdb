@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_builddir)/include
+INCLUDES = -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libtntdb.la
 
@@ -8,6 +8,7 @@ libtntdb_la_SOURCES = \
 	connectionpool.cpp \
 	date.cpp \
 	datetime.cpp \
+	decimal.cpp \
 	error.cpp \
 	librarymanager.cpp \
 	poolconnection.cpp \

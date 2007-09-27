@@ -27,13 +27,19 @@ namespace tntdb
   class Date;
   class Time;
   class Datetime;
-
+  class Decimal;
+  
   namespace mysql
   {
     void setNull(MYSQL_BIND& value);
     void setBool(MYSQL_BIND& value, bool data);
     void setInt(MYSQL_BIND& value, int data);
     void setUnsigned(MYSQL_BIND& value, unsigned data);
+    void setInt32(MYSQL_BIND& value, int32_t data);
+    void setUnsigned32(MYSQL_BIND& value, uint32_t data);
+    void setInt64(MYSQL_BIND& value, int64_t data);
+    void setUnsigned64(MYSQL_BIND& value, uint64_t data);
+    void setDecimal(MYSQL_BIND& value, unsigned long& length, const Decimal& data);
     void setFloat(MYSQL_BIND& value, float data);
     void setDouble(MYSQL_BIND& value, double data);
     void setChar(MYSQL_BIND& value, char data);
@@ -47,6 +53,11 @@ namespace tntdb
     bool         getBool(const MYSQL_BIND& value);
     int          getInt(const MYSQL_BIND& value);
     unsigned     getUnsigned(const MYSQL_BIND& value);
+    int32_t      getInt32(const MYSQL_BIND& value);
+    uint32_t     getUnsigned32(const MYSQL_BIND& value);
+    int64_t      getInt64(const MYSQL_BIND& value);
+    uint64_t     getUnsigned64(const MYSQL_BIND& value);
+    Decimal      getDecimal(const MYSQL_BIND& value);
     long         getLong(const MYSQL_BIND& value);
     float        getFloat(const MYSQL_BIND& value);
     double       getDouble(const MYSQL_BIND& value);

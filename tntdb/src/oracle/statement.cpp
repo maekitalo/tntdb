@@ -128,6 +128,59 @@ namespace tntdb
       checkError(ret, "OCIBindByName");
     }
 
+    void Statement::setInt32(const std::string& col, int32_t data)
+    {
+      return setInt(col, data);
+    }
+    
+    void Statement::setUnsigned32(const std::string& col, uint32_t data)
+    {
+      return setUnsigned(col, data);
+    }
+
+    void Statement::setInt64(const std::string& col, int64_t data)
+    {
+      Bind &b = getBind(col);
+      tntdb::Decimal decimal;
+      decimal.setInt64(data);
+      b.number = Number(decimal);
+      
+      sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
+        reinterpret_cast<const text*>(col.data()), col.size(),
+        (void *)b.number.getHandle(), OCI_NUMBER_SIZE,
+        SQLT_VNU, 0, 0, 0, 0, 0, OCI_DEFAULT);
+      
+      checkError(ret, "OCIBindByName");
+    }
+
+    void Statement::setUnsigned64(const std::string& col, uint64_t data)
+    {
+      Bind &b = getBind(col);
+      tntdb::Decimal decimal;
+      decimal.setUnsigned64(data);
+      b.number = Number(decimal);
+      
+      sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
+        reinterpret_cast<const text*>(col.data()), col.size(),
+        (void *)b.number.getHandle(), OCI_NUMBER_SIZE,
+        SQLT_VNU, 0, 0, 0, 0, 0, OCI_DEFAULT);
+      
+      checkError(ret, "OCIBindByName");
+    }
+    
+    void Statement::setDecimal(const std::string& col, const Decimal& decimal)
+    {
+      Bind &b = getBind(col);
+      b.number = Number(decimal);
+      
+      sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
+        reinterpret_cast<const text*>(col.data()), col.size(),
+        (void *)b.number.getHandle(), OCI_NUMBER_SIZE,
+        SQLT_VNU, 0, 0, 0, 0, 0, OCI_DEFAULT);
+      
+      checkError(ret, "OCIBindByName");
+    }
+    
     void Statement::setFloat(const std::string& col, float data)
     {
       Bind &b = getBind(col);

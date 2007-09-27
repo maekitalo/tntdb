@@ -27,7 +27,8 @@ namespace tntdb
   class Date;
   class Time;
   class Datetime;
-
+  class Decimal;
+  
   /// common inteface for resultvalues
   class IValue : public RefCounted
   {
@@ -36,6 +37,11 @@ namespace tntdb
       virtual bool getBool() const = 0;
       virtual int getInt() const = 0;
       virtual unsigned getUnsigned() const = 0;
+      virtual int32_t getInt32() const = 0;
+      virtual uint32_t getUnsigned32() const = 0;
+      virtual int64_t getInt64() const = 0;
+      virtual uint64_t getUnsigned64() const = 0;
+      virtual Decimal getDecimal() const = 0;
       virtual float getFloat() const = 0;
       virtual double getDouble() const = 0;
       virtual char getChar() const = 0;

@@ -167,6 +167,86 @@ namespace tntdb
         log_warn("hostvar \"" << col << "\" not found");
     }
 
+    void Statement::setInt32(const std::string& col, int32_t data)
+    {
+      log_debug("statement " << stmt << " setInt32(\"" << col << "\", " << data << ')');
+
+      bool found = false;
+      for (hostvarMapType::const_iterator it = hostvarMap.find(col);
+           it != hostvarMap.end() && it->first == col; ++it)
+      {
+        found = true;
+        inVars.setInt32(it->second, data);
+      }
+
+      if (!found)
+        log_warn("hostvar \"" << col << "\" not found");
+    }
+
+    void Statement::setUnsigned32(const std::string& col, uint32_t data)
+    {
+      log_debug("statement " << stmt << " setUnsigned32(\"" << col << "\", " << data << ')');
+
+      bool found = false;
+      for (hostvarMapType::const_iterator it = hostvarMap.find(col);
+           it != hostvarMap.end() && it->first == col; ++it)
+      {
+        found = true;
+        inVars.setUnsigned32(it->second, data);
+      }
+
+      if (!found)
+        log_warn("hostvar \"" << col << "\" not found");
+    }
+
+    void Statement::setInt64(const std::string& col, int64_t data)
+    {
+      log_debug("statement " << stmt << " setInt64(\"" << col << "\", " << data << ')');
+
+      bool found = false;
+      for (hostvarMapType::const_iterator it = hostvarMap.find(col);
+           it != hostvarMap.end() && it->first == col; ++it)
+      {
+        found = true;
+        inVars.setInt64(it->second, data);
+      }
+
+      if (!found)
+        log_warn("hostvar \"" << col << "\" not found");
+    }
+
+    void Statement::setUnsigned64(const std::string& col, uint64_t data)
+    {
+      log_debug("statement " << stmt << " setUnsigned64(\"" << col << "\", " << data << ')');
+
+      bool found = false;
+      for (hostvarMapType::const_iterator it = hostvarMap.find(col);
+           it != hostvarMap.end() && it->first == col; ++it)
+      {
+        found = true;
+        inVars.setUnsigned64(it->second, data);
+      }
+
+      if (!found)
+        log_warn("hostvar \"" << col << "\" not found");
+    }
+    
+    void Statement::setDecimal(const std::string& col, const Decimal& data)
+    {
+      log_debug("statement " << stmt << " setDecimal(\"" << col << "\", " << data << ')');
+
+      bool found = false;
+      for (hostvarMapType::const_iterator it = hostvarMap.find(col);
+           it != hostvarMap.end() && it->first == col; ++it)
+      {
+        found = true;
+        inVars.setDecimal(it->second, data);
+      }
+
+      if (!found)
+        log_warn("hostvar \"" << col << "\" not found");
+    }
+
     void Statement::setFloat(const std::string& col, float data)
     {
       log_debug("statement " << stmt << " setFloat(\"" << col << "\", " << data << ')');

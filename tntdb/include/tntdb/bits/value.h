@@ -23,6 +23,7 @@
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
+#include <tntdb/decimal.h>
 #include <tntdb/smartptr.h>
 
 namespace tntdb
@@ -32,16 +33,16 @@ namespace tntdb
    */
   class Value
   {
-	public:
-	  typedef unsigned size_type;
+    public:
+      typedef unsigned size_type;
 
-	private:
-	  SmartPtr<IValue, InternalRefCounted> value;
+    private:
+      SmartPtr<IValue, InternalRefCounted> value;
 
-	public:
-	  explicit Value(IValue* value = 0)
-		: value(value)
-		{ }
+    public:
+      explicit Value(IValue* value = 0)
+        : value(value)
+        { }
 
       //@{
       /**
@@ -51,21 +52,31 @@ namespace tntdb
        * type tntdb::TypeError is thrown.
        */
       /// return true, when value is null
-	  bool isNull() const                 { return !value || value->isNull(); }
+      bool isNull() const                 { return !value || value->isNull(); }
       /// return true, when value represents boolean true.
-	  bool getBool() const                { return value->getBool(); }
+      bool getBool() const                { return value->getBool(); }
       /// tries to convert value into an int.
-	  int getInt() const                  { return value->getInt(); }
+      int getInt() const                  { return value->getInt(); }
       /// tries to convert value into an unsigned.
-	  unsigned getUnsigned() const        { return value->getUnsigned(); }
+      unsigned getUnsigned() const        { return value->getUnsigned(); }
+      /// tries to convert value into an int32_t.
+      int32_t getInt32() const            { return value->getInt32(); }
+      /// tries to convert value into an uint32_t.
+      uint32_t getUnsigned32() const       { return value->getUnsigned32(); }
+      /// tries to convert value into an int64_t.
+      int64_t getInt64() const            { return value->getInt64(); }
+      /// tries to convert value into an uint64_t.
+      uint64_t getUnsigned64() const      { return value->getUnsigned64(); }
+      /// tries to convert value into a Decimal.
+      Decimal getDecimal() const          { return value->getDecimal(); }
       /// tries to convert value into an float.
-	  float getFloat() const              { return value->getFloat(); }
+      float getFloat() const              { return value->getFloat(); }
       /// tries to convert value into an double.
-	  double getDouble() const            { return value->getDouble(); }
+      double getDouble() const            { return value->getDouble(); }
       /// returns the first character of the texte-representation.
-	  char getChar() const                { return value->getChar(); }
+      char getChar() const                { return value->getChar(); }
       /// returns the value as a string.
-	  std::string getString() const       { std::string ret; value->getString(ret); return ret; }
+      std::string getString() const       { std::string ret; value->getString(ret); return ret; }
       /// returns the value as a Date.
       Date getDate() const                { return value->getDate(); }
       /// returns the value as a Time.
@@ -84,6 +95,9 @@ namespace tntdb
       operator bool() const               { return value->getBool(); }
       operator int() const                { return value->getInt(); }
       operator unsigned() const           { return value->getUnsigned(); }
+      operator int64_t() const            { return value->getInt64(); }
+      operator uint64_t() const           { return value->getUnsigned64(); }
+      operator Decimal() const            { return value->getDecimal(); }
       operator float() const              { return value->getFloat(); }
       operator double() const             { return value->getDouble(); }
       operator char() const               { return value->getChar(); }

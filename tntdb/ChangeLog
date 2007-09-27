@@ -1,3 +1,9 @@
+2007-09-27 tommi@tntnet.org
+  - build improvements for AIX
+
+2007-09-21 tommi@tntnet.org
+  - support for decimals and 32/64-bit integers (from Mark Wright)
+
 2007-06-08 tommi@tntnet.org
   - bugfix: tntdb crashed, when iterating over a statement which returns no rows
 

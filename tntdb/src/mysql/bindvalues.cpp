@@ -21,6 +21,7 @@
 #include <tntdb/mysql/error.h>
 #include <cxxtools/log.h>
 #include <algorithm>
+#include <string.h>
 
 log_define("tntdb.mysql.bindvalues")
 

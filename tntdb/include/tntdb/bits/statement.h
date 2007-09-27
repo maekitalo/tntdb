@@ -85,6 +85,31 @@ namespace tntdb
       Statement& setUnsigned(const std::string& col, unsigned data)
         { stmt->setUnsigned(col, data); return *this; }
       /**
+       * Sets the hostvariable with the given name to a int32_t value.
+       */
+      Statement& setInt32(const std::string& col, int32_t data)
+        { stmt->setInt32(col, data); return *this; }
+      /**
+       * Sets the hostvariable with the given name to a uint32_t value.
+       */
+      Statement& setUnsigned32(const std::string& col, uint32_t data)
+        { stmt->setUnsigned32(col, data); return *this; }
+      /**
+       * Sets the hostvariable with the given name to a int64_t value.
+       */
+      Statement& setInt64(const std::string& col, int64_t data)
+        { stmt->setInt64(col, data); return *this; }
+      /**
+       * Sets the hostvariable with the given name to a uint64_t value.
+       */
+      Statement& setUnsigned64(const std::string& col, uint64_t data)
+        { stmt->setUnsigned64(col, data); return *this; }
+      /**
+       * Sets the hostvariable with the given name to a Decimal.
+       */
+      Statement& setDecimal(const std::string& col, const Decimal& data)
+        { stmt->setDecimal(col, data); return *this; }
+      /**
        * Sets the hostvariable with the given name to a float value.
        */
       Statement& setFloat(const std::string& col, float data)

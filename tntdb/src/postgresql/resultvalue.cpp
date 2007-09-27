@@ -46,13 +46,11 @@ namespace tntdb
       std::istringstream in(s);
       T ret;
       in >> ret;
-      if (!in)
-      {
-        std::ostringstream msg;
-        msg << "can't convert \"" << s << "\" to " << tname;
-        throw TypeError(msg.str());
-      }
-      return ret;
+      if (in.eof() || !in.fail())
+        return ret;
+      std::ostringstream msg;
+      msg << "can't convert \"" << s << "\" to " << tname;
+      throw TypeError(msg.str());
     }
 
     int ResultValue::getInt() const
@@ -63,6 +61,31 @@ namespace tntdb
     unsigned ResultValue::getUnsigned() const
     {
       return getValue<unsigned>(getString(), "unsigned");
+    }
+    
+    int32_t ResultValue::getInt32() const
+    {
+      return getValue<int32_t>(getString(), "int32_t");
+    }
+
+    uint32_t ResultValue::getUnsigned32() const
+    {
+      return getValue<uint32_t>(getString(), "uint32_t");
+    }
+
+    int64_t ResultValue::getInt64() const
+    {
+      return getValue<int64_t>(getString(), "int64_t");
+    }
+
+    uint64_t ResultValue::getUnsigned64() const
+    {
+      return getValue<uint64_t>(getString(), "uint64_t");
+    }
+    
+    Decimal ResultValue::getDecimal() const
+    {
+      return getValue<Decimal>(getString(), "Decimal");
     }
 
     float ResultValue::getFloat() const

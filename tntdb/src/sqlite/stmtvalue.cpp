@@ -20,6 +20,7 @@
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
+#include <tntdb/decimal.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.sqlite.stmtvalue")
@@ -47,8 +48,38 @@ namespace tntdb
 
     unsigned StmtValue::getUnsigned() const
     {
-      log_debug("possible loss of data in conversion from int to unsigned");
-      return static_cast<unsigned>(getInt());
+      return static_cast<unsigned>(getInt64());
+    }
+
+    int32_t StmtValue::getInt32() const
+    {
+      return static_cast<int32_t>(getInt());
+    }
+
+    uint32_t StmtValue::getUnsigned32() const
+    {
+      return static_cast<uint32_t>(getInt64());
+    }
+
+    int64_t StmtValue::getInt64() const
+    {
+      log_debug("sqlite3_column_int64(" << getStmt() << ", " << iCol << ')');
+      return ::sqlite3_column_int64(getStmt(), iCol);
+    }
+
+    uint64_t StmtValue::getUnsigned64() const
+    {
+      log_debug("possible loss of data in conversion from int64_t to uint64_t");
+      return static_cast<uint64_t>(getInt64());
+    }
+
+    Decimal StmtValue::getDecimal() const
+    {
+      // SQLite 3.4.1 does not support the SQL decimal or numeric types.
+      // So double is used instead, but of course binary floating point can
+      // not accurately store decimal floating point numbers.
+      log_debug("sqlite3_column_double(" << getStmt() << ", " << iCol << ')');
+      return Decimal(::sqlite3_column_double(getStmt(), iCol));
     }
 
     float StmtValue::getFloat() const

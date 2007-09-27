@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_builddir)/include
+INCLUDES = -I$(top_srcdir)/include
 
 sources = connection.cpp connectionmanager.cpp cursor.cpp error.cpp statement.cpp stmtvalue.cpp stmtrow.cpp
 
@@ -9,7 +9,7 @@ if MAKE_SQLITE
 driver_LTLIBRARIES = tntdb-sqlite.la
 
 tntdb_sqlite_la_SOURCES = $(sources)
-tntdb_sqlite_la_LDFLAGS = -lsqlite3 -module -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
-tntdb_sqlite_la_LIBADD = $(top_builddir)/src/libtntdb.la
+tntdb_sqlite_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) -lsqlite3 @SHARED_LIB_FLAG@
+tntdb_sqlite_la_LIBADD = $(top_srcdir)/src/libtntdb.la
 
 endif

@@ -27,7 +27,7 @@ namespace tntdb
       : Error(std::string(function) + ": " + (errmsg ? errmsg : "unknown error"))
     {
       if (errmsg && do_free)
-        free(errmsg);
+        std::free(errmsg);
     }
 
     Execerror::Execerror(const char* function, sqlite3* db, int _errcode)

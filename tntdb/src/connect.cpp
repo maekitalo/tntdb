@@ -38,6 +38,10 @@
 # include <tntdb/sqlite/impl/connectionmanager.h>
 #endif
 
+#ifdef WITH_STATIC_ORACLE
+# include <tntdb/oracle/connectionmanager.h>
+#endif
+
 log_define("tntdb.connect")
 
 namespace tntdb
@@ -57,6 +61,8 @@ namespace tntdb
       return connectionManager_mysql.connect(url);
 #elif WITH_STATIC_SQLITE
       return connectionManager_sqlite.connect(url);
+#elif WITH_STATIC_ORACLE
+      return connectionManager_oracle.connect(url);
 #else
       throw Error("invalid url \"" + url + '"');
 #endif
@@ -71,6 +77,9 @@ namespace tntdb
 #elif WITH_STATIC_SQLITE
     if (driverName == "sqlite")
       return connectionManager_sqlite.connect(url.substr(n + 1));
+#elif WITH_STATIC_ORACLE
+    if (driverName == "oracle")
+      return connectionManager_oracle.connect(url.substr(n + 1));
 #endif
 
     std::string libraryUrl = url.substr(n + 1);

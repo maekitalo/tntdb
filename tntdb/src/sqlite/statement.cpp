@@ -30,6 +30,7 @@
 #include <tntdb/row.h>
 #include <tntdb/value.h>
 #include <sstream>
+#include <limits>
 #include <cxxtools/log.h>
 
 log_define("tntdb.sqlite.statement")
@@ -196,6 +197,11 @@ namespace tntdb
       }
     }
 
+    void Statement::setInt32(const std::string& col, int32_t data)
+    {
+      setInt(col, data);
+    }
+    
     void Statement::setUnsigned(const std::string& col, unsigned data)
     {
       if (data > static_cast<unsigned>(std::numeric_limits<int>::max()))
@@ -208,6 +214,47 @@ namespace tntdb
         setInt(col, static_cast<int>(data));
     }
 
+    void Statement::setUnsigned32(const std::string& col, uint32_t data)
+    {
+      setUnsigned(col, data);
+    }
+
+    void Statement::setInt64(const std::string& col, int64_t data)
+    {
+      int idx = getBindIndex(col);
+      sqlite3_stmt* stmt = getBindStmt();
+      if (idx != 0)
+      {
+        reset();
+
+        log_debug("sqlite3_bind_int64(" << stmt << ", " << idx << ')');
+        int ret = ::sqlite3_bind_int64(stmt, idx, data);
+
+        if (ret != SQLITE_OK)
+          throw Execerror("sqlite3_bind_int64", stmt, ret);
+      }
+    }
+    
+    void Statement::setUnsigned64(const std::string& col, uint64_t data)
+    {
+      setInt64(col, (int64_t)data);
+    }
+    
+    void Statement::setDecimal(const std::string& col, const Decimal& data)
+    {
+      // SQLite 3.4.1 does not support the SQL decimal or numeric types.
+      // So double is used instead, but of course binary floating point can
+      // not accurately store decimal floating point numbers.
+      // Maybe we could try instead using:
+      // int sqlite3_value_numeric_type(sqlite3_value*);
+      // However I do not understand the SQLite 3.4.1 documentation
+      // for this API.  I am confused by how it only returns an int,
+      // yet the API documentation talks about returning an int, double
+      // or text string.
+      double d = data.getDouble();
+      setDouble(col, d);
+    }
+    
     void Statement::setFloat(const std::string& col, float data)
     {
       setDouble(col, static_cast<double>(data));

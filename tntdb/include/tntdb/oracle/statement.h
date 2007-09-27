@@ -23,8 +23,10 @@
 #include <oci.h>
 #include <cxxtools/dynbuffer.h>
 #include <string>
+#include <string.h>
 #include <map>
 #include <tntdb/oracle/datetime.h>
+#include <tntdb/oracle/number.h>
 
 namespace tntdb
 {
@@ -47,6 +49,7 @@ namespace tntdb
             cxxtools::Dynbuffer<char> data;
             sb2 indicator;
             Datetime datetime;
+            Number number;
 
             Bind()
               : ptr(0),
@@ -89,6 +92,11 @@ namespace tntdb
         void setBool(const std::string& col, bool data);
         void setInt(const std::string& col, int data);
         void setUnsigned(const std::string& col, unsigned data);
+        void setInt32(const std::string& col, int32_t data);
+        void setUnsigned32(const std::string& col, uint32_t data);
+        void setInt64(const std::string& col, int64_t data);
+        void setUnsigned64(const std::string& col, uint64_t data);
+        void setDecimal(const std::string& col, const Decimal& data);
         void setFloat(const std::string& col, float data);
         void setDouble(const std::string& col, double data);
         void setChar(const std::string& col, char data);

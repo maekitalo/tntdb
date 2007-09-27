@@ -21,6 +21,7 @@
 
 #include <mysql.h>
 #include <string>
+#include <tntdb/decimal.h>
 #include <tntdb/mysql/bindutils.h>
 
 namespace tntdb
@@ -58,6 +59,16 @@ namespace tntdb
           { mysql::setInt(values[n], data); }
         void setUnsigned(unsigned n, unsigned data)
           { mysql::setUnsigned(values[n], data); }
+        void setInt32(unsigned n, int32_t data)
+          { mysql::setInt32(values[n], data); }
+        void setUnsigned32(unsigned n, uint32_t data)
+          { mysql::setUnsigned32(values[n], data); }
+        void setInt64(unsigned n, int64_t data)
+          { mysql::setInt64(values[n], data); }
+        void setUnsigned64(unsigned n, uint64_t data)
+          { mysql::setUnsigned64(values[n], data); }
+        void setDecimal(unsigned n, const Decimal& data)
+          { mysql::setDecimal(values[n], bindAttributes[n].length, data); }
         void setFloat(unsigned n, float data)
           { mysql::setFloat(values[n], data); }
         void setDouble(unsigned n, double data)
@@ -83,6 +94,16 @@ namespace tntdb
           { return mysql::getInt(values[n]); }
         unsigned getUnsigned(unsigned n) const
           { return mysql::getUnsigned(values[n]); }
+        int32_t getInt32(unsigned n) const
+          { return mysql::getInt32(values[n]); }
+        uint32_t getUnsigned32(unsigned n) const
+          { return mysql::getUnsigned32(values[n]); }
+        int64_t getInt64(unsigned n) const
+          { return mysql::getInt64(values[n]); }
+        uint64_t getUnsigned64(unsigned n) const
+          { return mysql::getUnsigned64(values[n]); }
+        Decimal getDecimal(unsigned n) const
+          { return mysql::getDecimal(values[n]); }
         long getLong(unsigned n) const
           { return mysql::getLong(values[n]); }
         float getFloat(unsigned n) const

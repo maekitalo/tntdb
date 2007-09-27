@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_builddir)/include
+INCLUDES = -I$(top_srcdir)/include
 
 sources = \
 	connection.cpp \
@@ -9,7 +9,8 @@ sources = \
 	result.cpp \
 	row.cpp \
 	statement.cpp \
-	value.cpp
+	value.cpp \
+	number.cpp
 
 AM_CXXFLAGS = $(PTHREAD_CFLAGS)
 
@@ -18,7 +19,7 @@ if MAKE_ORACLE
 driver_LTLIBRARIES = tntdb-oracle.la
 
 tntdb_oracle_la_SOURCES = $(sources)
-tntdb_oracle_la_LDFLAGS = -lclntsh -module -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
-tntdb_oracle_la_LIBADD = $(top_builddir)/src/libtntdb.la
+tntdb_oracle_la_LDFLAGS = -module -version-info @sonumber@ @SHARED_LIB_FLAG@ $(PTHREAD_LIBS)
+tntdb_oracle_la_LIBADD = $(top_srcdir)/src/libtntdb.la -lclntsh
 
 endif

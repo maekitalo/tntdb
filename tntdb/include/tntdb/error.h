@@ -20,6 +20,7 @@
 #define TNTDB_ERROR_H
 
 #include <stdexcept>
+#include <string>
 
 namespace tntdb
 {

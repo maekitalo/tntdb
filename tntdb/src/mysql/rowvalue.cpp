@@ -20,6 +20,7 @@
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
+#include <tntdb/decimal.h>
 #include <cxxtools/log.h>
 #include <sstream>
 
@@ -54,6 +55,46 @@ namespace tntdb
     unsigned RowValue::getUnsigned() const
     {
       unsigned ret = 0;
+      std::istringstream v(getString());
+      v >> ret;
+      return ret;
+    }
+
+    int32_t RowValue::getInt32() const
+    {
+      int32_t ret = 0;
+      std::istringstream v(getString());
+      v >> ret;
+      return ret;
+    }
+
+    uint32_t RowValue::getUnsigned32() const
+    {
+      uint32_t ret = 0;
+      std::istringstream v(getString());
+      v >> ret;
+      return ret;
+    }
+
+    int64_t RowValue::getInt64() const
+    {
+      int64_t ret = 0;
+      std::istringstream v(getString());
+      v >> ret;
+      return ret;
+    }
+
+    uint64_t RowValue::getUnsigned64() const
+    {
+      uint64_t ret = 0;
+      std::istringstream v(getString());
+      v >> ret;
+      return ret;
+    }
+
+    Decimal RowValue::getDecimal() const
+    {
+      Decimal ret;
       std::istringstream v(getString());
       v >> ret;
       return ret;

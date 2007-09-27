@@ -21,8 +21,10 @@
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
+#include <tntdb/decimal.h>
 #include <cxxtools/log.h>
 #include <sstream>
+#include <string.h>
 
 log_define("tntdb.mysql.bindutils")
 
@@ -160,6 +162,23 @@ namespace tntdb
           else
             return *static_cast<long long int*>(bind.buffer);
 
+        case MYSQL_TYPE_DECIMAL:
+        case MYSQL_TYPE_NEWDECIMAL:
+        {
+          std::string data(static_cast<char*>(bind.buffer), *bind.length);
+          log_debug("extract integer-type from decimal \"" << data << '"');
+          std::istringstream in(data);
+          Decimal decimal;
+          decimal.read(in);
+          if (in.eof() || !in.fail())
+          {
+            int_type ret = decimal.getInteger<int_type>();
+            return ret;
+          }
+          log_error("type-error in getInteger, type=" << bind.buffer_type);
+          throw TypeError("type-error in getInteger");
+        }
+          
         case MYSQL_TYPE_VAR_STRING:
         case MYSQL_TYPE_STRING:
         {
@@ -168,7 +187,7 @@ namespace tntdb
           std::istringstream in(data);
           int_type ret;
           in >> ret;
-          if (in)
+          if (in.eof() || !in.fail())
             return ret;
 
           // no break!!!
@@ -208,7 +227,7 @@ namespace tntdb
           std::istringstream in(data);
           float_type ret;
           in >> ret;
-          if (in)
+          if (in.eof() || !in.fail())
             return ret;
 
           // no break!!!
@@ -242,6 +261,44 @@ namespace tntdb
     {
       setValue(bind, data, MYSQL_TYPE_LONG);
       bind.is_unsigned = 1;
+    }
+
+    void setInt32(MYSQL_BIND& bind, int32_t data)
+    {
+      setValue(bind, data, MYSQL_TYPE_LONG);
+      bind.is_unsigned = 0;
+    }
+
+    void setUnsigned32(MYSQL_BIND& bind, uint32_t data)
+    {
+      setValue(bind, data, MYSQL_TYPE_LONG);
+      bind.is_unsigned = 1;
+    }
+
+    void setInt64(MYSQL_BIND& bind, int64_t data)
+    {
+      setValue(bind, data, MYSQL_TYPE_LONGLONG);
+      bind.is_unsigned = 0;
+    }
+
+    void setUnsigned64(MYSQL_BIND& bind, uint64_t data)
+    {
+      setValue(bind, data, MYSQL_TYPE_LONGLONG);
+      bind.is_unsigned = 1;
+    }
+
+    void setDecimal(MYSQL_BIND& bind, unsigned long& length, const Decimal& data)
+    {
+      std::ostringstream ds;
+      data.print(ds, Decimal::infinityLong);
+      std::string d = ds.str();
+      reserve(bind, d.size());
+      d.copy(static_cast<char*>(bind.buffer), d.size());
+      bind.buffer_type = MYSQL_TYPE_NEWDECIMAL;
+      bind.is_null = 0;
+      length = d.size();
+      bind.length = &length;
+      bind.is_unsigned = 0;
     }
 
     void setFloat(MYSQL_BIND& bind, float data)
@@ -353,6 +410,74 @@ namespace tntdb
       return getInteger<long>(bind);
     }
 
+    int32_t getInt32(const MYSQL_BIND& bind)
+    {
+      return getInteger<int32_t>(bind);
+    }
+
+    uint32_t getUnsigned32(const MYSQL_BIND& bind)
+    {
+      return getInteger<uint32_t>(bind);
+    }
+
+    int64_t getInt64(const MYSQL_BIND& bind)
+    {
+      return getInteger<int64_t>(bind);
+    }
+
+    uint64_t getUnsigned64(const MYSQL_BIND& bind)
+    {
+      return getInteger<uint64_t>(bind);
+    }
+
+    Decimal getDecimal(const MYSQL_BIND& bind)
+    {
+      if (isNull(bind))
+        throw NullValue();
+
+      switch (bind.buffer_type)
+      {
+        case MYSQL_TYPE_TINY:
+        case MYSQL_TYPE_SHORT:
+        case MYSQL_TYPE_INT24:
+        case MYSQL_TYPE_LONG:
+        case MYSQL_TYPE_LONGLONG:
+        {
+          int64_t i = getInteger<int64_t>(bind);
+          Decimal d(i);
+          return d;
+        }
+
+        case MYSQL_TYPE_FLOAT:
+        case MYSQL_TYPE_DOUBLE:
+        {
+          double f = getFloat<double>(bind);
+          Decimal d(f);
+          return d;
+        }
+          
+        case MYSQL_TYPE_DECIMAL:
+        case MYSQL_TYPE_NEWDECIMAL:
+        case MYSQL_TYPE_VAR_STRING:
+        case MYSQL_TYPE_STRING:
+        {
+          std::string data(static_cast<char*>(bind.buffer), *bind.length);
+          log_debug("extract Decimal from string \"" << data << '"');
+          std::istringstream in(data);
+          Decimal ret;
+          in >> ret;
+          if (in.eof() || !in.fail())
+            return ret;
+
+          // no break!!!
+        }
+
+        default:
+          log_error("type-error in getDecimal, type=" << bind.buffer_type);
+          throw TypeError("type-error in getDecimal");
+      }
+    }
+
     float getFloat(const MYSQL_BIND& bind)
     {
       return getFloat<float>(bind);
@@ -401,6 +526,8 @@ namespace tntdb
         case MYSQL_TYPE_BLOB:
         case MYSQL_TYPE_MEDIUM_BLOB:
         case MYSQL_TYPE_LONG_BLOB:
+        case MYSQL_TYPE_DECIMAL:
+        case MYSQL_TYPE_NEWDECIMAL:
           ret.assign(static_cast<const char*>(bind.buffer),
                              *bind.length);
           break;

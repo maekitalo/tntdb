@@ -111,19 +111,35 @@ namespace tntdb
           break;
 
         case SQLT_INT:
-        case SQLT_UIN:
           log_debug("OCIDefineByPos(SQLT_INT)");
           ret = OCIDefineByPos(stmt->getHandle(), &defp,
             stmt->getErrorHandle(), pos + 1, &longValue,
             sizeof(longValue), SQLT_INT, &nullind, &len, 0, OCI_DEFAULT);
           break;
 
+        case SQLT_UIN:
+          log_debug("OCIDefineByPos(SQLT_UIN)");
+          ret = OCIDefineByPos(stmt->getHandle(), &defp,
+            stmt->getErrorHandle(), pos + 1, &uint32Value,
+            sizeof(uint32Value), SQLT_UIN, &nullind, &len, 0, OCI_DEFAULT);
+          break;
+
         case SQLT_FLT:
-        case SQLT_NUM:
           log_debug("OCIDefineByPos(SQLT_FLT)");
           ret = OCIDefineByPos(stmt->getHandle(), &defp,
             stmt->getErrorHandle(), pos + 1, &doubleValue,
             sizeof(doubleValue), SQLT_FLT, &nullind, &len, 0, OCI_DEFAULT);
+          break;
+
+        case SQLT_NUM:
+        case SQLT_VNU:
+          ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, number.getScaleHandle(), 0, OCI_ATTR_SCALE,
+          stmt->getErrorHandle());
+          stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_SCALE)");
+          log_debug("OCIDefineByPos(SQLT_VNU)");
+          ret = OCIDefineByPos(stmt->getHandle(), &defp,
+            stmt->getErrorHandle(), pos + 1, number.getHandle(),
+            OCI_NUMBER_SIZE, SQLT_VNU, &nullind, &len, 0, OCI_DEFAULT);
           break;
 
         default:
@@ -164,13 +180,18 @@ namespace tntdb
           throw TypeError();
 
         case SQLT_INT:
-        case SQLT_UIN:
           return longValue != 0;
 
+        case SQLT_UIN:
+          return uint32Value != 0;
+
         case SQLT_FLT:
-        case SQLT_NUM:
           return doubleValue != 0;
 
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal().getBool();
+          
         default:
           return data[0] == 't' || data[0] == 'T'
               || data[0] == 'y' || data[0] == 'Y'
@@ -197,12 +218,20 @@ namespace tntdb
           return static_cast<int>(longValue);
 
         case SQLT_FLT:
-        case SQLT_NUM:
           return static_cast<int>(doubleValue);
 
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal().getInt();
+          
         default:
           return getValue<int>(data.data(), "int");
       }
+    }
+
+    int32_t Value::getInt32() const
+    {
+      return getInt();
     }
 
     unsigned Value::getUnsigned() const
@@ -223,14 +252,117 @@ namespace tntdb
           return static_cast<unsigned>(longValue);
 
         case SQLT_FLT:
-        case SQLT_NUM:
           return static_cast<unsigned>(doubleValue);
 
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal().getUnsigned();
+          
         default:
           return getValue<unsigned>(data.data(), "unsigned");
       }
     }
 
+    uint32_t Value::getUnsigned32() const
+    {
+      return getUnsigned();
+    }
+
+    int64_t Value::getInt64() const
+    {
+      if (isNull())
+        throw NullValue();
+
+      switch (type)
+      {
+        case SQLT_DAT:
+        case SQLT_TIMESTAMP:
+        case SQLT_TIMESTAMP_TZ:
+        case SQLT_TIMESTAMP_LTZ:
+          throw TypeError();
+
+        case SQLT_INT:
+        case SQLT_UIN:
+          return static_cast<int64_t>(longValue);
+
+        case SQLT_FLT:
+          return static_cast<int64_t>(doubleValue);
+
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal().getInt64();
+          
+        default:
+          return getValue<int64_t>(data.data(), "int");
+      }
+    }
+
+    uint64_t Value::getUnsigned64() const
+    {
+      if (isNull())
+        throw NullValue();
+
+      switch (type)
+      {
+        case SQLT_DAT:
+        case SQLT_TIMESTAMP:
+        case SQLT_TIMESTAMP_TZ:
+        case SQLT_TIMESTAMP_LTZ:
+          throw TypeError();
+
+        case SQLT_INT:
+        case SQLT_UIN:
+          return static_cast<uint64_t>(longValue);
+
+        case SQLT_FLT:
+          return static_cast<uint64_t>(doubleValue);
+
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal().getUnsigned64();
+          
+        default:
+          return getValue<uint64_t>(data.data(), "int");
+      }
+    }
+
+    Decimal Value::getDecimal() const
+    {
+      if (isNull())
+        throw NullValue();
+
+      switch (type)
+      {
+        case SQLT_DAT:
+        case SQLT_TIMESTAMP:
+        case SQLT_TIMESTAMP_TZ:
+        case SQLT_TIMESTAMP_LTZ:
+          throw TypeError();
+
+        case SQLT_INT:
+        case SQLT_UIN:
+        {
+          Decimal decimal;
+          decimal.setInt(longValue);
+          return decimal;
+        }
+
+        case SQLT_FLT:
+        {
+          Decimal decimal;
+          decimal.setDouble(doubleValue);
+          return decimal;
+        }
+
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal();
+          
+        default:
+          return getValue<Decimal>(data.data(), "Decimal");
+      }
+    }
+    
     float Value::getFloat() const
     {
       if (isNull())
@@ -249,9 +381,12 @@ namespace tntdb
           return static_cast<float>(longValue);
 
         case SQLT_FLT:
-        case SQLT_NUM:
           return static_cast<float>(doubleValue);
 
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal().getFloat();
+          
         default:
           return getValue<float>(data.data(), "float");
       }
@@ -275,9 +410,12 @@ namespace tntdb
           return static_cast<double>(longValue);
 
         case SQLT_FLT:
-        case SQLT_NUM:
           return static_cast<double>(doubleValue);
 
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal().getDouble();
+          
         default:
           return getValue<double>(data.data(), "double");
       }
@@ -301,9 +439,12 @@ namespace tntdb
           return static_cast<char>(longValue);
 
         case SQLT_FLT:
-        case SQLT_NUM:
           return static_cast<char>(doubleValue);
 
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return static_cast<char>(number.getDecimal().getInt());
+          
         default:
           return *data.data();
       }

@@ -34,56 +34,56 @@ namespace tntdb
    */
   class Result
   {
-	public:
-	  typedef unsigned size_type;
-	  typedef Row value_type;
+    public:
+      typedef unsigned size_type;
+      typedef Row value_type;
 
-	private:
-	  SmartPtr<IResult, InternalRefCounted> result;
+    private:
+      SmartPtr<IResult, InternalRefCounted> result;
 
-	public:
-	  class const_iterator;
+    public:
+      class const_iterator;
 
-	  Result()  { }
-	  Result(IResult* res)
-		: result(res)
-		{ }
+      Result()  { }
+      Result(IResult* res)
+        : result(res)
+        { }
 
       /**
        * Returns the row_num'ths row of the resultset.
        */
-	  Row getRow(size_type row_num) const;
+      Row getRow(size_type row_num) const;
       /**
        * Returns the field_num'ths value of the row_num'ths row.
        */
-	  Value getValue(size_type row_num, size_type field_num) const;
+      Value getValue(size_type row_num, size_type field_num) const;
 
       /**
        * Returns the number of rows of this resultset.
        */
-	  size_type size() const           { return result->size(); }
+      size_type size() const           { return result->size(); }
       /**
        * Returns true, when there are no rows available.
        */
-	  bool empty() const               { return size() == 0; }
+      bool empty() const               { return size() == 0; }
       /**
        * Returns the number of columns of the rows.
        */
-	  size_type getFieldCount() const  { return result->getFieldCount(); }
+      size_type getFieldCount() const  { return result->getFieldCount(); }
 
       /**
        * Returns the row_num'ths row of the resultset.
        */
-	  Row operator[] (size_type row_num) const;
+      Row operator[] (size_type row_num) const;
 
       /**
        * Returns a const_iterator to the first row of this resultset.
        */
-	  const_iterator begin() const;
+      const_iterator begin() const;
       /**
        * Returns a const_iterator past the last row of this resultset.
        */
-	  const_iterator end() const;
+      const_iterator end() const;
 
       /**
        * Returns true, when this classes does not reference a resultset.

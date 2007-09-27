@@ -22,6 +22,7 @@
 #include <tntdb/noncopyable.h>
 #include <cxxtools/pool.h>
 #include <map>
+#include <string>
 
 namespace tntdb
 {

@@ -21,6 +21,7 @@
 
 #include <tntdb/iface/ivalue.h>
 #include <tntdb/oracle/datetime.h>
+#include <tntdb/oracle/number.h>
 #include <cxxtools/dynbuffer.h>
 #include <oci.h>
 
@@ -41,8 +42,10 @@ namespace tntdb
         cxxtools::Dynbuffer<char> data;
         oracle::Datetime datetime;
         long longValue;
+        uint32_t uint32Value;
         double doubleValue;
-
+        oracle::Number number;
+      
         void init(Statement* stmt, OCIParam* paramp_, ub4 pos);
 
       public:
@@ -54,6 +57,11 @@ namespace tntdb
         virtual bool getBool() const;
         virtual int getInt() const;
         virtual unsigned getUnsigned() const;
+        virtual int32_t getInt32() const;
+        virtual uint32_t getUnsigned32() const;
+        virtual int64_t getInt64() const;
+        virtual uint64_t getUnsigned64() const;
+        virtual Decimal getDecimal() const;
         virtual float getFloat() const;
         virtual double getDouble() const;
         virtual char getChar() const;

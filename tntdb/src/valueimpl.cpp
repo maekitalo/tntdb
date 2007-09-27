@@ -20,6 +20,7 @@
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
+#include <tntdb/decimal.h>
 #include <tntdb/error.h>
 #include <cxxtools/log.h>
 #include <sstream>
@@ -77,6 +78,41 @@ namespace tntdb
     if (null)
       throw NullValue();
     return getValue<unsigned>(data, "unsigned");
+  }
+
+  int32_t ValueImpl::getInt32() const
+  {
+    if (null)
+      throw NullValue();
+    return getValue<int32_t>(data, "int32_t");
+  }
+
+  uint32_t ValueImpl::getUnsigned32() const
+  {
+    if (null)
+      throw NullValue();
+    return getValue<uint32_t>(data, "uint32_t");
+  }
+
+  int64_t ValueImpl::getInt64() const
+  {
+    if (null)
+      throw NullValue();
+    return getValue<int64_t>(data, "int64_t");
+  }
+
+  uint64_t ValueImpl::getUnsigned64() const
+  {
+    if (null)
+      throw NullValue();
+    return getValue<uint64_t>(data, "uint64_t");
+  }
+
+  Decimal ValueImpl::getDecimal() const
+  {
+    if (null)
+      throw NullValue();
+    return getValue<Decimal>(data, "Decimal");
   }
 
   float ValueImpl::getFloat() const

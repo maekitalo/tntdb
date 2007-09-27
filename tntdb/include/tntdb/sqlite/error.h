@@ -21,6 +21,7 @@
 
 #include <tntdb/error.h>
 #include <sqlite3.h>
+#include <string>
 
 namespace tntdb
 {

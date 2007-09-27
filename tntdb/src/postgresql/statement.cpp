@@ -264,6 +264,41 @@ namespace tntdb
       SET_TYPE(col, "int");
     }
 
+    void Statement::setInt32(const std::string& col, int32_t data)
+    {
+      log_debug("setInt32(\"" << col << "\", " << data << ')');
+      setValue(col, data);
+      SET_TYPE(col, "int");
+    }
+
+    void Statement::setUnsigned32(const std::string& col, uint32_t data)
+    {
+      log_debug("setUnsigned32(\"" << col << "\", " << data << ')');
+      setValue(col, data);
+      SET_TYPE(col, "int");
+    }
+    
+    void Statement::setInt64(const std::string& col, int64_t data)
+    {
+      log_debug("setInt64(\"" << col << "\", " << data << ')');
+      setValue(col, data);
+      SET_TYPE(col, "bigint");
+    }
+
+    void Statement::setUnsigned64(const std::string& col, uint64_t data)
+    {
+      log_debug("setUnsigned64(\"" << col << "\", " << data << ')');
+      setValue(col, data);
+      SET_TYPE(col, "bigint");
+    }
+
+    void Statement::setDecimal(const std::string& col, const Decimal& data)
+    {
+      log_debug("setDecimal(\"" << col << "\", " << data << ')');
+      setValue(col, data);
+      SET_TYPE(col, "numeric");
+    }
+    
     void Statement::setFloat(const std::string& col, float data)
     {
       log_debug("setFloat(\"" << col << "\", " << data << ')');

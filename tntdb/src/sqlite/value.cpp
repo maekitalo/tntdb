@@ -48,6 +48,36 @@ namespace tntdb
       null = false;
     }
 
+    void Value::set(int32_t data)
+    {
+      this->data = to_string(data);
+      null = false;
+    }
+
+    void Value::set(uint32_t data)
+    {
+      this->data = to_string(data);
+      null = false;
+    }
+
+    void Value::set(int64_t data)
+    {
+      this->data = to_string(data);
+      null = false;
+    }
+
+    void Value::set(uint64_t data)
+    {
+      this->data = to_string(data);
+      null = false;
+    }
+
+    void Value::set(const Decimal& data)
+    {
+      this->data = to_string(data);
+      null = false;
+    }
+    
     void Value::set(float data)
     {
       this->data = to_string(data);
@@ -105,6 +135,31 @@ namespace tntdb
     long Value::getLong() const
     {
       return string_to<long>(data).first;
+    }
+
+    int32_t Value::getInt32() const
+    {
+      return string_to<int32_t>(data).first;
+    }
+
+    uint32_t Value::getUnsigned32() const
+    {
+      return string_to<uint32_t>(data).first;
+    }
+
+    int64_t Value::getInt64() const
+    {
+      return string_to<int64_t>(data).first;
+    }
+
+    uint64_t Value::getUnsigned64() const
+    {
+      return string_to<uint64_t>(data).first;
+    }
+
+    Decimal Value::getDecimal() const
+    {
+      return string_to<Decimal>(data).first;
     }
 
     float Value::getFloat() const

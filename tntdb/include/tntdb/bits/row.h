@@ -30,32 +30,32 @@ namespace tntdb
    */
   class Row
   {
-	public:
+    public:
       /// Iterator for iterating through the values of this row.
-	  class const_iterator;
-	  typedef unsigned size_type;
-	  typedef Value value_type;
+      class const_iterator;
+      typedef unsigned size_type;
+      typedef Value value_type;
 
-	private:
-	  SmartPtr<IRow, InternalRefCounted> row;
+    private:
+      SmartPtr<IRow, InternalRefCounted> row;
 
-	public:
-	  Row()  { }
-	  Row(IRow* row_)
-		: row(row_)
-		{ }
+    public:
+      Row()  { }
+      Row(IRow* row_)
+        : row(row_)
+        { }
 
       /// Returns the number of columns of this row.
-	  unsigned size() const   { return row->size(); }
+      unsigned size() const   { return row->size(); }
       /// Returns true, if this row-object has no columns.
-	  bool empty() const      { return !row || size() == 0; }
+      bool empty() const      { return !row || size() == 0; }
 
       /// Returns the field_num's value-object.
-	  Value getValue(size_type field_num) const
-		{ return row->getValue(field_num); }
+      Value getValue(size_type field_num) const
+        { return row->getValue(field_num); }
       /// Returns the field_num's value-object.
-	  Value operator[] (size_type field_num) const
-		{ return row->getValue(field_num); }
+      Value operator[] (size_type field_num) const
+        { return row->getValue(field_num); }
 
       /// Return true, if the specified value is null.
       bool isNull(size_type field_num) const
@@ -66,19 +66,29 @@ namespace tntdb
        * the requested type.
        */
 
-	  bool getBool(size_type field_num) const
+      bool getBool(size_type field_num) const
         { return getValue(field_num).getBool(); }
-	  int getInt(size_type field_num) const
+      int getInt(size_type field_num) const
         { return getValue(field_num).getInt(); }
-	  unsigned getUnsigned(size_type field_num) const
+      unsigned getUnsigned(size_type field_num) const
         { return getValue(field_num).getUnsigned(); }
-	  float getFloat(size_type field_num) const
+      int32_t getInt32(size_type field_num) const
+        { return getValue(field_num).getInt32(); }
+      uint32_t getUnsigned32(size_type field_num) const
+        { return getValue(field_num).getUnsigned32(); }
+      int64_t getInt64(size_type field_num) const
+        { return getValue(field_num).getInt64(); }
+      uint64_t getUnsigned64(size_type field_num) const
+        { return getValue(field_num).getUnsigned64(); }
+          Decimal getDecimal(size_type field_num) const
+        { return getValue(field_num).getDecimal(); }
+      float getFloat(size_type field_num) const
         { return getValue(field_num).getFloat(); }
-	  double getDouble(size_type field_num) const
+      double getDouble(size_type field_num) const
         { return getValue(field_num).getDouble(); }
-	  char getChar(size_type field_num) const
+      char getChar(size_type field_num) const
         { return getValue(field_num).getChar(); }
-	  std::string getString(size_type field_num) const
+      std::string getString(size_type field_num) const
         { return getValue(field_num).getString(); }
       Date getDate(size_type field_num) const
         { return getValue(field_num).getDate(); }
@@ -89,9 +99,9 @@ namespace tntdb
       //@}
 
       /// Returns a iterator to the first column
-	  const_iterator begin() const;
+      const_iterator begin() const;
       /// Returns a iterator past the last column
-	  const_iterator end() const;
+      const_iterator end() const;
 
       /// Returns true, if this class is not connected to a actual databaserow.
       bool operator!() const         { return !row; }

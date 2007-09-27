@@ -11,6 +11,7 @@ nobase_include_HEADERS = \
 	tntdb/connection.h \
 	tntdb/date.h \
 	tntdb/datetime.h \
+	tntdb/decimal.h \
 	tntdb/error.h \
 	tntdb/iface/iconnection.h \
 	tntdb/iface/iconnectionmanager.h \
@@ -71,6 +72,7 @@ nobase_noinst_HEADERS = \
 	tntdb/oracle/cursor.h \
 	tntdb/oracle/datetime.h \
 	tntdb/oracle/error.h \
+	tntdb/oracle/number.h \
 	tntdb/oracle/result.h \
 	tntdb/oracle/row.h \
 	tntdb/oracle/statement.h \
