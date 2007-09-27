@@ -101,11 +101,8 @@ namespace tntdb
     bool isNaN() const;
     
     /// Return true if this Number object is zero, else return false;
-    bool isZero(void) const;
+    bool isZero() const;
       
-    /// Return false if this Number object is zero, else return true;
-    bool getBool(void) const;
-
     /// Split this decimal number into integral part, fractional
     /// and exponent parts.  An optional user specified exponent
     /// offset can be used to first scale the decimal number.
@@ -126,7 +123,7 @@ namespace tntdb
 
     /// Return this number as a C++ floating point type.
     template <typename FloatingPointType>
-    FloatingPointType getFloatingPoint(void) const;
+    FloatingPointType getFloatingPoint() const;
 
     /// Return this number as a C++ int.
     int getInt() const throw(std::overflow_error)
@@ -153,11 +150,11 @@ namespace tntdb
       { return getInteger<uint64_t>(); }
     
     /// Convert to a C++ float.
-    float getFloat(void) const
+    float getFloat() const
       { return getFloatingPoint<float>(); }
 
     /// Convert to a C++ double.
-    double getDouble(void) const
+    double getDouble() const
       { return getFloatingPoint<double>(); }
 
     /// Set this this tntdb::Decimal object to the value of the given
@@ -216,7 +213,7 @@ namespace tntdb
       { setFloatingPoint<double>(num); }
     
     // Return this Decimal number as a string.
-    std::string toString(void) const;
+    std::string toString() const;
       
     /// Print this Decimal number, ignoring std::ostream flags, fill and width.
     std::ostream &print(std::ostream &out) const;
@@ -350,7 +347,7 @@ namespace tntdb
   }
   
   template <typename FloatingPointType>
-  FloatingPointType Decimal::getFloatingPoint(void) const
+  FloatingPointType Decimal::getFloatingPoint() const
   {
     if (exponent >= 0)
     {

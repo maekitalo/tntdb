@@ -71,10 +71,7 @@ namespace tntdb
 
   bool Decimal::isInfinity() const
   {
-    if (flags & infinity)
-      return true;
-    else
-      return false;
+    return (flags & infinity);
   }
 
   bool Decimal::isInfinity(bool positiveInf) const
@@ -89,12 +86,7 @@ namespace tntdb
 
   bool Decimal::isNaN() const
   {
-    if (flags & NaN)
-    {
-      return true;
-    }
-    else
-      return false;
+    return (flags & NaN)
   }
   
   bool Decimal::isZero() const
@@ -102,19 +94,9 @@ namespace tntdb
     if (flags & (infinity | NaN))
       return false;
     else
-    {
-      if (mantissa == 0)
-        return true;
-      else
-        return false;
-    }
+      return (mantissa == 0)
   }
 
-  bool Decimal::getBool() const
-  {
-    return !isZero();
-  }
-  
   std::string Decimal::toString() const
   {
     std::ostringstream ostr;
