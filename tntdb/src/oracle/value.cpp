@@ -190,7 +190,7 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getBool();
+          return number.getDecimal().isZero();
           
         default:
           return data[0] == 't' || data[0] == 'T'
