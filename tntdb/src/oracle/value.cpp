@@ -470,8 +470,12 @@ namespace tntdb
           break;
 
         case SQLT_FLT:
-        case SQLT_NUM:
           ret = toString(doubleValue);
+          break;
+
+        case SQLT_NUM:
+        case SQLT_VNU:
+          ret = number.getDecimal().toString();
           break;
 
         default:

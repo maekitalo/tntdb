@@ -23,10 +23,6 @@
 #include <string.h>
 #include <math.h>
 
-#ifndef OCI_NUMBER_SIZE
-#define OCI_NUMBER_SIZE 22
-#endif
-
 namespace tntdb
 {
   namespace oracle
