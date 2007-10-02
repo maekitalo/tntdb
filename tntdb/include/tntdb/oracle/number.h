@@ -32,14 +32,11 @@ namespace tntdb
     class Number
     {
       unsigned char vnum[OCI_NUMBER_SIZE];
-      char pad[2];
-      sb1 scale;
     public:
       Number();
       Number(const Decimal &decimal);
       Decimal getDecimal() const;
       unsigned char* getHandle() { return vnum; }
-      sb1 *getScaleHandle() { return &scale; }
     };
   };
 };

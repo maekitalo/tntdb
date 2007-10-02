@@ -290,6 +290,7 @@ namespace tntdb
     void setDecimal(MYSQL_BIND& bind, unsigned long& length, const Decimal& data)
     {
       std::ostringstream ds;
+      ds.precision(24);
       data.print(ds, Decimal::infinityLong);
       std::string d = ds.str();
       reserve(bind, d.size());

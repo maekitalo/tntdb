@@ -190,6 +190,51 @@ namespace tntdb
       }
     }
 
+    template <>
+    void Statement::setValue(const std::string& col, float data)
+    {
+      hostvarMapType::const_iterator it = hostvarMap.find(col);
+      if (it == hostvarMap.end())
+        log_warn("hostvariable :" << col << " not found");
+      else
+      {
+        std::ostringstream v;
+        v.precision(24);
+        v << data;
+        values[it->second].setValue(v.str());
+      }
+    }
+
+    template <>
+    void Statement::setValue(const std::string& col, double data)
+    {
+      hostvarMapType::const_iterator it = hostvarMap.find(col);
+      if (it == hostvarMap.end())
+        log_warn("hostvariable :" << col << " not found");
+      else
+      {
+        std::ostringstream v;
+        v.precision(24);
+        v << data;
+        values[it->second].setValue(v.str());
+      }
+    }
+
+    template <>
+    void Statement::setValue(const std::string& col, Decimal data)
+    {
+      hostvarMapType::const_iterator it = hostvarMap.find(col);
+      if (it == hostvarMap.end())
+        log_warn("hostvariable :" << col << " not found");
+      else
+      {
+        std::ostringstream v;
+        v.precision(24);
+        v << data;
+        values[it->second].setValue(v.str());
+      }
+    }
+    
     template <typename T>
     void Statement::setStringValue(const std::string& col, T data)
     {

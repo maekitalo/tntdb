@@ -26,8 +26,7 @@ namespace tntdb
     mantissa(0),
     exponent(0),
     flags(positive),
-    defaultPrintFlags(infinityShort),
-    fractionDigits(0)
+    defaultPrintFlags(infinityShort)
   {
   }
 
@@ -35,8 +34,7 @@ namespace tntdb
     mantissa(0),
     exponent(0),
     flags(positive),
-    defaultPrintFlags(infinityShort),
-    fractionDigits(0)
+    defaultPrintFlags(infinityShort)
   {
     setDouble(value);
   }
@@ -45,17 +43,15 @@ namespace tntdb
     mantissa(MantissaType(man >= int64_t(0) ? man : -man)),
     exponent(exp),
     flags(man >=int64_t(0) ? positive : 0),
-    defaultPrintFlags(infinityShort),
-    fractionDigits(0)
+    defaultPrintFlags(infinityShort)
   {
   }
   
-  Decimal::Decimal(MantissaType man, ExponentType exp, FlagsType f, FractionDigitsType fd, PrintFlagsType pf) :
+  Decimal::Decimal(MantissaType man, ExponentType exp, FlagsType f, PrintFlagsType pf) :
     mantissa(man),
     exponent(exp),
     flags(f),
-    defaultPrintFlags(pf),
-    fractionDigits(fd)
+    defaultPrintFlags(pf)
   {
   }
 
@@ -100,10 +96,38 @@ namespace tntdb
   std::string Decimal::toString() const
   {
     std::ostringstream ostr;
+    ostr.precision(24);
     print(ostr);
     return ostr.str();
   }
 
+  void Decimal::printFraction(std::ostream &out,
+                              ExponentType fracDigits,
+                              MantissaType fractional)
+  {
+    // 2^64 = 18446744073709551616, which has 20 digits.
+    const int maxDigits = 20;
+    char buffer[maxDigits + 1];
+    if (fracDigits > maxDigits)
+      fracDigits = maxDigits;
+    int digitsOutput = 0;
+    int digitsProcessed = 0;
+    MantissaType frac = fractional;
+    buffer[maxDigits] = '\0';
+    do
+    {
+      MantissaType fracQuotient = frac / MantissaType(Base);
+      MantissaType fracRemainder = frac % MantissaType(Base);
+      // Trailing zeros are not output
+      if ((digitsOutput != 0) || (fracRemainder != 0))
+        buffer[maxDigits - ++digitsOutput] = char(fracRemainder + '0');
+      frac = fracQuotient;
+    }
+    while (++digitsProcessed < fracDigits);
+    if (digitsOutput > 0)
+      out << "." << &buffer[maxDigits - digitsOutput];
+  }
+  
   std::ostream &Decimal::print(std::ostream &out) const
   {
     return print(out, defaultPrintFlags);
@@ -111,27 +135,8 @@ namespace tntdb
 
   std::ostream &Decimal::print(std::ostream &out, PrintFlagsType printFlags) const
   {
-    int saveFieldWidth = out.width(0);
+    int savePrecision = out.precision();
     std::ios::fmtflags saveFlags = out.flags(std::ios_base::left | std::ios_base::dec);
-    std::ios::char_type saveFill = out.fill(' ');
-    printFormatted(out, printFlags);
-    out.flags(saveFlags);
-    out.width(saveFieldWidth);
-    out.fill(saveFill);
-    return out;
-  }
-  
-  std::ostream &Decimal::printFormatted(std::ostream &out) const
-  {
-    return printFormatted(out, defaultPrintFlags);
-  }
-  
-  std::ostream &Decimal::printFormatted(std::ostream &out, PrintFlagsType printFlags) const
-  {
-    int saveFieldWidth = out.width();
-    std::ios::fmtflags saveFlags = out.flags();
-    std::ios::char_type saveFill = out.fill(' ');
-    int mantissaWidth = saveFieldWidth;
     if (flags & infinity)
     {
       if (flags & positive)
@@ -176,93 +181,106 @@ namespace tntdb
         if (!(flags & positive))
         {
           out << "-";
-          if (mantissaWidth >= 0)
-            --mantissaWidth;
         }
         else
         {
           if (saveFlags & std::ios_base::showpos)
           {
             out << "+";
-            if (mantissaWidth >= 0)
-              --mantissaWidth;
           }
         }
-        if (fractionDigits != 0)
-        {
-          mantissaWidth -= (fractionDigits + 1);
-        }
-        if ((exponent != -fractionDigits) && (saveFieldWidth != 0))
-        {
-          // Count number of exponent digits 
-          ExponentType expDigits = numberOfDigits<ExponentType>(exponent);
-          // Subtract exponent characters from mantissa field width
-          mantissaWidth -= (expDigits + 2);
-        }
-        if (mantissaWidth < 0)
-          mantissaWidth = 0; 
         // Count number of mantissa digits 
-        // ExponentType manDigits = ExponentType(numberOfDigits<MantissaType>(mantissa));
+        ExponentType manDigits = ExponentType(numberOfDigits<MantissaType>(mantissa));
         ExponentType exp = 0;
         MantissaType integral = 0;
         MantissaType fractional = 0;
-        if (fractionDigits == 0)
+        ExponentType exponentOffset = 0;
+        ExponentType fracDigits = 0;
+        ExponentType precisionFracDigits = 0;
+        if ((savePrecision != 0) && (manDigits > savePrecision))
         {
-          out << std::noshowpos << std::setw(mantissaWidth) << mantissa;
-          if (exponent != 0)
-          {
-            out << std::setw(0) << "E" << std::left << std::showpos << std::setw(0) << exponent;
-          }
+          // Then the number will not fit in precision digits without printing an exponent
+          exponentOffset = 1 - manDigits;
+          if (exponentOffset < 0)
+            fracDigits = -exponentOffset;
+          precisionFracDigits = savePrecision - 1;
         }
         else
         {
-          try
+          exponentOffset = exponent;
+          if (exponentOffset < 0)
+            fracDigits = -exponentOffset;
+          precisionFracDigits = fracDigits;
+        }
+        try
+        {
+          getIntegralFractionalExponent<MantissaType>(integral,
+                                                      fractional,
+                                                      exp,
+                                                      ExponentType(exponentOffset));
+          out << std::noshowpos << integral;
+          if (fracDigits > 0)
           {
-            getIntegralFractionalExponent<MantissaType>(integral,
-                                                        fractional,
-                                                        exp,
-                                                        ExponentType(0));
-            out << std::noshowpos << std::setw(mantissaWidth) << integral
-                << "."
-                << std::setw(fractionDigits) << std::setfill('0') << std::right << fractional;
-          }
-          catch(const std::overflow_error&)
-          {
-            out << std::noshowpos << std::setw(mantissaWidth) << mantissa;
-            if (exponent != 0)
+            if (fracDigits > precisionFracDigits)
             {
-              out << std::setw(0) << "E" << std::left << std::showpos << std::setw(0) << exponent;
+              MantissaType fracDivisor = MantissaType(Base);
+              MantissaType oneHalf = MantissaType(Base / 2);
+              for (int j = 1; j < fracDigits - precisionFracDigits; ++j)
+              {
+                fracDivisor *= MantissaType(Base);
+                oneHalf *= MantissaType(Base);
+              }
+              MantissaType precisionFractional = fractional / fracDivisor;
+              MantissaType precisionFractionalRemainder = fractional % fracDivisor;
+              if (precisionFractionalRemainder >= oneHalf)
+                ++precisionFractional;
+              Decimal::printFraction(out, precisionFracDigits, precisionFractional);
             }
+            else
+            {
+              Decimal::printFraction(out, fracDigits, fractional);
+            }
+          }
+          if (exp != 0)
+          {
+            out << std::setw(0) << "e" << std::left << std::showpos << std::setw(0) << exp;
+          }
+        }
+        catch(const std::overflow_error&)
+        {
+          out << std::noshowpos << mantissa;
+          if (exponent != 0)
+          {
+            out << std::setw(0) << "e" << std::left << std::showpos << std::setw(0) << exponent;
           }
         }
       }
     }
     out.flags(saveFlags);
-    
     return out;
   }
     
   std::ostream &operator<<(std::ostream& out, const Decimal& decimal)
   {
-    return decimal.printFormatted(out);
+    return decimal.print(out);
   }
 
-  void Decimal::init(MantissaType m, ExponentType e, FlagsType f, FractionDigitsType fd, PrintFlagsType pf)
+  void Decimal::init(MantissaType m, ExponentType e, FlagsType f, PrintFlagsType pf)
   {
     mantissa = m;
     exponent = e;
     flags = f;
-    fractionDigits = fd;
     defaultPrintFlags = pf;
   }
   
-  std::istream &Decimal::read(std::istream& in)
+  std::istream &Decimal::read(std::istream& in, bool ignoreOverflowReadingFraction)
   {
     enum DecimalReadStateEnum
     {
       start,
       readingMantissa,
       readingFraction,
+      ignoringFraction,
       readingExponent,
       readingNaN,
       readingInfinity,
@@ -276,9 +294,11 @@ namespace tntdb
     MantissaType man = 0;
     MantissaType previousMan = 0;
     ExponentType exponentMultiplier = 10;
-    ExponentType exp = 0;
-    ExponentType previousExp = 0;
-    FractionDigitsType fracDigits = 0;
+    typedef uint32_t UnsignedExponentType;
+    UnsignedExponentType absExp = 0;
+    UnsignedExponentType previousAbsExp = 0;
+    ExponentType exponentSign = 1;
+    ExponentType fracDigits = 0;
     FlagsType f = positive;
     PrintFlagsType pf = infinityShort;
     char readCharArray[sizeof(infinityCharArray)];
@@ -325,14 +345,19 @@ namespace tntdb
                 case '7':
                 case '8':
                 case '9':
-                  previousMan = man;
                   man = (man * mantissaMultiplier) + (c - '0');
-                  if (man < previousMan)
-                  {
-                    // overflow detected
-                    decimalReadState = failed;
-                  }
                   decimalReadState = readingMantissa;
+                  break;
+                case 'e':
+                case 'E':
+                  decimalReadState = readingExponent;
+                  break;
+                case '.':
+                  decimalReadState = readingFraction;
+                  break;
+                default:
+                  skipRead = true;
+                  decimalReadState = finished;
                   break;
             }
             break;
@@ -350,8 +375,8 @@ namespace tntdb
                 case '8':
                 case '9':
                   previousMan = man;
-                  man = (man * mantissaMultiplier) + (c - '0');
-                  if (man < previousMan)
+                  if (Decimal::overflowDetectedInUnsignedMultiplyByTen(man) ||
+                      ((man += (c - '0')) < previousMan))
                   {
                     // overflow detected
                     decimalReadState = failed;
@@ -384,13 +409,46 @@ namespace tntdb
                 case '8':
                 case '9':
                   previousMan = man;
-                  man = (man * mantissaMultiplier) + (c - '0');
-                  if (man < previousMan)
+                  if (Decimal::overflowDetectedInUnsignedMultiplyByTen(man) ||
+                      ((man += (c - '0')) < previousMan))
                   {
                     // overflow detected
-                    decimalReadState = failed;
+                    if (ignoreOverflowReadingFraction)
+                    {
+                      man = previousMan;
+                      decimalReadState = ignoringFraction;
+                    }
+                    else
+                    {
+                      decimalReadState = failed;
+                    }
                   }
-                  fracDigits += 1;
+                  else
+                    fracDigits += 1;
+                  break;
+                case 'e':
+                case 'E':
+                  decimalReadState = readingExponent;
+                  break;
+                default:
+                  skipRead = true;
+                  decimalReadState = finished;
+                  break;
+            }
+            break;
+          case ignoringFraction:
+            switch(c)
+            {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
                   break;
                 case 'e':
                 case 'E':
@@ -415,20 +473,19 @@ namespace tntdb
                 case '7':
                 case '8':
                 case '9':
-                  previousExp = exp;
-                  exp = (exp * exponentMultiplier) + (c - '0');
-                  if (((exponentMultiplier > 0) && (exp < previousExp)) ||
-                      ((exponentMultiplier < 0) && (exp > previousExp)))
+                  previousAbsExp = absExp;
+                  if (Decimal::overflowDetectedInUnsignedMultiplyByTen(absExp) ||
+                      ((absExp += (c - '0')) < previousAbsExp))
                   {
                     // overflow detected
                     decimalReadState = failed;
                   }
                   break;
                 case '-':
-                  exponentMultiplier = -10;
+                  exponentSign = -1;
                   break;
                 case '+':
-                  exponentMultiplier = 10;
+                  exponentSign = 1;
                   break;
                 default:
                   skipRead = true;
@@ -557,7 +614,7 @@ namespace tntdb
     }
     if ((c == std::istream::traits_type::eof()) || (decimalReadState == finished))
     {
-      init(man, exp - fracDigits, f, fracDigits, pf);
+      init(man, (ExponentType(absExp) * exponentSign) - fracDigits, f, pf);
     }
     else
     {

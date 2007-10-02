@@ -36,7 +36,6 @@ namespace tntdb
     typedef int32_t ExponentType;
     typedef int8_t FlagsType;
     typedef int8_t PrintFlagsType;
-    typedef int16_t FractionDigitsType;
     enum { Base = 10 };
     enum
     {
@@ -63,7 +62,6 @@ namespace tntdb
     ExponentType exponent;
     FlagsType flags;
     PrintFlagsType defaultPrintFlags;
-    FractionDigitsType fractionDigits;
 
   public:
     /// Initializes the Decimal-object with empty values.
@@ -75,7 +73,7 @@ namespace tntdb
     
     /// Initializes the Decimal-object with the given MantissaType mantissa
     /// and ExponentType exponent
-    Decimal(MantissaType man, ExponentType exp, FlagsType f, FractionDigitsType fd = 0, PrintFlagsType pf = infinityShort);
+    Decimal(MantissaType man, ExponentType exp, FlagsType f, PrintFlagsType pf = infinityShort);
     /// Return the decimal mantissa.
     MantissaType getMantissa() const;
     /// Return the base 10 exponent.
@@ -118,8 +116,7 @@ namespace tntdb
     
     /// Return this number as a C++ integer type.
     template <typename IntegerType>
-    IntegerType getInteger(RoundingAlgorithmType roundingAlgorithm = round,
-                           ExponentType optionalUserSpecifiedExponentOffset = 0) const throw(std::overflow_error);
+    IntegerType getInteger(RoundingAlgorithmType roundingAlgorithm = round) const throw(std::overflow_error);
 
     /// Return this number as a C++ floating point type.
     template <typename FloatingPointType>
@@ -215,36 +212,54 @@ namespace tntdb
     // Return this Decimal number as a string.
     std::string toString() const;
       
-    /// Print this Decimal number, ignoring std::ostream flags, fill and width.
+    /// Print this Decimal number.  If out.precision() != 0, then this
+    /// decimal number is printed with out.precision() significant digits.
     std::ostream &print(std::ostream &out) const;
 
-    /// Print this Decimal number, ignoring std::ostream flags, fill and width.
+    /// Print this Decimal number, with optional printFlags which only affect
+    /// how positive and negative infinity are printed.
+    /// If out.precision() != 0, then this decimal number is printed with
+    /// out.precision() significant digits.
     std::ostream &print(std::ostream &out, PrintFlagsType printFlags) const;
     
-    /// Print this Decimal number, using some std::ostream flags, fill and width.
-    std::ostream &printFormatted(std::ostream &out) const;
-
-    /// Print this Decimal number, using some std::ostream flags, fill and width.
-    std::ostream &printFormatted(std::ostream &out, PrintFlagsType printFlags) const;
-    
     /// Read a Decimal number.
-    std::istream &read(std::istream &in);
+    /// @param in input stream
+    /// @param ignoreOverflowReadingFraction if true, ignore overflow errors
+    /// while reading the fractional part, and set the mantissa to the the
+    /// value before the overflow.  This is useful while converting from
+    /// float or double values to Decimal.  The full range of significant
+    /// digits that the Decimal can hold can be read in the conversion like:
+    /// std::ostringstream ostr;
+    /// ostr.precision(24);
+    /// ostr << num;
+    /// read(ostr.str(), true);
+    std::istream &read(std::istream &in, bool ignoreOverflowReadingFraction = false);
 
-    void init(MantissaType m, ExponentType e, FlagsType f = positive, FractionDigitsType fd = 0, PrintFlagsType pf = infinityShort);
+    void init(MantissaType m, ExponentType e, FlagsType f = positive, PrintFlagsType pf = infinityShort);
+
+  protected:
+    static void printFraction(std::ostream &out,
+                              ExponentType fracDigits,
+                              MantissaType fractional);
+
+    /// Multiply an unsigned integer type by 10, checking for overflow.
+    /// @param n on input: the number to multply by 10, on output, the
+    /// result of the multiplication by 10.
+    /// @return true if overflow detected, else false;
+    template <typename T>
+    static bool overflowDetectedInUnsignedMultiplyByTen(T &n);
   };
 
   template <typename IntegerType> 
   IntegerType Decimal::numberOfDigits(IntegerType n) const
   {
-    IntegerType multiplier = IntegerType(10);
-    IntegerType previousMultiplier = IntegerType(1);
+    IntegerType multiplier = IntegerType(Base);
     IntegerType noDigits = 1;
     IntegerType abs = n;
     if (n < 0)
       abs = -n;
-    for (; (abs < multiplier) && (multiplier > previousMultiplier); ++noDigits)
+    for (; abs > multiplier; ++noDigits)
     {
-      previousMultiplier = multiplier;
       multiplier *= IntegerType(Base);
     }
     return noDigits;
@@ -258,26 +273,27 @@ namespace tntdb
   {
     ManType integralPart = mantissa;
     ManType fractionalPart = ManType(0);
-    ExponentType exp = exponent + optionalUserSpecifiedExponentOffset;
-    if ((exp != 0) && (integralPart != 0))
+    ExponentType exp = exponent - optionalUserSpecifiedExponentOffset;
+    if ((optionalUserSpecifiedExponentOffset != 0) && (integralPart != 0))
     {
-      if (exp >= 0)
+      if (optionalUserSpecifiedExponentOffset >= 0)
       {
         ManType previousIntegralPart = ManType(0);
-        for (int i = 0; (i < exp) && (integralPart > previousIntegralPart); ++i)
+        bool overflowDetected = false;
+        for (int i = 0; (i < optionalUserSpecifiedExponentOffset) && (integralPart > previousIntegralPart); ++i)
         {
           previousIntegralPart = integralPart;
-          integralPart *= ManType(Base);
+          overflowDetected = overflowDetectedInUnsignedMultiplyByTen(integralPart);
         }
-        if (integralPart <= previousIntegralPart)
+        if (overflowDetected)
           throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::getIntegralFractionalExponent()"));
       }
       else
       {
-        ExponentType absExponent = -exp;
+        ExponentType absOptionalUserSpecifiedExponentOffset = -optionalUserSpecifiedExponentOffset;
         ManType exponentDivisor = ManType(Base);
         ManType previousExponentDivisor = ManType(1);
-        for (int i = 1; (i < absExponent) && (exponentDivisor > previousExponentDivisor); ++i)
+        for (int i = 1; (i < absOptionalUserSpecifiedExponentOffset) && (exponentDivisor > previousExponentDivisor); ++i)
         {
           previousExponentDivisor = exponentDivisor;
           exponentDivisor *= ManType(Base);
@@ -298,8 +314,7 @@ namespace tntdb
   }
   
   template <typename IntegerType>
-  IntegerType Decimal::getInteger(RoundingAlgorithmType roundingAlgorithm,
-                                  ExponentType optionalUserSpecifiedExponentOffset) const throw(std::overflow_error)
+  IntegerType Decimal::getInteger(RoundingAlgorithmType roundingAlgorithm) const throw(std::overflow_error)
   {
     ExponentType exp = 0;
     IntegerType quotient = 0;
@@ -307,7 +322,7 @@ namespace tntdb
     getIntegralFractionalExponent<IntegerType>(quotient,
                                                remainder,
                                                exp,
-                                               optionalUserSpecifiedExponentOffset);
+                                               exponent);
     if (exp >= 0)
       return quotient;
 
@@ -400,13 +415,42 @@ namespace tntdb
   template <typename FloatingPointType>
   void Decimal::setFloatingPoint(FloatingPointType num)
   {
+    // 2^64 = 18446744073709551616, which has 20 digits.
+    // Hence a precision of 20 digits could overflow.
+    // If it does, hopefully it will be while reading
+    // the fractional part of the floating point number,
+    // in which case read() can use the mantissa value before
+    // the overflow.
     std::ostringstream ostr;
+    ostr.precision(24);
     ostr << num;
-    std::istringstream istr(ostr.str());
-    read(istr);
+    std::string numStr(ostr.str());
+    std::istringstream istr(numStr);
+    read(istr, true);
+  }
+
+  template <typename T>
+  bool Decimal::overflowDetectedInUnsignedMultiplyByTen(T &n)
+  {
+    bool overflowDetected = false;
+    T nTimes2 = n << 1;
+    T nTimes4 = n << 2;
+    T nTimes8 = n << 3;
+    T nTimes10 = (nTimes2 + nTimes8);
+    if ((nTimes2 < n) || (nTimes4 < nTimes2) || (nTimes8 < nTimes4) || (nTimes10 < nTimes8))
+      overflowDetected = true;
+    else
+    {
+      n = nTimes10;
+    }
+    return overflowDetected;
   }
   
+  /// Print this Decimal number.  If out.precision() != 0, then this
+  /// decimal number is printed with out.precision() significant digits.
   std::ostream &operator<<(std::ostream &out, const Decimal& decimal);
+
+  /// Read a Decimal number.
   std::istream &operator>>(std::istream &in, Decimal& decimal);
 }
 

@@ -27,14 +27,12 @@ namespace tntdb
 {
   namespace oracle
   {
-    Number::Number() :
-      scale(0)
+    Number::Number()
     {
       memset(vnum, OCI_NUMBER_SIZE, 0);
     }
     
-    Number::Number(const Decimal &decimal) :
-      scale(0)
+    Number::Number(const Decimal &decimal)
     {
       memset(vnum, OCI_NUMBER_SIZE, 0);
       if (decimal.isInfinity())
@@ -168,7 +166,7 @@ namespace tntdb
         flags |= tntdb::Decimal::positive;
       if (infinity)
         flags |= tntdb::Decimal::infinity;
-      Decimal decimal(mantissa, base_one_hundred_exponent * 2, flags, scale, tntdb::Decimal::infinityTilde);
+      Decimal decimal(mantissa, base_one_hundred_exponent * 2, flags, tntdb::Decimal::infinityTilde);
       return decimal;
     }
   };

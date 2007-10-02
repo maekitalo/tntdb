@@ -16,6 +16,30 @@ namespace tntdb
       return o.str();
     }
 
+    template <> std::string to_string(float v)
+    {
+      std::ostringstream o;
+      o.precision(24);
+      o << v;
+      return o.str();
+    }
+    
+    template <> std::string to_string(double v)
+    {
+      std::ostringstream o;
+      o.precision(24);
+      o << v;
+      return o.str();
+    }
+
+    template <> std::string to_string(Decimal v)
+    {
+      std::ostringstream o;
+      o.precision(24);
+      o << v;
+      return o.str();
+    }
+    
     template <typename T> std::pair<T, bool> string_to(const std::string& v)
     {
       T ret;

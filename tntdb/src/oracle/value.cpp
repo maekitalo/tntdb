@@ -54,7 +54,25 @@ namespace tntdb
       }
 
       template <>
+      std::string toString(float v)
+      {
+        std::ostringstream ret;
+        ret.precision(24);
+        ret << v;
+        return ret.str();
+      }
+      
+      template <>
       std::string toString(double v)
+      {
+        std::ostringstream ret;
+        ret.precision(24);
+        ret << v;
+        return ret.str();
+      }
+      
+      template <>
+      std::string toString(Decimal v)
       {
         std::ostringstream ret;
         ret.precision(24);
@@ -133,9 +151,6 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, number.getScaleHandle(), 0, OCI_ATTR_SCALE,
-          stmt->getErrorHandle());
-          stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_SCALE)");
           log_debug("OCIDefineByPos(SQLT_VNU)");
           ret = OCIDefineByPos(stmt->getHandle(), &defp,
             stmt->getErrorHandle(), pos + 1, number.getHandle(),
