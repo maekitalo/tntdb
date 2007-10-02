@@ -30,7 +30,8 @@ nobase_include_HEADERS = \
 	tntdb/statement.h \
 	tntdb/time.h \
 	tntdb/transaction.h \
-	tntdb/value.h
+	tntdb/value.h \
+	tntdb.h
 
 nobase_noinst_HEADERS = \
 	tntdb/mysql/bindutils.h \
