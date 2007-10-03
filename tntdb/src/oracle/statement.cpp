@@ -69,6 +69,7 @@ namespace tntdb
       {
         it->second->setNull();
 
+        log_debug("OCIBindByName, clear(\"" << it->first << "\")");
         sword ret = OCIBindByName(getHandle(), &it->second->ptr, conn->getErrorHandle(),
           0, 0, 0, 0,
           SQLT_INT, &it->second->indicator, 0, 0, 0, 0, OCI_DEFAULT);
@@ -82,6 +83,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.setNull();
 
+      log_debug("OCIBindByName, setNull(\"" << col << "\")");
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         0, 0, 0, 0,
         SQLT_INT, &b.indicator, 0, 0, 0, 0, OCI_DEFAULT);
@@ -94,6 +96,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(bool));
 
+      log_debug("OCIBindByName, setBool(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), sizeof(bool),
@@ -107,6 +110,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(int));
 
+      log_debug("OCIBindByName, setInt(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), sizeof(int),
@@ -120,6 +124,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(unsigned));
 
+      log_debug("OCIBindByName, setUnsigned(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), sizeof(unsigned),
@@ -145,6 +150,7 @@ namespace tntdb
       decimal.setInt64(data);
       b.number = Number(decimal);
       
+      log_debug("OCIBindByName, setInt64(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         (void *)b.number.getHandle(), OCI_NUMBER_SIZE,
@@ -160,6 +166,7 @@ namespace tntdb
       decimal.setUnsigned64(data);
       b.number = Number(decimal);
       
+      log_debug("OCIBindByName, setUnsigned64(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         (void *)b.number.getHandle(), OCI_NUMBER_SIZE,
@@ -173,6 +180,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.number = Number(decimal);
       
+      log_debug("OCIBindByName, setDecimal(\"" << col << "\", " << decimal << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         (void *)b.number.getHandle(), OCI_NUMBER_SIZE,
@@ -186,6 +194,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(float));
 
+      log_debug("OCIBindByName, setFloat(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), sizeof(float),
@@ -199,6 +208,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(double));
 
+      log_debug("OCIBindByName, setDouble(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), sizeof(double),
@@ -212,6 +222,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.setData(&data, 1);
 
+      log_debug("OCIBindByName, setChar(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), 1,
@@ -225,6 +236,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.setData(data);
 
+      log_debug("OCIBindByName, setString(\"" << col << "\", \"" << data << "\")");
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), data.size(),
@@ -238,6 +250,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.datetime = Datetime(conn, data);
 
+      log_debug("OCIBindByName, setDate(\"" << col << "\", " << data.getIso() << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.datetime.getHandle(), sizeof(OCIDateTime*),
@@ -251,6 +264,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.datetime = Datetime(conn, data);
 
+      log_debug("OCIBindByName, setTime(\"" << col << "\", " << data.getIso() << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.datetime.getHandle(), sizeof(OCIDateTime*),
@@ -264,6 +278,7 @@ namespace tntdb
       Bind &b = getBind(col);
       b.datetime = Datetime(conn, data);
 
+      log_debug("OCIBindByName, setDatetime(\"" << col << "\", " << data.getIso() << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.datetime.getHandle(), sizeof(OCIDateTime*),
