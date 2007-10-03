@@ -186,6 +186,8 @@ namespace tntdb
       Statement& set(const std::string& col, const Datetime& data)
         { data.isNull() ? stmt->setNull(col)
                         : stmt->setDatetime(col, data); return *this; }
+      Statement& set(const std::string& col, const Decimal& data)
+        { stmt->setDecimal(col, data); return *this; }
       //@}
 
       /// statement-execution-methods
