@@ -29,12 +29,12 @@ namespace tntdb
   {
     Number::Number()
     {
-      memset(vnum, OCI_NUMBER_SIZE, 0);
+      memset(vnum, 0, OCI_NUMBER_SIZE);
     }
     
     Number::Number(const Decimal &decimal)
     {
-      memset(vnum, OCI_NUMBER_SIZE, 0);
+      memset(vnum, 0, OCI_NUMBER_SIZE);
       if (decimal.isInfinity())
       {
         if (decimal.isInfinity(true))
@@ -58,47 +58,47 @@ namespace tntdb
         }
         else
         {
-          const int right_number_length = OCI_NUMBER_SIZE;
-          unsigned char right_number[right_number_length];
-          tntdb::Decimal::ExponentType no_base_one_hundred_digits = 1;
+          const int rightNumberLength = OCI_NUMBER_SIZE;
+          unsigned char rightNumber[rightNumberLength];
+          tntdb::Decimal::ExponentType noBaseOneHundredDigits = 1;
           tntdb::Decimal::MantissaType x = decimal.getMantissa();
-          tntdb::Decimal::ExponentType base_one_hundred_exponent = decimal.getExponent() * 2;
+          tntdb::Decimal::ExponentType baseOneHundredExponent = decimal.getExponent() * 2;
           if (decimal.isPositive())
           {
             tntdb::Decimal::MantissaType digit = x % tntdb::Decimal::MantissaType(100) + tntdb::Decimal::MantissaType(1);
-            right_number[right_number_length - 1] = (unsigned char)digit;
+            rightNumber[rightNumberLength - 1] = (unsigned char)digit;
             while ((x /= tntdb::Decimal::MantissaType(100)) != 0)
             {
               digit = x % tntdb::Decimal::MantissaType(100) + 1;
-              right_number[right_number_length - (1 + no_base_one_hundred_digits)] = (unsigned char)digit;
-              no_base_one_hundred_digits += 1;
+              rightNumber[rightNumberLength - (1 + noBaseOneHundredDigits)] = (unsigned char)digit;
+              noBaseOneHundredDigits += 1;
             }
-            vnum[0] = (unsigned char)(no_base_one_hundred_digits + 1);
-            tntdb::Decimal::ExponentType exponent_base = 64 + base_one_hundred_exponent + no_base_one_hundred_digits;
+            vnum[0] = (unsigned char)(noBaseOneHundredDigits + 1);
+            tntdb::Decimal::ExponentType exponent_base = 64 + baseOneHundredExponent + noBaseOneHundredDigits;
             vnum[1] = (unsigned char)(0x80 + exponent_base);
-            memcpy(&vnum[2], &right_number[right_number_length - no_base_one_hundred_digits], no_base_one_hundred_digits);
+            memcpy(&vnum[2], &rightNumber[rightNumberLength - noBaseOneHundredDigits], noBaseOneHundredDigits);
           }
           else
           {
             tntdb::Decimal::MantissaType digit = tntdb::Decimal::MantissaType(101) - (x % tntdb::Decimal::MantissaType(100));
-            right_number[right_number_length - 1] = (unsigned char)digit;
+            rightNumber[rightNumberLength - 1] = (unsigned char)digit;
             while ((x /= tntdb::Decimal::MantissaType(100)) != 0)
             {
               digit = tntdb::Decimal::MantissaType(101) - (x % tntdb::Decimal::MantissaType(100));
-              right_number[right_number_length - (1 + no_base_one_hundred_digits)] = (unsigned char)digit;
-              no_base_one_hundred_digits += 1;
+              rightNumber[rightNumberLength - (1 + noBaseOneHundredDigits)] = (unsigned char)digit;
+              noBaseOneHundredDigits += 1;
             } 
-            memcpy(&vnum[2], &right_number[right_number_length - no_base_one_hundred_digits], no_base_one_hundred_digits);
-            tntdb::Decimal::ExponentType exponent_base = (63 - no_base_one_hundred_digits) + base_one_hundred_exponent;
+            memcpy(&vnum[2], &rightNumber[rightNumberLength - noBaseOneHundredDigits], noBaseOneHundredDigits);
+            tntdb::Decimal::ExponentType exponent_base = (63 - noBaseOneHundredDigits) + baseOneHundredExponent;
             vnum[1] = (unsigned char)exponent_base;
-            if (no_base_one_hundred_digits < 20)
+            if (noBaseOneHundredDigits < 20)
             {
-              vnum[0] = (unsigned char)(no_base_one_hundred_digits + 2);
-              vnum[2 + no_base_one_hundred_digits] = (unsigned char)102;
+              vnum[0] = (unsigned char)(noBaseOneHundredDigits + 2);
+              vnum[2 + noBaseOneHundredDigits] = (unsigned char)102;
             }
             else
             {
-              vnum[0] = (unsigned char)(no_base_one_hundred_digits + 1);
+              vnum[0] = (unsigned char)(noBaseOneHundredDigits + 1);
             }
           }
         }
@@ -110,7 +110,7 @@ namespace tntdb
       // Negative infinity is represented by 0x00, and positive infinity is represented by the two bytes 0xFF65
       bool positive = vnum[1] & 0x80;
       bool infinity = false;
-      tntdb::Decimal::ExponentType base_one_hundred_exponent = vnum[1] & 0x7f;
+      tntdb::Decimal::ExponentType baseOneHundredExponent = vnum[1] & 0x7f;
       tntdb::Decimal::MantissaType mantissa = 0;
       int length = vnum[0];
       if (length > OCI_NUMBER_SIZE)
@@ -133,7 +133,7 @@ namespace tntdb
         if (positive)
         {
           mantissa = tntdb::Decimal::MantissaType(vnum[2] - 1);
-          if ((length == 2) && (base_one_hundred_exponent == 0x7f) && (mantissa == 0x64))
+          if ((length == 2) && (baseOneHundredExponent == 0x7f) && (mantissa == 0x64))
           {
             // Positive infinity is represented by the two bytes 0xff65.
             mantissa = ~tntdb::Decimal::MantissaType(0);
@@ -142,7 +142,7 @@ namespace tntdb
           else
           {
             infinity = false;
-            base_one_hundred_exponent -= (65 + length - 2);
+            baseOneHundredExponent -= (65 + length - 2);
             for (int i = 3; i <= length; ++i)
             {
               mantissa = (mantissa * tntdb::Decimal::MantissaType(100)) + tntdb::Decimal::MantissaType(vnum[i] - 1);
@@ -151,7 +151,7 @@ namespace tntdb
         }
         else
         {
-          base_one_hundred_exponent =  -(base_one_hundred_exponent - 64) - (length - 1);
+          baseOneHundredExponent =  -(baseOneHundredExponent - 64) - (length - 1);
           mantissa = tntdb::Decimal::MantissaType(101 - vnum[2]);
           if (length < OCI_NUMBER_SIZE)
             --length;  // ignore terminator byte value of 102 decimal for negative numbers with less than 20 base 100 mantissa digits.
@@ -166,7 +166,7 @@ namespace tntdb
         flags |= tntdb::Decimal::positive;
       if (infinity)
         flags |= tntdb::Decimal::infinity;
-      Decimal decimal(mantissa, base_one_hundred_exponent * 2, flags, tntdb::Decimal::infinityTilde);
+      Decimal decimal(mantissa, baseOneHundredExponent * 2, flags, tntdb::Decimal::infinityTilde);
       return decimal;
     }
   };

@@ -248,7 +248,37 @@ namespace tntdb
     /// @return true if overflow detected, else false;
     template <typename T>
     static bool overflowDetectedInUnsignedMultiplyByTen(T &n);
+    
+    /// Divide an unsigned integer type by a power of 10 divisor, checking
+    /// for overflow.
+    /// @param dividend the unsigned integer dividend.
+    /// @param quotient the result of the division by the power of 10 divisor.
+    /// @param remainder the remainder result of the division by the power of 10 divisor.
+    /// @param divisorPowerOfTenDigits divide by 10^divisorPowerOfTenDigits.
+    /// @return true if overflow detected, else false;
+    template <typename ManType>
+    static void unsignedDivideByPowerOfTen(const ManType dividend,
+                                           ManType &quotient,
+                                           ManType &remainder,
+                                           ManType divisorPowerOfTenDigits) throw(std::overflow_error);
   };
+  
+  template <typename T>
+  bool Decimal::overflowDetectedInUnsignedMultiplyByTen(T &n)
+  {
+    bool overflowDetected = false;
+    T nTimes2 = n << 1;
+    T nTimes4 = n << 2;
+    T nTimes8 = n << 3;
+    T nTimes10 = (nTimes2 + nTimes8);
+    if ((nTimes2 < n) || (nTimes4 < nTimes2) || (nTimes8 < nTimes4) || (nTimes10 < nTimes8))
+      overflowDetected = true;
+    else
+    {
+      n = nTimes10;
+    }
+    return overflowDetected;
+  }
 
   template <typename IntegerType> 
   IntegerType Decimal::numberOfDigits(IntegerType n) const
@@ -258,11 +288,76 @@ namespace tntdb
     IntegerType abs = n;
     if (n < 0)
       abs = -n;
-    for (; abs > multiplier; ++noDigits)
+    bool overflowDetected = false;
+    for (; !overflowDetected && (abs > multiplier); ++noDigits)
     {
-      multiplier *= IntegerType(Base);
+      overflowDetected = Decimal::overflowDetectedInUnsignedMultiplyByTen(multiplier);
     }
     return noDigits;
+  }
+  
+  template <typename ManType>
+  void Decimal::unsignedDivideByPowerOfTen(const ManType dividend,
+                                           ManType &quotient,
+                                           ManType &remainder,
+                                           ManType divisorPowerOfTenDigits) throw(std::overflow_error)
+  {
+    ManType divisorExponentPowerOfTenDigitsRemaining = divisorPowerOfTenDigits;
+    // If the divisorPowerOfTenDigits is larger than
+    // maxDivisorDigits, then do 2 (or more if required) divides
+    // to avoid unsigned integer overflow in the multiplication calculating
+    // the divisor.
+    const ManType maxDivisorDigits = 19;
+    ManType exponentDivisor = ManType(Base);
+    ManType previousExponentDivisor = ManType(1);
+    bool overflowDetected = false;
+    if (divisorExponentPowerOfTenDigitsRemaining > maxDivisorDigits)
+    {
+      // The first divide is to make divisorExponentPowerOfTenDigitsRemaining an even multiple of
+      // maxDivisorDigits.
+      ManType divideChunksRemaining = divisorExponentPowerOfTenDigitsRemaining / maxDivisorDigits;
+      ManType firstDivideDigits = divisorExponentPowerOfTenDigitsRemaining % maxDivisorDigits;
+      for (int i = 1; (i < firstDivideDigits) && !overflowDetected; ++i)
+      {
+        previousExponentDivisor = exponentDivisor;
+        overflowDetected = overflowDetectedInUnsignedMultiplyByTen(exponentDivisor);
+      }
+      if (overflowDetected)
+        throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::unsignedDivideByPowerOfTen()"));
+      quotient = ManType(dividend) / exponentDivisor;
+      divisorExponentPowerOfTenDigitsRemaining -= firstDivideDigits;
+      --divideChunksRemaining;
+      exponentDivisor = ManType(Base);
+      // If divisorExponentPowerOfTenDigitsRemaining is still larger than maxDivisorDigits,
+      // then do more divides until it is equal to maxDivisorDigits.
+      if (divideChunksRemaining > 1)
+      {
+        // Calculate the 10^maxDivisorDigits divisor
+        for (int i = 1; (i < maxDivisorDigits) && !overflowDetected; ++i)
+        {
+          previousExponentDivisor = exponentDivisor;
+          overflowDetected = overflowDetectedInUnsignedMultiplyByTen(exponentDivisor);
+        }
+        if (overflowDetected)
+          throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::unsignedDivideByPowerOfTen()"));
+        // Do all but the last divide
+        while (divideChunksRemaining > 1)
+        {
+          quotient = ManType(dividend) / exponentDivisor;
+          --divideChunksRemaining;
+        }
+        exponentDivisor = ManType(Base);
+      }
+    }
+    for (int i = 1; (i < divisorExponentPowerOfTenDigitsRemaining) && !overflowDetected; ++i)
+    {
+      previousExponentDivisor = exponentDivisor;
+      overflowDetected = overflowDetectedInUnsignedMultiplyByTen(exponentDivisor);
+    }
+    if (overflowDetected)
+      throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::unsignedDivideByPowerOfTen()"));
+    quotient = ManType(dividend) / exponentDivisor;
+    remainder = ManType(dividend) % exponentDivisor;
   }
   
   template <typename ManType>
@@ -280,7 +375,7 @@ namespace tntdb
       {
         ManType previousIntegralPart = ManType(0);
         bool overflowDetected = false;
-        for (int i = 0; (i < optionalUserSpecifiedExponentOffset) && (integralPart > previousIntegralPart); ++i)
+        for (int i = 0; (i < optionalUserSpecifiedExponentOffset) && !overflowDetected; ++i)
         {
           previousIntegralPart = integralPart;
           overflowDetected = overflowDetectedInUnsignedMultiplyByTen(integralPart);
@@ -290,18 +385,8 @@ namespace tntdb
       }
       else
       {
-        ExponentType absOptionalUserSpecifiedExponentOffset = -optionalUserSpecifiedExponentOffset;
-        ManType exponentDivisor = ManType(Base);
-        ManType previousExponentDivisor = ManType(1);
-        for (int i = 1; (i < absOptionalUserSpecifiedExponentOffset) && (exponentDivisor > previousExponentDivisor); ++i)
-        {
-          previousExponentDivisor = exponentDivisor;
-          exponentDivisor *= ManType(Base);
-        }
-        if (exponentDivisor <= previousExponentDivisor)
-          throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::getIntegralFractionalExponent()"));
-        integralPart = ManType(mantissa) / exponentDivisor;
-        fractionalPart = ManType(mantissa) % exponentDivisor;
+        ManType absOptionalUserSpecifiedExponentOffset = ManType(-optionalUserSpecifiedExponentOffset);
+        Decimal::unsignedDivideByPowerOfTen(ManType(mantissa), integralPart, fractionalPart, absOptionalUserSpecifiedExponentOffset);
       }
     }
     // if positive, or ManType is an unsigned integer type
@@ -359,6 +444,15 @@ namespace tntdb
 
     // default is roundingAlgorithm = truncate
     return ((flags & positive) || (IntegerType(-1) > IntegerType(0))) ? quotient : -quotient;
+  }
+
+  template <>
+  inline bool Decimal::getInteger(RoundingAlgorithmType roundingAlgorithm) const throw(std::overflow_error)
+  {
+    if ((flags & (infinity | NaN)) || (mantissa != 0))
+      return true;
+    else
+      return false;
   }
   
   template <typename FloatingPointType>
@@ -427,23 +521,6 @@ namespace tntdb
     std::string numStr(ostr.str());
     std::istringstream istr(numStr);
     read(istr, true);
-  }
-
-  template <typename T>
-  bool Decimal::overflowDetectedInUnsignedMultiplyByTen(T &n)
-  {
-    bool overflowDetected = false;
-    T nTimes2 = n << 1;
-    T nTimes4 = n << 2;
-    T nTimes8 = n << 3;
-    T nTimes10 = (nTimes2 + nTimes8);
-    if ((nTimes2 < n) || (nTimes4 < nTimes2) || (nTimes8 < nTimes4) || (nTimes10 < nTimes8))
-      overflowDetected = true;
-    else
-    {
-      n = nTimes10;
-    }
-    return overflowDetected;
   }
   
   /// Print this Decimal number.  If out.precision() != 0, then this

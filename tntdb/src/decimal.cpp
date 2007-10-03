@@ -22,36 +22,36 @@
 
 namespace tntdb
 {
-  Decimal::Decimal() :
-    mantissa(0),
-    exponent(0),
-    flags(positive),
-    defaultPrintFlags(infinityShort)
+  Decimal::Decimal()
+    : mantissa(0),
+      exponent(0),
+      flags(positive),
+      defaultPrintFlags(infinityShort)
   {
   }
 
-  Decimal::Decimal(double value) :
-    mantissa(0),
-    exponent(0),
-    flags(positive),
-    defaultPrintFlags(infinityShort)
+  Decimal::Decimal(double value)
+    : mantissa(0),
+      exponent(0),
+      flags(positive),
+      defaultPrintFlags(infinityShort)
   {
     setDouble(value);
   }
 
-  Decimal::Decimal(int64_t man, ExponentType exp) :
-    mantissa(MantissaType(man >= int64_t(0) ? man : -man)),
-    exponent(exp),
-    flags(man >=int64_t(0) ? positive : 0),
-    defaultPrintFlags(infinityShort)
+  Decimal::Decimal(int64_t man, ExponentType exp)
+    : mantissa(MantissaType(man >= int64_t(0) ? man : -man)),
+      exponent(exp),
+      flags(man >=int64_t(0) ? positive : 0),
+      defaultPrintFlags(infinityShort)
   {
   }
   
-  Decimal::Decimal(MantissaType man, ExponentType exp, FlagsType f, PrintFlagsType pf) :
-    mantissa(man),
-    exponent(exp),
-    flags(f),
-    defaultPrintFlags(pf)
+  Decimal::Decimal(MantissaType man, ExponentType exp, FlagsType f, PrintFlagsType pf)
+    : mantissa(man),
+      exponent(exp),
+      flags(f),
+      defaultPrintFlags(pf)
   {
   }
 
@@ -219,20 +219,24 @@ namespace tntdb
                                                       exp,
                                                       ExponentType(exponentOffset));
           out << std::noshowpos << integral;
-          if (fracDigits > 0)
+          if ((fracDigits > 0) && (precisionFracDigits > 0))
           {
             if (fracDigits > precisionFracDigits)
             {
-              MantissaType fracDivisor = MantissaType(Base);
+              MantissaType precisionFractional = 0;
+              MantissaType precisionFractionalRemainder = 0;
+              MantissaType precisionFractionalDivisorDigits = MantissaType(fracDigits - precisionFracDigits);
+              Decimal::unsignedDivideByPowerOfTen(fractional,
+                                                  precisionFractional,
+                                                  precisionFractionalRemainder,
+                                                  precisionFractionalDivisorDigits);
               MantissaType oneHalf = MantissaType(Base / 2);
-              for (int j = 1; j < fracDigits - precisionFracDigits; ++j)
+              bool overflowDetected = false;
+              for (int j = 0; !overflowDetected && (j < precisionFractionalDivisorDigits - 1); ++j)
               {
-                fracDivisor *= MantissaType(Base);
-                oneHalf *= MantissaType(Base);
+                overflowDetected = Decimal::overflowDetectedInUnsignedMultiplyByTen(oneHalf);
               }
-              MantissaType precisionFractional = fractional / fracDivisor;
-              MantissaType precisionFractionalRemainder = fractional % fracDivisor;
-              if (precisionFractionalRemainder >= oneHalf)
+              if (!overflowDetected && (oneHalf > 0) && (precisionFractionalRemainder >= oneHalf))
                 ++precisionFractional;
               Decimal::printFraction(out, precisionFracDigits, precisionFractional);
             }
