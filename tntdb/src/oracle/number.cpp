@@ -111,6 +111,7 @@ namespace tntdb
       bool positive = vnum[1] & 0x80;
       bool infinity = false;
       tntdb::Decimal::ExponentType baseOneHundredExponent = vnum[1] & 0x7f;
+      tntdb::Decimal::ExponentType baseOneHundredExponentOverflowOffset = 0;
       tntdb::Decimal::MantissaType mantissa = 0;
       int length = vnum[0];
       if (length > OCI_NUMBER_SIZE)
@@ -142,22 +143,46 @@ namespace tntdb
           else
           {
             infinity = false;
+            bool overflowDetected = false;
             baseOneHundredExponent -= (65 + length - 2);
-            for (int i = 3; i <= length; ++i)
+            for (int i = 3; (i <= length) && !overflowDetected; ++i)
             {
-              mantissa = (mantissa * tntdb::Decimal::MantissaType(100)) + tntdb::Decimal::MantissaType(vnum[i] - 1);
+              tntdb::Decimal::MantissaType previousMantissa = mantissa;
+              // Multiply by 100, checking for overflow
+              overflowDetected = Decimal::overflowDetectedInMultiplyByTen(mantissa) ||
+                Decimal::overflowDetectedInMultiplyByTen(mantissa);
+              tntdb::Decimal::MantissaType mantissaTimes100 = mantissa;
+              mantissa += tntdb::Decimal::MantissaType(vnum[i] - 1);
+              overflowDetected = overflowDetected || (mantissa < mantissaTimes100);
+              if (overflowDetected)
+              {
+                mantissa = previousMantissa;
+                baseOneHundredExponentOverflowOffset = length + 1 - i;
+              }
             }
           }
         }
         else
         {
+          bool overflowDetected = false;
           baseOneHundredExponent =  -(baseOneHundredExponent - 64) - (length - 1);
           mantissa = tntdb::Decimal::MantissaType(101 - vnum[2]);
           if (length < OCI_NUMBER_SIZE)
             --length;  // ignore terminator byte value of 102 decimal for negative numbers with less than 20 base 100 mantissa digits.
-          for (int i = 3; i <= length; ++i)
+          for (int i = 3; (i <= length) && !overflowDetected; ++i)
           {
-            mantissa = (mantissa  * tntdb::Decimal::MantissaType(100)) + tntdb::Decimal::MantissaType(101 - vnum[i]);
+            tntdb::Decimal::MantissaType previousMantissa = mantissa;
+            // Multiply by 100, checking for overflow
+            overflowDetected = Decimal::overflowDetectedInMultiplyByTen(mantissa) ||
+              Decimal::overflowDetectedInMultiplyByTen(mantissa);
+            tntdb::Decimal::MantissaType mantissaTimes100 = mantissa;
+            mantissa += tntdb::Decimal::MantissaType(101 - vnum[i]);
+            overflowDetected = overflowDetected || (mantissa < mantissaTimes100);
+            if (overflowDetected)
+            {
+              mantissa = previousMantissa;
+              baseOneHundredExponentOverflowOffset = length + 1 - i;
+            }
           }
         }
       }
@@ -166,7 +191,7 @@ namespace tntdb
         flags |= tntdb::Decimal::positive;
       if (infinity)
         flags |= tntdb::Decimal::infinity;
-      Decimal decimal(mantissa, baseOneHundredExponent * 2, flags, tntdb::Decimal::infinityTilde);
+      Decimal decimal(mantissa, (baseOneHundredExponent + baseOneHundredExponentOverflowOffset) * 2, flags, tntdb::Decimal::infinityTilde);
       return decimal;
     }
   };

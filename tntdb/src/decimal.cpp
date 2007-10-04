@@ -226,15 +226,15 @@ namespace tntdb
               MantissaType precisionFractional = 0;
               MantissaType precisionFractionalRemainder = 0;
               MantissaType precisionFractionalDivisorDigits = MantissaType(fracDigits - precisionFracDigits);
-              Decimal::unsignedDivideByPowerOfTen(fractional,
-                                                  precisionFractional,
-                                                  precisionFractionalRemainder,
-                                                  precisionFractionalDivisorDigits);
+              Decimal::divideByPowerOfTen(fractional,
+                                          precisionFractional,
+                                          precisionFractionalRemainder,
+                                          precisionFractionalDivisorDigits);
               MantissaType oneHalf = MantissaType(Base / 2);
               bool overflowDetected = false;
               for (int j = 0; !overflowDetected && (j < precisionFractionalDivisorDigits - 1); ++j)
               {
-                overflowDetected = Decimal::overflowDetectedInUnsignedMultiplyByTen(oneHalf);
+                overflowDetected = Decimal::overflowDetectedInMultiplyByTen(oneHalf);
               }
               if (!overflowDetected && (oneHalf > 0) && (precisionFractionalRemainder >= oneHalf))
                 ++precisionFractional;
@@ -379,7 +379,7 @@ namespace tntdb
                 case '8':
                 case '9':
                   previousMan = man;
-                  if (Decimal::overflowDetectedInUnsignedMultiplyByTen(man) ||
+                  if (Decimal::overflowDetectedInMultiplyByTen(man) ||
                       ((man += (c - '0')) < previousMan))
                   {
                     // overflow detected
@@ -413,7 +413,7 @@ namespace tntdb
                 case '8':
                 case '9':
                   previousMan = man;
-                  if (Decimal::overflowDetectedInUnsignedMultiplyByTen(man) ||
+                  if (Decimal::overflowDetectedInMultiplyByTen(man) ||
                       ((man += (c - '0')) < previousMan))
                   {
                     // overflow detected
@@ -478,7 +478,7 @@ namespace tntdb
                 case '8':
                 case '9':
                   previousAbsExp = absExp;
-                  if (Decimal::overflowDetectedInUnsignedMultiplyByTen(absExp) ||
+                  if (Decimal::overflowDetectedInMultiplyByTen(absExp) ||
                       ((absExp += (c - '0')) < previousAbsExp))
                   {
                     // overflow detected

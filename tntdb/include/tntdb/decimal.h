@@ -27,7 +27,16 @@
 namespace tntdb
 {
   /**
-   * This class holds a decimal number.
+   * This class holds a decimal floating point number.  It is necessary to
+   * convert it to some other type to perform arithmetic and other operations.
+   * Decimal is implemented with a 64 bit unsigned integer mantissa, and a
+   * 32 bit exponent.  For conversions from integer types, strings, and reading
+   * from the database, Decimal tries to maintain accuracy if the result will
+   * fit in the 64 bit unsigned mantissa and exponent.  When converting to
+   * integer types, Decimal will throw std::overflow exception if the result
+   * will not fit.  For converting to binary floating point numbers, binary
+   * floating point is used in the conversion, and the result is an
+   * approximation.
    */
   class Decimal
   {
@@ -37,25 +46,28 @@ namespace tntdb
     typedef int8_t FlagsType;
     typedef int8_t PrintFlagsType;
     enum { Base = 10 };
+    /// Flags used for denoting positive or negative, infinity and not a number.
     enum
     {
-      positive = 0x01,
-      infinity = 0x02,
-      negativeInfinity = infinity,
-      positiveInfinity = infinity | positive,
-      NaN = 0x04
+      positive = 0x01,                          ///< Set if this Decimal is positive, else this Decimal is negative.
+      infinity = 0x02,                          ///< Set if this Decimal is positive or negative infinity.
+      negativeInfinity = infinity,              ///< Negative infinity.
+      positiveInfinity = infinity | positive,   ///< Positive infinity.
+      NaN = 0x04                                ///< Not a Number.
     };
-    enum
+    /// How infinity is printed on output.
+    enum InfinityOutputType
     {
-      infinityShort,   // Affects output only, print Inf or -Inf.
-      infinityLong,    // Affects output only, print Infinity or -Infinity instead of Inf or -Inf.
-      infinityTilde    // Affects output only, print ~ or -~ (as used in Oracle) instead of Inf or -Inf.
-    };  
+      infinityShort,   ///< Affects output only, print Inf or -Inf.
+      infinityLong,    ///< Affects output only, print Infinity or -Infinity instead of Inf or -Inf.
+      infinityTilde    ///< Affects output only, print ~ or -~ (as used in Oracle) instead of Inf or -Inf.
+    };
+    /// Rounding algorithm.
     enum RoundingAlgorithmType
     {
-      truncate,
-      round,
-      bankersRound
+      truncate,        ///< 1.1, 1.5, and 1.6 and all rounded down to 1.0.
+      round,           ///< 1.1 is rounded down to 1.0, 1.5, and 1.6 are rounded up to 2.0.
+      bankersRound     ///< 1.1 and 1.5 are rounded down to 1.0, 1.6 is rounded up to 2.0.
     };
   private:
     MantissaType mantissa;
@@ -67,43 +79,67 @@ namespace tntdb
     /// Initializes the Decimal-object with empty values.
     Decimal();
     /// Initializes the Decimal-object with the given double value.
+    /// @param value double to initialize it with.
     explicit Decimal(double value);
 
+    /// Initialize this Decimal-object with the given decimal mantissa and exponent.
+    /// @param man integer decimal mantissa value to set this Decimal number to.
+    /// @param exp integer base 10 exponent to set this Decimal number to.
     Decimal(int64_t man, ExponentType exp);
     
     /// Initializes the Decimal-object with the given MantissaType mantissa
     /// and ExponentType exponent
+    /// @param man integer decimal mantissa value to set this Decimal number to.
+    /// @param exp integer base 10 exponent to set this Decimal number to.
+    /// @param f the flags, need to specify positive or negative. @link Decimal::FlagsType @endlink
+    /// @param pf the print flags for infinity and not a number. @link Decimal::InfinityOutputType @endlink
     Decimal(MantissaType man, ExponentType exp, FlagsType f, PrintFlagsType pf = infinityShort);
     /// Return the decimal mantissa.
+    /// @return the decimal mantissa.
     MantissaType getMantissa() const;
     /// Return the base 10 exponent.
+    /// @return the base 10 exponent.
     ExponentType getExponent() const;
 
-    /// Return true if this Decimal number is positive, else return false.
+    /// Is this Decimal number positive?
+    /// @return true if this Decimal number is positive, else return false.
     bool isPositive() const
       { return flags & positive; }
-    
-    /// Return true if this Decimal number is either positive or negative
+
+    /// Is this Decimal number positive or negative infinity?
+    /// @return true if this Decimal number is either positive or negative
     /// infinity, else return false.
     bool isInfinity() const;
 
-    /// If postitiveInfinity is true, then return true if this
+    /// Is this Decimal number positive or negative infinity?
+    /// @param positiveInfinity 
+    /// @return If postitiveInfinity is true, then return true if this
     /// Decimal number is postitive infinity.
     /// Else if postitiveInfinity is false, then return true if this
     /// Decimal number is negative infinity.
     /// Else return false.
     bool isInfinity(bool positiveInfinity) const;
-    
-    /// Return true if this Decimal number is Not a Number.
+
+    /// Is this Decimal not a number?
+    /// @return true if this Decimal number is Not a Number.
     /// Else return false.
     bool isNaN() const;
-    
-    /// Return true if this Number object is zero, else return false;
+
+    /// Is this Decimal number zero?
+    /// @return true if this Number object is zero, else return false.
     bool isZero() const;
       
     /// Split this decimal number into integral part, fractional
     /// and exponent parts.  An optional user specified exponent
     /// offset can be used to first scale the decimal number.
+    /// @param integral the part of the decimal floating point
+    /// number to the left of the decimal point.
+    /// @param fractional the part to the decimal floating point
+    /// number to the right of the decimal point.
+    /// @param ex the exponent of the decimal floating point number
+    /// @param optionalUserSpecifiedExponentOffset optional user
+    /// specified exponent offset can be used to first scale the decimal number.
+    /// @throw std::overflow_error if the result will not fit
     template <typename ManType>
     void getIntegralFractionalExponent(ManType &integral,
                                        ManType &fractional,
@@ -115,111 +151,153 @@ namespace tntdb
     IntegerType numberOfDigits(IntegerType n) const;
     
     /// Return this number as a C++ integer type.
+    /// @param roundingAlgorithm @link Decimal::RoundingAlgorithmType @endlink
+    /// @return integer result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
     template <typename IntegerType>
     IntegerType getInteger(RoundingAlgorithmType roundingAlgorithm = round) const throw(std::overflow_error);
 
     /// Return this number as a C++ floating point type.
+    /// @return binary floating point result, which is computed
+    /// with binary floating point arithmetic, and hence is an approximation.
     template <typename FloatingPointType>
     FloatingPointType getFloatingPoint() const;
 
-    /// Return this number as a C++ int.
+    /// Return this decimal number rounded as a C++ int.
+    /// @return int result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
     int getInt() const throw(std::overflow_error)
       { return getInteger<int>(); }
 
-    /// Return this number as a C++ int32_t.
+    /// Return this decimal number rounded as a C++ int32_t.
+    /// @return int32_t result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
     int32_t getInt32() const throw(std::overflow_error)
       { return getInteger<int32_t>(); }
       
-    /// Return this number as a C++ unsigned.
+    /// Return this decimal number rounded as a C++ unsigned.
+    /// @return unsigned result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
     unsigned getUnsigned() const throw(std::overflow_error)
       { return getInteger<unsigned>(); }
 
-    /// Return this number as a C++ uint32_t.
+    /// Return this decimal number rounded as a C++ uint32_t.
+    /// @return uint32_t result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
     uint32_t getUnsigned32() const throw(std::overflow_error)
       { return getInteger<uint32_t>(); }
 
-    /// Return this number as a C++ int64_t.
+    /// Return this decimal number rounded as a C++ int64_t.
+    /// @return int64_t result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
     int64_t getInt64() const throw(std::overflow_error)
       { return getInteger<int64_t>(); }
 
-    /// Return this number as a C++ uint64_t.
+    /// Return this decimal number rounded as a C++ uint64_t.
+    /// @return uint64_t number, if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
     uint64_t getUnsigned64() const throw(std::overflow_error)
       { return getInteger<uint64_t>(); }
     
     /// Convert to a C++ float.
+    /// @return float result, which is computed with binary floating point
+    /// arithmetic, and hence is an approximation.
     float getFloat() const
       { return getFloatingPoint<float>(); }
 
     /// Convert to a C++ double.
+    /// @return double result, which is computed with binary floating point
+    /// arithmetic, and hence is an approximation.
     double getDouble() const
       { return getFloatingPoint<double>(); }
 
     /// Set this this tntdb::Decimal object to the value of the given
     /// integer type.
+    /// @param num integer value to set this Decimal number to.
     template <typename IntegerType>
     void setInteger(IntegerType num);
 
     /// Set this this tntdb::Decimal object to the value of the given
     /// floating point type.
+    /// @param num floating point value to set this Decimal number to.
     template <typename FloatingPointType>
     void setFloatingPoint(FloatingPointType num);
     
     /// Set this this tntdb::Decimal object to the value of the given
     /// integer type mantissa and base 10 exponent.
+    /// @param num integer decimal mantissa value to set this Decimal number to.
+    /// @param exponent integer base 10 exponent to set this Decimal number to.
     template <typename IntegerType>
     void setDecimalInteger(IntegerType num, int32_t exponent);
       
     /// Set this this tntdb::Decimal object to the value of the given int.
+    /// @param num integer value to set this Decimal number to.
     void setInt(int num)
       { setInteger<int>(num); }
 
     /// Set this this tntdb::Decimal object to the value of the given int32_t.
+    /// @param num integer value to set this Decimal number to.
     void setInt32(int32_t num)
       { setInteger<int32_t>(num); }
       
     /// Set this this tntdb::Decimal object to the value of the given unsigned.
+    /// @param num integer value to set this Decimal number to.
     void setUnsigned(unsigned num)
       { setInteger<unsigned>(num); }
 
     /// Set this this tntdb::Decimal object to the value of the given uint32_t.
+    /// @param num integer value to set this Decimal number to.
     void setUnsigned32(uint32_t num)
       { setInteger<uint32_t>(num); }
 
     /// Set this this tntdb::Decimal object to the value of the given int64_t.
+    /// @param num integer value to set this Decimal number to.
     void setInt64(int64_t num)
       { setInteger<int64_t>(num); }
 
     /// Set this this tntdb::Decimal object to the value of the given uint64_t.
+    /// @param num integer value to set this Decimal number to.
     void setUnsigned64(uint64_t num)
       { setInteger<int64_t>(num); }
 
-    /// Set this this tntdb::Decimal object to the value of the given int64_t.
+    /// Set this this tntdb::Decimal object to the value of the given int64_t
+    /// decimal mantissa and base 10 exponent.
+    /// @param num decimal mantissa integer value to set this Decimal number to.
+    /// @param exp base 10 exponent.
     void setDecimalInt64(int64_t num, int32_t exp)
       { setDecimalInteger<int64_t>(num, exp); }
 
-    /// Set this this tntdb::Decimal object to the value of the given uint64_t.
+    /// Set this this tntdb::Decimal object to the value of the given uint64_t
+    /// decimal mantissa and base 10 exponent.
+    /// @param num decimal mantissa integer value to set this Decimal number to.
+    /// @param exp base 10 exponent.
     void setDecimalUnsigned64(uint64_t num, int32_t exp)
       { setDecimalInteger<int64_t>(num, exp); }
 
     /// Set this this tntdb::Decimal object to the value of the given float.
+    /// @param num float value to set this Decimal number to.
     void setFloat(float num)
       { setFloatingPoint<float>(num); }
 
     /// Set this this tntdb::Decimal object to the value of the given double.
+    /// @param num double value to set this Decimal number to.
     void setDouble(double num)
       { setFloatingPoint<double>(num); }
     
-    // Return this Decimal number as a string.
+    /// Return this Decimal number as a string.
+    /// @return string representation of this decimal number.
     std::string toString() const;
       
     /// Print this Decimal number.  If out.precision() != 0, then this
     /// decimal number is printed with out.precision() significant digits.
+    /// @param out output stream
     std::ostream &print(std::ostream &out) const;
 
-    /// Print this Decimal number, with optional printFlags which only affect
+    /// Print this Decimal number.  If out.precision() != 0, then
+    /// this decimal number is printed with out.precision() significant digits.
+    /// @param out output stream
+    /// @param printFlags the optional printFlags only affect
     /// how positive and negative infinity are printed.
-    /// If out.precision() != 0, then this decimal number is printed with
-    /// out.precision() significant digits.
     std::ostream &print(std::ostream &out, PrintFlagsType printFlags) const;
     
     /// Read a Decimal number.
@@ -235,36 +313,48 @@ namespace tntdb
     /// read(ostr.str(), true);
     std::istream &read(std::istream &in, bool ignoreOverflowReadingFraction = false);
 
-    void init(MantissaType m, ExponentType e, FlagsType f = positive, PrintFlagsType pf = infinityShort);
-
-  protected:
-    static void printFraction(std::ostream &out,
-                              ExponentType fracDigits,
-                              MantissaType fractional);
-
-    /// Multiply an unsigned integer type by 10, checking for overflow.
+    ///@name Low level arithmetic methods 
+    //\@{
+    /// Multiply an integer type by 10, checking for overflow.
     /// @param n on input: the number to multply by 10, on output, the
     /// result of the multiplication by 10.
-    /// @return true if overflow detected, else false;
+    /// @return true if overflow detected, else false.
     template <typename T>
-    static bool overflowDetectedInUnsignedMultiplyByTen(T &n);
-    
-    /// Divide an unsigned integer type by a power of 10 divisor, checking
+    static bool overflowDetectedInMultiplyByTen(T &n);
+
+    /// Divide an integer type by a power of 10 divisor, checking
     /// for overflow.
-    /// @param dividend the unsigned integer dividend.
+    /// @param dividend the integer dividend.
     /// @param quotient the result of the division by the power of 10 divisor.
     /// @param remainder the remainder result of the division by the power of 10 divisor.
     /// @param divisorPowerOfTenDigits divide by 10^divisorPowerOfTenDigits.
-    /// @return true if overflow detected, else false;
+    /// @return true if overflow detected, else false.
+    /// @throw std::overflow_error if the result will not fit
     template <typename ManType>
-    static void unsignedDivideByPowerOfTen(const ManType dividend,
-                                           ManType &quotient,
-                                           ManType &remainder,
-                                           ManType divisorPowerOfTenDigits) throw(std::overflow_error);
+    static void divideByPowerOfTen(const ManType dividend,
+                                   ManType &quotient,
+                                   ManType &remainder,
+                                   ManType divisorPowerOfTenDigits) throw(std::overflow_error);
+    //\@}
+  protected:    
+    ///@internal
+    //\@{
+    /// Initialize this Decimal number, called by the constructors.
+    /// @param m integer decimal mantissa value to set this Decimal number to.
+    /// @param e integer base 10 exponent to set this Decimal number to.
+    /// @param f the flags, need to specify positive or negative. @link Decimal::FlagsType @endlink
+    /// @param pf the print flags for infinity and not a number. @link Decimal::InfinityOutputType @endlink
+    void init(MantissaType m, ExponentType e, FlagsType f = positive, PrintFlagsType pf = infinityShort);
+
+    /// Print fraction
+    static void printFraction(std::ostream &out,
+                              ExponentType fracDigits,
+                              MantissaType fractional);
+    //\@}
   };
   
   template <typename T>
-  bool Decimal::overflowDetectedInUnsignedMultiplyByTen(T &n)
+  bool Decimal::overflowDetectedInMultiplyByTen(T &n)
   {
     bool overflowDetected = false;
     T nTimes2 = n << 1;
@@ -291,25 +381,29 @@ namespace tntdb
     bool overflowDetected = false;
     for (; !overflowDetected && (abs > multiplier); ++noDigits)
     {
-      overflowDetected = Decimal::overflowDetectedInUnsignedMultiplyByTen(multiplier);
+      overflowDetected = Decimal::overflowDetectedInMultiplyByTen(multiplier);
     }
     return noDigits;
   }
   
   template <typename ManType>
-  void Decimal::unsignedDivideByPowerOfTen(const ManType dividend,
-                                           ManType &quotient,
-                                           ManType &remainder,
-                                           ManType divisorPowerOfTenDigits) throw(std::overflow_error)
+  void Decimal::divideByPowerOfTen(const ManType dividend,
+                                   ManType &quotient,
+                                   ManType &remainder,
+                                   ManType divisorPowerOfTenDigits) throw(std::overflow_error)
   {
     ManType divisorExponentPowerOfTenDigitsRemaining = divisorPowerOfTenDigits;
     // If the divisorPowerOfTenDigits is larger than
     // maxDivisorDigits, then do 2 (or more if required) divides
-    // to avoid unsigned integer overflow in the multiplication calculating
-    // the divisor.
-    const ManType maxDivisorDigits = 19;
+    // to avoid integer overflow in the multiplication calculating
+    // the divisor.  The largest mulitple of 10 that can be stored in an
+    // unsigned 64 bit int is 10^19, signed 64 bit int is 10^18,
+    // 32 bit signed or unsigned int is 10^9, 16 bit signed or unsigned int
+    // is 10000, 8 bit signed or unsigned char is 100.
+    const ManType maxDivisorDigits = ((sizeof(ManType) >= 8) ? ((ManType(-1) > 0) ? 19 : 18) :
+                                      ((sizeof(ManType) == 4) ? 9 : ((sizeof(ManType) == 2) ? 4 : 2 )));
     ManType exponentDivisor = ManType(Base);
-    ManType previousExponentDivisor = ManType(1);
+    ManType previousExponentDivisor = ManType(Base);
     bool overflowDetected = false;
     if (divisorExponentPowerOfTenDigitsRemaining > maxDivisorDigits)
     {
@@ -320,31 +414,32 @@ namespace tntdb
       for (int i = 1; (i < firstDivideDigits) && !overflowDetected; ++i)
       {
         previousExponentDivisor = exponentDivisor;
-        overflowDetected = overflowDetectedInUnsignedMultiplyByTen(exponentDivisor);
+        overflowDetected = overflowDetectedInMultiplyByTen(exponentDivisor);
       }
       if (overflowDetected)
-        throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::unsignedDivideByPowerOfTen()"));
+        throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::divideByPowerOfTen()"));
       quotient = ManType(dividend) / exponentDivisor;
       divisorExponentPowerOfTenDigitsRemaining -= firstDivideDigits;
       --divideChunksRemaining;
       exponentDivisor = ManType(Base);
       // If divisorExponentPowerOfTenDigitsRemaining is still larger than maxDivisorDigits,
       // then do more divides until it is equal to maxDivisorDigits.
-      if (divideChunksRemaining > 1)
+      if (divideChunksRemaining > 0)
       {
         // Calculate the 10^maxDivisorDigits divisor
         for (int i = 1; (i < maxDivisorDigits) && !overflowDetected; ++i)
         {
           previousExponentDivisor = exponentDivisor;
-          overflowDetected = overflowDetectedInUnsignedMultiplyByTen(exponentDivisor);
+          overflowDetected = overflowDetectedInMultiplyByTen(exponentDivisor);
         }
         if (overflowDetected)
-          throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::unsignedDivideByPowerOfTen()"));
+          throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::divideByPowerOfTen()"));
         // Do all but the last divide
-        while (divideChunksRemaining > 1)
+        while (divideChunksRemaining > 0)
         {
           quotient = ManType(dividend) / exponentDivisor;
           --divideChunksRemaining;
+          divisorExponentPowerOfTenDigitsRemaining -= maxDivisorDigits;
         }
         exponentDivisor = ManType(Base);
       }
@@ -352,10 +447,10 @@ namespace tntdb
     for (int i = 1; (i < divisorExponentPowerOfTenDigitsRemaining) && !overflowDetected; ++i)
     {
       previousExponentDivisor = exponentDivisor;
-      overflowDetected = overflowDetectedInUnsignedMultiplyByTen(exponentDivisor);
+      overflowDetected = overflowDetectedInMultiplyByTen(exponentDivisor);
     }
     if (overflowDetected)
-      throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::unsignedDivideByPowerOfTen()"));
+      throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::divideByPowerOfTen()"));
     quotient = ManType(dividend) / exponentDivisor;
     remainder = ManType(dividend) % exponentDivisor;
   }
@@ -366,35 +461,50 @@ namespace tntdb
                                               ExponentType &ex,
                                               ExponentType optionalUserSpecifiedExponentOffset) const throw(std::overflow_error)
   {
-    ManType integralPart = mantissa;
-    ManType fractionalPart = ManType(0);
+    MantissaType integralPart = mantissa;
+    MantissaType fractionalPart = MantissaType(0);
     ExponentType exp = exponent - optionalUserSpecifiedExponentOffset;
     if ((optionalUserSpecifiedExponentOffset != 0) && (integralPart != 0))
     {
       if (optionalUserSpecifiedExponentOffset >= 0)
       {
-        ManType previousIntegralPart = ManType(0);
+        MantissaType previousIntegralPart = MantissaType(0);
         bool overflowDetected = false;
         for (int i = 0; (i < optionalUserSpecifiedExponentOffset) && !overflowDetected; ++i)
         {
           previousIntegralPart = integralPart;
-          overflowDetected = overflowDetectedInUnsignedMultiplyByTen(integralPart);
+          overflowDetected = overflowDetectedInMultiplyByTen(integralPart);
         }
         if (overflowDetected)
           throw std::overflow_error(std::string("integer multiply overflow detected in Decimal::getIntegralFractionalExponent()"));
       }
       else
       {
-        ManType absOptionalUserSpecifiedExponentOffset = ManType(-optionalUserSpecifiedExponentOffset);
-        Decimal::unsignedDivideByPowerOfTen(ManType(mantissa), integralPart, fractionalPart, absOptionalUserSpecifiedExponentOffset);
+        MantissaType absOptionalUserSpecifiedExponentOffset = MantissaType(-optionalUserSpecifiedExponentOffset);
+        Decimal::divideByPowerOfTen(mantissa, integralPart, fractionalPart, absOptionalUserSpecifiedExponentOffset);
       }
     }
+    ManType integralResult = 0;
     // if positive, or ManType is an unsigned integer type
-    if ((flags & positive) || (ManType(-1) > ManType(0)))
-      integral = integralPart;
+    if (flags & positive)
+    {
+      integralResult = ManType(integralPart);
+      // If the result is negative, or if the result after the cast
+      // is different, then throw an overflow_error exception.
+      if ((integralResult < 0) || (MantissaType(integralResult) != integralPart))
+        throw std::overflow_error(std::string("integer overflow detected in Decimal::getIntegralFractionalExponent()"));
+    }
     else
-      integral = -integralPart;
-    fractional = fractionalPart;
+    {
+      integralResult = -ManType(integralPart);
+      // If ManType is an unsigned integer type, or if the
+      // result is positive, or if the absolute value of the result
+      // after the cast is different, then throw an overflow_error exception.
+      if ((ManType(-1) > ManType(0)) || (integralResult > 0) || (MantissaType(-integralResult) != integralPart))
+        throw std::overflow_error(std::string("integer overflow detected in Decimal::getIntegralFractionalExponent()"));
+    }
+    integral = integralResult;
+    fractional = ManType(fractionalPart);
     ex = exp;
   }
   
@@ -404,6 +514,7 @@ namespace tntdb
     ExponentType exp = 0;
     IntegerType quotient = 0;
     IntegerType remainder = 0;
+    IntegerType result = 0;
     getIntegralFractionalExponent<IntegerType>(quotient,
                                                remainder,
                                                exp,
@@ -424,26 +535,29 @@ namespace tntdb
         // if positive, or IntegerType is an unsigned integer type
         if ((flags & positive) || (IntegerType(-1) > IntegerType(0)))
         {
-          return (remainder >= oneHalf) ? quotient + IntegerType(1) : quotient;
+          result = (remainder >= oneHalf) ? quotient + IntegerType(1) : quotient;
         }
         else
         {
-          return (remainder >= oneHalf) ? -(quotient + IntegerType(1)) : -quotient;
+          result = (remainder >= oneHalf) ? -(quotient + IntegerType(1)) : -quotient;
         }
 
       case bankersRound:
         if ((flags & positive) || (IntegerType(-1) > IntegerType(0)))
         {
-          return (remainder > oneHalf) ? quotient + IntegerType(1) : quotient;
+          result = (remainder > oneHalf) ? quotient + IntegerType(1) : quotient;
         }
         else
         {
-          return (remainder > oneHalf) ? -(quotient + IntegerType(1)) : -quotient;
+          result = (remainder > oneHalf) ? -(quotient + IntegerType(1)) : -quotient;
+        }
+      default:
+        {
+          // default is roundingAlgorithm = truncate
+          result = ((flags & positive) || (IntegerType(-1) > IntegerType(0))) ? quotient : -quotient;
         }
     }
-
-    // default is roundingAlgorithm = truncate
-    return ((flags & positive) || (IntegerType(-1) > IntegerType(0))) ? quotient : -quotient;
+    return result;
   }
 
   template <>

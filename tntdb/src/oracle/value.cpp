@@ -19,6 +19,7 @@
 #include <tntdb/oracle/value.h>
 #include <tntdb/oracle/statement.h>
 #include <tntdb/error.h>
+#include <tntdb/decimal.h>
 #include <sstream>
 #include <cxxtools/log.h>
 
@@ -205,7 +206,7 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().isZero();
+          return !number.getDecimal().isZero();
           
         default:
           return data[0] == 't' || data[0] == 'T'
