@@ -47,7 +47,7 @@ namespace tntdb
     typedef int8_t PrintFlagsType;
     enum { Base = 10 };
     /// Flags used for denoting positive or negative, infinity and not a number.
-    enum
+    enum FlagsTypeEnum
     {
       positive = 0x01,                          ///< Set if this Decimal is positive, else this Decimal is negative.
       infinity = 0x02,                          ///< Set if this Decimal is positive or negative infinity.
@@ -91,7 +91,7 @@ namespace tntdb
     /// and ExponentType exponent
     /// @param man integer decimal mantissa value to set this Decimal number to.
     /// @param exp integer base 10 exponent to set this Decimal number to.
-    /// @param f the flags, need to specify positive or negative. @link Decimal::FlagsType @endlink
+    /// @param f the flags, need to specify positive or negative. @link Decimal::FlagsTypeEnum @endlink
     /// @param pf the print flags for infinity and not a number. @link Decimal::InfinityOutputType @endlink
     Decimal(MantissaType man, ExponentType exp, FlagsType f, PrintFlagsType pf = infinityShort);
     /// Return the decimal mantissa.
@@ -342,7 +342,7 @@ namespace tntdb
     /// Initialize this Decimal number, called by the constructors.
     /// @param m integer decimal mantissa value to set this Decimal number to.
     /// @param e integer base 10 exponent to set this Decimal number to.
-    /// @param f the flags, need to specify positive or negative. @link Decimal::FlagsType @endlink
+    /// @param f the flags, need to specify positive or negative. @link Decimal::FlagsTypeEnum @endlink
     /// @param pf the print flags for infinity and not a number. @link Decimal::InfinityOutputType @endlink
     void init(MantissaType m, ExponentType e, FlagsType f = positive, PrintFlagsType pf = infinityShort);
 
