@@ -560,15 +560,6 @@ namespace tntdb
     return result;
   }
 
-  template <>
-  inline bool Decimal::getInteger(RoundingAlgorithmType roundingAlgorithm) const throw(std::overflow_error)
-  {
-    if ((flags & (infinity | NaN)) || (mantissa != 0))
-      return true;
-    else
-      return false;
-  }
-  
   template <typename FloatingPointType>
   FloatingPointType Decimal::getFloatingPoint() const
   {
