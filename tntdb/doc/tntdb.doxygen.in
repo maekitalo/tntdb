@@ -81,7 +81,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ../include/tntdb.h \
+INPUT                  = main.page \
+                         ../include/tntdb.h \
                          ../include/tntdb \
                          ../include/tntdb/bits
 FILE_PATTERNS          = *.c \

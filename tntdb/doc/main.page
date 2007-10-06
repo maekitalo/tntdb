@@ -1,0 +1,88 @@
+/** \mainpage Easy to use database abstraction layer
+
+\section intro Introduction
+
+Tntdb is database abstraction layer for C++.
+
+The goals are:
+ - easy and safe to use
+ - automatic resource management
+ - database independent
+ - thin layer for best performance
+ - no SQL-abstraction
+ - use modern C++ with exceptions and STL
+ - support for multithreaded applications
+
+A example, which lists the the content of a table:
+
+\code
+#include <iostream>
+#include <tntdb/connect.h>
+#include <tntdb/statement.h>
+#include <tntdb/row.h>
+
+int main(int argc, char* argv[])
+{
+  try
+  {
+    tntdb::Connection conn = tntdb::connect("sqlite:mydatabase.db");
+
+    tntdb::Statement stmt = conn.prepare(
+        "select FIRST_NAME, LAST_NAME"
+        "  from ADDRESS");
+
+    for (tntdb::Statement::const_iterator cur = stmt.begin();
+         cur != stmt.end(); ++cur)
+    {
+      tntdb::Row row = *cur;
+      std::cout << row[0].getString() << '\t' << row[1].getString() << std::endl;
+    }
+  }
+  catch (const std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
+}
+\endcode
+
+Example: modify data:
+
+\code
+#include <iostream>
+#include <tntdb/connect.h>
+#include <tntdb/statement.h>
+#include <tntdb/row.h>
+
+int main(int argc, char* argv[])
+{
+  try
+  {
+    tntdb::Connection conn = tntdb::connect("sqlite:mydatabase.db");
+
+    tntdb::Transaction trans;  // start a transaction here
+
+    tntdb::Statement stmt = conn.prepare(
+        "insert into ADDRESS (ID, FIRST_NAME, LAST_NAME)"
+        "  values (:id, :firstName, :lastName)");
+
+    stmt.set("id", 34)
+        .set("firstName", "Tommi")
+        .set("lastName", "Makitalo")
+        .execute();
+
+    stmt.set("id", 35)
+        .set("firstName", "Linus")
+        .set("lastName", "Torvalds")
+        .execute();
+
+    // if no explicit commit is executed, then rollback is done
+    trans.commit();
+  }
+  catch (const std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
+}
+\endcode
+
+*/

@@ -34,8 +34,10 @@ namespace tntdb
    * Examples:
    *
    * \code
-   *  tntdb::Connection myConn = tntdb::connect("mysql:db=DS2;user=web;passwd=web");
+   *  tntdb::Connection sqConn = tntdb::connect("sqlite:mydatabase.db");
    *  tntdb::Connection pgConn = tntdb::connect("postgresql:dbname=DS2 user=web passwd=web");
+   *  tntdb::Connection myConn = tntdb::connect("mysql:db=DS2;user=web;passwd=web");
+   *  tntdb::Connection orConn = tntdb::connect("oracle:XE;user=hr;passwd=hr");
    * \endcode
    */
   Connection connect(const std::string& url);
