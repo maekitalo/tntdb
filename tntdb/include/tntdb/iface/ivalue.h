@@ -19,7 +19,7 @@
 #ifndef TNTDB_IFACE_IVALUE_H
 #define TNTDB_IFACE_IVALUE_H
 
-#include <tntdb/refcounted.h>
+#include <cxxtools/refcounted.h>
 #include <string>
 
 namespace tntdb
@@ -30,7 +30,7 @@ namespace tntdb
   class Decimal;
   
   /// common inteface for resultvalues
-  class IValue : public RefCounted
+  class IValue : public cxxtools::RefCounted
   {
     public:
       virtual bool isNull() const = 0;

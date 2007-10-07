@@ -71,7 +71,7 @@ namespace tntdb
             }
         };
 
-        typedef std::map<std::string, SmartPtr<Bind, InternalRefCounted> > BindMapType;
+        typedef std::map<std::string, cxxtools::SmartPtr<Bind> > BindMapType;
         BindMapType bindMap;
 
         Bind* getBindPtr(const std::string& col);

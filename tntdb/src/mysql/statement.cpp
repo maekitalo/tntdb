@@ -395,12 +395,12 @@ namespace tntdb
       unsigned field_count = getFieldCount();
 
       RowContainer* result = new RowContainer();
-      SmartPtr<RowContainer, InternalRefCounted> sresult = result;
+      cxxtools::SmartPtr<RowContainer> sresult = result;
 
       while (true)
       {
         BoundRow* ptr = new BoundRow(field_count);
-        SmartPtr<BoundRow, InternalRefCounted> sptr = ptr;
+        cxxtools::SmartPtr<BoundRow> sptr = ptr;
 
         for (unsigned n = 0; n < field_count; ++n)
           ptr->initOutBuffer(n, fields[n]);
@@ -440,7 +440,7 @@ namespace tntdb
       unsigned field_count = getFieldCount();
 
       BoundRow* ptr = new BoundRow(field_count);
-      SmartPtr<BoundRow, InternalRefCounted> sptr = ptr;
+      cxxtools::SmartPtr<BoundRow> sptr = ptr;
 
       for (unsigned n = 0; n < field_count; ++n)
         ptr->initOutBuffer(n, fields[n]);

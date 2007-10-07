@@ -20,7 +20,6 @@
 #define TNTDB_SQLITE_IMPL_SQLSTATEMENT_H
 
 #include <tntdb/iface/istatement.h>
-#include <tntdb/smartptr.h>
 #include <sqlite3.h>
 
 namespace tntdb

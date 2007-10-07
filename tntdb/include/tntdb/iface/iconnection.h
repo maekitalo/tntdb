@@ -19,8 +19,8 @@
 #ifndef TNTDB_IFACE_ICONNECTION_H
 #define TNTDB_IFACE_ICONNECTION_H
 
-#include <tntdb/refcounted.h>
-#include <tntdb/smartptr.h>
+#include <cxxtools/refcounted.h>
+#include <cxxtools/smartptr.h>
 #include <string>
 #include <map>
 
@@ -32,7 +32,7 @@ namespace tntdb
   class Statement;
   class IStatement;
 
-  class IConnection : public RefCounted
+  class IConnection : public cxxtools::RefCounted
   {
     public:
       typedef unsigned size_type;
@@ -53,7 +53,7 @@ namespace tntdb
 
   class IStmtCacheConnection : public IConnection
   {
-      typedef std::map<std::string, SmartPtr<IStatement> > stmtCacheType;
+      typedef std::map<std::string, cxxtools::SmartPtr<IStatement> > stmtCacheType;
       stmtCacheType stmtCache;
 
     public:

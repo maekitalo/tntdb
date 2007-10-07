@@ -20,7 +20,7 @@
 #define TNTDB_BITS_CONNECTION_H
 
 #include <string>
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 #include <tntdb/iface/iconnection.h>
 #include <tntdb/bits/statement.h>
 
@@ -59,7 +59,7 @@ namespace tntdb
       typedef unsigned size_type;
 
     private:
-      SmartPtr<IConnection, InternalRefCounted> conn;
+      cxxtools::SmartPtr<IConnection> conn;
 
     public:
       /**

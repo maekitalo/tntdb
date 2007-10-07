@@ -22,7 +22,7 @@
 #include <tntdb/iface/iresult.h>
 #include <tntdb/iface/irow.h>
 #include <vector>
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 
 namespace tntdb
 {
@@ -30,7 +30,7 @@ namespace tntdb
   {
     class RowContainer : public IResult
     {
-        std::vector<SmartPtr<IRow, InternalRefCounted> > rows;
+        std::vector<cxxtools::SmartPtr<IRow> > rows;
 
       public:
         void addRow(IRow* row)  { rows.push_back(row); }

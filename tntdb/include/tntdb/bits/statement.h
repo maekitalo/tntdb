@@ -20,7 +20,7 @@
 #define TNTDB_BITS_STATEMENT_H
 
 #include <string>
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 #include <tntdb/iface/istatement.h>
 #include <tntdb/date.h>
 #include <tntdb/time.h>
@@ -52,7 +52,7 @@ namespace tntdb
       typedef IStatement::size_type size_type;
 
     private:
-      SmartPtr<IStatement, InternalRefCounted> stmt;
+      cxxtools::SmartPtr<IStatement> stmt;
 
     public:
       Statement(IStatement* stmt_ = 0)

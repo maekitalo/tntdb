@@ -22,7 +22,7 @@
 #include <tntdb/datetime.h>
 #include <tntdb/date.h>
 #include <tntdb/time.h>
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 #include <tntdb/oracle/connection.h>
 #include <oci.h>
 
@@ -32,7 +32,7 @@ namespace tntdb
   {
     class Datetime
     {
-        SmartPtr<Connection, InternalRefCounted> conn;
+        cxxtools::SmartPtr<Connection> conn;
         OCIDateTime* datetime;
         bool release;
 

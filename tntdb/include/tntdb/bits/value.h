@@ -24,7 +24,7 @@
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
 #include <tntdb/decimal.h>
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 
 namespace tntdb
 {
@@ -37,7 +37,7 @@ namespace tntdb
       typedef unsigned size_type;
 
     private:
-      SmartPtr<IValue, InternalRefCounted> value;
+      cxxtools::SmartPtr<IValue> value;
 
     public:
       explicit Value(IValue* value = 0)

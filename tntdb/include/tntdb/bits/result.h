@@ -19,7 +19,7 @@
 #ifndef TNTDB_BITS_RESULT_H
 #define TNTDB_BITS_RESULT_H
 
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 #include <tntdb/iface/iresult.h>
 
 namespace tntdb
@@ -39,7 +39,7 @@ namespace tntdb
       typedef Row value_type;
 
     private:
-      SmartPtr<IResult, InternalRefCounted> result;
+      cxxtools::SmartPtr<IResult> result;
 
     public:
       class const_iterator;

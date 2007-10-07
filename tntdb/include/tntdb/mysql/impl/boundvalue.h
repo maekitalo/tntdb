@@ -21,7 +21,7 @@
 
 #include <tntdb/iface/ivalue.h>
 #include <tntdb/iface/irow.h>
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 #include <mysql.h>
 
 namespace tntdb
@@ -39,7 +39,7 @@ namespace tntdb
         typedef unsigned size_type;
 
       private:
-        SmartPtr<IRow, InternalRefCounted> row;
+        cxxtools::SmartPtr<IRow> row;
         MYSQL_BIND& mysql_bind;
 
       public:

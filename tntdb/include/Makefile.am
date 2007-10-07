@@ -23,10 +23,8 @@ nobase_include_HEADERS = \
 	tntdb/connectionpool.h \
 	tntdb/librarymanager.h \
 	tntdb/noncopyable.h \
-	tntdb/refcounted.h \
 	tntdb/result.h \
 	tntdb/row.h \
-	tntdb/smartptr.h \
 	tntdb/statement.h \
 	tntdb/time.h \
 	tntdb/transaction.h \

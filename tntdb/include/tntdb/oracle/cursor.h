@@ -20,8 +20,8 @@
 #define TNTDB_ORACLE_CURSOR_H
 
 #include <tntdb/iface/icursor.h>
-#include <tntdb/smartptr.h>
 #include <tntdb/row.h>
+#include <cxxtools/smartptr.h>
 #include <oci.h>
 
 namespace tntdb
@@ -32,7 +32,7 @@ namespace tntdb
 
     class Cursor : public ICursor
     {
-        SmartPtr<Statement, InternalRefCounted> stmt;
+        cxxtools::SmartPtr<Statement> stmt;
         OCIStmt* stmtp;
         tntdb::Row row;
 

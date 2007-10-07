@@ -21,7 +21,7 @@
 
 #include <tntdb/iface/irow.h>
 #include <tntdb/bits/value.h>
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 
 namespace tntdb
 {
@@ -37,7 +37,7 @@ namespace tntdb
       typedef Value value_type;
 
     private:
-      SmartPtr<IRow, InternalRefCounted> row;
+      cxxtools::SmartPtr<IRow> row;
 
     public:
       Row()  { }

@@ -44,6 +44,7 @@ AC_CHECK_HEADER([cxxtools/log.h], , AC_MSG_ERROR([cxxtools-logging not found]))
 AC_MSG_CHECKING([for cxxtools usability])
 AC_COMPILE_IFELSE(
   [#include <cxxtools/thread.h>
+   #include <cxxtools/smartptr.h>
    void t() { cxxtools::AttachedThread* p; }
   ],
   AC_MSG_RESULT(yes),

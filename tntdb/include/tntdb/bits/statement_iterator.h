@@ -33,7 +33,7 @@ namespace tntdb
       : public std::iterator<std::forward_iterator_tag, Row>
   {
       Row current;
-      SmartPtr<ICursor, InternalRefCounted> cursor;
+      cxxtools::SmartPtr<ICursor> cursor;
 
     public:
       const_iterator(ICursor* cursor_ = 0);

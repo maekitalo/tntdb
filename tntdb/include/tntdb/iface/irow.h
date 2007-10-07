@@ -19,14 +19,15 @@
 #ifndef TNTDB_IFACE_IROW_H
 #define TNTDB_IFACE_IROW_H
 
-#include <tntdb/refcounted.h>
+#include <cxxtools/refcounted.h>
+#include <string>
 
 namespace tntdb
 {
   class Value;
 
   /// common interface for row-types
-  class IRow : public RefCounted
+  class IRow : public cxxtools::RefCounted
   {
     public:
       typedef unsigned size_type;

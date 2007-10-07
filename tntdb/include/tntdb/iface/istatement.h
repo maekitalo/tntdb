@@ -19,7 +19,7 @@
 #ifndef TNTDB_IFACE_ISTATEMENT_H
 #define TNTDB_IFACE_ISTATEMENT_H
 
-#include <tntdb/refcounted.h>
+#include <cxxtools/refcounted.h>
 #include <string>
 
 namespace tntdb
@@ -33,7 +33,7 @@ namespace tntdb
   class Decimal;
   class ICursor;
 
-  class IStatement : public RefCounted
+  class IStatement : public cxxtools::RefCounted
   {
     public:
       typedef unsigned size_type;

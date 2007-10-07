@@ -21,7 +21,7 @@
 
 #include <tntdb/iface/icursor.h>
 #include <tntdb/mysql/bindvalues.h>
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 
 namespace tntdb
 {
@@ -32,8 +32,8 @@ namespace tntdb
 
     class Cursor : public ICursor
     {
-        SmartPtr<BoundRow, InternalRefCounted> row;
-        SmartPtr<Statement, InternalRefCounted> mysqlStatement;
+        cxxtools::SmartPtr<BoundRow> row;
+        cxxtools::SmartPtr<Statement> mysqlStatement;
         MYSQL_STMT* stmt;
 
       public:

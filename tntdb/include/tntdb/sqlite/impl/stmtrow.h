@@ -21,7 +21,6 @@
 
 #include <tntdb/iface/irow.h>
 #include <tntdb/sqlite/impl/statement.h>
-#include <tntdb/smartptr.h>
 
 namespace tntdb
 {

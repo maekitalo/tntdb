@@ -20,7 +20,7 @@
 #define TNTDB_SQLITE_IMPL_CURSOR_H
 
 #include <tntdb/iface/icursor.h>
-#include <tntdb/smartptr.h>
+#include <cxxtools/smartptr.h>
 #include <sqlite3.h>
 
 namespace tntdb
@@ -31,7 +31,7 @@ namespace tntdb
 
     class Cursor : public ICursor
     {
-        SmartPtr<Statement, InternalRefCounted> statement;
+        cxxtools::SmartPtr<Statement> statement;
         sqlite3_stmt* stmt;
 
       public:

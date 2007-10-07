@@ -19,14 +19,14 @@
 #ifndef TNTDB_IFACE_IRESULT_H
 #define TNTDB_IFACE_IRESULT_H
 
-#include <tntdb/refcounted.h>
+#include <cxxtools/refcounted.h>
 
 namespace tntdb
 {
   class Row;
 
   /// common inteface for resultset
-  class IResult : public RefCounted
+  class IResult : public cxxtools::RefCounted
   {
     public:
       typedef unsigned size_type;
