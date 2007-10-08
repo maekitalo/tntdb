@@ -1,4 +1,5 @@
 EXTRA_DIST = @PACKAGE@.doxygen.in \
+	main.page \
 	tntdb.odt \
 	tntdb.pdf
 
