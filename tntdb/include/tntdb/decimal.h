@@ -411,7 +411,7 @@ namespace tntdb
       // maxDivisorDigits.
       ManType divideChunksRemaining = divisorExponentPowerOfTenDigitsRemaining / maxDivisorDigits;
       ManType firstDivideDigits = divisorExponentPowerOfTenDigitsRemaining % maxDivisorDigits;
-      for (int i = 1; (i < firstDivideDigits) && !overflowDetected; ++i)
+      for (ManType i = 1; (i < firstDivideDigits) && !overflowDetected; ++i)
       {
         previousExponentDivisor = exponentDivisor;
         overflowDetected = overflowDetectedInMultiplyByTen(exponentDivisor);
@@ -427,7 +427,7 @@ namespace tntdb
       if (divideChunksRemaining > 0)
       {
         // Calculate the 10^maxDivisorDigits divisor
-        for (int i = 1; (i < maxDivisorDigits) && !overflowDetected; ++i)
+        for (ManType i = 1; (i < maxDivisorDigits) && !overflowDetected; ++i)
         {
           previousExponentDivisor = exponentDivisor;
           overflowDetected = overflowDetectedInMultiplyByTen(exponentDivisor);
@@ -444,7 +444,7 @@ namespace tntdb
         exponentDivisor = ManType(Base);
       }
     }
-    for (int i = 1; (i < divisorExponentPowerOfTenDigitsRemaining) && !overflowDetected; ++i)
+    for (ManType i = 1; (i < divisorExponentPowerOfTenDigitsRemaining) && !overflowDetected; ++i)
     {
       previousExponentDivisor = exponentDivisor;
       overflowDetected = overflowDetectedInMultiplyByTen(exponentDivisor);
@@ -470,7 +470,7 @@ namespace tntdb
       {
         MantissaType previousIntegralPart = MantissaType(0);
         bool overflowDetected = false;
-        for (int i = 0; (i < optionalUserSpecifiedExponentOffset) && !overflowDetected; ++i)
+        for (ExponentType i = 0; (i < optionalUserSpecifiedExponentOffset) && !overflowDetected; ++i)
         {
           previousIntegralPart = integralPart;
           overflowDetected = overflowDetectedInMultiplyByTen(integralPart);
@@ -524,7 +524,7 @@ namespace tntdb
 
     ExponentType absExponent = -exp;
     IntegerType oneHalf = IntegerType(Base / 2);
-    for (int i = 1; i < absExponent; ++i)
+    for (ExponentType i = 1; i < absExponent; ++i)
     {
       oneHalf *= IntegerType(Base);
     }
@@ -566,7 +566,7 @@ namespace tntdb
     if (exponent >= 0)
     {
       FloatingPointType exponentMultiplier = FloatingPointType(1);
-      for (int i = 0; i < exponent; ++i)
+      for (ExponentType i = 0; i < exponent; ++i)
         exponentMultiplier *= FloatingPointType(Base);
       FloatingPointType x = FloatingPointType(mantissa) * exponentMultiplier;
       if (flags & positive)
@@ -578,7 +578,7 @@ namespace tntdb
     {
       ExponentType absExponent = -exponent;
       FloatingPointType exponentDivisor = FloatingPointType(Base);
-      for (int i = 1; i < absExponent; ++i)
+      for (ExponentType i = 1; i < absExponent; ++i)
       {
         exponentDivisor *= FloatingPointType(Base);
       }

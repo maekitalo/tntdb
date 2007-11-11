@@ -232,7 +232,7 @@ namespace tntdb
                                           precisionFractionalDivisorDigits);
               MantissaType oneHalf = MantissaType(Base / 2);
               bool overflowDetected = false;
-              for (int j = 0; !overflowDetected && (j < precisionFractionalDivisorDigits - 1); ++j)
+              for (MantissaType j = 0; !overflowDetected && (j < precisionFractionalDivisorDigits - 1); ++j)
               {
                 overflowDetected = Decimal::overflowDetectedInMultiplyByTen(oneHalf);
               }
@@ -297,7 +297,6 @@ namespace tntdb
     MantissaType mantissaMultiplier = 10;
     MantissaType man = 0;
     MantissaType previousMan = 0;
-    ExponentType exponentMultiplier = 10;
     typedef uint32_t UnsignedExponentType;
     UnsignedExponentType absExp = 0;
     UnsignedExponentType previousAbsExp = 0;
@@ -306,7 +305,6 @@ namespace tntdb
     FlagsType f = positive;
     PrintFlagsType pf = infinityShort;
     char readCharArray[sizeof(infinityCharArray)];
-    bool skipRead = false;
     int c = 0;
     for (c = in.peek(); (c != std::istream::traits_type::eof()) && (decimalReadState != finished) && (decimalReadState != failed); c = in.peek())
     {
