@@ -117,6 +117,12 @@ namespace tntdb
 
     char StmtValue::getChar() const
     {
+      log_debug("sqlite3_column_bytes(" << getStmt() << ", " << iCol << ')');
+      int bytes = ::sqlite3_column_bytes(getStmt(), iCol);
+
+      if (bytes <= 0)
+        throw NullValue();
+
       log_debug("sqlite3_column_blob(" << getStmt() << ", " << iCol << ')');
       const void* ret = ::sqlite3_column_blob(getStmt(), iCol);
       return *static_cast<const char*>(ret);
@@ -127,10 +133,18 @@ namespace tntdb
       log_debug("sqlite3_column_bytes(" << getStmt() << ", " << iCol << ')');
       int bytes = ::sqlite3_column_bytes(getStmt(), iCol);
 
-      log_debug("sqlite3_column_blob(" << getStmt() << ", " << iCol << ')');
-      const void* data = ::sqlite3_column_blob(getStmt(), iCol);
+      if (bytes <= 0)
+      {
+        log_debug("empty string value - clear string");
+        ret.clear();
+      }
+      else
+      {
+        log_debug("sqlite3_column_blob(" << getStmt() << ", " << iCol << ')');
+        const void* data = ::sqlite3_column_blob(getStmt(), iCol);
 
-      ret.assign(reinterpret_cast<const char*>(data), bytes);
+        ret.assign(reinterpret_cast<const char*>(data), bytes);
+      }
     }
 
     Date StmtValue::getDate() const

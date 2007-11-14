@@ -375,8 +375,13 @@ namespace tntdb
             log_debug("sqlite3_column_bytes(" << stmt << ", " << i << ')');
             int n = sqlite3_column_bytes(stmt, i);
 
-            log_debug("sqlite3_column_blob(" << stmt << ", " << i << ')');
-            const void* txt = sqlite3_column_blob(stmt, i);
+            const void* txt = 0;
+
+            if (n > 0)
+            {
+              log_debug("sqlite3_column_blob(" << stmt << ", " << i << ')');
+              txt = sqlite3_column_blob(stmt, i);
+            }
 
             Value v;
             if (txt)
@@ -426,8 +431,14 @@ namespace tntdb
           log_debug("sqlite3_column_bytes(" << stmt << ", " << i << ')');
           int n = sqlite3_column_bytes(stmt, i);
 
-          log_debug("sqlite3_column_blob(" << stmt << ", " << i << ')');
-          const void* txt = sqlite3_column_blob(stmt, i);
+          const void* txt = 0;
+
+          if (n > 0)
+          {
+            log_debug("sqlite3_column_blob(" << stmt << ", " << i << ')');
+            txt = sqlite3_column_blob(stmt, i);
+          }
+
           Value v;
           if (txt)
             v = Value(new ValueImpl(
@@ -478,8 +489,14 @@ namespace tntdb
         log_debug("sqlite3_column_bytes(" << stmt << ", 0)");
         int n = sqlite3_column_bytes(stmt, 0);
 
-        log_debug("sqlite3_column_blob(" << stmt << ", 0)");
-        const void* txt = sqlite3_column_blob(stmt, 0);
+        const void* txt = 0;
+
+        if (n > 0)
+        {
+          log_debug("sqlite3_column_blob(" << stmt << ", 0)");
+          txt = sqlite3_column_blob(stmt, 0);
+        }
+
         Value v;
         if (txt)
           v = Value(new ValueImpl(
