@@ -161,6 +161,11 @@ AC_ARG_WITH(
 
 if test "$with_oracle" = yes
 then
+  if test "$ORACLE_HOME" != ""
+  then
+    CXXFLAGS+=" -I$ORACLE_HOME/rdbms/public"
+    LDFLAGS+=" -L$ORACLE_HOME/lib"
+  fi
   AC_CHECK_HEADER([oci.h], , AC_MSG_ERROR([header for oracle not found]))
 fi
 

@@ -45,7 +45,9 @@ namespace tntdb
         uint32_t uint32Value;
         double doubleValue;
         oracle::Number number;
-      
+
+        std::string colName;
+
         void init(Statement* stmt, OCIParam* paramp_, ub4 pos);
 
       public:
@@ -69,6 +71,8 @@ namespace tntdb
         virtual Date getDate() const;
         virtual Time getTime() const;
         virtual tntdb::Datetime getDatetime() const;
+
+        const std::string& getColumnName() const  { return colName; }
     };
   }
 }

@@ -107,6 +107,17 @@ namespace tntdb
     {
       sword ret;
 
+      /* retrieve column name */
+      ub4 col_name_len = 0;
+      text* col_name = 0;
+      ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &col_name, &col_name_len,
+        OCI_ATTR_NAME, stmt->getErrorHandle());
+
+      stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_NAME)");
+      colName.assign(reinterpret_cast<const char*>(col_name), col_name_len);
+
+      log_debug("column name=\"" << col_name << '"');
+
       /* retrieve the data type attribute */
       ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &type, 0, OCI_ATTR_DATA_TYPE,
         stmt->getErrorHandle());

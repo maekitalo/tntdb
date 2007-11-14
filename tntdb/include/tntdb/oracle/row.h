@@ -30,14 +30,16 @@ namespace tntdb
   {
     class Row : public IRow
     {
-        std::vector<tntdb::Value> values;
+        typedef std::vector<tntdb::Value> Values;
+        Values values;
 
       public:
         explicit Row(Statement* stmt);
         Row(Statement* stmt, unsigned columncount);
 
         virtual size_type size() const;
-        virtual tntdb::Value getValue(size_type field_num) const;
+        virtual tntdb::Value getValueByNumber(size_type field_num) const;
+        virtual tntdb::Value getValueByName(const std::string& field_name) const;
     };
   }
 }

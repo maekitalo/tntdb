@@ -18,6 +18,8 @@
 
 #include <tntdb/oracle/row.h>
 #include <tntdb/oracle/value.h>
+#include <tntdb/error.h>
+#include <cctype>
 #include <cxxtools/log.h>
 
 log_define("tntdb.oracle.row")
@@ -53,9 +55,28 @@ namespace tntdb
       return values.size();
     }
 
-    tntdb::Value Row::getValue(size_type field_num) const
+    tntdb::Value Row::getValueByNumber(size_type field_num) const
     {
       return values.at(field_num);
+    }
+
+    tntdb::Value Row::getValueByName(const std::string& field_name) const
+    {
+      std::string field_name_upper;
+      field_name_upper.reserve(field_name.size());
+      for (std::string::const_iterator it = field_name.begin();
+        it != field_name.end(); ++it)
+          field_name_upper += std::toupper(*it);
+
+      Values::const_iterator it;
+      for (it = values.begin(); it != values.end(); ++it)
+        if (static_cast<const Value*>(it->getImpl())->getColumnName() == field_name_upper)
+          break;
+
+      if (it == values.end())
+        throw FieldNotFound(field_name);
+
+      return *it;
     }
 
   }
