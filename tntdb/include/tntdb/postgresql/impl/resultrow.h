@@ -39,10 +39,10 @@ namespace tntdb
 
       public:
         ResultRow(Result* result, size_type rownumber);
-        ~ResultRow();
 
         unsigned size() const;
-        Value getValue(size_type field_num) const;
+        Value getValueByNumber(size_type field_num) const;
+        Value getValueByName(const std::string& field_name) const;
 
         size_type getRowNumber() const   { return rownumber; }
         PGresult* getPGresult() const;

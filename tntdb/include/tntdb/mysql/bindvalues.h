@@ -36,6 +36,11 @@ namespace tntdb
         {
           unsigned long length;
           my_bool isNull;
+          std::string name;
+          BindAttributes()
+            : length(0),
+              isNull(true)
+              { }
         }* bindAttributes;
 
         // non copyable
@@ -114,6 +119,9 @@ namespace tntdb
           { return mysql::getChar(values[n]); }
         void getString(unsigned n, std::string& ret) const
           { mysql::getString(values[n], ret); }
+
+        const std::string& getName(unsigned n) const
+          { return bindAttributes[n].name; }
 
         void initOutBuffer(unsigned n, MYSQL_FIELD& f);
     };

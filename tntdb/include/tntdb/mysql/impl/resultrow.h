@@ -33,12 +33,14 @@ namespace tntdb
         Result result;
         MYSQL_ROW row;
         unsigned long* lengths;
+        MYSQL_FIELD* fields;
 
       public:
         ResultRow(const tntdb::Result& result_, MYSQL_RES* res, MYSQL_ROW row_);
 
         unsigned size() const;
-        Value getValue(size_type field_num) const;
+        Value getValueByNumber(size_type field_num) const;
+        Value getValueByName(const std::string& field_name) const;
     };
   }
 }

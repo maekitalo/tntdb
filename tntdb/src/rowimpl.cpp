@@ -19,6 +19,7 @@
 #include <tntdb/impl/row.h>
 #include <tntdb/impl/value.h>
 #include <tntdb/value.h>
+#include <tntdb/error.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.row")
@@ -30,9 +31,23 @@ namespace tntdb
     return data.size();
   }
 
-  Value RowImpl::getValue(size_type field_num) const
+  Value RowImpl::getValueByNumber(size_type field_num) const
   {
-    return data[field_num];
+    return data[field_num].value;
+  }
+
+  Value RowImpl::getValueByName(const std::string& field_name) const
+  {
+    data_type::const_iterator it;
+
+    for (it = data.begin(); it != data.end(); ++it)
+      if (it->name == field_name)
+        break;
+
+    if (it == data.end())
+      throw FieldNotFound(field_name);
+
+    return it->value;
   }
 
 }

@@ -21,6 +21,7 @@
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
 #include <tntdb/decimal.h>
+#include <tntdb/error.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.sqlite.stmtvalue")
@@ -29,6 +30,27 @@ namespace tntdb
 {
   namespace sqlite
   {
+    StmtValue::StmtValue(sqlite3_stmt* stmt_, const std::string& name_)
+      : stmt(stmt_)
+    {
+      log_debug("sqlite3_column_count(" << stmt << ')');
+      int count = ::sqlite3_column_count(stmt);
+
+      for (iCol = 0; iCol < count; ++iCol)
+      {
+        log_debug("sqlite3_column_name(" << stmt << ", " << iCol << ')');
+        const char* name = sqlite3_column_name(stmt, iCol);
+        if (name == 0)
+          throw std::bad_alloc();
+
+        if (name == name_)
+          break;
+      }
+
+      if (iCol >= count)
+        throw FieldNotFound(name_);
+    }
+
     bool StmtValue::isNull() const
     {
       log_debug("sqlite3_column_type(" << getStmt() << ", " << iCol << ')');

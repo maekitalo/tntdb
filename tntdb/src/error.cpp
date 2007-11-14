@@ -45,4 +45,10 @@ namespace tntdb
     : Error(msg),
       sql(sql_)
     { }
+
+  FieldNotFound::FieldNotFound(const std::string& field_)
+    : Error("field \"" + field_ + "\" not found"),
+      field(field_)
+  {
+  }
 }

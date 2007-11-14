@@ -52,14 +52,26 @@ namespace tntdb
 
       /// Returns the field_num's value-object.
       Value getValue(size_type field_num) const
-        { return row->getValue(field_num); }
+        { return row->getValueByNumber(field_num); }
+      /// Returns the value-object by name.
+      /// Note that this is less effective than fetching by number
+      Value getValue(const std::string& field_name) const
+        { return row->getValueByName(field_name); }
       /// Returns the field_num's value-object.
       Value operator[] (size_type field_num) const
-        { return row->getValue(field_num); }
+        { return row->getValueByNumber(field_num); }
+      /// Returns the value-object by name.
+      /// Note that this is less effective than fetching by number
+      Value operator[] (const std::string& field_name) const
+        { return row->getValueByName(field_name); }
 
       /// Return true, if the specified value is null.
       bool isNull(size_type field_num) const
         { return getValue(field_num).isNull(); }
+      /// Return true, if the specified value is null.
+      bool isNull(const std::string& field_name) const
+        { return getValue(field_name).isNull(); }
+
       //@{
       /**
        * The get-methods try to convert the value of the speicfied column to
@@ -80,7 +92,7 @@ namespace tntdb
         { return getValue(field_num).getInt64(); }
       uint64_t getUnsigned64(size_type field_num) const
         { return getValue(field_num).getUnsigned64(); }
-          Decimal getDecimal(size_type field_num) const
+      Decimal getDecimal(size_type field_num) const
         { return getValue(field_num).getDecimal(); }
       float getFloat(size_type field_num) const
         { return getValue(field_num).getFloat(); }
@@ -90,12 +102,47 @@ namespace tntdb
         { return getValue(field_num).getChar(); }
       std::string getString(size_type field_num) const
         { return getValue(field_num).getString(); }
+      void getString(size_type field_num, std::string& ret) const
+        { return getValue(field_num).getString(ret); }
       Date getDate(size_type field_num) const
         { return getValue(field_num).getDate(); }
       Time getTime(size_type field_num) const
         { return getValue(field_num).getTime(); }
       Datetime getDatetime(size_type field_num) const
         { return getValue(field_num).getDatetime(); }
+
+      bool getBool(const std::string& field_name) const
+        { return getValue(field_name).getBool(); }
+      int getInt(const std::string& field_name) const
+        { return getValue(field_name).getInt(); }
+      unsigned getUnsigned(const std::string& field_name) const
+        { return getValue(field_name).getUnsigned(); }
+      int32_t getInt32(const std::string& field_name) const
+        { return getValue(field_name).getInt32(); }
+      uint32_t getUnsigned32(const std::string& field_name) const
+        { return getValue(field_name).getUnsigned32(); }
+      int64_t getInt64(const std::string& field_name) const
+        { return getValue(field_name).getInt64(); }
+      uint64_t getUnsigned64(const std::string& field_name) const
+        { return getValue(field_name).getUnsigned64(); }
+      Decimal getDecimal(const std::string& field_name) const
+        { return getValue(field_name).getDecimal(); }
+      float getFloat(const std::string& field_name) const
+        { return getValue(field_name).getFloat(); }
+      double getDouble(const std::string& field_name) const
+        { return getValue(field_name).getDouble(); }
+      char getChar(const std::string& field_name) const
+        { return getValue(field_name).getChar(); }
+      std::string getString(const std::string& field_name) const
+        { return getValue(field_name).getString(); }
+      void getString(const std::string& field_name, std::string& ret) const
+        { return getValue(field_name).getString(ret); }
+      Date getDate(const std::string& field_name) const
+        { return getValue(field_name).getDate(); }
+      Time getTime(const std::string& field_name) const
+        { return getValue(field_name).getTime(); }
+      Datetime getDatetime(const std::string& field_name) const
+        { return getValue(field_name).getDatetime(); }
       //@}
 
       /// Returns a iterator to the first column

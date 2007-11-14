@@ -19,6 +19,7 @@
 #include <tntdb/mysql/impl/boundrow.h>
 #include <tntdb/mysql/impl/boundvalue.h>
 #include <tntdb/value.h>
+#include <tntdb/error.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.mysql.boundrow")
@@ -32,12 +33,25 @@ namespace tntdb
       return BindValues::getSize();
     }
 
-    Value BoundRow::getValue(size_type field_num) const
+    Value BoundRow::getValueByNumber(size_type field_num) const
     {
       // TODO eliminate creation of BoundValue, by preallocating them.
       // We can maintain a vector<BoundValue> and prevent dynamic deallocation
       // of elements by overriding BoundValue::release
       return Value(new BoundValue(const_cast<IRow*>(static_cast<const IRow*>(this)), getMysqlBind()[field_num]));
+    }
+
+    Value BoundRow::getValueByName(const std::string& field_name) const
+    {
+      size_type field_num;
+      for (field_num = 0; field_num < size(); ++field_num)
+        if (getName(field_num) == field_name)
+          break;
+
+      if (field_num >= size())
+        throw FieldNotFound(field_name);
+
+      return getValueByNumber(field_num);
     }
   }
 }

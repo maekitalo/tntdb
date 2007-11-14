@@ -19,6 +19,7 @@
 #include <tntdb/mysql/impl/resultrow.h>
 #include <tntdb/mysql/impl/rowvalue.h>
 #include <tntdb/bits/value.h>
+#include <tntdb/error.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.mysql.resultrow")
@@ -34,6 +35,9 @@ namespace tntdb
     {
       log_debug("mysql_fetch_lengths");
       lengths = ::mysql_fetch_lengths(res);
+
+      log_debug("mysql_fetch_fields");
+      fields = ::mysql_fetch_fields(res);
     }
 
     unsigned ResultRow::size() const
@@ -41,9 +45,23 @@ namespace tntdb
       return result.getFieldCount();
     }
 
-    Value ResultRow::getValue(size_type field_num) const
+    Value ResultRow::getValueByNumber(size_type field_num) const
     {
       return Value(new RowValue(result, row, field_num, lengths[field_num]));
     }
+
+    Value ResultRow::getValueByName(const std::string& field_name) const
+    {
+      size_type field_num;
+      for (field_num = 0; field_num < size(); ++field_num)
+        if (fields[field_num].name == field_name)
+          break;
+
+      if (field_num >= size())
+        throw FieldNotFound(field_name);
+
+      return getValueByNumber(field_num);
+    }
+
   }
 }

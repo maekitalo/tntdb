@@ -77,6 +77,17 @@ namespace tntdb
 
       const std::string& getSql() const  { return sql; }
   };
+
+  class FieldNotFound : public Error
+  {
+      std::string field;
+
+    public:
+      explicit FieldNotFound(const std::string& field);
+      ~FieldNotFound() throw() { }
+
+      const std::string& getField() const   { return field; }
+  };
 }
 
 #endif // TNTDB_ERROR_H

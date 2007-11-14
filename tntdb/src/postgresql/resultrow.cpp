@@ -21,6 +21,7 @@
 #include <tntdb/postgresql/impl/resultvalue.h>
 #include <tntdb/bits/row.h>
 #include <tntdb/bits/value.h>
+#include <tntdb/error.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.postgresql.resultrow")
@@ -34,14 +35,6 @@ namespace tntdb
         result(result_),
         rownumber(rownumber_)
     {
-      if (result)
-        result->addRef();
-    }
-
-    ResultRow::~ResultRow()
-    {
-      if (result)
-        result->release();
     }
 
     unsigned ResultRow::size() const
@@ -49,9 +42,23 @@ namespace tntdb
       return result->getFieldCount();
     }
 
-    Value ResultRow::getValue(size_type field_num) const
+    Value ResultRow::getValueByNumber(size_type field_num) const
     {
       return Value(new ResultValue(const_cast<ResultRow*>(this), field_num));
+    }
+
+    Value ResultRow::getValueByName(const std::string& field_name) const
+    {
+      unsigned fc = result->getFieldCount();
+      unsigned n;
+      for (n = 0; n < fc; ++n)
+        if (field_name == PQfname(getPGresult(), n))
+          break;
+
+      if (n == fc)
+        throw FieldNotFound(field_name);
+
+      return getValueByNumber(n);
     }
 
     PGresult* ResultRow::getPGresult() const

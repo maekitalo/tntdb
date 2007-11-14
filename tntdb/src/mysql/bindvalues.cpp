@@ -40,7 +40,6 @@ namespace tntdb
         values(new MYSQL_BIND[n]),
         bindAttributes(new BindAttributes[n])
     {
-      ::memset(bindAttributes, 0, sizeof(BindAttributes) * valuesSize);
       ::memset(values, 0, sizeof(MYSQL_BIND) * valuesSize);
       for (unsigned n = 0; n < valuesSize; ++n)
       {
@@ -76,7 +75,6 @@ namespace tntdb
       values = new MYSQL_BIND[n];
       bindAttributes = new BindAttributes[n];
 
-      ::memset(bindAttributes, 0, sizeof(BindAttributes) * valuesSize);
       ::memset(values, 0, sizeof(MYSQL_BIND) * valuesSize);
       for (unsigned n = 0; n < valuesSize; ++n)
       {
@@ -94,6 +92,10 @@ namespace tntdb
       if (f.type == 0)
         log_debug("no type in metadata for field " << n << "; using MYSQL_TYPE_VAR_STRING");
       values[n].buffer_type = f.type ? f.type : MYSQL_TYPE_VAR_STRING;
+      if (f.name)
+        bindAttributes[n].name = f.name;
+      else
+        bindAttributes[n].name.clear();
     }
   }
 }

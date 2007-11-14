@@ -76,7 +76,13 @@ namespace tntdb
       /// returns the first character of the texte-representation.
       char getChar() const                { return value->getChar(); }
       /// returns the value as a string.
-      std::string getString() const       { std::string ret; value->getString(ret); return ret; }
+      std::string getString() const
+        { std::string ret; value->getString(ret); return ret; }
+      /// fills the passed string with the value.
+      /// this might be slightly more efficient than just returning a new
+      /// string since one copy is saved.
+      void getString(std::string& ret) const
+        { value->getString(ret); }
       /// returns the value as a Date.
       Date getDate() const                { return value->getDate(); }
       /// returns the value as a Time.

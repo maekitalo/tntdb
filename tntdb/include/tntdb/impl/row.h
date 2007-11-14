@@ -28,7 +28,19 @@ namespace tntdb
   class RowImpl : public IRow
   {
     public:
-      typedef std::vector<Value> data_type;
+      struct ValueType
+      {
+        std::string name;
+        Value value;
+
+        ValueType()  { }
+        ValueType(const std::string& name_, const Value& value_)
+          : name(name_),
+            value(value_)
+            { }
+      };
+
+      typedef std::vector<ValueType> data_type;
 
     private:
       data_type data;
@@ -43,10 +55,11 @@ namespace tntdb
 
       // methods from IResult
       virtual size_type size() const;
-      virtual Value getValue(size_type field_num) const;
+      virtual Value getValueByNumber(size_type field_num) const;
+      virtual Value getValueByName(const std::string& field_name) const;
 
       // specific methods
-      void add(const Value& value)   { data.push_back(value); }
+      void add(const std::string& field_name, const Value& value)   { data.push_back(ValueType(field_name, value)); }
   };
 }
 

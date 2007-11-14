@@ -37,6 +37,8 @@ namespace tntdb
             iCol(iCol_)
         { }
 
+        StmtValue(sqlite3_stmt* stmt, const std::string& name);
+
         virtual bool isNull() const;
         virtual bool getBool() const;
         virtual int getInt() const;

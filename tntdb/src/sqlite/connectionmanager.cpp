@@ -34,4 +34,4 @@ namespace tntdb
   }
 }
 
-TNTDB_CONNECTIONMANAGER_DEFINE(sqlite);
+TNTDB_CONNECTIONMANAGER_DEFINE(sqlite)

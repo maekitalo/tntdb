@@ -377,11 +377,18 @@ namespace tntdb
 
             log_debug("sqlite3_column_blob(" << stmt << ", " << i << ')');
             const void* txt = sqlite3_column_blob(stmt, i);
+
             Value v;
             if (txt)
               v = Value(new ValueImpl(
                 std::string(static_cast<const char*>(txt), n)));
-            row->add(v);
+
+            log_debug("sqlite3_column_name(" << stmt << ", " << i << ')');
+            const char* name = sqlite3_column_name(stmt, i);
+            if (name == 0)
+              throw std::bad_alloc();
+
+            row->add(name, v);
           }
         }
         else if (ret != SQLITE_DONE)
@@ -425,7 +432,13 @@ namespace tntdb
           if (txt)
             v = Value(new ValueImpl(
               std::string(static_cast<const char*>(txt), n)));
-          r->add(v);
+
+          log_debug("sqlite3_column_name(" << stmt << ", " << i << ')');
+          const char* name = sqlite3_column_name(stmt, i);
+          if (name == 0)
+            throw std::bad_alloc();
+
+          r->add(name, v);
         }
         return row;
       }

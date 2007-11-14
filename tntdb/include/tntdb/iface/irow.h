@@ -33,7 +33,8 @@ namespace tntdb
       typedef unsigned size_type;
 
       virtual size_type size() const = 0;
-      virtual Value getValue(size_type field_num) const = 0;
+      virtual Value getValueByNumber(size_type field_num) const = 0;
+      virtual Value getValueByName(const std::string& field_name) const = 0;
   };
 }
 

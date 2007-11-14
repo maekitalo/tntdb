@@ -32,9 +32,14 @@ namespace tntdb
       return static_cast<unsigned>(::sqlite3_column_count(stmt));
     }
 
-    Value StmtRow::getValue(size_type field_num) const
+    Value StmtRow::getValueByNumber(size_type field_num) const
     {
       return Value(new StmtValue(stmt, field_num));
+    }
+
+    Value StmtRow::getValueByName(const std::string& field_name) const
+    {
+      return Value(new StmtValue(stmt, field_name));
     }
 
   }
