@@ -23,7 +23,9 @@
 #include <tntdb/result.h>
 #include <tntdb/value.h>
 #include <tntdb/statement.h>
+#include <tntdb/blob.h>
 #include <cxxtools/loginit.h>
+#include <cxxtools/hdstream.h>
 
 class Tester
 {
@@ -43,6 +45,7 @@ class Tester
     void testSelectRowByName();
     void testCursor();
     void testCursorByName();
+    void testBlob();
     void dropTables();
 
     void test();
@@ -211,6 +214,32 @@ void Tester::testCursorByName()
   std::cout << "selected with cursor" << std::endl;
 }
 
+void Tester::testBlob()
+{
+  std::cout << "blob insert" << std::endl;
+  tntdb::Statement stmt = conn.prepare(
+    "insert into tab1 (a, b)"
+    "  values (:a, :b)");
+
+  const char* bindata = "\1\2\3\0abc";
+  tntdb::Blob blob1(bindata, 7);
+
+  std::cout << "blob1.size()=" << blob1.size() << std::endl;
+
+  stmt.set("a", 10)
+      .set("b", blob1)
+      .execute();
+
+  cxxtools::Hdostream o;
+
+  std::cout << "blob select" << std::endl;
+  tntdb::Blob blob2 = conn.selectValue("select b from tab1 where a = 10").getBlob();
+
+  o << blob2.getString() << std::flush;
+
+  std::cout << "blob1==blob2: " << (blob1 == blob2) << " size=" << blob2.size() << std::endl;
+}
+
 void Tester::dropTables()
 {
   std::cout << "drop table" << std::endl;
@@ -229,6 +258,7 @@ void Tester::test()
   testSelectRowByName();
   testCursor();
   testCursorByName();
+  testBlob();
   dropTables();
 }
 
