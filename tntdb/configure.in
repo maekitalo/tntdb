@@ -112,8 +112,6 @@ then
     AC_MSG_ERROR([mysql configuration script was not found])
   fi
 
-  # TODO check form MYSQL_BIND
-
   MYSQL_CFLAGS=`$MYSQL_CONFIG --cflags`
   MYSQL_LDFLAGS=`$MYSQL_CONFIG --libs_r`
 

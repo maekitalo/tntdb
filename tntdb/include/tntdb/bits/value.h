@@ -24,6 +24,7 @@
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
 #include <tntdb/decimal.h>
+#include <tntdb/blob.h>
 #include <cxxtools/smartptr.h>
 
 namespace tntdb
@@ -83,6 +84,14 @@ namespace tntdb
       /// string since one copy is saved.
       void getString(std::string& ret) const
         { value->getString(ret); }
+      /// Returns the value as a blob.
+      /// This is more or less an alias to getString just to stress, that
+      /// the data is truly binary and not some text value.
+      Blob getBlob() const
+        { Blob ret; value->getString(ret.getStringRef()); return ret; }
+      /// Returns the value as a blob.
+      void getBlob(Blob& blob) const
+        { value->getString(blob.getStringRef()); }
       /// returns the value as a Date.
       Date getDate() const                { return value->getDate(); }
       /// returns the value as a Time.
@@ -108,6 +117,7 @@ namespace tntdb
       operator double() const             { return value->getDouble(); }
       operator char() const               { return value->getChar(); }
       operator std::string() const        { std::string ret; value->getString(ret); return ret; }
+      operator Blob() const               { Blob ret; value->getString(ret.getStringRef()); return ret; }
       operator Date() const               { return value->getDate(); }
       operator Time() const               { return value->getTime(); }
       operator Datetime() const           { return value->getDatetime(); }

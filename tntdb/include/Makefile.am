@@ -7,8 +7,10 @@ nobase_include_HEADERS = \
 	tntdb/bits/statement.h \
 	tntdb/bits/statement_iterator.h \
 	tntdb/bits/value.h \
+	tntdb/blob.h \
 	tntdb/connect.h \
 	tntdb/connection.h \
+	tntdb/connectionpool.h \
 	tntdb/date.h \
 	tntdb/datetime.h \
 	tntdb/decimal.h \
@@ -20,7 +22,6 @@ nobase_include_HEADERS = \
 	tntdb/iface/irow.h \
 	tntdb/iface/istatement.h \
 	tntdb/iface/ivalue.h \
-	tntdb/connectionpool.h \
 	tntdb/librarymanager.h \
 	tntdb/noncopyable.h \
 	tntdb/result.h \

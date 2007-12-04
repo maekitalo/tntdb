@@ -21,6 +21,7 @@
 
 #include <tntdb/iface/irow.h>
 #include <tntdb/bits/value.h>
+#include <tntdb/blob.h>
 #include <cxxtools/smartptr.h>
 
 namespace tntdb
@@ -104,6 +105,10 @@ namespace tntdb
         { return getValue(field_num).getString(); }
       void getString(size_type field_num, std::string& ret) const
         { return getValue(field_num).getString(ret); }
+      Blob getBlob(size_type field_num) const
+        { return getValue(field_num).getBlob(); }
+      void getBlob(size_type field_num, Blob& ret) const
+        { return getValue(field_num).getBlob(ret); }
       Date getDate(size_type field_num) const
         { return getValue(field_num).getDate(); }
       Time getTime(size_type field_num) const
@@ -137,6 +142,10 @@ namespace tntdb
         { return getValue(field_name).getString(); }
       void getString(const std::string& field_name, std::string& ret) const
         { return getValue(field_name).getString(ret); }
+      Blob getBlob(const std::string& field_name) const
+        { return getValue(field_name).getBlob(); }
+      void getBlob(const std::string& field_name, Blob& ret) const
+        { return getValue(field_name).getBlob(ret); }
       Date getDate(const std::string& field_name) const
         { return getValue(field_name).getDate(); }
       Time getTime(const std::string& field_name) const

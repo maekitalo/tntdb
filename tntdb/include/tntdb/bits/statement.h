@@ -25,6 +25,7 @@
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
+#include <tntdb/blob.h>
 
 namespace tntdb
 {
@@ -136,6 +137,8 @@ namespace tntdb
       Statement& setString(const std::string& col, const char* data)
         { data == 0 ? stmt->setNull(col)
                     : stmt->setString(col, data); return *this; }
+      Statement& setBlob(const std::string& col, const Blob& data)
+        { stmt->setString(col, data.getString()); return *this; }
       /**
        * Sets the hostvariable with the given name to a date value.
        */
@@ -188,6 +191,8 @@ namespace tntdb
                         : stmt->setDatetime(col, data); return *this; }
       Statement& set(const std::string& col, const Decimal& data)
         { stmt->setDecimal(col, data); return *this; }
+      Statement& set(const std::string& col, const Blob& data)
+        { stmt->setString(col, data.getString()); return *this; }
       //@}
 
       /// statement-execution-methods
