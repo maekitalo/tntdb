@@ -25,22 +25,51 @@ log_define("tntdb.connectionpool")
 
 namespace tntdb
 {
+  ////////////////////////////////////////////////////////////////////////
+  // Connector
+  //
   Connection* ConnectionPool::Connector::operator() ()
   {
     log_debug("create new connection for url \"" << url << '"');
     return new Connection(tntdb::connect(url));
   }
 
-  ConnectionPool::~ConnectionPool()
+  ////////////////////////////////////////////////////////////////////////
+  // ConnectionPool
+  //
+  Connection ConnectionPool::connect()
+  {
+    log_debug("ConnectionPool::connect()");
+
+    log_debug("current pool-size " << getCurrentSize());
+
+    while (true)
+    {
+      Connection conn(new PoolConnection(pool.get()));
+
+      if (conn.ping())
+        return conn;
+
+      // a pool-connection don't put itself back into the pool after a failed ping
+      log_warn("drop dead connection from pool");
+    }
+
+    return Connection();  // never reached
+  }
+
+  ////////////////////////////////////////////////////////////////////////
+  // ConnectionPools
+  //
+  ConnectionPools::~ConnectionPools()
   {
     cxxtools::MutexLock lock(mutex);
     for (PoolsType::iterator it = pools.begin(); it != pools.end(); ++it)
       delete it->second;
   }
 
-  Connection ConnectionPool::connect(const std::string& url)
+  Connection ConnectionPools::connect(const std::string& url)
   {
-    log_debug("ConnectionPool::connect(\"" << url << "\")");
+    log_debug("ConnectionPools::connect(\"" << url << "\")");
 
     PoolsType::iterator it;
 
@@ -50,7 +79,7 @@ namespace tntdb
       if (it == pools.end())
       {
         log_debug("create pool for url \"" << url << "\" with " << maxcount << " connections");
-        PoolType* pool = new PoolType(maxcount, Connector(url));
+        PoolType* pool = new PoolType(url, maxcount);
         it = pools.insert(PoolsType::value_type(url, pool)).first;
       }
       else
@@ -58,23 +87,10 @@ namespace tntdb
     }
 
     log_debug("current pool-size " << it->second->getCurrentSize());
-
-    while (it->second->getCurrentSize() > 0)
-    {
-      log_debug("fetch connection from pool");
-      Connection conn(new PoolConnection(it->second->get()));
-      if (conn.ping())
-        return conn;
-
-      // a pool-connection don't put itself back into the pool after a failed ping
-      log_warn("drop dead connection from pool");
-    }
-
-    log_debug("create new connection in pool");
-    return Connection(new PoolConnection(it->second->get()));
+    return it->second->connect();
   }
 
-  void ConnectionPool::drop(unsigned keep)
+  void ConnectionPools::drop(unsigned keep)
   {
     log_debug("drop(" << keep << ')');
 
@@ -87,7 +103,7 @@ namespace tntdb
     }
   }
 
-  void ConnectionPool::drop(const std::string& url, unsigned keep)
+  void ConnectionPools::drop(const std::string& url, unsigned keep)
   {
     log_debug("drop(\"" << url << "\", " << keep << ')');
 
@@ -111,7 +127,7 @@ namespace tntdb
       log_debug("pool \"" << url << "\" not found");
   }
 
-  unsigned ConnectionPool::getCurrentSize(const std::string& url) const
+  unsigned ConnectionPools::getCurrentSize(const std::string& url) const
   {
     cxxtools::MutexLock lock(mutex);
 
@@ -120,7 +136,7 @@ namespace tntdb
                              : it->second->getCurrentSize();
   }
 
-  void ConnectionPool::setMaxSize(unsigned m)
+  void ConnectionPools::setMaximumSize(unsigned m)
   {
     cxxtools::MutexLock lock(mutex);
     maxcount = m;

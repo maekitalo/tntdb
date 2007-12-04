@@ -99,31 +99,31 @@ namespace tntdb
     return libraryManager.connect(libraryUrl);
   }
 
-  static ConnectionPool connectionPool;
+  static ConnectionPools connectionPools;
 
   Connection connectCached(const std::string& url)
   {
     log_debug("connectCached(\"" << url << "\")");
-    return connectionPool.connect(url);
+    return connectionPools.connect(url);
   }
 
   void dropCached(unsigned keep)
   {
-    connectionPool.drop(keep);
+    connectionPools.drop(keep);
   }
 
   void dropCached(const std::string& url, unsigned keep)
   {
-    connectionPool.drop(url, keep);
+    connectionPools.drop(url, keep);
   }
 
   void setMaxPoolSize(unsigned max)
   {
-    connectionPool.setMaxSize(max);
+    connectionPools.setMaximumSize(max);
   }
 
   unsigned getMaxPoolSize()
   {
-    return connectionPool.getMaxSize();
+    return connectionPools.getMaximumSize();
   }
 }

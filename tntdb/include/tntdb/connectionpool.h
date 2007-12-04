@@ -28,11 +28,12 @@ namespace tntdb
 {
   class Connection;
 
-  class ConnectionPool : private NonCopyable
+  class ConnectionPool
   {
       class Connector
       {
           std::string url;
+
         public:
           Connector(const std::string& url_)
             : url(url_)
@@ -41,10 +42,35 @@ namespace tntdb
           Connection* operator() ();
       };
 
+       typedef cxxtools::Pool<Connection, Connector> PoolType;
+       PoolType pool;
+
     public:
-      typedef cxxtools::Pool<Connection, Connector> PoolType;
-      typedef std::map<std::string, PoolType*> PoolsType;
       typedef PoolType::PoolObject PoolObjectType;
+
+    public:
+      explicit ConnectionPool(const std::string& url, unsigned maxcount = 0)
+        : pool(maxcount, Connector(url))
+        { }
+
+      Connection connect();
+
+      /**
+       * Releases unused connections. Keeps the given number of
+       * connections.
+       */
+      void drop(unsigned keep = 0)     { pool.drop(keep); }
+
+      unsigned getMaximumSize()        { return pool.getMaximumSize(); }
+      void setMaximumSize(unsigned m)  { pool.setMaximumSize(m); }
+      unsigned getCurrentSize() const  { return pool.getCurrentSize(); }
+  };
+
+  class ConnectionPools : private NonCopyable
+  {
+    public:
+      typedef ConnectionPool PoolType;
+      typedef std::map<std::string, PoolType*> PoolsType;
 
     private:
       PoolsType pools;
@@ -52,10 +78,10 @@ namespace tntdb
       mutable cxxtools::Mutex mutex;
 
     public:
-      explicit ConnectionPool(unsigned maxcount_ = 0)
+      explicit ConnectionPools(unsigned maxcount_ = 0)
         : maxcount(maxcount_)
         { }
-      ~ConnectionPool();
+      ~ConnectionPools();
 
       Connection connect(const std::string& url);
 
@@ -70,8 +96,8 @@ namespace tntdb
        */
       void drop(const std::string& url, unsigned keep = 0);
 
-      unsigned getMaxSize()            { return maxcount; }
-      void setMaxSize(unsigned m);
+      unsigned getMaximumSize()            { return maxcount; }
+      void setMaximumSize(unsigned m);
       unsigned getCurrentSize(const std::string& url) const;
   };
 
