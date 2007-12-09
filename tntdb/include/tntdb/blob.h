@@ -77,10 +77,10 @@ namespace tntdb
       { return !operator== (b); }
 
       const char* data() const
-      { dataptr.getPointer() ? dataptr->data() : 0; }
+      { return dataptr.getPointer() ? dataptr->data() : 0; }
 
       unsigned size() const
-      { dataptr.getPointer() ? dataptr->size() : 0; }
+      { return dataptr.getPointer() ? dataptr->size() : 0; }
 
   };
 }
