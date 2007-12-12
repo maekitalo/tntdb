@@ -24,17 +24,24 @@
 #include <tntdb/value.h>
 #include <tntdb/statement.h>
 #include <tntdb/blob.h>
+#include <tntdb/error.h>
 #include <cxxtools/loginit.h>
 #include <cxxtools/hdstream.h>
+#include <cxxtools/arg.h>
 
 class Tester
 {
     tntdb::Connection conn;
+    bool keep;
 
   public:
     Tester(const std::string& dburl)
-      : conn(tntdb::connect(dburl))
+      : conn(tntdb::connect(dburl)),
+        keep(false)
       { }
+
+    void setKeep(bool sw = true)   { keep = sw; }
+    bool isKeep() const            { return keep; }
 
     void createTables();
     void insertDataStmt();
@@ -55,12 +62,19 @@ void Tester::createTables()
 {
   std::cout << "create tables" << std::endl;
 
-  conn.execute(
-    "create table tab1 ("
-    "  a integer not null primary key,"
-    "  b varchar(255) not null)" );
+  try
+  {
+    conn.execute(
+      "create table tab1 ("
+      "  a integer not null primary key,"
+      "  b varchar(255) not null)" );
 
-  std::cout << "table tab1 created" << std::endl;
+    std::cout << "table tab1 created" << std::endl;
+  }
+  catch (const tntdb::Error& e)
+  {
+    std::cerr << "create table failed with error message: " << e.what() << std::endl;
+  }
 }
 
 void Tester::insertDataStmt()
@@ -104,7 +118,7 @@ void Tester::testSelect()
   {
     int a = (*it)[0];
     std::string b = (*it)[1];
-    std::cout << "a=" << a << "\tb=" << b << std::endl;
+    std::cout << "a=" << a << "\tb=" << b << " len(b)=" << b.size() << std::endl;
   }
 
   std::cout << "selected" << std::endl;
@@ -238,6 +252,8 @@ void Tester::testBlob()
   o << blob2.getString() << std::flush;
 
   std::cout << "blob1==blob2: " << (blob1 == blob2) << " size=" << blob2.size() << std::endl;
+  if (blob1 != blob2)
+    std::cerr << "blob failed" << std::endl;
 }
 
 void Tester::dropTables()
@@ -259,13 +275,19 @@ void Tester::test()
   testCursor();
   testCursorByName();
   testBlob();
-  dropTables();
+  if (!keep)
+    dropTables();
+  else
+    std::cout << "drop tables skipped" << std::endl;
 }
 
 int main(int argc, char* argv[])
 {
   try
   {
+    cxxtools::Arg<bool> keep(argc, argv, 'k');
+    cxxtools::Arg<bool> droponly(argc, argv, 'd');
+
     log_init();
 
     if (argc < 2)
@@ -275,7 +297,11 @@ int main(int argc, char* argv[])
     }
 
     Tester tester(argv[1]);
-    tester.test();
+    tester.setKeep(keep);
+    if (droponly)
+      tester.dropTables();
+    else
+      tester.test();
     std::cout << "success" << std::endl;
   }
   catch (const std::exception& e)

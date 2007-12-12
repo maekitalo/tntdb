@@ -506,7 +506,7 @@ namespace tntdb
           break;
 
         default:
-          ret = data.data();
+          ret.assign(data.data(), len > 0 ? len - 1 : 0);
       }
     }
 
