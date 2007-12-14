@@ -1,4 +1,4 @@
-AC_INIT(tntdb, 0.9.4, [Tommi Maekitalo <tommi@tntnet.org>])
+AC_INIT(tntdb, 0.9.5, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 
 abi_current=0
@@ -172,14 +172,15 @@ AM_CONDITIONAL(MAKE_ORACLE, test "$with_oracle" = yes)
 #
 # Doxygen-documentation
 #
+AC_ARG_VAR(DOXYGEN, [doxygen documentation generator])
 AC_ARG_WITH(
   [doxygen],
   AS_HELP_STRING([--with-doxygen],
                  [generate doxygen documentation]),
-  [DOXYGEN=$withval],
-  [DOXYGEN=doxygen])
+  [doxygenFlag=$withval],
+  [doxygenFlag=doxygen])
 
-if test "$DOXYGEN" != "no"
+if test "$doxygenFlag" != "no"
   then
     AC_CHECK_PROG(DOXYGEN, doxygen, doxygen)
     if test "$DOXYGEN" == ""
@@ -189,7 +190,7 @@ if test "$DOXYGEN" != "no"
     AC_DEFINE(WITH_DOXYGEN, 1, [build doxygen documentation])
   fi
 
-AM_CONDITIONAL(MAKE_DOXYGEN, test "$DOXYGEN" != "no")
+AM_CONDITIONAL(MAKE_DOXYGEN, test "$doxygenFlag" != "no")
 AC_SUBST(DOXYGEN)
 
 # driverlibdir
