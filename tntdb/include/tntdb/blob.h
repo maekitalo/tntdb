@@ -21,6 +21,7 @@
 
 #include <cxxtools/smartptr.h>
 #include <cxxtools/refcounted.h>
+#include <string> // remove
 #include <cstddef>
 #include <cstring>
 #include <cstdlib>
@@ -39,7 +40,7 @@ namespace tntdb
     BlobData, is provided, that uses malloc()/free() to aquire space for the
     blob-data and new/delete for the implementation class.
 */
-class IBlob : public RefCounted
+class IBlob : public cxxtools::RefCounted
 {
     public:
         /** @brief Destructor
@@ -93,7 +94,7 @@ class IBlob : public RefCounted
         { }
 
         IBlob(size_t refs)
-        : RefCounted(refs)
+        : cxxtools::RefCounted(refs)
         , _data(0)
         , _size(0)
         { }
@@ -171,6 +172,7 @@ static struct BlobDataInitializer
 class Blob
 {
     //! @brief Release policy for SmartPtr
+    template <typename T>
     struct Release
     {
         void destroy(IBlob* blob)
@@ -178,7 +180,7 @@ class Blob
     };
 
     //! @brief Pointer to shared data
-    SmartPtr< IBlob, InternalRefCounted<IBlob>, Release > m_data;
+    cxxtools::SmartPtr< IBlob, cxxtools::InternalRefCounted, Release > m_data;
 
 public:
     Blob()
@@ -207,12 +209,26 @@ public:
     void assign(const char* data, size_t len)
     {
         // copy-on-write
-        if ( m_data->refs() > 1 )
+        if ( m_data->getRefs() > 1 )
         {
             m_data = m_data->create();
         }
 
         m_data->assign(data, len);
+    }
+
+    //! OBSOLETE, just to make it compile
+    const std::string& getString() const
+    {
+        static std::string s;
+        return s;
+    }
+
+    //! OBSOLETE, just to make it compile
+    std::string& getStringRef()
+    {
+        static std::string s;
+        return s;
     }
 
     bool operator==(const Blob& b) const
