@@ -21,10 +21,8 @@
 
 #include <cxxtools/smartptr.h>
 #include <cxxtools/refcounted.h>
-#include <string> // remove
 #include <cstddef>
 #include <cstring>
-#include <cstdlib>
 
 namespace tntdb
 {
@@ -37,8 +35,7 @@ namespace tntdb
     IBlob::assign, IBlob::create and IBlob::destroy. The main purpose of these
     methods is to customize memory allocation of blob-data, aswell as the shared
     implementation class derived from IBlob. A default implementation, called
-    BlobData, is provided, that uses malloc()/free() to aquire space for the
-    blob-data and new/delete for the implementation class.
+    BlobImpl, is provided, that uses new/delete and the implementation class.
 */
 class IBlob : public cxxtools::RefCounted
 {
@@ -61,7 +58,6 @@ class IBlob : public cxxtools::RefCounted
             instance.
         */
         virtual IBlob* create() const = 0;
-
 
         /** @brief Destroy a value implementation
 
@@ -93,12 +89,6 @@ class IBlob : public cxxtools::RefCounted
         , _size(0)
         { }
 
-        IBlob(size_t refs)
-        : cxxtools::RefCounted(refs)
-        , _data(0)
-        , _size(0)
-        { }
-
         char* _data;
         size_t _size;
 };
@@ -106,29 +96,34 @@ class IBlob : public cxxtools::RefCounted
 /** @brief Default Blob value implementation
 
     This implementation uses new/delete to create and destroy
-    the shared objects and malloc/free to allocate memory for
+    the shared objects and new/delete to allocate memory for
     the blob-data.
 */
-class BlobData : public IBlob
+class BlobImpl : public IBlob
 {
     public:
-        BlobData()
+        BlobImpl()
         { }
 
-        ~BlobData()
+        ~BlobImpl()
         {
-            if(_data)
-                std::free(_data);
+            delete[] _data;
         }
 
         virtual void assign(const char* data, size_t len)
         {
+            if (len == 0)
+            {
+                delete[] _data;
+                _data = 0;
+                _size = 0;
+                return;
+            }
+
             if( len > this->size() )
             {
-                if(_data)
-                    std::free(_data);
-
-                _data = (char*)std::malloc(len);
+                delete[] _data;
+                _data = new char[len];
             }
 
             std::memcpy(_data, data, len);
@@ -136,25 +131,25 @@ class BlobData : public IBlob
         }
 
         virtual IBlob* create() const
-        { return new BlobData(); }
+        { return new BlobImpl(); }
 
         virtual void destroy()
         { delete this; }
 
-        static BlobData* emptyInstance()
+        static BlobImpl* emptyInstance()
         {
-            static BlobData empty(1);
+            static BlobImpl empty(1);
             return &empty;
         }
 
     protected:
-        BlobData(size_t refs)
-        : IBlob(refs)
-        {}
+        // ctor, which constructs a instance, with a reference-counter of 1
+        BlobImpl(int)
+        { addRef(); }
 };
 
 
-/** @internal Initialize statics in BlobData during static initialization
+/** @internal Initialize statics in BlobImpl during static initialization
 
     Thread-safety.
 */
@@ -162,9 +157,9 @@ static struct BlobDataInitializer
 {
     BlobDataInitializer()
     {
-        BlobData::emptyInstance();
+        BlobImpl::emptyInstance();
     }
-} pt_blobdata_initializer;
+} tntdb_blobdata_initializer;
 
 
 /** @brief Binary large objects
@@ -184,25 +179,24 @@ class Blob
 
 public:
     Blob()
-    : m_data( BlobData::emptyInstance() )
+    : m_data( BlobImpl::emptyInstance() )
     { }
 
     /** Construct a Blob with data of a given length
 
-        Constructs a Blob using a default implementation using malloc/free
-        to manage the blob-data and new/delete to manage the shared data
-        object. The first \a len bytes of the data pointed to by \a data are
-        copied to this Blob.
+        Constructs a Blob using a default implementation using new/delete
+        to manage the blob-data and the shared data object. The first \a len
+        bytes of the data pointed to by \a data are copied to this Blob.
     */
     Blob(const char* data, size_t len)
-    : m_data( new BlobData() )
+    : m_data( new BlobImpl() )
     {
         m_data->assign(data, len);
     }
 
     /** Construct a Blob to use a customized implementation
     */
-    Blob(IBlob* b)
+    explicit Blob(IBlob* b)
     : m_data(b)
     { }
 
@@ -217,23 +211,9 @@ public:
         m_data->assign(data, len);
     }
 
-    //! OBSOLETE, just to make it compile
-    const std::string& getString() const
-    {
-        static std::string s;
-        return s;
-    }
-
-    //! OBSOLETE, just to make it compile
-    std::string& getStringRef()
-    {
-        static std::string s;
-        return s;
-    }
-
     bool operator==(const Blob& b) const
     {
-        return *m_data == *m_data;
+        return *m_data == *b.m_data;
     }
 
     bool operator!=(const Blob& b) const
@@ -245,79 +225,18 @@ public:
     */
     const char* data() const
     {
-    return  m_data->data();
+        return  m_data->data();
     }
 
     /** Returns the size of the data
     */
     size_t size() const
     {
-    return m_data->size();
+        return m_data->size();
     }
 
 };
 
-/*
-  class Blob
-  {
-      cxxtools::SmartPtr<std::string, cxxtools::ExternalRefCounted> dataptr;
-
-    public:
-      Blob()  {}
-      Blob(const char* data, unsigned len)
-        : dataptr(new std::string(data, len))
-        { }
-
-      void assign(const char* data, unsigned len)
-      {
-        if (!dataptr.getPointer() || dataptr.getRefs() > 1)
-          dataptr = new std::string(data, len);
-        else
-          dataptr->assign(data, len);
-      }
-
-      void assign(const std::string& str)
-      {
-        if (!dataptr.getPointer() || dataptr.getRefs() > 1)
-          dataptr = new std::string(str);
-        else
-          dataptr->assign(str);
-      }
-
-      std::string& getStringRef()
-      {
-        if (!dataptr.getPointer() || dataptr.getRefs() > 1)
-          dataptr = new std::string();
-        return *dataptr;
-      }
-
-      const std::string& getString() const
-      {
-        if (!dataptr.getPointer())
-          const_cast<Blob*>(this)->dataptr = new std::string();
-        else if (dataptr.getRefs() > 1)
-          const_cast<Blob*>(this)->dataptr = new std::string(*dataptr);
-        return *dataptr;
-      }
-
-      bool operator== (const Blob& b) const
-      {
-        return dataptr.getPointer() ? b.dataptr.getPointer() ? *dataptr == *b.dataptr
-                                                             : dataptr->size() == 0
-                                    : b.dataptr->size() == 0;
-      }
-
-      bool operator!= (const Blob& b) const
-      { return !operator== (b); }
-
-      const char* data() const
-      { return dataptr.getPointer() ? dataptr->data() : 0; }
-
-      unsigned size() const
-      { return dataptr.getPointer() ? dataptr->size() : 0; }
-
-  };
-*/
 }
 
 #endif // TNTDB_BLOB_H

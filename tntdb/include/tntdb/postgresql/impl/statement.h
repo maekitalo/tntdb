@@ -70,13 +70,14 @@ namespace tntdb
 
         cxxtools::Dynbuffer<const char*> paramValues;
         cxxtools::Dynbuffer<int> paramLengths;
+        cxxtools::Dynbuffer<int> paramFormats;
 
         // helper-methods for setting values
         template <typename T>
         void setValue(const std::string& col, T data);
 
         template <typename T>
-        void setStringValue(const std::string& col, T data);
+        void setStringValue(const std::string& col, T data, bool binary = false);
 
         template <typename T>
         void setIsoValue(const std::string& col, T data);
@@ -108,6 +109,7 @@ namespace tntdb
         void setDouble(const std::string& col, double data);
         void setChar(const std::string& col, char data);
         void setString(const std::string& col, const std::string& data);
+        void setBlob(const std::string& col, const Blob& data);
         void setDate(const std::string& col, const Date& data);
         void setTime(const std::string& col, const Time& data);
         void setDatetime(const std::string& col, const Datetime& data);
@@ -123,6 +125,8 @@ namespace tntdb
         int getNParams()               { return values.size(); }
         const char* const* getParamValues();
         const int* getParamLengths();
+        const int* getParamFormats()
+            { return paramFormats.data(); }
         PGconn* getPGConn();
         Connection* getConnection()    { return conn; }
     };

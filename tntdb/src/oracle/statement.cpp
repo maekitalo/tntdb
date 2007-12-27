@@ -245,6 +245,20 @@ namespace tntdb
       checkError(ret, "OCIBindByName");
     }
 
+    void Statement::setBlob(const std::string& col, const Blob& data)
+    {
+      Bind &b = getBind(col);
+      b.setData(data);
+
+      log_debug("OCIBindByName, setBlob(\"" << col << "\", data{" << data.size() << "})");
+      sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
+        reinterpret_cast<const text*>(col.data()), col.size(),
+        b.data.data(), data.size(),
+        SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
+
+      checkError(ret, "OCIBindByName");
+    }
+
     void Statement::setDate(const std::string& col, const Date& data)
     {
       Bind &b = getBind(col);

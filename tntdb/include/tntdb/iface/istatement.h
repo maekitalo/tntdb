@@ -32,6 +32,7 @@ namespace tntdb
   class Datetime;
   class Decimal;
   class ICursor;
+  class Blob;
 
   class IStatement : public cxxtools::RefCounted
   {
@@ -53,6 +54,7 @@ namespace tntdb
       virtual void setDouble(const std::string& col, double data) = 0;
       virtual void setChar(const std::string& col, char data) = 0;
       virtual void setString(const std::string& col, const std::string& data) = 0;
+      virtual void setBlob(const std::string& col, const Blob& data) = 0;
       virtual void setDate(const std::string& col, const Date& data) = 0;
       virtual void setTime(const std::string& col, const Time& data) = 0;
       virtual void setDatetime(const std::string& col, const Datetime& data) = 0;

@@ -95,6 +95,11 @@ namespace tntdb
       mysql::getString(mysql_bind, ret);
     }
 
+    void BoundValue::getBlob(Blob& ret) const
+    {
+      mysql::getBlob(mysql_bind, ret);
+    }
+
     Date BoundValue::getDate() const
     {
       return mysql::getDate(mysql_bind);

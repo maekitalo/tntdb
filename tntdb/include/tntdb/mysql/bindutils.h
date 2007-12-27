@@ -24,6 +24,7 @@
 
 namespace tntdb
 {
+  class Blob;
   class Date;
   class Time;
   class Datetime;
@@ -45,6 +46,7 @@ namespace tntdb
     void setChar(MYSQL_BIND& value, char data);
     void setString(MYSQL_BIND& value, unsigned long& length, const char* data);
     void setString(MYSQL_BIND& value, unsigned long& length, const std::string& data);
+    void setBlob(MYSQL_BIND& value, unsigned long& length, const Blob& data);
     void setDate(MYSQL_BIND& value, const Date& data);
     void setTime(MYSQL_BIND& value, const Time& data);
     void setDatetime(MYSQL_BIND& value, const Datetime& data);
@@ -63,6 +65,7 @@ namespace tntdb
     double       getDouble(const MYSQL_BIND& value);
     char         getChar(const MYSQL_BIND& value);
     void         getString(const MYSQL_BIND& value, std::string& ret);
+    void         getBlob(const MYSQL_BIND& value, Blob& ret);
     Date         getDate(const MYSQL_BIND& value);
     Time         getTime(const MYSQL_BIND& value);
     Datetime     getDatetime(const MYSQL_BIND& value);

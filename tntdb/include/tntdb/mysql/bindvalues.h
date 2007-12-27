@@ -84,6 +84,8 @@ namespace tntdb
           { mysql::setString(values[n], bindAttributes[n].length, data); }
         void setString(unsigned n, const std::string& data)
           { mysql::setString(values[n], bindAttributes[n].length, data); }
+        void setBlob(unsigned n, const Blob& data)
+          { mysql::setBlob(values[n], bindAttributes[n].length, data); }
         void setDate(unsigned n, const Date& data)
           { mysql::setDate(values[n], data); }
         void setTime(unsigned n, const Time& data)

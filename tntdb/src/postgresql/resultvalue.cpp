@@ -121,6 +121,17 @@ namespace tntdb
       ret.assign(value, len);
     }
 
+    void ResultValue::getBlob(Blob& ret) const
+    {
+      char* value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
+      int len = PQgetlength(getPGresult(), row->getRowNumber(), tup_num);
+      log_debug("PQgetlength returns " << len);
+      size_t to_len;
+      unsigned char* data = PQunescapeBytea(reinterpret_cast<unsigned char*>(value), &to_len);
+      ret.assign(reinterpret_cast<char*>(data), to_len);
+      PQfreemem(data);
+    }
+
     Date ResultValue::getDate() const
     {
       std::string value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);

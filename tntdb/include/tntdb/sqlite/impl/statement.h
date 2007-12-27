@@ -61,6 +61,7 @@ namespace tntdb
         virtual void setDouble(const std::string& col, double data);
         virtual void setChar(const std::string& col, char data);
         virtual void setString(const std::string& col, const std::string& data);
+        virtual void setBlob(const std::string& col, const Blob& data);
         virtual void setDate(const std::string& col, const Date& data);
         virtual void setTime(const std::string& col, const Time& data);
         virtual void setDatetime(const std::string& col, const Datetime& data);

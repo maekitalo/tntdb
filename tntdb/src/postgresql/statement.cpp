@@ -95,6 +95,7 @@ namespace tntdb
 
       paramValues.reserve(se.getMaxIdx());
       paramLengths.reserve(se.getMaxIdx());
+      paramFormats.reserve(se.getMaxIdx());
     }
 
     Statement::~Statement()
@@ -163,9 +164,9 @@ namespace tntdb
         doPrepare();
 
       log_debug("PQexecPrepared(" << getPGConn() << ", \"" << stmtName
-        << "\", " << values.size() << ", paramValues, paramLengths, 0, 0)");
+        << "\", " << values.size() << ", paramValues, paramLengths, paramFormats, 0)");
       PGresult* result = PQexecPrepared(getPGConn(), stmtName.c_str(),
-        getNParams(), getParamValues(), getParamLengths(), 0, 0);
+        getNParams(), getParamValues(), getParamLengths(), getParamFormats(), 0);
 
       if (isError(result))
       {
@@ -187,6 +188,7 @@ namespace tntdb
         std::ostringstream v;
         v << data;
         values[it->second].setValue(v.str());
+        paramFormats[it->second] = 0;
       }
     }
 
@@ -202,6 +204,7 @@ namespace tntdb
         v.precision(24);
         v << data;
         values[it->second].setValue(v.str());
+        paramFormats[it->second] = 0;
       }
     }
 
@@ -217,6 +220,7 @@ namespace tntdb
         v.precision(24);
         v << data;
         values[it->second].setValue(v.str());
+        paramFormats[it->second] = 0;
       }
     }
 
@@ -232,17 +236,21 @@ namespace tntdb
         v.precision(24);
         v << data;
         values[it->second].setValue(v.str());
+        paramFormats[it->second] = 0;
       }
     }
     
     template <typename T>
-    void Statement::setStringValue(const std::string& col, T data)
+    void Statement::setStringValue(const std::string& col, T data, bool binary)
     {
       hostvarMapType::const_iterator it = hostvarMap.find(col);
       if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
       else
+      {
         values[it->second].setValue(data);
+        paramFormats[it->second] = binary;
+      }
     }
 
     template <typename T>
@@ -252,7 +260,10 @@ namespace tntdb
       if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
       else
+      {
         values[it->second].setValue(data.getIso());
+        paramFormats[it->second] = 0;
+      }
     }
 
 #ifndef HAVE_PQPREPARE
@@ -370,6 +381,13 @@ namespace tntdb
       log_debug("setString(\"" << col << "\", \"" << data << "\")");
       setStringValue(col, data);
       SET_TYPE(col, "text");
+    }
+
+    void Statement::setBlob(const std::string& col, const Blob& data)
+    {
+      log_debug("setBlob(\"" << col << "\", Blob)");
+      setStringValue(col, std::string(data.data(), data.size()), true);
+      SET_TYPE(col, "blob");
     }
 
     void Statement::setDate(const std::string& col, const Date& data)

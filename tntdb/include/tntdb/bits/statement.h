@@ -138,7 +138,7 @@ namespace tntdb
         { data == 0 ? stmt->setNull(col)
                     : stmt->setString(col, data); return *this; }
       Statement& setBlob(const std::string& col, const Blob& data)
-        { stmt->setString(col, data.getString()); return *this; }
+        { stmt->setBlob(col, data); return *this; }
       /**
        * Sets the hostvariable with the given name to a date value.
        */
@@ -192,7 +192,7 @@ namespace tntdb
       Statement& set(const std::string& col, const Decimal& data)
         { stmt->setDecimal(col, data); return *this; }
       Statement& set(const std::string& col, const Blob& data)
-        { stmt->setString(col, data.getString()); return *this; }
+        { stmt->setBlob(col, data); return *this; }
       //@}
 
       /// statement-execution-methods

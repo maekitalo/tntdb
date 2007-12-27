@@ -18,6 +18,7 @@
 
 #include <tntdb/mysql/bindutils.h>
 #include <tntdb/mysql/error.h>
+#include <tntdb/blob.h>
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
@@ -323,6 +324,17 @@ namespace tntdb
       reserve(bind, length + 1);
       memcpy(static_cast<char*>(bind.buffer), data, length + 1);
 
+      bind.buffer_type = MYSQL_TYPE_BLOB;
+      bind.is_null = 0;
+      bind.length = &length;
+    }
+
+    void setBlob(MYSQL_BIND& bind, unsigned long& length, const Blob& data)
+    {
+      length = data.size();
+      reserve(bind, length);
+      memcpy(static_cast<char*>(bind.buffer), data.data(), length);
+
       bind.buffer_type = MYSQL_TYPE_VAR_STRING;
       bind.is_null = 0;
       bind.length = &length;
@@ -592,6 +604,29 @@ namespace tntdb
           }
           ret.assign(s.str());
         }
+      }
+    }
+
+    void getBlob(const MYSQL_BIND& bind, Blob& ret)
+    {
+      if (isNull(bind))
+        throw NullValue();
+
+      switch (bind.buffer_type)
+      {
+        case MYSQL_TYPE_STRING:
+        case MYSQL_TYPE_VAR_STRING:
+        case MYSQL_TYPE_TINY_BLOB:
+        case MYSQL_TYPE_BLOB:
+        case MYSQL_TYPE_MEDIUM_BLOB:
+        case MYSQL_TYPE_LONG_BLOB:
+          ret.assign(static_cast<const char*>(bind.buffer),
+                             *bind.length);
+          break;
+
+        default:
+          log_error("type-error in getBlob, type=" << bind.buffer_type);
+          throw TypeError("type-error in getBlob");
       }
     }
 

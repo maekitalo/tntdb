@@ -17,6 +17,7 @@
  */
 
 #include <tntdb/mysql/impl/rowvalue.h>
+#include <tntdb/blob.h>
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
@@ -122,6 +123,11 @@ namespace tntdb
     }
 
     void RowValue::getString(std::string& ret) const
+    {
+      ret.assign(row[col], len);
+    }
+
+    void RowValue::getBlob(Blob& ret) const
     {
       ret.assign(row[col], len);
     }

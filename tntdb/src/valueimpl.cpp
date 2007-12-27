@@ -21,6 +21,7 @@
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
 #include <tntdb/decimal.h>
+#include <tntdb/blob.h>
 #include <tntdb/error.h>
 #include <cxxtools/log.h>
 #include <sstream>
@@ -141,6 +142,13 @@ namespace tntdb
     if (null)
       throw NullValue();
     ret.assign(data);
+  }
+
+  void ValueImpl::getBlob(Blob& ret) const
+  {
+    if (null)
+      throw NullValue();
+    ret.assign(data.data(), data.size());
   }
 
   Date ValueImpl::getDate() const

@@ -61,6 +61,7 @@ namespace tntdb
         void setDouble(const std::string& col, double data);
         void setChar(const std::string& col, char data);
         void setString(const std::string& col, const std::string& data);
+        void setBlob(const std::string& col, const Blob& data);
         void setDate(const std::string& col, const Date& data);
         void setTime(const std::string& col, const Time& data);
         void setDatetime(const std::string& col, const Datetime& data);

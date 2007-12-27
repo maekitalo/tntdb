@@ -311,6 +311,22 @@ namespace tntdb
         log_warn("hostvar \"" << col << "\" not found");
     }
 
+    void Statement::setBlob(const std::string& col, const Blob& data)
+    {
+      log_debug("statement " << stmt << " setBlob(\"" << col << "\", data {" << data.size() << "})");
+
+      bool found = false;
+      for (hostvarMapType::const_iterator it = hostvarMap.find(col);
+           it != hostvarMap.end() && it->first == col; ++it)
+      {
+        found = true;
+        inVars.setBlob(it->second, data);
+      }
+
+      if (!found)
+        log_warn("hostvar \"" << col << "\" not found");
+    }
+
     void Statement::setDate(const std::string& col, const Date& data)
     {
       log_debug("statement " << stmt << " setDate(\"" << col << "\", "

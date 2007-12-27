@@ -510,6 +510,29 @@ namespace tntdb
       }
     }
 
+    void Value::getBlob(Blob& ret) const
+    {
+      if (isNull())
+        throw NullValue();
+
+      switch (type)
+      {
+        case SQLT_DAT:
+        case SQLT_TIMESTAMP:
+        case SQLT_TIMESTAMP_TZ:
+        case SQLT_TIMESTAMP_LTZ:
+        case SQLT_INT:
+        case SQLT_UIN:
+        case SQLT_FLT:
+        case SQLT_NUM:
+        case SQLT_VNU:
+          throw TypeError();
+
+        default:
+          ret.assign(data.data(), len > 0 ? len - 1 : 0);
+      }
+    }
+
     Date Value::getDate() const
     {
       if (isNull())

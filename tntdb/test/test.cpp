@@ -43,7 +43,7 @@ class Tester
     void setKeep(bool sw = true)   { keep = sw; }
     bool isKeep() const            { return keep; }
 
-    void createTables();
+    void createTables(bool postgresql);
     void insertDataStmt();
     void testSelect();
     void testSelectRow();
@@ -55,19 +55,25 @@ class Tester
     void testBlob();
     void dropTables();
 
-    void test();
+    void test(bool postgresql);
 };
 
-void Tester::createTables()
+void Tester::createTables(bool postgresql)
 {
   std::cout << "create tables" << std::endl;
 
   try
   {
-    conn.execute(
-      "create table tab1 ("
-      "  a integer not null primary key,"
-      "  b varchar(255) not null)" );
+    if (postgresql)
+      conn.execute(
+        "create table tab1 ("
+        "  a integer not null primary key,"
+        "  b bytea not null)" );
+    else
+      conn.execute(
+        "create table tab1 ("
+        "  a integer not null primary key,"
+        "  b varchar(255) not null)" );
 
     std::cout << "table tab1 created" << std::endl;
   }
@@ -249,10 +255,12 @@ void Tester::testBlob()
   std::cout << "blob select" << std::endl;
   tntdb::Blob blob2 = conn.selectValue("select b from tab1 where a = 10").getBlob();
 
-  o << blob2.getString() << std::flush;
+  o << std::string(blob2.data(), blob2.size()) << std::flush;
 
-  std::cout << "blob1==blob2: " << (blob1 == blob2) << " size=" << blob2.size() << std::endl;
-  if (blob1 != blob2)
+  std::string blobData1(blob1.data(), blob1.size());
+  std::string blobData2(blob2.data(), blob2.size());
+  std::cout << "blob1==blob2: " << (blobData1 == blobData2) << " size=" << blobData2.size() << std::endl;
+  if (blobData1 != blobData2)
     std::cerr << "blob failed" << std::endl;
 }
 
@@ -263,9 +271,9 @@ void Tester::dropTables()
   std::cout << "table tab1 dropped" << std::endl;
 }
 
-void Tester::test()
+void Tester::test(bool postgresql)
 {
-  createTables();
+  createTables(postgresql);
   insertDataStmt();
   testSelect();
   testSelectRow();
@@ -287,6 +295,7 @@ int main(int argc, char* argv[])
   {
     cxxtools::Arg<bool> keep(argc, argv, 'k');
     cxxtools::Arg<bool> droponly(argc, argv, 'd');
+    cxxtools::Arg<bool> postgresql(argc, argv, 'p');
 
     log_init();
 
@@ -301,7 +310,7 @@ int main(int argc, char* argv[])
     if (droponly)
       tester.dropTables();
     else
-      tester.test();
+      tester.test(postgresql);
     std::cout << "success" << std::endl;
   }
   catch (const std::exception& e)

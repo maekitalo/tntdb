@@ -1,6 +1,9 @@
 2007-11-14 tommi@tntnet.org
   - get values by column name
 
+2007-10-07 tommi@tntnet.org
+  - replace tntdb::SmartPtr with cxxtools::SmartPtr
+
 2007-09-27 tommi@tntnet.org
   - build improvements for AIX
 

@@ -21,6 +21,7 @@
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
 #include <tntdb/decimal.h>
+#include <tntdb/blob.h>
 #include <tntdb/error.h>
 #include <cxxtools/log.h>
 
@@ -137,6 +138,25 @@ namespace tntdb
       {
         log_debug("empty string value - clear string");
         ret.clear();
+      }
+      else
+      {
+        log_debug("sqlite3_column_blob(" << getStmt() << ", " << iCol << ')');
+        const void* data = ::sqlite3_column_blob(getStmt(), iCol);
+
+        ret.assign(reinterpret_cast<const char*>(data), bytes);
+      }
+    }
+
+    void StmtValue::getBlob(Blob& ret) const
+    {
+      log_debug("sqlite3_column_bytes(" << getStmt() << ", " << iCol << ')');
+      int bytes = ::sqlite3_column_bytes(getStmt(), iCol);
+
+      if (bytes <= 0)
+      {
+        log_debug("empty value - clear blob");
+        ret.assign(0, 0);
       }
       else
       {

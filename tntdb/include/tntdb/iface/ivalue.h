@@ -28,6 +28,7 @@ namespace tntdb
   class Time;
   class Datetime;
   class Decimal;
+  class Blob;
   
   /// common inteface for resultvalues
   class IValue : public cxxtools::RefCounted
@@ -46,6 +47,7 @@ namespace tntdb
       virtual double getDouble() const = 0;
       virtual char getChar() const = 0;
       virtual void getString(std::string& ret) const = 0;
+      virtual void getBlob(Blob& ret) const = 0;
       virtual Date getDate() const = 0;
       virtual Time getTime() const = 0;
       virtual Datetime getDatetime() const = 0;

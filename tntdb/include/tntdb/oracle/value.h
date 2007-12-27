@@ -68,6 +68,7 @@ namespace tntdb
         virtual double getDouble() const;
         virtual char getChar() const;
         virtual void getString(std::string& ret) const;
+        virtual void getBlob(Blob& ret) const;
         virtual Date getDate() const;
         virtual Time getTime() const;
         virtual tntdb::Datetime getDatetime() const;

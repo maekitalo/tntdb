@@ -303,7 +303,24 @@ namespace tntdb
 
         log_debug("sqlite3_bind_blob(" << stmt << ", " << idx << ", " << data
           << ", " << data.size() << ", SQLITE_TRANSIENT)");
-        int ret = ::sqlite3_bind_blob(stmt, idx, data.c_str(), data.size(), SQLITE_TRANSIENT);
+        int ret = ::sqlite3_bind_blob(stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
+
+        if (ret != SQLITE_OK)
+          throw Execerror("sqlite3_bind_blob", stmt, ret);
+      }
+    }
+
+    void Statement::setBlob(const std::string& col, const Blob& data)
+    {
+      int idx = getBindIndex(col);
+      sqlite3_stmt* stmt = getBindStmt();
+      if (idx != 0)
+      {
+        reset();
+
+        log_debug("sqlite3_bind_blob(" << stmt << ", " << idx << ", data, "
+            << data.size() << ", SQLITE_TRANSIENT)");
+        int ret = ::sqlite3_bind_blob(stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
 
         if (ret != SQLITE_OK)
           throw Execerror("sqlite3_bind_blob", stmt, ret);
