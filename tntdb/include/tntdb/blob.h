@@ -1,5 +1,6 @@
 /* 
  * Copyright (C) 2007 Tommi Maekitalo
+ * Copyright (C) 2007-2008 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
