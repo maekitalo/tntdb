@@ -6,10 +6,10 @@ AM_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 if MAKE_SQLITE
 
-driver_LTLIBRARIES = tntdb-sqlite.la
+driver_LTLIBRARIES = tntdb1-sqlite.la
 
-tntdb_sqlite_la_SOURCES = $(sources)
-tntdb_sqlite_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) -lsqlite3 @SHARED_LIB_FLAG@
-tntdb_sqlite_la_LIBADD = $(top_srcdir)/src/libtntdb.la
+tntdb1_sqlite_la_SOURCES = $(sources)
+tntdb1_sqlite_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) -lsqlite3 @SHARED_LIB_FLAG@
+tntdb1_sqlite_la_LIBADD = $(top_srcdir)/src/libtntdb.la
 
 endif

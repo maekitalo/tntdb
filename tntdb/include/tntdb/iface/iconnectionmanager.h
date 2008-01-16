@@ -22,11 +22,13 @@
 #include <tntdb/noncopyable.h>
 #include <string>
 
+#define TNTDB_DRIVER_PRAEFIX connectionManager1_
+
 #define TNTDB_CONNECTIONMANAGER_DECLARE(drivername) \
-  extern "C" { extern tntdb::drivername::ConnectionManager connectionManager_ ## drivername; }
+  extern "C" { extern tntdb::drivername::ConnectionManager connectionManager1_ ## drivername; }
 
 #define TNTDB_CONNECTIONMANAGER_DEFINE(drivername) \
-  extern "C" { tntdb::drivername::ConnectionManager connectionManager_ ## drivername; }
+  extern "C" { tntdb::drivername::ConnectionManager connectionManager1_ ## drivername; }
 
 namespace tntdb
 {

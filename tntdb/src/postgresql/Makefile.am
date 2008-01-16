@@ -7,10 +7,10 @@ AM_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 if MAKE_POSTGRESQL
 
-driver_LTLIBRARIES = tntdb-postgresql.la
+driver_LTLIBRARIES = tntdb1-postgresql.la
 
-tntdb_postgresql_la_SOURCES = $(sources)
-tntdb_postgresql_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) @PG_LDFLAGS@ @SHARED_LIB_FLAG@
-tntdb_postgresql_la_LIBADD = $(top_srcdir)/src/libtntdb.la
+tntdb1_postgresql_la_SOURCES = $(sources)
+tntdb1_postgresql_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) @PG_LDFLAGS@ @SHARED_LIB_FLAG@
+tntdb1_postgresql_la_LIBADD = $(top_srcdir)/src/libtntdb.la
 
 endif

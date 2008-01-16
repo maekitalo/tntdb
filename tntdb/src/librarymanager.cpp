@@ -23,11 +23,14 @@
 #define DRIVERDIR "tntdb"
 #endif
 
+#define TNTDB_STRINGIFY(x) #x
+#define TNTDB_TOSTRING(x) TNTDB_STRINGIFY(x)
+
 log_define("tntdb.librarymanager")
 
 namespace tntdb
 {
-  static const std::string libraryPrefix = "tntdb-";
+  static const std::string libraryPrefix = "tntdb1-";
 
   LibraryManager::LibraryManager(const std::string& driverName)
   {
@@ -56,7 +59,7 @@ namespace tntdb
       lib = cxxtools::dl::Library(d.c_str());
     }
 
-    connectionManager = static_cast<IConnectionManager*>(lib.sym(("connectionManager_" + driverName).c_str()).getSym());
+    connectionManager = static_cast<IConnectionManager*>(lib.sym(( TNTDB_TOSTRING(TNTDB_DRIVER_PRAEFIX) + driverName).c_str()).getSym());
 
     log_debug("driver " << driverName << " loaded (" << lib.getHandle() << ") connectionManager=" << connectionManager);
   }
