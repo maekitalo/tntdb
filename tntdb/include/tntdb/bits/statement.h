@@ -25,7 +25,6 @@
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
-#include <tntdb/blob.h>
 
 namespace tntdb
 {

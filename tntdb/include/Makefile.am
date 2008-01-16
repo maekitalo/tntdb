@@ -1,4 +1,5 @@
 nobase_include_HEADERS = \
+	tntdb/bits/blob.h \
 	tntdb/bits/connection.h \
 	tntdb/bits/result.h \
 	tntdb/bits/result_iterator.h \
@@ -15,6 +16,7 @@ nobase_include_HEADERS = \
 	tntdb/datetime.h \
 	tntdb/decimal.h \
 	tntdb/error.h \
+	tntdb/iface/iblob.h \
 	tntdb/iface/iconnection.h \
 	tntdb/iface/iconnectionmanager.h \
 	tntdb/iface/icursor.h \

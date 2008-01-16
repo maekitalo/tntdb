@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2007 Tommi Maekitalo
+ * Copyright (C) 2007-2008 Tommi Maekitalo
  * Copyright (C) 2007-2008 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
@@ -17,10 +17,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TNTDB_BLOB_H
-#define TNTDB_BLOB_H
+#include <tntdb/blob.h>
 
-#include <tntdb/bits/blob.h>
+namespace tntdb
+{
+    IBlob::~IBlob()
+    { }
 
-#endif // TNTDB_BLOB_H
+    void BlobImpl::assign(const char* data, size_t len)
+    {
+        if (len == 0)
+        {
+            delete[] _data;
+            _data = 0;
+            _size = 0;
+            return;
+        }
 
+        if( len > this->size() )
+        {
+            delete[] _data;
+            _data = new char[len];
+        }
+
+        std::memcpy(_data, data, len);
+        _size = len;
+    }
+
+    IBlob* BlobImpl::create() const
+    { return new BlobImpl(); }
+
+    void BlobImpl::destroy()
+    { delete this; }
+
+}

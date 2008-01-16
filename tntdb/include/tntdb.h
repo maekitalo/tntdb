@@ -19,6 +19,7 @@
 #ifndef TNTDB_H
 #define TNTDB_H
 
+#include <tntdb/blob.h>
 #include <tntdb/connect.h>
 #include <tntdb/connection.h>
 #include <tntdb/connectionpool.h>
