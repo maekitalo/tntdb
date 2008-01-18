@@ -42,8 +42,8 @@ namespace tntdb
           Connection* operator() ();
       };
 
-       typedef cxxtools::Pool<Connection, Connector> PoolType;
-       PoolType pool;
+      typedef cxxtools::Pool<Connection, Connector> PoolType;
+      PoolType pool;
 
     public:
       typedef PoolType::PoolObject PoolObjectType;
