@@ -34,10 +34,6 @@ namespace tntdb
    */
   class Value
   {
-    public:
-      typedef unsigned size_type;
-
-    private:
       cxxtools::SmartPtr<IValue> value;
 
     public:
