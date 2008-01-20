@@ -32,7 +32,7 @@ namespace tntdb
       typedef const value_type* const_pointer;
 
     private:
-      Row row;
+      const IRow* row;
       size_type offset;
       Value current;
 
@@ -41,18 +41,18 @@ namespace tntdb
         if (off != offset)
         {
           offset = off;
-          if (offset < row.size())
-            current = row.getValue(offset);
+          if (offset < row->size())
+            current = Value(row->getValueByNumber(offset));
         }
       }
 
     public:
       const_iterator(const Row& row_, size_type offset_)
-        : row(row_),
+        : row(row_.getImpl()),
           offset(offset_)
       {
-        if (offset < row.size())
-          current = row.getValue(offset);
+        if (offset < row->size())
+          current = Value(row->getValueByNumber(offset));
       }
 
       bool operator== (const const_iterator& it) const
