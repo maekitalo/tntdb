@@ -24,6 +24,7 @@ nobase_include_HEADERS = \
 	tntdb/iface/irow.h \
 	tntdb/iface/istatement.h \
 	tntdb/iface/ivalue.h \
+	tntdb/impl/blob.h \
 	tntdb/librarymanager.h \
 	tntdb/noncopyable.h \
 	tntdb/result.h \

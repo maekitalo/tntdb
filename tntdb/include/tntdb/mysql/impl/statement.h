@@ -20,6 +20,7 @@
 #define TNTDB_MYSQL_IMPL_SQLSTATEMENT_H
 
 #include <tntdb/iface/istatement.h>
+#include <tntdb/iface/irow.h>
 #include <tntdb/mysql/bindvalues.h>
 #include <tntdb/connection.h>
 #include <map>
@@ -39,6 +40,8 @@ namespace tntdb
         MYSQL* mysql;
         MYSQL_STMT* stmt;
         MYSQL_RES* metadata;
+
+        cxxtools::SmartPtr<IRow> fetchRow(MYSQL_FIELD* fields, unsigned field_count);
 
       public:
         Statement(const tntdb::Connection& conn, MYSQL* mysql,

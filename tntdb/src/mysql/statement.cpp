@@ -66,6 +66,52 @@ namespace tntdb
       const std::string SE::hostvarInd = "?";
     }
 
+    cxxtools::SmartPtr<IRow> Statement::fetchRow(MYSQL_FIELD* fields, unsigned field_count)
+    {
+      cxxtools::SmartPtr<BoundRow> ptr = new BoundRow(field_count);
+
+      for (unsigned n = 0; n < field_count; ++n)
+      {
+        if (fields[n].length > 0x10000)
+          // do not allocate buffers > 64k - use mysql_stmt_fetch_column instead later
+          fields[n].length = 0x10000;
+
+        ptr->initOutBuffer(n, fields[n]);
+      }
+
+      log_debug("mysql_stmt_bind_result(" << stmt << ", " << ptr->getMysqlBind() << ')');
+      if (mysql_stmt_bind_result(stmt, ptr->getMysqlBind()) != 0)
+        throw MysqlStmtError("mysql_stmt_bind_result", stmt);
+
+      log_debug("mysql_stmt_fetch(" << stmt << ')');
+      int ret = mysql_stmt_fetch(stmt);
+
+      if (ret == MYSQL_DATA_TRUNCATED)
+      {
+        // fetch column data where truncated
+        for (unsigned n = 0; n < field_count; ++n)
+        {
+          if (*ptr->getMysqlBind()[n].length > ptr->getMysqlBind()[n].buffer_length)
+          {
+            // actual length was longer than buffer_length, so this column is truncated
+            fields[n].length = *ptr->getMysqlBind()[n].length;
+            ptr->initOutBuffer(n, fields[n]);
+
+            log_debug("mysql_stmt_fetch_column(" << stmt << ", BIND, " << n
+                << ", 0) with " << fields[n].length << " bytes");
+            if (mysql_stmt_fetch_column(stmt, ptr->getMysqlBind() + n, n, 0) != 0)
+              throw MysqlStmtError("mysql_stmt_fetch_column", stmt);
+          }
+        }
+      }
+      else if (ret == MYSQL_NO_DATA)
+        ptr = 0;
+      else if (ret == 1)
+        throw MysqlStmtError("mysql_stmt_fetch", stmt);
+
+      return ptr.getPointer();
+    }
+
     Statement::Statement(const tntdb::Connection& conn_, MYSQL* mysql_,
       const std::string& query_)
       : conn(conn_),
@@ -413,28 +459,9 @@ namespace tntdb
       RowContainer* result = new RowContainer();
       cxxtools::SmartPtr<RowContainer> sresult = result;
 
-      while (true)
-      {
-        BoundRow* ptr = new BoundRow(field_count);
-        cxxtools::SmartPtr<BoundRow> sptr = ptr;
-
-        for (unsigned n = 0; n < field_count; ++n)
-          ptr->initOutBuffer(n, fields[n]);
-
-        log_debug("mysql_stmt_bind_result(" << stmt << ", " << ptr->getMysqlBind() << ')');
-        if (mysql_stmt_bind_result(stmt, ptr->getMysqlBind()) != 0)
-          throw MysqlStmtError("mysql_stmt_bind_result", stmt);
-
-        log_debug("mysql_stmt_fetch(" << stmt << ')');
-        int ret = mysql_stmt_fetch(stmt);
-
-        if (ret == MYSQL_NO_DATA)
-          break;
-        else if (ret == 1)
-          throw MysqlStmtError("mysql_stmt_fetch", stmt);
-
+      cxxtools::SmartPtr<IRow> ptr;
+      while ((ptr = fetchRow(fields, field_count)).getPointer() != 0)
         result->addRow(ptr);
-      }
 
       return Result(result);
     }
@@ -455,23 +482,10 @@ namespace tntdb
       MYSQL_FIELD* fields = getFields();
       unsigned field_count = getFieldCount();
 
-      BoundRow* ptr = new BoundRow(field_count);
-      cxxtools::SmartPtr<BoundRow> sptr = ptr;
+      cxxtools::SmartPtr<IRow> ptr = fetchRow(fields, field_count);
 
-      for (unsigned n = 0; n < field_count; ++n)
-        ptr->initOutBuffer(n, fields[n]);
-
-      log_debug("mysql_stmt_bind_result(" << stmt << ", " << ptr->getMysqlBind() << ')');
-      if (mysql_stmt_bind_result(stmt, ptr->getMysqlBind()) != 0)
-        throw MysqlStmtError("mysql_stmt_bind_result", stmt);
-
-      log_debug("mysql_stmt_fetch(" << stmt << ')');
-      int ret = mysql_stmt_fetch(stmt);
-
-      if (ret == MYSQL_NO_DATA)
+      if (!ptr)
         throw NotFound();
-      else if (ret == 1)
-        throw MysqlStmtError("mysql_stmt_fetch", stmt);
 
       return Row(ptr);
     }
@@ -598,11 +612,6 @@ namespace tntdb
       if (!metadata)
       {
         stmt = getStmt();
-
-        log_debug("mysql_stmt_attr_set(STMT_ATTR_UPDATE_MAX_LENGTH)");
-        my_bool b = 1;
-        if (mysql_stmt_attr_set(stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &b) != 0)
-          throw MysqlStmtError("mysql_stmt_attr_set", stmt);
 
         log_debug("mysql_stmt_result_metadata(" << stmt << ')');
         metadata = mysql_stmt_result_metadata(stmt);
