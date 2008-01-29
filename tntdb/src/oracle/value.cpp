@@ -116,7 +116,7 @@ namespace tntdb
       stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_NAME)");
       colName.assign(reinterpret_cast<const char*>(col_name), col_name_len);
 
-      log_debug("column name=\"" << col_name << '"');
+      log_debug("column name=\"" << colName << '"');
 
       /* retrieve the data type attribute */
       ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &type, 0, OCI_ATTR_DATA_TYPE,
