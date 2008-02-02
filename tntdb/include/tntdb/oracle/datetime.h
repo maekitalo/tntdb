@@ -66,7 +66,7 @@ namespace tntdb
         tntdb::Datetime getDatetime() const;
         tntdb::Time     getTime() const;
 
-        OCIDateTime* getHandle() const  { return datetime; }
+        OCIDateTime*& getHandle()        { return datetime; }
     };
 
   }

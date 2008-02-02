@@ -267,7 +267,7 @@ namespace tntdb
       log_debug("OCIBindByName, setDate(\"" << col << "\", " << data.getIso() << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.datetime.getHandle(), sizeof(OCIDateTime*),
+        &b.datetime.getHandle(), sizeof(OCIDateTime*),
         SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -281,7 +281,7 @@ namespace tntdb
       log_debug("OCIBindByName, setTime(\"" << col << "\", " << data.getIso() << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.datetime.getHandle(), sizeof(OCIDateTime*),
+        &b.datetime.getHandle(), sizeof(OCIDateTime*),
         SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -295,7 +295,7 @@ namespace tntdb
       log_debug("OCIBindByName, setDatetime(\"" << col << "\", " << data.getIso() << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.datetime.getHandle(), sizeof(OCIDateTime*),
+        &b.datetime.getHandle(), sizeof(OCIDateTime*),
         SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
