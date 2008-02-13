@@ -51,6 +51,10 @@ class IBlob : public cxxtools::RefCounted
         */
         virtual void assign(const char* data, size_t len) = 0;
 
+        /** @brief Makes sure, the buffer has at least \a len bytes.
+        */
+        virtual char* reserve(size_t len, bool shrink) = 0;
+
         /** @brief Create a value implementation
 
             Returns a pointer to a implementation class derived from IBlob.

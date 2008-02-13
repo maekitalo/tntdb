@@ -29,40 +29,50 @@ namespace tntdb
 {
   namespace oracle
   {
+    namespace error
+    {
+      log_define("tntdb.oracle.error")
+
+      inline void checkError(OCIError* errhp, sword ret, const char* function)
+      {
+        switch (ret)
+        {
+          case OCI_SUCCESS:
+            break;
+
+          case OCI_SUCCESS_WITH_INFO:
+            log_warn(function << ": OCI_SUCCESS_WITH_INFO");
+            break;
+
+          case OCI_NEED_DATA:
+            log_warn(function << ": OCI_NEED_DATA");
+            throw Error(errhp, function);
+
+          case OCI_NO_DATA:
+            log_warn(function << ": OCI_NO_DATA");
+            throw NotFound();
+
+          case OCI_ERROR:
+            throw Error(errhp, function);
+
+          case OCI_INVALID_HANDLE:
+            log_error("OCI_INVALID_HANDLE");
+            throw InvalidHandle(function);
+
+          case OCI_STILL_EXECUTING:
+            log_error("OCI_STILL_EXECUTING");
+            throw StillExecuting(function);
+
+          case OCI_CONTINUE:
+            log_error("OCI_CONTINUE");
+            throw ErrorContinue(function);
+        }
+      }
+    }
+
     void Connection::checkError(sword ret, const char* function) const
     {
-      switch (ret)
-      {
-        case OCI_SUCCESS:
-          break;
-
-        case OCI_SUCCESS_WITH_INFO:
-          log_warn(function << ": OCI_SUCCESS_WITH_INFO");
-          break;
-
-        case OCI_NEED_DATA:
-          log_warn(function << ": OCI_NEED_DATA");
-          throw Error(errhp, function);
-
-        case OCI_NO_DATA:
-          log_warn(function << ": OCI_NO_DATA");
-          throw NotFound();
-
-        case OCI_ERROR:
-          throw Error(errhp, function);
-
-        case OCI_INVALID_HANDLE:
-          log_error("OCI_INVALID_HANDLE");
-          throw InvalidHandle(function);
-
-        case OCI_STILL_EXECUTING:
-          log_error("OCI_STILL_EXECUTING");
-          throw StillExecuting(function);
-
-        case OCI_CONTINUE:
-          log_error("OCI_CONTINUE");
-          throw ErrorContinue(function);
-      }
+      error::checkError(getErrorHandle(), ret, function);
     }
 
     void Connection::logon(const std::string& dblink, const std::string& user, const std::string& password)

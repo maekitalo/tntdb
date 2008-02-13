@@ -22,6 +22,7 @@
 #include <tntdb/iface/ivalue.h>
 #include <tntdb/oracle/datetime.h>
 #include <tntdb/oracle/number.h>
+#include <tntdb/oracle/blob.h>
 #include <cxxtools/dynbuffer.h>
 #include <oci.h>
 
@@ -40,11 +41,12 @@ namespace tntdb
         ub2 nullind;
 
         cxxtools::Dynbuffer<char> data;
-        oracle::Datetime datetime;
+        Datetime datetime;
         long longValue;
         uint32_t uint32Value;
         double doubleValue;
-        oracle::Number number;
+        Number number;
+        Blob blob;
 
         std::string colName;
 
@@ -68,7 +70,7 @@ namespace tntdb
         virtual double getDouble() const;
         virtual char getChar() const;
         virtual void getString(std::string& ret) const;
-        virtual void getBlob(Blob& ret) const;
+        virtual void getBlob(tntdb::Blob& ret) const;
         virtual Date getDate() const;
         virtual Time getTime() const;
         virtual tntdb::Datetime getDatetime() const;

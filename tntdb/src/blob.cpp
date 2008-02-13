@@ -26,22 +26,28 @@ namespace tntdb
 
     void BlobImpl::assign(const char* data, size_t len)
     {
-        if (len == 0)
+        reserve(len, false);
+        std::memcpy(_data, data, len);
+        _size = len;
+    }
+
+    char* BlobImpl::reserve(size_t len, bool shrink)
+    {
+        if (len == 0 && shrink)
         {
             delete[] _data;
             _data = 0;
             _size = 0;
-            return;
         }
-
-        if( len > this->size() )
+        else
         {
-            delete[] _data;
-            _data = new char[len];
+          if (shrink && len != this->size() || len > this->size())
+          {
+              delete[] _data;
+              _data = new char[len];
+          }
+          _size = len;
         }
-
-        std::memcpy(_data, data, len);
-        _size = len;
     }
 
     IBlob* BlobImpl::create() const

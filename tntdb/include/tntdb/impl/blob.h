@@ -44,6 +44,8 @@ class BlobImpl : public IBlob
 
         virtual void assign(const char* data, size_t len);
 
+        virtual char* reserve(size_t len, bool shrink);
+
         virtual IBlob* create() const;
 
         virtual void destroy();

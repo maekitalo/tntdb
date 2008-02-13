@@ -65,6 +65,8 @@ public:
     : m_data(b)
     { }
 
+    /** assigns the data to this blob object
+     */
     void assign(const char* data, size_t len)
     {
         // copy-on-write
@@ -74,6 +76,15 @@ public:
         }
 
         m_data->assign(data, len);
+    }
+
+    /** makes sure, the buffer it at least len bytes.
+     *  If shrink is set, the buffer will be exactly len bytes.
+     *  Data is not preserved when reallocated.
+     */
+    char* reserve(size_t len, bool shrink = false)
+    {
+        return m_data->reserve(len, shrink);
     }
 
     bool operator==(const Blob& b) const

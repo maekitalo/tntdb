@@ -1,6 +1,7 @@
 INCLUDES = -I$(top_srcdir)/include
 
 sources = \
+	blob.cpp \
 	connection.cpp \
 	connectionmanager.cpp \
 	cursor.cpp \

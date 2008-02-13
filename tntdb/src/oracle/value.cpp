@@ -116,8 +116,6 @@ namespace tntdb
       stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_NAME)");
       colName.assign(reinterpret_cast<const char*>(col_name), col_name_len);
 
-      log_debug("column name=\"" << colName << '"');
-
       /* retrieve the data type attribute */
       ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &type, 0, OCI_ATTR_DATA_TYPE,
         stmt->getErrorHandle());
@@ -126,6 +124,8 @@ namespace tntdb
       ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &len, 0, OCI_ATTR_DATA_SIZE,
         stmt->getErrorHandle());
       stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_DATA_SIZE)");
+
+      log_debug("column name=\"" << colName << "\" type=" << type << " size=" << len);
 
       /* define outputvariable */
       switch (type)
@@ -167,6 +167,13 @@ namespace tntdb
           ret = OCIDefineByPos(stmt->getHandle(), &defp,
             stmt->getErrorHandle(), pos + 1, number.getHandle(),
             OCI_NUMBER_SIZE, SQLT_VNU, &nullind, &len, 0, OCI_DEFAULT);
+          break;
+
+        case SQLT_BLOB:
+          log_debug("OCIDefineByPos(SQLT_LOB)");
+          ret = OCIDefineByPos(stmt->getHandle(), &defp,
+            stmt->getErrorHandle(), pos + 1, &blob.getHandle(stmt->getConnection()),
+            0, SQLT_BLOB, &nullind, &len, 0, OCI_DEFAULT);
           break;
 
         default:
@@ -510,8 +517,10 @@ namespace tntdb
       }
     }
 
-    void Value::getBlob(Blob& ret) const
+    void Value::getBlob(tntdb::Blob& ret) const
     {
+      log_debug("get blob from type " << type);
+
       if (isNull())
         throw NullValue();
 
@@ -527,6 +536,10 @@ namespace tntdb
         case SQLT_NUM:
         case SQLT_VNU:
           throw TypeError();
+
+        case SQLT_BLOB:
+          blob.getData(ret);
+          break;
 
         default:
           ret.assign(data.data(), len > 0 ? len - 1 : 0);

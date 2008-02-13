@@ -26,6 +26,7 @@
 #include <string.h>
 #include <map>
 #include <tntdb/oracle/datetime.h>
+#include <tntdb/oracle/blob.h>
 #include <tntdb/oracle/number.h>
 #include <tntdb/blob.h>
 
@@ -50,6 +51,7 @@ namespace tntdb
             cxxtools::Dynbuffer<char> data;
             sb2 indicator;
             Datetime datetime;
+            Blob blob;
             Number number;
 
             Bind()
@@ -65,11 +67,6 @@ namespace tntdb
             {
               data.reserve(size);
               memcpy(data.data(), value, size);
-            }
-            void setData(const Blob& value)
-            {
-              data.reserve(value.size());
-              std::copy(value.data(), value.data() + value.size(), data.data());
             }
             void setNull(bool sw = true)
             {
@@ -107,7 +104,7 @@ namespace tntdb
         void setDouble(const std::string& col, double data);
         void setChar(const std::string& col, char data);
         void setString(const std::string& col, const std::string& data);
-        void setBlob(const std::string& col, const Blob& data);
+        void setBlob(const std::string& col, const tntdb::Blob& data);
         void setDate(const std::string& col, const Date& data);
         void setTime(const std::string& col, const Time& data);
         void setDatetime(const std::string& col, const tntdb::Datetime& data);

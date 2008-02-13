@@ -198,7 +198,7 @@ namespace tntdb
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), sizeof(float),
-        SQLT_FLT, 0, 0, 0, 0, 0, OCI_DEFAULT);
+        SQLT_BFLOAT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
     }
@@ -212,7 +212,7 @@ namespace tntdb
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), sizeof(double),
-        SQLT_FLT, 0, 0, 0, 0, 0, OCI_DEFAULT);
+        SQLT_BDOUBLE, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
     }
@@ -245,16 +245,16 @@ namespace tntdb
       checkError(ret, "OCIBindByName");
     }
 
-    void Statement::setBlob(const std::string& col, const Blob& data)
+    void Statement::setBlob(const std::string& col, const tntdb::Blob& data)
     {
       Bind &b = getBind(col);
-      b.setData(data);
+      b.setData(data.data(), data.size());
 
       log_debug("OCIBindByName, setBlob(\"" << col << "\", data{" << data.size() << "})");
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         b.data.data(), data.size(),
-        SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
+        SQLT_BIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
     }
@@ -267,7 +267,7 @@ namespace tntdb
       log_debug("OCIBindByName, setDate(\"" << col << "\", " << data.getIso() << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        &b.datetime.getHandle(), sizeof(OCIDateTime*),
+        &b.datetime.getHandle(), sizeof(OCIDateTime**),
         SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -281,7 +281,7 @@ namespace tntdb
       log_debug("OCIBindByName, setTime(\"" << col << "\", " << data.getIso() << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        &b.datetime.getHandle(), sizeof(OCIDateTime*),
+        &b.datetime.getHandle(), sizeof(OCIDateTime**),
         SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -295,7 +295,7 @@ namespace tntdb
       log_debug("OCIBindByName, setDatetime(\"" << col << "\", " << data.getIso() << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        &b.datetime.getHandle(), sizeof(OCIDateTime*),
+        &b.datetime.getHandle(), sizeof(OCIDateTime**),
         SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
