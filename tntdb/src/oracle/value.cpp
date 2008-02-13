@@ -177,11 +177,11 @@ namespace tntdb
           break;
 
         default:
-          log_debug("OCIDefineByPos(SQLT_AVC)");
+          log_debug("OCIDefineByPos(SQLT_AFC)");
           data.reserve(len + 16);
           ret = OCIDefineByPos(stmt->getHandle(), &defp,
             stmt->getErrorHandle(), pos + 1, data.data(),
-            len + 16, SQLT_AVC, &nullind, &len, 0, OCI_DEFAULT);
+            len + 16, SQLT_AFC, &nullind, &len, 0, OCI_DEFAULT);
           break;
       }
       stmt->checkError(ret, "OCIDefineByPos");
@@ -486,6 +486,9 @@ namespace tntdb
 
     void Value::getString(std::string& ret) const
     {
+      log_debug("Value::getString with type=" << type << " name=" << colName
+        << " size=" << len);
+
       if (isNull())
         throw NullValue();
 
@@ -513,7 +516,7 @@ namespace tntdb
           break;
 
         default:
-          ret.assign(data.data(), len > 0 ? len - 1 : 0);
+          ret.assign(data.data(), len > 0 ? len : 0);
       }
     }
 
