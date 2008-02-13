@@ -31,6 +31,7 @@ namespace tntdb
 */
 class Blob
 {
+public:
     //! @brief Release policy for SmartPtr
     template <typename T>
     struct Release
@@ -39,6 +40,7 @@ class Blob
         { blob->destroy(); }
     };
 
+private:
     //! @brief Pointer to shared data
     cxxtools::SmartPtr< IBlob, cxxtools::InternalRefCounted, Release > m_data;
 
