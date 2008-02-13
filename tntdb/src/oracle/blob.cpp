@@ -86,23 +86,10 @@ namespace tntdb
       conn->checkError(ret, "OCILobGetLength");
       log_debug("len=" << len);
 
-      boolean flag;
-      log_debug("OCILobIsOpen");
-      ret = OCILobIsOpen(conn->getSvcCtxHandle(), conn->getErrorHandle(),
-        lob, &flag);
-      conn->checkError(ret, "OCILobIsOpen");
-      log_debug("OCILobIsOpen says " << flag);
-
       log_debug("OCILobOpen");
       ret = OCILobOpen(conn->getSvcCtxHandle(), conn->getErrorHandle(),
         lob, OCI_LOB_READONLY);
       conn->checkError(ret, "OCILobOpen");
-
-      log_debug("OCILobIsOpen");
-      ret = OCILobIsOpen(conn->getSvcCtxHandle(), conn->getErrorHandle(),
-        lob, &flag);
-      conn->checkError(ret, "OCILobIsOpen");
-      log_debug("OCILobIsOpen says " << flag);
 
       char* buffer = blob.reserve(len, true);
       memset(buffer, '\0', len);
@@ -110,7 +97,7 @@ namespace tntdb
       ub4 amt = len;
       log_debug("OCILobRead");
       ret = OCILobRead(conn->getSvcCtxHandle(), conn->getErrorHandle(),
-        lob, &amt, 0, buffer, len, 0, 0, 0, SQLCS_IMPLICIT);
+        lob, &amt, 1, buffer, len, 0, 0, 0, SQLCS_IMPLICIT);
       conn->checkError(ret, "OCILobRead");
 
       log_debug("OCILobClose");
