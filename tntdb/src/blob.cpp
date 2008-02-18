@@ -48,6 +48,8 @@ namespace tntdb
           }
           _size = len;
         }
+
+        return _data;
     }
 
     IBlob* BlobImpl::create() const
