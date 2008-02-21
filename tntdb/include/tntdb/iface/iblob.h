@@ -49,11 +49,11 @@ class IBlob : public cxxtools::RefCounted
             The \a len bytes of the data pointed to by \a data are copied
             to this blob.
         */
-        virtual void assign(const char* data, size_t len) = 0;
+        virtual void assign(const char* data, std::size_t len) = 0;
 
         /** @brief Makes sure, the buffer has at least \a len bytes.
         */
-        virtual char* reserve(size_t len, bool shrink) = 0;
+        virtual char* reserve(std::size_t len, bool shrink) = 0;
 
         /** @brief Create a value implementation
 
@@ -71,7 +71,7 @@ class IBlob : public cxxtools::RefCounted
 
         /** @brief Returns the size of the blob-data.
         */
-        size_t size() const
+        std::size_t size() const
         { return _size; }
 
         /** @brief Returns a pointer to the blob-data or 0 if the blob is empty
@@ -94,7 +94,7 @@ class IBlob : public cxxtools::RefCounted
         { }
 
         char* _data;
-        size_t _size;
+        std::size_t _size;
 };
 
 }

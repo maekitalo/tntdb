@@ -55,7 +55,7 @@ public:
         to manage the blob-data and the shared data object. The first \a len
         bytes of the data pointed to by \a data are copied to this Blob.
     */
-    Blob(const char* data, size_t len)
+    Blob(const char* data, std::size_t len)
     : m_data( new BlobImpl() )
     {
         m_data->assign(data, len);
@@ -69,7 +69,7 @@ public:
 
     /** assigns the data to this blob object
      */
-    void assign(const char* data, size_t len)
+    void assign(const char* data, std::size_t len)
     {
         // copy-on-write
         if ( m_data->getRefs() > 1 )
@@ -84,7 +84,7 @@ public:
      *  If shrink is set, the buffer will be exactly len bytes.
      *  Data is not preserved when reallocated.
      */
-    char* reserve(size_t len, bool shrink = false)
+    char* reserve(std::size_t len, bool shrink = false)
     {
         return m_data->reserve(len, shrink);
     }
@@ -108,7 +108,7 @@ public:
 
     /** Returns the size of the data
     */
-    size_t size() const
+    std::size_t size() const
     {
         return m_data->size();
     }

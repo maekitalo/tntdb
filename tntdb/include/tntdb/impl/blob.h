@@ -42,9 +42,9 @@ class BlobImpl : public IBlob
             delete[] _data;
         }
 
-        virtual void assign(const char* data, size_t len);
+        virtual void assign(const char* data, std::size_t len);
 
-        virtual char* reserve(size_t len, bool shrink);
+        virtual char* reserve(std::size_t len, bool shrink);
 
         virtual IBlob* create() const;
 

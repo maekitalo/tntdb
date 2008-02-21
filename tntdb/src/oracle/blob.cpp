@@ -18,6 +18,7 @@
 
 #include <tntdb/oracle/blob.h>
 #include <cxxtools/log.h>
+#include <string.h>
 
 log_define("tntdb.oracle.blob")
 
