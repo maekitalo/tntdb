@@ -1,3 +1,6 @@
+2008-05-30 tommi@tntnet.org
+  - fix string handling in sqlite-driver
+
 2008-02-16 tommi@tntnet.org
   - version 1.0.0
 

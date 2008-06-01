@@ -301,12 +301,12 @@ namespace tntdb
       {
         reset();
 
-        log_debug("sqlite3_bind_blob(" << stmt << ", " << idx << ", " << data
+        log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
           << ", " << data.size() << ", SQLITE_TRANSIENT)");
-        int ret = ::sqlite3_bind_blob(stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
+        int ret = ::sqlite3_bind_text(stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
 
         if (ret != SQLITE_OK)
-          throw Execerror("sqlite3_bind_blob", stmt, ret);
+          throw Execerror("sqlite3_bind_text", stmt, ret);
       }
     }
 
