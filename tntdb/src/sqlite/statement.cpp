@@ -115,6 +115,9 @@ namespace tntdb
         // we have already a new statement-handle - destroy the old one
         log_debug("sqlite3_finalize(" << stmt_ << ')');
         ::sqlite3_finalize(stmt_);
+
+        if (stmtInUse == stmt_)
+          stmtInUse = 0;
       }
     }
 
