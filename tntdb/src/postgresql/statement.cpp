@@ -290,7 +290,10 @@ namespace tntdb
       if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
       else
+      {
         values[it->second].setNull();
+        paramFormats[it->second] = 0;
+      }
     }
 
     void Statement::setBool(const std::string& col, bool data)
@@ -301,7 +304,10 @@ namespace tntdb
       if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
       else
+      {
         values[it->second].setValue(data ? "T" : "F");
+        paramFormats[it->second] = 0;
+      }
 
       SET_TYPE(col, "bool");
     }
