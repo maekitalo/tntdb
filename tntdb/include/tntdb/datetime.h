@@ -20,6 +20,8 @@
 #define TNTDB_DATETIME_H
 
 #include <string>
+#include <tntdb/date.h>
+#include <tntdb/time.h>
 
 namespace tntdb
 {
@@ -48,6 +50,16 @@ namespace tntdb
           millis(0)
           { }
 
+      Datetime(const Date& date, const Time& time)
+        : year(date.getYear()),
+          month(date.getMonth()),
+          day(date.getDay()),
+          hour(time.getHour()),
+          minute(time.getMinute()),
+          second(time.getSecond()),
+          millis(time.getMillis())
+          { }
+
       /// Initializes the Datetime-object with the given values.
       /// No range-checks are done.
       Datetime(unsigned short year_,
@@ -66,6 +78,9 @@ namespace tntdb
           millis(millis_)
           { }
 
+      static Datetime localtime();
+      static Datetime gmtime();
+
       /// Returns the year-part of the Datetime.
       unsigned short getYear() const     { return year; }
       /// Returns the month-part of the Datetime.
@@ -80,6 +95,9 @@ namespace tntdb
       unsigned short getSecond() const   { return second; }
       /// Returns the millisecond-part of the Datetime.
       unsigned short getMillis() const   { return millis; }
+
+      Date getDate() const  { return Date(year, month, day); }
+      Time getTime() const  { return Time(hour, minute, second, millis); }
 
       bool isNull() const  { return month == 0; }
 

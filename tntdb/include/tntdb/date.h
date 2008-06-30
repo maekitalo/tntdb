@@ -48,12 +48,17 @@ namespace tntdb
           day(day_)
           { }
 
+      static Date localtime();
+      static Date gmtime();
+
       /// Returns the year-part of the Date.
       unsigned short getYear() const     { return year; }
       /// Returns the month-part of the Date.
       unsigned short getMonth() const    { return month; }
       /// Returns the day-part of the Date.
       unsigned short getDay() const      { return day; }
+      /// Returns the day of week of the Date (0=sunday to 6=saturday).
+      unsigned short getWDay() const;
 
       bool isNull() const  { return month == 0; }
 

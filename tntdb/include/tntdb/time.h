@@ -54,6 +54,9 @@ namespace tntdb
           millis(millis_)
           { }
 
+      static Time localtime();
+      static Time gmtime();
+
       /// Returns the hour-part of the Time.
       unsigned short getHour() const     { return static_cast<unsigned short>(hour); }
       /// Returns the minute-part of the Time.

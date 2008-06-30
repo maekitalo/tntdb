@@ -19,9 +19,37 @@
 #include <tntdb/datetime.h>
 #include <tntdb/error.h>
 #include <cctype>
+#include <sys/time.h>
+#include <time.h>
 
 namespace tntdb
 {
+  Datetime Datetime::localtime()
+  {
+    struct timeval tv;
+    struct tm tm;
+
+    gettimeofday(&tv, 0);
+    localtime_r(&tv.tv_sec, &tm);
+
+    return Datetime(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+                    tm.tm_hour, tm.tm_min, tm.tm_sec,
+                    tv.tv_usec / 1000);
+  }
+
+  Datetime Datetime::gmtime()
+  {
+    struct timeval tv;
+    struct tm tm;
+
+    gettimeofday(&tv, 0);
+    gmtime_r(&tv.tv_sec, &tm);
+
+    return Datetime(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+                    tm.tm_hour, tm.tm_min, tm.tm_sec,
+                    tv.tv_usec / 1000);
+  }
+
   std::string Datetime::getIso() const
   {
     // format YYYY-MM-DD hh:mm:ss.sss
