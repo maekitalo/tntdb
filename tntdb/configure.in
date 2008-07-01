@@ -19,7 +19,7 @@ ACX_PTHREAD
 
 # host specific flags
 case $host_os in
-aix4.3.*|aix5*)
+aix4.3.*|aix[5-9]*)
     LDFLAGS="$LDFLAGS -Wl,-brtl"
     ;;
 esac
