@@ -17,13 +17,6 @@ AC_PROG_CXX
 AC_LANG(C++)
 ACX_PTHREAD
 
-# host specific flags
-case $host_os in
-aix4.3.*|aix[5-9]*)
-    LDFLAGS="$LDFLAGS -Wl,-brtl"
-    ;;
-esac
-
 AC_PROG_LIBTOOL
 
 #
@@ -145,7 +138,7 @@ then
 fi
 
 AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes)
-  AC_SUBST(MYSQL_LDFLAGS)
+AC_SUBST(MYSQL_LDFLAGS)
 
 #
 # Oracle
@@ -215,6 +208,14 @@ case "${host_cpu}-${host_os}" in
     ;;
 esac
 AC_SUBST(SHARED_LIB_FLAG)
+
+# host specific flags
+case $host_os in
+aix4.3.*|aix[5-9]*)
+    MODULE_LDFLAGS="-Wl,-brtl"
+    ;;
+esac
+AC_SUBST(MODULE_LDFLAGS)
 
 #
 # check header
