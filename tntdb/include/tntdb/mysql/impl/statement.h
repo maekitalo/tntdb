@@ -81,7 +81,7 @@ namespace tntdb
         /// the statement. If this class has already prepared a statement,
         /// this is returned and removed from this class.
         MYSQL_STMT* getStmt();
-        void execute(MYSQL_STMT* stmt);
+        void execute(MYSQL_STMT* stmt, unsigned fetchsize);
 
         /// Statement-handles retrieved by getStmt can be offered for reuse
         /// with this method. Ownership is transfered back to this class.

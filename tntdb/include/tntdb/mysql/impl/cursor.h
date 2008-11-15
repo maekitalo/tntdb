@@ -37,7 +37,7 @@ namespace tntdb
         MYSQL_STMT* stmt;
 
       public:
-        Cursor(Statement* statement);
+        Cursor(Statement* statement, unsigned fetchsize);
         ~Cursor();
 
         // method for ICursor

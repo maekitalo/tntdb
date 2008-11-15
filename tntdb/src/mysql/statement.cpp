@@ -435,7 +435,7 @@ namespace tntdb
       {
         // use statement-API
         stmt = getStmt();
-        execute(stmt);
+        execute(stmt, 16);
         return mysql_stmt_affected_rows(stmt);
       }
     }
@@ -448,13 +448,14 @@ namespace tntdb
         return conn.select(query);
 
       stmt = getStmt();
-      execute(stmt);
+      execute(stmt, 16);
 
       if (mysql_stmt_store_result(stmt) != 0)
         throw MysqlStmtError("mysql_stmt_store_result", stmt);
 
       MYSQL_FIELD* fields = getFields();
       unsigned field_count = getFieldCount();
+      freeMetadata();
 
       RowContainer* result = new RowContainer();
       cxxtools::SmartPtr<RowContainer> sresult = result;
@@ -474,13 +475,14 @@ namespace tntdb
         return conn.selectRow(query);
 
       stmt = getStmt();
-      execute(stmt);
+      execute(stmt, 1);
 
       if (mysql_stmt_store_result(stmt) != 0)
         throw MysqlStmtError("mysql_stmt_store_result", stmt);
 
       MYSQL_FIELD* fields = getFields();
       unsigned field_count = getFieldCount();
+      freeMetadata();
 
       cxxtools::SmartPtr<IRow> ptr = fetchRow(fields, field_count);
 
@@ -502,7 +504,7 @@ namespace tntdb
 
     ICursor* Statement::createCursor(unsigned fetchsize)
     {
-      return new Cursor(this);
+      return new Cursor(this, fetchsize);
     }
 
     MYSQL_STMT* Statement::getStmt()
@@ -534,33 +536,20 @@ namespace tntdb
         throw e;
       }
 
-// we have currently no test for these STMT_ATTR_..., but that might change:
-
-#ifdef HAVE_STMT_ATTR_CURSOR_TYPE
+/*
       // read always with cursor
-      log_debug("mysql_stmt_attr_set(STMT_ATTR_CURSOR_TYPE)");
+      log_debug("mysql_stmt_attr_set(" << ret << ", STMT_ATTR_CURSOR_TYPE)");
       unsigned long cursorType = CURSOR_TYPE_READ_ONLY;
-      if (mysql_stmt_attr_set(stmt, STMT_ATTR_CURSOR_TYPE, &cursorType) != 0)
+      if (mysql_stmt_attr_set(ret, STMT_ATTR_CURSOR_TYPE, &cursorType) != 0)
       {
-        MysqlStmtError e("mysql_stmt_attr_set", ret);
-        log_debug("mysql_stmt_close(" << ret << ')');
-        ::mysql_stmt_close(ret);
-        throw e;
-      }
-#endif
+        log_debug("error");
 
-#ifdef HAVE_STMT_ATTR_PREFETCH_ROWS
-      // fetch 100 rows at once
-      log_debug("mysql_stmt_attr_set(STMT_ATTR_PREFETCH_ROWS, 100)");
-      unsigned long count = 100;
-      if (mysql_stmt_attr_set(stmt, STMT_ATTR_PREFETCH_ROWS, &count) != 0)
-      {
         MysqlStmtError e("mysql_stmt_attr_set", ret);
         log_debug("mysql_stmt_close(" << ret << ')');
         ::mysql_stmt_close(ret);
         throw e;
       }
-#endif
+*/
 
       // check parametercount
       log_debug("mysql_stmt_param_count(" << ret << ')');
@@ -580,8 +569,14 @@ namespace tntdb
       return ret;
     }
 
-    void Statement::execute(MYSQL_STMT* stmt)
+    void Statement::execute(MYSQL_STMT* stmt, unsigned fetchsize)
     {
+      // fetch multiple rows at once
+      log_debug("mysql_stmt_attr_set(STMT_ATTR_PREFETCH_ROWS, " << fetchsize << ")");
+      unsigned long count = fetchsize;
+      if (mysql_stmt_attr_set(stmt, STMT_ATTR_PREFETCH_ROWS, &count) != 0)
+        throw MysqlStmtError("mysql_stmt_attr_set", stmt);
+
       // bind parameters
       log_debug("mysql_stmt_bind_param(" << stmt << ')');
       if (mysql_stmt_bind_param(stmt, inVars.getMysqlBind()) != 0)
