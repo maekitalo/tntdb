@@ -48,11 +48,14 @@ namespace tntdb
 
   unsigned short Date::getWDay() const
   {
-    struct timeval tv;
     struct tm tm;
+    memset(&tm, 0, sizeof(struct tm));
+    tm.tm_mday = day;
+    tm.tm_mon = month - 1;
+    tm.tm_year = year - 1900;
 
-    gettimeofday(&tv, 0);
-    gmtime_r(&tv.tv_sec, &tm);
+    time_t t = mktime(&tm);
+    localtime_r(&t, &tm);
 
     return tm.tm_wday;
   }
