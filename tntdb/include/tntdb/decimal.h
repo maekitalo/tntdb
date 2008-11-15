@@ -23,6 +23,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <stdint.h>
 
 namespace tntdb
 {
