@@ -21,6 +21,7 @@
 
 #include <mysql.h>
 #include <string>
+#include <stdint.h>
 
 namespace tntdb
 {
