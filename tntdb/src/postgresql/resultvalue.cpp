@@ -116,6 +116,8 @@ namespace tntdb
 
     void ResultValue::getString(std::string& ret) const
     {
+      if (PQgetisnull(getPGresult(), row->getRowNumber(), tup_num))
+        throw NullValue();
       char* value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
       int len = PQgetlength(getPGresult(), row->getRowNumber(), tup_num);
       ret.assign(value, len);
