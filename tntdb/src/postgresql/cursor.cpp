@@ -91,6 +91,7 @@ namespace tntdb
         std::ostringstream sql;
         sql << "FETCH " << fetchSize << " FROM " + cursorName;
         currentResult = stmt->getConnection()->select(sql.str());
+        log_debug(currentResult.size() << " rows fetched");
 
         currentRow = 0;
 
