@@ -18,7 +18,7 @@
 
 #include <tntdb/librarymanager.h>
 #include <cxxtools/log.h>
-#include <cxxtools/ioerror.h>
+#include <cxxtools/systemerror.h>
 
 #ifndef DRIVERDIR
 #define DRIVERDIR "tntdb"
@@ -47,9 +47,9 @@ namespace tntdb
         lib = cxxtools::Library(d);
         break;
       }
-      catch (const cxxtools::FileNotFound& e)
+      catch (const cxxtools::OpenLibraryFailed& e)
       {
-        log_debug("error loading library \"" << d << "\": " << e.what());
+        log_debug("open library \"" << d << "\" failed: " << e.what());
       }
     }
 
