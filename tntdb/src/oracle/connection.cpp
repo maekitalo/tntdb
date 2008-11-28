@@ -246,7 +246,9 @@ namespace tntdb
     {
       try
       {
-        prepare("select 1 from dual").selectValue();
+        if (!pingStmt)
+          pingStmt = prepare("select 1 from dual");
+        pingStmt.selectValue();
         return true;
       }
       catch (const Error&)

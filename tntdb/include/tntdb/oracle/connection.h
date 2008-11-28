@@ -33,6 +33,7 @@ namespace tntdb
         OCIError*   errhp;   /* the error handle */
         OCISession* usrhp;   /* user session handle */
         OCISvcCtx*  svchp;   /* the service handle */
+        tntdb::Statement pingStmt;
 
         void logon(const std::string& dblink, const std::string& user, const std::string& password);
 
