@@ -18,6 +18,7 @@
 
 #include <tntdb/librarymanager.h>
 #include <cxxtools/log.h>
+#include <cxxtools/ioerror.h>
 
 #ifndef DRIVERDIR
 #define DRIVERDIR "tntdb"
@@ -43,25 +44,27 @@ namespace tntdb
       try
       {
         log_debug("loading library \"" << d << '"');
-        lib = cxxtools::dl::Library(d.c_str());
+        lib = cxxtools::Library(d);
         break;
       }
-      catch (const cxxtools::dl::DlopenError&)
+      catch (const cxxtools::FileNotFound& e)
       {
-        log_debug("library \"" << d << "\" not found");
+        log_debug("error loading library \"" << d << "\": " << e.what());
       }
     }
 
-    if (it == path.end())
+    if (!lib)
     {
       std::string d = libraryPrefix + driverName;
       log_debug("loading library \"" << d << '"');
-      lib = cxxtools::dl::Library(d.c_str());
+      lib = cxxtools::Library(d.c_str());
     }
 
-    connectionManager = static_cast<IConnectionManager*>(lib.sym(( TNTDB_TOSTRING(TNTDB_DRIVER_PRAEFIX) + driverName).c_str()).getSym());
+    std::string symbolName = TNTDB_TOSTRING(TNTDB_DRIVER_PRAEFIX) + driverName;
+    void* sym = lib.getSymbol(symbolName.c_str());
+    connectionManager = static_cast<IConnectionManager*>(sym);
 
-    log_debug("driver " << driverName << " loaded (" << lib.getHandle() << ") connectionManager=" << connectionManager);
+    log_debug("driver " << driverName << " successfully loaded");
   }
 
   LibraryManager::SearchPathType& LibraryManager::getSearchPath()

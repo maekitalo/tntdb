@@ -21,7 +21,7 @@
 
 #include <tntdb/iface/iconnectionmanager.h>
 #include <tntdb/bits/connection.h>
-#include <cxxtools/dlloader.h>
+#include <cxxtools/library.h>
 #include <string>
 #include <vector>
 
@@ -29,7 +29,7 @@ namespace tntdb
 {
   class LibraryManager
   {
-      cxxtools::dl::Library lib;
+      cxxtools::Library lib;
       IConnectionManager* connectionManager;
 
     public:
