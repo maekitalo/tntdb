@@ -72,7 +72,7 @@ public:
     void assign(const char* data, std::size_t len)
     {
         // copy-on-write
-        if ( m_data->getRefs() > 1 )
+        if ( m_data->refs() > 1 )
         {
             m_data = m_data->create();
         }
