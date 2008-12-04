@@ -20,7 +20,7 @@
 #define TNTDB_TRANSACTION_H
 
 #include <tntdb/connection.h>
-#include <tntdb/noncopyable.h>
+#include <cxxtools/noncopyable.h>
 
 namespace tntdb
 {
@@ -31,7 +31,7 @@ namespace tntdb
    * is hold it the class. The destructor rolls the transaction back, when not explicitely
    * commited or rolled back.
    */
-  class Transaction : private NonCopyable
+  class Transaction : private cxxtools::NonCopyable
   {
       Connection db;
       bool active;

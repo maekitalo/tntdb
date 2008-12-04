@@ -19,7 +19,7 @@
 #ifndef TNTDB_CONNECTIONPOOL_H
 #define TNTDB_CONNECTIONPOOL_H
 
-#include <tntdb/noncopyable.h>
+#include <cxxtools/noncopyable.h>
 #include <cxxtools/pool.h>
 #include <map>
 #include <string>
@@ -66,7 +66,7 @@ namespace tntdb
       unsigned getCurrentSize() const  { return pool.getCurrentSize(); }
   };
 
-  class ConnectionPools : private NonCopyable
+  class ConnectionPools : private cxxtools::NonCopyable
   {
     public:
       typedef ConnectionPool PoolType;
