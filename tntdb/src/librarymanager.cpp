@@ -54,7 +54,7 @@ namespace tntdb
       }
       catch (const cxxtools::OpenLibraryFailed& e)
       {
-        log_debug("opening library \"" << d << "\" failed: " << e.what());
+        log_warn("opening library \"" << d << "\" failed: " << e.what());
       }
     }
 

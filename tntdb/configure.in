@@ -1,7 +1,7 @@
-AC_INIT(tntdb, 1.0.1, [Tommi Maekitalo <tommi@tntnet.org>])
+AC_INIT(tntdb, 1.1.0pre1, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 
-abi_current=1
+abi_current=2
 abi_revision=0
 abi_age=0
 sonumber=${abi_current}:${abi_revision}:${abi_age}
@@ -22,34 +22,8 @@ AC_PROG_LIBTOOL
 #
 # Cxxtools
 #
-AC_PATH_PROGS(CXXTOOLS_CONFIG, cxxtools-config)
-if ! test -x "$CXXTOOLS_CONFIG"; then
-  AC_MSG_ERROR([cxxtools configuration script was not found])
-fi
-
-CXXTOOLS_CXXFLAGS=`$CXXTOOLS_CONFIG --cxxflags`
-CXXTOOLS_LDFLAGS=`$CXXTOOLS_CONFIG --libs`
-CXXFLAGS="$CXXFLAGS $CXXTOOLS_CXXFLAGS"
-LDFLAGS="$CXXFLAGS $CXXTOOLS_LDFLAGS $LDFLAGS"
-
-AC_CHECK_HEADER([cxxtools/log.h], , AC_MSG_ERROR([cxxtools-logging not found]))
-
-AC_MSG_CHECKING([for cxxtools usability])
-AC_COMPILE_IFELSE(
-  [#include <cxxtools/thread.h>
-   #include <cxxtools/smartptr.h>
-   void t() { cxxtools::AttachedThread* p; }
-  ],
-  AC_MSG_RESULT(yes),
-  [
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR(please check your cxxtools-installation - maybe you need an upgrade)
-  ]
-  )
-
-AC_SUBST(CXXTOOLS_CONFIG)
-AC_SUBST(CXXTOOLS_CXXFLAGS)
-AC_SUBST(CXXTOOLS_LDFLAGS)
+AC_CHECK_HEADER([cxxtools/condition.h], , AC_MSG_ERROR([cxxtools headers not found]))
+LDFLAGS="$LDFLAGS -lcxxtools"
 
 #
 # Postgresql

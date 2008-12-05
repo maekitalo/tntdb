@@ -17,10 +17,10 @@ AM_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 if MAKE_ORACLE
 
-driver_LTLIBRARIES = tntdb1-oracle.la
+driver_LTLIBRARIES = tntdb2-oracle.la
 
-tntdb1_oracle_la_SOURCES = $(sources)
-tntdb1_oracle_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) -lclntsh @SHARED_LIB_FLAG@
-tntdb1_oracle_la_LIBADD = $(top_srcdir)/src/libtntdb.la
+tntdb2_oracle_la_SOURCES = $(sources)
+tntdb2_oracle_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) -lclntsh @SHARED_LIB_FLAG@
+tntdb2_oracle_la_LIBADD = $(top_srcdir)/src/libtntdb.la
 
 endif
