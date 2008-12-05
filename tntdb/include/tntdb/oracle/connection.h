@@ -20,6 +20,7 @@
 #define TNTDB_ORACLE_CONNECTION_H
 
 #include <tntdb/iface/iconnection.h>
+#include <tntdb/statement.h>
 #include <oci.h>
 
 namespace tntdb
