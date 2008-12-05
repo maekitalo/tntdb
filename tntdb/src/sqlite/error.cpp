@@ -27,7 +27,14 @@ namespace tntdb
       : Error(std::string(function) + ": " + (errmsg ? errmsg : "unknown error"))
     {
       if (errmsg && do_free)
+// I would like to use a autoconf here, but sqlite3_malloc/sqlite3_free did
+// exist prior version 3.5 but was not used, so a configure-check is difficult.
+// (at least I have no idea how to do it)
+#if SQLITE_VERSION_NUMBER >= 3005000
+        sqlite3_free(errmsg);
+#else
         std::free(errmsg);
+#endif
     }
 
     Execerror::Execerror(const char* function, sqlite3* db, int _errcode)
