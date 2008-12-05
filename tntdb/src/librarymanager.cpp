@@ -19,6 +19,7 @@
 #include <tntdb/librarymanager.h>
 #include <cxxtools/log.h>
 #include <cxxtools/systemerror.h>
+#include <cxxtools/directory.h>
 
 #ifndef DRIVERDIR
 #define DRIVERDIR "tntdb"
@@ -31,7 +32,7 @@ log_define("tntdb.librarymanager")
 
 namespace tntdb
 {
-  static const std::string libraryPrefix = "tntdb1-";
+  static const std::string libraryPrefix = "tntdb2-";
 
   LibraryManager::LibraryManager(const std::string& driverName)
   {
@@ -40,16 +41,20 @@ namespace tntdb
     SearchPathType::const_iterator it;
     for (it = path.begin(); it != path.end(); ++it)
     {
-      std::string d = *it + '/' + libraryPrefix + driverName;
+      std::string d = *it + cxxtools::Directory::sep() + libraryPrefix + driverName;
       try
       {
         log_debug("loading library \"" << d << '"');
         lib = cxxtools::Library(d);
         break;
       }
+      catch (const cxxtools::FileNotFound& e)
+      {
+        log_debug("library \"" << d << "\" not found: " << e.what());
+      }
       catch (const cxxtools::OpenLibraryFailed& e)
       {
-        log_debug("open library \"" << d << "\" failed: " << e.what());
+        log_debug("opening library \"" << d << "\" failed: " << e.what());
       }
     }
 
@@ -57,7 +62,7 @@ namespace tntdb
     {
       std::string d = libraryPrefix + driverName;
       log_debug("loading library \"" << d << '"');
-      lib = cxxtools::Library(d.c_str());
+      lib = cxxtools::Library(d);
     }
 
     std::string symbolName = TNTDB_TOSTRING(TNTDB_DRIVER_PRAEFIX) + driverName;
