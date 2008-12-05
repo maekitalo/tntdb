@@ -2,7 +2,7 @@
 #include <tntdb/result.h>
 #include <tntdb/value.h>
 #include <cxxtools/arg.h>
-#include <cxxtools/hirestime.h>
+#include <cxxtools/timespan.h>
 
 int main(int argc, char* argv[])
 {
@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     unsigned max = conn.selectValue("select max(PROD_ID) from PRODUCTS")
                        .getUnsigned();
 
-    cxxtools::HiresTime t0 = cxxtools::HiresTime::gettimeofday();
+    cxxtools::Timespan t0 = cxxtools::Timespan::gettimeofday();
 
     unsigned sum = 0;
     if (cached)
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
       }
     }
 
-    cxxtools::HiresTime t1 = cxxtools::HiresTime::gettimeofday();
+    cxxtools::Timespan t1 = cxxtools::Timespan::gettimeofday();
 
     std::cout << "count=" << max << "\n"
                  "sum=" << sum << "\n"
