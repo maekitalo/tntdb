@@ -192,6 +192,7 @@ namespace tntdb
       if (envhp)
       {
         clearStatementCache();
+        pingStmt = tntdb::Statement();
 
         log_debug("OCIHandleFree(" << envhp << ')');
         sword ret = OCIHandleFree(envhp, OCI_HTYPE_ENV);
