@@ -39,51 +39,71 @@ namespace tntdb
 {
   void Connection::beginTransaction()
   {
+    log_trace("Connection::beginTransaction()");
+
     conn->beginTransaction();
   }
 
   void Connection::commitTransaction()
   {
+    log_trace("Connection::commitTransaction");
+
     conn->commitTransaction();
   }
 
   void Connection::rollbackTransaction()
   {
+    log_trace("Connection::rollbackTransaction");
+
     conn->rollbackTransaction();
   }
 
   Connection::size_type Connection::execute(const std::string& query)
   {
+    log_trace("Connection::execute(\"" << query << "\")");
+
     return conn->execute(query);
   }
 
   Result Connection::select(const std::string& query)
   {
+    log_trace("Connection::select(\"" << query << "\")");
+
     return conn->select(query);
   }
 
   Row Connection::selectRow(const std::string& query)
   {
+    log_trace("Connection::selectRow(\"" << query << "\")");
+
     return conn->selectRow(query);
   }
 
   Value Connection::selectValue(const std::string& query)
   {
+    log_trace("Connection::selectValue(\"" << query << "\")");
+
     return conn->selectValue(query);
   }
 
   Statement Connection::prepare(const std::string& query)
   {
+    log_trace("Connection::prepare(\"" << query << "\")");
+
     return conn->prepare(query);
   }
 
   Statement Connection::prepareCached(const std::string& query)
   {
+    log_trace("Connection::prepareCached(\"" << query << "\")");
+
     return conn->prepareCached(query);
   }
 
   Statement IStmtCacheConnection::prepareCached(const std::string& query)
   {
+    log_trace("IStmtCacheConnection::prepare(\"" << query << "\")");
+
     stmtCacheType::iterator it = stmtCache.find(query);
     if (it == stmtCache.end())
     {
@@ -102,6 +122,8 @@ namespace tntdb
 
   void IStmtCacheConnection::clearStatementCache()
   {
+    log_trace("IStmtCacheConnection::clearStatementCache()");
+
     stmtCache.clear();
   }
 }

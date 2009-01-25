@@ -32,5 +32,13 @@
 #include <tntdb/bits/statement.h>
 #include <tntdb/bits/statement_iterator.h>
 
+namespace tntdb
+{
+  inline Statement::const_iterator Statement::end() const
+  {
+    return const_iterator();
+  }
+}
+
 #endif // TNTDB_SQL_STATEMENT_H
 

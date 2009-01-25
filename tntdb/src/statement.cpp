@@ -38,35 +38,32 @@ namespace tntdb
 {
   Statement::size_type Statement::execute()
   {
-    log_debug("Statement::execute()");
+    log_trace("Statement::execute()");
     return stmt->execute();
   }
 
   Result Statement::select()
   {
-    log_debug("Statement::select()");
+    log_trace("Statement::select()");
     return stmt->select();
   }
 
   Row Statement::selectRow()
   {
-    log_debug("Statement::selectRow()");
+    log_trace("Statement::selectRow()");
     return stmt->selectRow();
   }
 
   Value Statement::selectValue()
   {
-    log_debug("Statement::selectValue()");
+    log_trace("Statement::selectValue()");
     return stmt->selectValue();
   }
 
   Statement::const_iterator Statement::begin(unsigned fetchsize) const
   {
+    log_trace("Statement::begin(" << fetchsize << ')');
     return const_iterator(stmt->createCursor(fetchsize));
   }
 
-  Statement::const_iterator Statement::end() const
-  {
-    return const_iterator();
-  }
 }
