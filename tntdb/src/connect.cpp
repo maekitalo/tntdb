@@ -74,7 +74,7 @@ namespace tntdb
 #elif WITH_STATIC_ORACLE
       return connectionManager_oracle.connect(url);
 #else
-      throw Error("invalid url \"" + url + '"');
+      throw Error("invalid dburl \"" + url + '"');
 #endif
 
     std::string driverName =  url.substr(0, n);
