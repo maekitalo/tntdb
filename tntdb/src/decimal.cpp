@@ -29,6 +29,7 @@
 #include <tntdb/decimal.h>
 #include <sstream>
 #include <iomanip>
+#include <ios>
 
 namespace tntdb
 {

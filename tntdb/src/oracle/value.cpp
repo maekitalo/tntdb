@@ -499,7 +499,7 @@ namespace tntdb
       log_debug("Value::getString with type=" << type << " name=" << colName
         << " size=" << len);
 
-      if (isNull())
+      if (type != SQLT_AFC && type != SQLT_CHR && isNull())
         throw NullValue();
 
       switch (type)

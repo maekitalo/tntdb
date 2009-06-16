@@ -32,6 +32,7 @@
 #include <tntdb/result.h>
 #include <tntdb/statement.h>
 #include <tntdb/mysql/error.h>
+#include <cctype>
 
 #include <cxxtools/log.h>
 

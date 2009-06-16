@@ -97,8 +97,8 @@ namespace tntdb
 
   inline unsigned short getNumber2(const char* s)
   {
-    if (!isdigit(s[0])
-      || !isdigit(s[1]))
+    if (!std::isdigit(s[0])
+      || !std::isdigit(s[1]))
       throw TypeError();
     return (s[0] - '0') * 10
          + (s[1] - '0');
@@ -106,10 +106,10 @@ namespace tntdb
 
   inline unsigned short getNumber4(const char* s)
   {
-    if (!isdigit(s[0])
-      || !isdigit(s[1])
-      || !isdigit(s[2])
-      || !isdigit(s[3]))
+    if (!std::isdigit(s[0])
+      || !std::isdigit(s[1])
+      || !std::isdigit(s[2])
+      || !std::isdigit(s[3]))
       throw TypeError();
     return (s[0] - '0') * 1000
          + (s[1] - '0') * 100
