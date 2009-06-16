@@ -269,7 +269,7 @@ namespace tntdb
           return number.getDecimal().getInt();
           
         default:
-          return getValue<int>(data.data(), "int");
+          return getValue<int>(std::string(data.data(), len), "int");
       }
     }
 
@@ -303,7 +303,7 @@ namespace tntdb
           return number.getDecimal().getUnsigned();
           
         default:
-          return getValue<unsigned>(data.data(), "unsigned");
+          return getValue<unsigned>(std::string(data.data(), len), "unsigned");
       }
     }
 
@@ -337,7 +337,7 @@ namespace tntdb
           return number.getDecimal().getInt64();
           
         default:
-          return getValue<int64_t>(data.data(), "int");
+          return getValue<int64_t>(std::string(data.data(), len), "int64_t");
       }
     }
 
@@ -366,7 +366,7 @@ namespace tntdb
           return number.getDecimal().getUnsigned64();
           
         default:
-          return getValue<uint64_t>(data.data(), "int");
+          return getValue<uint64_t>(std::string(data.data(), len), "uint64_t");
       }
     }
 
@@ -403,7 +403,7 @@ namespace tntdb
           return number.getDecimal();
           
         default:
-          return getValue<Decimal>(data.data(), "Decimal");
+          return getValue<Decimal>(std::string(data.data(), len), "Decimal");
       }
     }
     
@@ -432,7 +432,7 @@ namespace tntdb
           return number.getDecimal().getFloat();
           
         default:
-          return getValue<float>(data.data(), "float");
+          return getValue<float>(std::string(data.data(), len), "float");
       }
     }
 
@@ -461,7 +461,7 @@ namespace tntdb
           return number.getDecimal().getDouble();
           
         default:
-          return getValue<double>(data.data(), "double");
+          return getValue<double>(std::string(data.data(), len), "double");
       }
     }
 
