@@ -198,9 +198,9 @@ namespace tntdb
 
         try
         {
-          log_debug("OCIServerDetach");
-          ret = OCIServerDetach(srvhp, errhp, OCI_DEFAULT);
-          checkError(ret, "OCIServerDetach");
+          log_debug("OCISessionEnd");
+          ret = OCISessionEnd(svchp, errhp, usrhp, OCI_DEFAULT);
+          checkError(ret, "OCISessionEnd");
         }
         catch (const std::exception& e)
         {
@@ -209,9 +209,9 @@ namespace tntdb
 
         try
         {
-          log_debug("OCISessionEnd");
-          ret = OCISessionEnd(svchp, errhp, usrhp, OCI_DEFAULT);
-          checkError(ret, "OCISessionEnd");
+          log_debug("OCIServerDetach");
+          ret = OCIServerDetach(srvhp, errhp, OCI_DEFAULT);
+          checkError(ret, "OCIServerDetach");
         }
         catch (const std::exception& e)
         {
