@@ -191,11 +191,35 @@ namespace tntdb
     {
       if (envhp)
       {
+        sword ret;
+
         clearStatementCache();
         pingStmt = tntdb::Statement();
 
+        try
+        {
+          log_debug("OCIServerDetach");
+          ret = OCIServerDetach(srvhp, errhp, OCI_DEFAULT);
+          checkError(ret, "OCIServerDetach");
+        }
+        catch (const std::exception& e)
+        {
+          log_error(e.what());
+        }
+
+        try
+        {
+          log_debug("OCISessionEnd");
+          ret = OCISessionEnd(svchp, errhp, usrhp, OCI_DEFAULT);
+          checkError(ret, "OCISessionEnd");
+        }
+        catch (const std::exception& e)
+        {
+          log_error(e.what());
+        }
+
         log_debug("OCIHandleFree(" << envhp << ')');
-        sword ret = OCIHandleFree(envhp, OCI_HTYPE_ENV);
+        ret = OCIHandleFree(envhp, OCI_HTYPE_ENV);
         if (ret == OCI_SUCCESS)
           log_debug("handle released");
         else
