@@ -41,14 +41,14 @@ namespace tntdb
         MYSQL mysql;
         bool initialized;
 
-        void open(const char* host,
+        void open(const char* app, const char* host,
           const char* user, const char* passwd,
           const char* db, unsigned int port,
           const char* unix_socket, unsigned long client_flag);
 
       public:
         explicit Connection(const char* conn);
-        Connection(const char* host,
+        Connection(const char* app, const char* host,
           const char* user, const char* passwd,
           const char* db, unsigned int port = 3306,
           const char* unix_socket = 0, unsigned long client_flag = 0);

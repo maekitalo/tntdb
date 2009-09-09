@@ -53,11 +53,12 @@ namespace tntdb
       { return s && s[0] ? s : 0; }
     }
 
-    void Connection::open(const char* host, const char* user,
+    void Connection::open(const char* app, const char* host, const char* user,
       const char* passwd, const char* db, unsigned int port,
       const char* unix_socket, unsigned long client_flag)
     {
       log_debug("mysql_real_connect(MYSQL, "
+        << str(app) << ", "
         << str(host) << ", "
         << str(user) << ", "
         << str(passwd) << ", "
@@ -70,23 +71,27 @@ namespace tntdb
         throw std::runtime_error("cannot initalize mysql");
       initialized = true;
 
+      if (::mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, app && app[0] ? app : "tntdb") != 0)
+        throw MysqlError("mysql_options", &mysql);
+
       if (!::mysql_real_connect(&mysql, zstr(host), zstr(user), zstr(passwd),
                                 zstr(db), port, zstr(unix_socket), client_flag))
         throw MysqlError("mysql_real_connect", &mysql);
     }
 
-    Connection::Connection(const char* host, const char* user,
+    Connection::Connection(const char* app, const char* host, const char* user,
       const char* passwd, const char* db, unsigned int port,
       const char* unix_socket, unsigned long client_flag)
       : initialized(false)
     {
-      open(host, user, passwd, db, port, unix_socket, client_flag);
+      open(app, host, user, passwd, db, port, unix_socket, client_flag);
     }
 
     Connection::Connection(const char* conn)
       : initialized(false)
     {
       log_debug("Connection::Connection(\"" << conn << "\")");
+      std::string app;
       std::string host;
       std::string user;
       std::string passwd;
@@ -98,12 +103,17 @@ namespace tntdb
       enum state_type {
         state_key,
         state_value,
+        state_value_esc,
+        state_qvalue,
+        state_qvaluee,
+        state_qvalue_esc,
         state_port,
         state_flag
       } state = state_key;
 
       std::string key;
       std::string* value;
+      char quote;
 
       for (const char* p = conn; *p; ++p)
       {
@@ -125,13 +135,15 @@ namespace tntdb
               }
               else
               {
-                if (key == "host")
+                if (key == "app")
+                  value = &app;
+                else if (key == "host")
                   value = &host;
                 else if (key == "user")
                   value = &user;
-                else if (key == "passwd")
+                else if (key == "passwd" || key == "password")
                   value = &passwd;
-                else if (key == "db")
+                else if (key == "db" || key == "dbname" || key == "database")
                   value = &db;
                 else if (key == "unix_socket")
                   value = &unix_socket;
@@ -139,23 +151,63 @@ namespace tntdb
                   throw std::runtime_error("invalid key \"" + key
                     + "\" in connectionstring \"" + conn + '"');
 
+                if (!value->empty())
+                  throw std::runtime_error("value already set for key \"" + key
+                    + "\" in connectionstring \"" + conn + '"');
+
                 key.clear();
+                value->clear();
                 state = state_value;
               }
             }
+            else if (key.empty() && std::isspace(*p))
+              ;
             else
               key += *p;
             break;
 
           case state_value:
-            if (*p == ';')
+            if (*p == ';' || std::isspace(*p))
               state = state_key;
+            else if (*p == '\\')
+              state = state_value_esc;
+            else if (value->empty() && (*p == '\'' || *p == '"'))
+            {
+              quote = *p;
+              state = state_qvalue;
+            }
             else
               *value += *p;
             break;
 
+          case state_value_esc:
+            *value += *p;
+            state = state_value;
+            break;
+
+          case state_qvalue:
+            if (*p == quote)
+              state = state_key;
+            else if (*p == '\\')
+              state = state_qvalue_esc;
+            else
+              *value += *p;
+            break;
+
+          case state_qvaluee:
+            if (*p == ';' || std::isspace(*p))
+              state = state_key;
+            else
+              throw std::runtime_error(std::string("delimiter expected in connectionstring ") + conn);
+            break;
+
+          case state_qvalue_esc:
+            *value += *p;
+            state = state_qvalue;
+            break;
+
           case state_port:
-            if (*p == ';')
+            if (*p == ';' || std::isspace(*p))
               state = state_key;
             else if (std::isdigit(*p))
               port = port * 10 + (*p - '0');
@@ -165,7 +217,7 @@ namespace tntdb
             break;
 
           case state_flag:
-            if (*p == ';')
+            if (*p == ';' || std::isspace(*p))
               state = state_key;
             else if (std::isdigit(*p))
               client_flag = client_flag * 10 + (*p - '0');
@@ -179,7 +231,7 @@ namespace tntdb
       if (state == state_key && !key.empty())
         throw std::runtime_error(std::string("invalid connectionstring ") + conn);
 
-      open(host.c_str(), user.c_str(), passwd.c_str(), db.c_str(),
+      open(app.c_str(), host.c_str(), user.c_str(), passwd.c_str(), db.c_str(),
         port, unix_socket.c_str(), client_flag);
     }
 
