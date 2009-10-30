@@ -54,7 +54,7 @@ namespace tntdb
         std::string query;
         OCIStmt* stmtp;
 
-        class Bind : public RefCounted
+        class Bind : public cxxtools::RefCounted
         {
           public:
             OCIBind* ptr;
