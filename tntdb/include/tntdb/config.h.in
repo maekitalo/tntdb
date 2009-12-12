@@ -1,0 +1,12 @@
+/* define if int and int32_t are same types */
+#define INT_INT32_T_CONFLICT @INT_INT32_T_CONFLICT@
+
+/* define if int and int64_t are same types */
+#define INT_INT64_T_CONFLICT @INT_INT64_T_CONFLICT@
+
+/* define if unsigned and uint32_t are same types */
+#define UNSIGNED_UINT32_T_CONFLICT @UNSIGNED_UINT32_T_CONFLICT@
+
+/* define if unsigned and uint64_t are same types */
+#define UNSIGNED_UINT64_T_CONFLICT @UNSIGNED_UINT64_T_CONFLICT@
+

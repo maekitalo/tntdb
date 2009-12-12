@@ -80,3 +80,6 @@ nobase_noinst_HEADERS = \
 	tntdb/oracle/row.h \
 	tntdb/oracle/statement.h \
 	tntdb/oracle/value.h
+
+nobase_nodist_include_HEADERS = \
+    tntdb/config.h

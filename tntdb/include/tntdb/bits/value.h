@@ -35,6 +35,7 @@
 #include <tntdb/datetime.h>
 #include <tntdb/decimal.h>
 #include <tntdb/blob.h>
+#include <tntdb/config.h>
 #include <cxxtools/smartptr.h>
 
 namespace tntdb
@@ -116,8 +117,18 @@ namespace tntdb
       operator bool() const               { return value->getBool(); }
       operator int() const                { return value->getInt(); }
       operator unsigned() const           { return value->getUnsigned(); }
+#if INT_INT32_T_CONFLICT != 1
+      operator int32_t() const            { return value->getInt32(); }
+#endif
+#if UNSIGNED_UINT32_T_CONFLICT != 1
+      operator uint32_t() const           { return value->getUnsigned32(); }
+#endif
+#if INT_INT64_T_CONFLICT != 1
       operator int64_t() const            { return value->getInt64(); }
+#endif
+#if UNSIGNED_UINT64_T_CONFLICT != 1
       operator uint64_t() const           { return value->getUnsigned64(); }
+#endif
       operator Decimal() const            { return value->getDecimal(); }
       operator float() const              { return value->getFloat(); }
       operator double() const             { return value->getDouble(); }
