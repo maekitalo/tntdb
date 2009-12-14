@@ -55,7 +55,7 @@ namespace tntdb
       //@{
       /**
        * Explicit data-access.
-       * The get-methods return the value in the requested type.
+       * The getXXX-methods return the value in the requested type.
        * If the value can't be converted to the requested type, a exception of
        * type tntdb::TypeError is thrown.
        */
@@ -109,6 +109,42 @@ namespace tntdb
 
       //@{
       /**
+       * Explicit data-access.
+       * The get-methods return false if the value is null. Otherwise the
+       * passed reference is filled with the value.
+       * If the value can't be converted to the requested type, a exception of
+       * type tntdb::TypeError is thrown.
+       * In contrast to the getXXX-methods the type is not specified explictely
+       * but determined by the passed reference.
+       */
+      bool getValue(bool& ret) const;
+      bool getValue(int& ret) const;
+      bool getValue(unsigned& ret) const;
+#if INT_INT32_T_CONFLICT != 1
+      bool getValue(int32_t& ret) const;
+#endif
+#if UNSIGNED_UINT32_T_CONFLICT != 1
+      bool getValue(uint32_t& ret) const;
+#endif
+#if INT_INT64_T_CONFLICT != 1
+      bool getValue(int64_t& ret) const;
+#endif
+#if UNSIGNED_UINT64_T_CONFLICT != 1
+      bool getValue(uint64_t& ret) const;
+#endif
+      bool getValue(Decimal& ret) const;
+      bool getValue(float& ret) const;
+      bool getValue(double& ret) const;
+      bool getValue(char& ret) const;
+      bool getValue(std::string& ret) const;
+      bool getValue(Blob& ret) const;
+      bool getValue(Date& ret) const;
+      bool getValue(Time& ret) const;
+      bool getValue(Datetime& ret) const;
+      //@}
+
+      //@{
+      /**
        * Make Value-objects implicit convertable.
        * This class defines implicit convert-operators to convert the value
        * automatically to different types.
@@ -145,6 +181,159 @@ namespace tntdb
       ///  Returns the actual implementation-class.
       const IValue* getImpl() const       { return &*value; }
   };
+
+  inline bool Value::getValue(bool& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getBool();
+    return true;
+  }
+
+  inline bool Value::getValue(int& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getInt();
+    return true;
+  }
+
+  inline bool Value::getValue(unsigned& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getUnsigned();
+    return true;
+  }
+
+#if INT_INT32_T_CONFLICT != 1
+  inline bool Value::getValue(int32_t& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getInt32();
+    return true;
+  }
+#endif
+
+#if UNSIGNED_UINT32_T_CONFLICT != 1
+  inline bool Value::getValue(uint32_t& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getUnsigned32();
+    return true;
+  }
+#endif
+
+#if INT_INT64_T_CONFLICT != 1
+  inline bool Value::getValue(int64_t& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getInt64();
+    return true;
+  }
+#endif
+
+#if UNSIGNED_UINT64_T_CONFLICT != 1
+  inline bool Value::getValue(uint64_t& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getUnsigned64();
+    return true;
+  }
+#endif
+
+  inline bool Value::getValue(Decimal& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getDecimal();
+    return true;
+  }
+
+  inline bool Value::getValue(float& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getFloat();
+    return true;
+  }
+
+  inline bool Value::getValue(double& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getDouble();
+    return true;
+  }
+
+  inline bool Value::getValue(char& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getChar();
+    return true;
+  }
+
+  inline bool Value::getValue(std::string& out) const
+  {
+    if (isNull())
+      return false;
+
+    getString(out);
+    return true;
+  }
+
+  inline bool Value::getValue(Blob& out) const
+  {
+    if (isNull())
+      return false;
+
+    getBlob(out);
+    return true;
+  }
+
+  inline bool Value::getValue(Date& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getDate();
+    return true;
+  }
+
+  inline bool Value::getValue(Time& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getTime();
+    return true;
+  }
+
+  inline bool Value::getValue(Datetime& out) const
+  {
+    if (isNull())
+      return false;
+
+    out = getDatetime();
+    return true;
+  }
+
 }
 
 #endif // TNTDB_BITS_VALUE_H
