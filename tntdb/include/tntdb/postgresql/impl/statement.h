@@ -34,7 +34,6 @@
 #include <map>
 #include <vector>
 #include <libpq-fe.h>
-#include <cxxtools/dynbuffer.h>
 
 namespace tntdb
 {
@@ -78,9 +77,9 @@ namespace tntdb
         typedef std::vector<valueType> valuesType;
         valuesType values;
 
-        cxxtools::Dynbuffer<const char*> paramValues;
-        cxxtools::Dynbuffer<int> paramLengths;
-        cxxtools::Dynbuffer<int> paramFormats;
+        std::vector<const char*> paramValues;
+        std::vector<int> paramLengths;
+        std::vector<int> paramFormats;
 
         // helper-methods for setting values
         template <typename T>
@@ -136,7 +135,7 @@ namespace tntdb
         const char* const* getParamValues();
         const int* getParamLengths();
         const int* getParamFormats()
-            { return paramFormats.data(); }
+            { return &paramFormats[0]; }
         PGconn* getPGConn();
         Connection* getConnection()    { return conn; }
     };

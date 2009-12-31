@@ -36,7 +36,6 @@
 #include <tntdb/bits/value.h>
 #include <tntdb/stmtparser.h>
 #include <sstream>
-#include <cxxtools/dynbuffer.h>
 #include <cxxtools/log.h>
 #include "config.h"
 
@@ -103,9 +102,9 @@ namespace tntdb
 
       query = parser.getSql();
 
-      paramValues.reserve(se.getMaxIdx());
-      paramLengths.reserve(se.getMaxIdx());
-      paramFormats.reserve(se.getMaxIdx());
+      paramValues.resize(se.getMaxIdx());
+      paramLengths.resize(se.getMaxIdx());
+      paramFormats.resize(se.getMaxIdx());
     }
 
     Statement::~Statement()
@@ -479,14 +478,14 @@ namespace tntdb
     {
       for (unsigned n = 0; n < values.size(); ++n)
         paramValues[n] = values[n].getValue();
-      return paramValues.data();
+      return &paramValues[0];
     }
 
     const int* Statement::getParamLengths()
     {
       for (unsigned n = 0; n < values.size(); ++n)
         paramLengths[n] = values[n].getLength();
-      return paramLengths.data();
+      return &paramLengths[0];
     }
 
     PGconn* Statement::getPGConn()
