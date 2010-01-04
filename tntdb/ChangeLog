@@ -1,116 +1,199 @@
+2009-12-31 maekitalo
+ - replace obsolete cxxtools::Dynbuffer with std::vector
+
+2009-12-14 maekitalo
+ - add method tntdb::Value::getValue
+
+2009-12-12 maekitalo
+ - check if int and int32_t and others are distinct types
+
+2009-09-09 maekitalo
+ - extend syntax of connection string in mysql driver:
+ - allow values to be enclosed in single or double quotes
+ - escape special characters in values with backslash
+ - allow whitespace as delimiter
+ - check for duplicate keys in connection string
+ - add key "app" with a default "tntdb" and use my.cnf with this section
+
+2009-06-29 maekitalo
+ - clean up of oracle connection in proper order
+
+2009-06-29 maekitalo
+ - close oracle connection correctly
+
+2009-06-16 maekitalo
+ - fix sporadic error in string to number conversion in oracle driver
+
+2009-05-15 maekitalo
+ - clear statement cache at transaction end with sqlite since statement handles are invalidated
+
+2008-12-18 maekitalo
+ - fix error in oracle driver when shutting down the connection after ping
+
+2008-12-05 maekitalo
+ - bump so number
+ - simplify cxxtools configuration
+
+2008-12-05 maekitalo
+ - fix crash in sqlite driver in Connection::execute
+
+2008-12-05 maekitalo
+ - fix driver loading (was broken after cxxtools update)
+
+2008-11-28 maekitalo
+ - wrong exception was caught for not found driver libraries
+
+2008-11-28 maekitalo
+ - cache ping statement handle in oracle driver
+
+2008-11-21 maekitalo
+ - throw NullValue-excpetion, when a null-column is read in a postgresql result set
+
+2008-11-15 maekitalo
+ - use fetchsize hint of statement in mysql driver
+
+2008-11-15 maekitalo
+ - fix getWDay of date class
+
+2008-07-04 maekitalo
+ - remove aix specific handling
+
+2008-07-01 maekitalo
+ - fix linkflags for aix 6
+
+2008-07-01 maekitalo
+ - support for aix version > 5
+
+2008-07-01 maekitalo
+ - don't use ORACLE_HOME to find oracle includes and libraries, since we cannot know, which library the user needs to link (lib or lib32 or whatever)
+
+2008-06-30 maekitalo
+ - slightly improved date and time classes
+
+2008-06-07 maekitalo
+ - fix Statement::setBool in postgresql driver
+
+2008-06-02 maekitalo
+ - fix crash when creating 2 cursors for one statement and destroying in different order
+
+
+
+
+
+
 2008-05-30 tommi@tntnet.org
-  - fix string handling in sqlite-driver
+ - fix string handling in sqlite-driver
 
 2008-02-16 tommi@tntnet.org
-  - version 1.0.0
+ - version 1.0.0
 
 2008-02-13 tommi@tntnet.org
-  - Blob class (Marc)
+ - Blob class (Marc)
 
 2007-11-14 tommi@tntnet.org
-  - get values by column name
+ - get values by column name
 
 2007-10-07 tommi@tntnet.org
-  - replace tntdb::SmartPtr with cxxtools::SmartPtr
+ - replace tntdb::SmartPtr with cxxtools::SmartPtr
 
 2007-09-27 tommi@tntnet.org
-  - build improvements for AIX
+ - build improvements for AIX
 
 2007-09-21 tommi@tntnet.org
-  - support for decimals and 32/64-bit integers (from Mark Wright)
+ - support for decimals and 32/64-bit integers (from Mark Wright)
 
 2007-06-08 tommi@tntnet.org
-  - bugfix: tntdb crashed, when iterating over a statement which returns no rows
+ - bugfix: tntdb crashed, when iterating over a statement which returns no rows
 
 2007-05-23 tommi@tntnet.org
-  - driver for oracle
-  - support for MEDIUMINT in mysql-driver
+ - driver for oracle
+ - support for MEDIUMINT in mysql-driver
 
 2007-05-11 tommi@tntnet.org
-  - fix connectionpool
+ - fix connectionpool
 
 2007-03-27 tommi@tntnet.org
-  - tntdb::Connection::ping to check, if the connection is alive
-  - use that ping in connectionpool before returning connection
-  - tntdb::setMaxPoolSize(unsingned) and tntdb::getMaxPoolSize()
+ - tntdb::Connection::ping to check, if the connection is alive
+ - use that ping in connectionpool before returning connection
+ - tntdb::setMaxPoolSize(unsingned) and tntdb::getMaxPoolSize()
 
 2007-02-20 tommi@tntnet.org
 
-  - fix leak: the statement-cursor is not freed, when the first fetch was not
-    successful
+ - fix leak: the statement-cursor is not freed, when the first fetch was not
+   successful
 
 2006-10-21 tommi@tntnet.org
 
-  - add fetchsize-parameter (with default 100) to tntdb::Statement::begin to
-    pass a hint to the implementing cursor
+ - add fetchsize-parameter (with default 100) to tntdb::Statement::begin to
+   pass a hint to the implementing cursor
 
 2006-10-12 tommi@tntnet.org
 
-  - don't inline constructors of error-classes to help compiler matching the
-    right type in catch-block (a problem with gcc 4.1 at least)
+ - don't inline constructors of error-classes to help compiler matching the
+   right type in catch-block (a problem with gcc 4.1 at least)
 
 2006-10-07 tommi@tntnet.org
 
-  - add getDate-, getTime- and getDatetime-methods to tntdb::Row
+ - add getDate-, getTime- and getDatetime-methods to tntdb::Row
 
 2006-09-20 tommi@tntnet.org
 
-  - fix cached prepared statements in sqlite: reset before reuse
+ - fix cached prepared statements in sqlite: reset before reuse
 
 2006-09-11 tommi@tntnet.org
 
-  - fix handling of binary data in sqlite3-driver
-  - move drivers to separate directory specified in configure with "--with-driverdir=..."
+ - fix handling of binary data in sqlite3-driver
+ - move drivers to separate directory specified in configure with "--with-driverdir=..."
 
 2006-08-25 tommi@tntnet.org
 
-  - fix smartpointer to support self-assignment
+ - fix smartpointer to support self-assignment
 
 2006-08-24 tommi@tntnet.org
 
-  - change license to LGPL
+ - change license to LGPL
 
 2006-07-21 tommi@tntnet.org
 
-  - extend license to allow linking with openssl due to postgresql
+ - extend license to allow linking with openssl due to postgresql
 
 2006-04-12 tommi@tntnet.org
 
-  - fix mysql-driver-bug: crashed when fetching some datatypes, because the api
+ - fix mysql-driver-bug: crashed when fetching some datatypes, because the api
     seems to return too small length-values (or I misunderstand the api;-) )
 
 2006-03-27 tommi@tntnet.org
 
-  - allow date-, datetime- and time-classes to be null, when passed to statements
+ - allow date-, datetime- and time-classes to be null, when passed to statements
 
 2006-03-01 tommi@tntnet.org
 
-  - declare cursor in postgresql with hold to enable cursor outside transactions
+ - declare cursor in postgresql with hold to enable cursor outside transactions
 
 2006-02-13 tommi@tntnet.org
 
-  - new method Statement::clear()
+ - new method Statement::clear()
 
 2006-01-21 tommi@tntnet.org
 
-  - connectionpool
+ - connectionpool
 
 2006-01-13 tommi@tntnet.org
 
-  - add missing include/tntdb/sqlite/impl/connectionmanager.h
+ - add missing include/tntdb/sqlite/impl/connectionmanager.h
 
 2005-12-26 tommi@tntnet.org
 
-  - new Sqlite-driver
+ - new Sqlite-driver
 
 2005-11-12 tommi@tntnet.org
 
-  - use PQexec with PREPARE when PQprepare is not found (postgresql prior 8.0)
+ - use PQexec with PREPARE when PQprepare is not found (postgresql prior 8.0)
 
 2005-11-11 tommi@tntnet.org
 
-  - make drivers for mysql and postgresql optional in configure
+ - make drivers for mysql and postgresql optional in configure
 
 2005-10-26 tommi@tntnet.org
 
-  - fixed handling of MYSQL_TYPE_LONGLONG
+ - fixed handling of MYSQL_TYPE_LONGLONG
