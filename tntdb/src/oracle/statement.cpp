@@ -109,7 +109,7 @@ namespace tntdb
       log_debug("OCIBindByName, setBool(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.data.data(), sizeof(bool),
+        &b.data[0], sizeof(bool),
         SQLT_INT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -123,7 +123,7 @@ namespace tntdb
       log_debug("OCIBindByName, setInt(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.data.data(), sizeof(int),
+        &b.data[0], sizeof(int),
         SQLT_INT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -137,7 +137,7 @@ namespace tntdb
       log_debug("OCIBindByName, setUnsigned(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.data.data(), sizeof(unsigned),
+        &b.data[0], sizeof(unsigned),
         SQLT_UIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -207,7 +207,7 @@ namespace tntdb
       log_debug("OCIBindByName, setFloat(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.data.data(), sizeof(float),
+        &b.data[0], sizeof(float),
         SQLT_FLT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -221,7 +221,7 @@ namespace tntdb
       log_debug("OCIBindByName, setDouble(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.data.data(), sizeof(double),
+        &b.data[0], sizeof(double),
         SQLT_FLT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -235,7 +235,7 @@ namespace tntdb
       log_debug("OCIBindByName, setChar(\"" << col << "\", " << data << ')');
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.data.data(), 1,
+        &b.data[0], 1,
         SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -249,7 +249,7 @@ namespace tntdb
       log_debug("OCIBindByName, setString(\"" << col << "\", \"" << data << "\")");
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.data.data(), data.size(),
+        &b.data[0], data.size(),
         SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
@@ -263,7 +263,7 @@ namespace tntdb
       log_debug("OCIBindByName, setBlob(\"" << col << "\", data{" << data.size() << "})");
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
-        b.data.data(), data.size(),
+        &b.data[0], data.size(),
         SQLT_BIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");

@@ -33,7 +33,7 @@
 #include <tntdb/oracle/datetime.h>
 #include <tntdb/oracle/number.h>
 #include <tntdb/oracle/blob.h>
-#include <cxxtools/dynbuffer.h>
+#include <vector>
 #include <oci.h>
 
 namespace tntdb
@@ -50,7 +50,7 @@ namespace tntdb
         ub2 type;
         ub2 nullind;
 
-        cxxtools::Dynbuffer<char> data;
+        std::vector<char> data;
         Datetime datetime;
         long longValue;
         uint32_t uint32Value;

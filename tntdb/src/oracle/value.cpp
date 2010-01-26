@@ -188,9 +188,9 @@ namespace tntdb
 
         default:
           log_debug("OCIDefineByPos(SQLT_AFC)");
-          data.reserve(len + 16);
+          data.resize(len + 16);
           ret = OCIDefineByPos(stmt->getHandle(), &defp,
-            stmt->getErrorHandle(), pos + 1, data.data(),
+            stmt->getErrorHandle(), pos + 1, &data[0],
             len + 16, SQLT_AFC, &nullind, &len, 0, OCI_DEFAULT);
           break;
       }
@@ -269,7 +269,7 @@ namespace tntdb
           return number.getDecimal().getInt();
           
         default:
-          return getValue<int>(std::string(data.data(), len), "int");
+          return getValue<int>(std::string(&data[0], len), "int");
       }
     }
 
@@ -303,7 +303,7 @@ namespace tntdb
           return number.getDecimal().getUnsigned();
           
         default:
-          return getValue<unsigned>(std::string(data.data(), len), "unsigned");
+          return getValue<unsigned>(std::string(&data[0], len), "unsigned");
       }
     }
 
@@ -337,7 +337,7 @@ namespace tntdb
           return number.getDecimal().getInt64();
           
         default:
-          return getValue<int64_t>(std::string(data.data(), len), "int64_t");
+          return getValue<int64_t>(std::string(&data[0], len), "int64_t");
       }
     }
 
@@ -366,7 +366,7 @@ namespace tntdb
           return number.getDecimal().getUnsigned64();
           
         default:
-          return getValue<uint64_t>(std::string(data.data(), len), "uint64_t");
+          return getValue<uint64_t>(std::string(&data[0], len), "uint64_t");
       }
     }
 
@@ -403,7 +403,7 @@ namespace tntdb
           return number.getDecimal();
           
         default:
-          return getValue<Decimal>(std::string(data.data(), len), "Decimal");
+          return getValue<Decimal>(std::string(&data[0], len), "Decimal");
       }
     }
     
@@ -432,7 +432,7 @@ namespace tntdb
           return number.getDecimal().getFloat();
           
         default:
-          return getValue<float>(std::string(data.data(), len), "float");
+          return getValue<float>(std::string(&data[0], len), "float");
       }
     }
 
@@ -461,7 +461,7 @@ namespace tntdb
           return number.getDecimal().getDouble();
           
         default:
-          return getValue<double>(std::string(data.data(), len), "double");
+          return getValue<double>(std::string(&data[0], len), "double");
       }
     }
 
@@ -490,7 +490,7 @@ namespace tntdb
           return static_cast<char>(number.getDecimal().getInt());
           
         default:
-          return *data.data();
+          return data[0];
       }
     }
 
@@ -526,7 +526,7 @@ namespace tntdb
           break;
 
         default:
-          ret.assign(data.data(), len > 0 ? len : 0);
+          ret.assign(&data[0], len > 0 ? len : 0);
       }
     }
 
@@ -555,7 +555,7 @@ namespace tntdb
           break;
 
         default:
-          ret.assign(data.data(), len > 0 ? len - 1 : 0);
+          ret.assign(&data[0], len > 0 ? len - 1 : 0);
       }
     }
 

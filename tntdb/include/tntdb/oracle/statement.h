@@ -31,7 +31,7 @@
 
 #include <tntdb/iface/istatement.h>
 #include <oci.h>
-#include <cxxtools/dynbuffer.h>
+#include <vector>
 #include <string>
 #include <string.h>
 #include <map>
@@ -58,7 +58,7 @@ namespace tntdb
         {
           public:
             OCIBind* ptr;
-            cxxtools::Dynbuffer<char> data;
+            std::vector<char> data;
             sb2 indicator;
             Datetime datetime;
             Blob blob;
@@ -70,13 +70,13 @@ namespace tntdb
               { }
             void setData(const std::string& value)
             {
-              data.reserve(value.size());
-              value.copy(data.data(), value.size());
+              data.resize(value.size());
+              value.copy(&data[0], value.size());
             }
             void setData(const char* value, unsigned size)
             {
-              data.reserve(size);
-              memcpy(data.data(), value, size);
+              data.resize(size);
+              memcpy(&data[0], value, size);
             }
             void setNull(bool sw = true)
             {
