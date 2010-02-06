@@ -93,29 +93,29 @@ namespace tntdb
     return conn->prepare(query);
   }
 
-  Statement Connection::prepareCached(const std::string& query)
+  Statement Connection::prepareCached(const std::string& query, const std::string& key)
   {
     log_trace("Connection::prepareCached(\"" << query << "\")");
 
-    return conn->prepareCached(query);
+    return conn->prepareCached(query, key);
   }
 
-  Statement IStmtCacheConnection::prepareCached(const std::string& query)
+  Statement IStmtCacheConnection::prepareCached(const std::string& query, const std::string& key)
   {
-    log_trace("IStmtCacheConnection::prepare(\"" << query << "\")");
+    log_trace("IStmtCacheConnection::prepare(\"" << query << ", " << key << "\")");
 
-    stmtCacheType::iterator it = stmtCache.find(query);
+    stmtCacheType::iterator it = stmtCache.find(key);
     if (it == stmtCache.end())
     {
-      log_debug("statement for query \"" << query << "\" not found in cache");
+      log_debug("statement for query \"" << key << "\" not found in cache");
       Statement stmt = prepare(query);
       IStatement* istmt = const_cast<IStatement*>(stmt.getImpl());
-      stmtCache.insert(stmtCacheType::value_type(query, istmt));
+      stmtCache.insert(stmtCacheType::value_type(key, istmt));
       return stmt;
     }
     else
     {
-      log_debug("statement for query \"" << query << "\" fetched from cache");
+      log_debug("statement for query \"" << key << "\" fetched from cache");
       return Statement(it->second);
     }
   }

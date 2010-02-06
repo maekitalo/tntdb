@@ -133,12 +133,23 @@ namespace tntdb
        * Creates a new Statement-object, with the given query.
        */
       Statement prepare(const std::string& query);
+
+      /**
+       * Like prepareCached but use the passed string as a cache key.
+       * Since queries are normally quite lengthy, they are not that fast
+       * as a lookup key. For better performance of the cache it is feasible
+       * to give a shorter key for the query. But it is the user, who is in
+       * charge to use unique keys.
+       */
+      Statement prepareCached(const std::string& query, const std::string& key);
+
       /**
        * Creates a new Statement-object, with the given query
        * and stores the statement in a cache. When called again
        * with the same query, the cached result is returned.
        */
-      Statement prepareCached(const std::string& query);
+      Statement prepareCached(const std::string& query)
+      { return prepareCached(query, query); }
 
       /**
        * Clears the cache, built with prepareCache.

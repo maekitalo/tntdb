@@ -101,9 +101,9 @@ namespace tntdb
     return connection->prepare(query);
   }
 
-  Statement PoolConnection::prepareCached(const std::string& query)
+  Statement PoolConnection::prepareCached(const std::string& query, const std::string& key)
   {
-    return connection->prepareCached(query);
+    return connection->prepareCached(query, key);
   }
 
   void PoolConnection::clearStatementCache()
