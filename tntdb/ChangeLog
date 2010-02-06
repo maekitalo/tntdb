@@ -73,6 +73,9 @@
 2008-06-07 maekitalo
  - fix Statement::setBool in postgresql driver
 
+2008-06-03 tommi@tntnet.org
+  - release version 1.0.1
+
 2008-06-02 maekitalo
  - fix crash when creating 2 cursors for one statement and destroying in different order
 
