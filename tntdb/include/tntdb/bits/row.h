@@ -32,6 +32,7 @@
 #include <tntdb/iface/irow.h>
 #include <tntdb/bits/value.h>
 #include <tntdb/blob.h>
+#include <tntdb/config.h>
 #include <cxxtools/smartptr.h>
 
 namespace tntdb
@@ -163,6 +164,88 @@ namespace tntdb
       Datetime getDatetime(const std::string& field_name) const
         { return getValue(field_name).getDatetime(); }
       //@}
+
+      bool getValue(size_type field_num, bool& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, int& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, unsigned& ret) const
+        { return getValue(field_num).getValue(ret); }
+#if INT_INT32_T_CONFLICT != 1
+      bool getValue(size_type field_num, int32_t& ret) const
+        { return getValue(field_num).getValue(ret); }
+#endif
+#if UNSIGNED_UINT32_T_CONFLICT != 1
+      bool getValue(size_type field_num, uint32_t& ret) const
+        { return getValue(field_num).getValue(ret); }
+#endif
+#if INT_INT64_T_CONFLICT != 1
+      bool getValue(size_type field_num, int64_t& ret) const
+        { return getValue(field_num).getValue(ret); }
+#endif
+#if UNSIGNED_UINT64_T_CONFLICT != 1
+      bool getValue(size_type field_num, uint64_t& ret) const
+        { return getValue(field_num).getValue(ret); }
+#endif
+      bool getValue(size_type field_num, Decimal& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, float& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, double& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, char& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, std::string& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, Blob& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, Date& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, Time& ret) const
+        { return getValue(field_num).getValue(ret); }
+      bool getValue(size_type field_num, Datetime& ret) const
+        { return getValue(field_num).getValue(ret); }
+
+      bool getValue(const std::string& field_name, bool& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, int& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, unsigned& ret) const
+        { return getValue(field_name).getValue(ret); }
+#if INT_INT32_T_CONFLICT != 1
+      bool getValue(const std::string& field_name, int32_t& ret) const
+        { return getValue(field_name).getValue(ret); }
+#endif
+#if UNSIGNED_UINT32_T_CONFLICT != 1
+      bool getValue(const std::string& field_name, uint32_t& ret) const
+        { return getValue(field_name).getValue(ret); }
+#endif
+#if INT_INT64_T_CONFLICT != 1
+      bool getValue(const std::string& field_name, int64_t& ret) const
+        { return getValue(field_name).getValue(ret); }
+#endif
+#if UNSIGNED_UINT64_T_CONFLICT != 1
+      bool getValue(const std::string& field_name, uint64_t& ret) const
+        { return getValue(field_name).getValue(ret); }
+#endif
+      bool getValue(const std::string& field_name, Decimal& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, float& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, double& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, char& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, std::string& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, Blob& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, Date& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, Time& ret) const
+        { return getValue(field_name).getValue(ret); }
+      bool getValue(const std::string& field_name, Datetime& ret) const
+        { return getValue(field_name).getValue(ret); }
 
       /// Returns a iterator to the first column
       const_iterator begin() const;
