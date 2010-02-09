@@ -117,63 +117,9 @@ namespace tntdb
        * In contrast to the getXXX-methods the type is not specified explictely
        * but determined by the passed reference.
        */
-      bool getValue(bool& ret) const;
-      bool getValue(int& ret) const;
-      bool getValue(unsigned& ret) const;
-#if INT_INT32_T_CONFLICT != 1
-      bool getValue(int32_t& ret) const;
-#endif
-#if UNSIGNED_UINT32_T_CONFLICT != 1
-      bool getValue(uint32_t& ret) const;
-#endif
-#if INT_INT64_T_CONFLICT != 1
-      bool getValue(int64_t& ret) const;
-#endif
-#if UNSIGNED_UINT64_T_CONFLICT != 1
-      bool getValue(uint64_t& ret) const;
-#endif
-      bool getValue(Decimal& ret) const;
-      bool getValue(float& ret) const;
-      bool getValue(double& ret) const;
-      bool getValue(char& ret) const;
-      bool getValue(std::string& ret) const;
-      bool getValue(Blob& ret) const;
-      bool getValue(Date& ret) const;
-      bool getValue(Time& ret) const;
-      bool getValue(Datetime& ret) const;
-      //@}
-
-      //@{
-      /**
-       * Make Value-objects implicit convertable.
-       * This class defines implicit convert-operators to convert the value
-       * automatically to different types.
-       * They are identical with the corresponding get-methods.
-       */
-      operator bool() const               { return value->getBool(); }
-      operator int() const                { return value->getInt(); }
-      operator unsigned() const           { return value->getUnsigned(); }
-#if INT_INT32_T_CONFLICT != 1
-      operator int32_t() const            { return value->getInt32(); }
-#endif
-#if UNSIGNED_UINT32_T_CONFLICT != 1
-      operator uint32_t() const           { return value->getUnsigned32(); }
-#endif
-#if INT_INT64_T_CONFLICT != 1
-      operator int64_t() const            { return value->getInt64(); }
-#endif
-#if UNSIGNED_UINT64_T_CONFLICT != 1
-      operator uint64_t() const           { return value->getUnsigned64(); }
-#endif
-      operator Decimal() const            { return value->getDecimal(); }
-      operator float() const              { return value->getFloat(); }
-      operator double() const             { return value->getDouble(); }
-      operator char() const               { return value->getChar(); }
-      operator std::string() const        { std::string ret; value->getString(ret); return ret; }
-      operator Blob() const               { Blob ret; value->getBlob(ret); return ret; }
-      operator Date() const               { return value->getDate(); }
-      operator Time() const               { return value->getTime(); }
-      operator Datetime() const           { return value->getDatetime(); }
+      template <typename T>
+      bool getValue(T& ret) const
+        { return *this >> ret; }
       //@}
 
       /// Returns true, if this class is not connected to a actual statement.
@@ -182,155 +128,155 @@ namespace tntdb
       const IValue* getImpl() const       { return &*value; }
   };
 
-  inline bool Value::getValue(bool& out) const
+  inline bool operator>> (const Value& value, bool& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getBool();
+    out = value.getBool();
     return true;
   }
 
-  inline bool Value::getValue(int& out) const
+  inline bool operator>> (const Value& value, int& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getInt();
+    out = value.getInt();
     return true;
   }
 
-  inline bool Value::getValue(unsigned& out) const
+  inline bool operator>> (const Value& value, unsigned& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getUnsigned();
+    out = value.getUnsigned();
     return true;
   }
 
 #if INT_INT32_T_CONFLICT != 1
-  inline bool Value::getValue(int32_t& out) const
+  inline bool operator>> (const Value& value, int32_t& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getInt32();
+    out = value.getInt32();
     return true;
   }
 #endif
 
 #if UNSIGNED_UINT32_T_CONFLICT != 1
-  inline bool Value::getValue(uint32_t& out) const
+  inline bool operator>> (const Value& value, uint32_t& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getUnsigned32();
+    out = value.getUnsigned32();
     return true;
   }
 #endif
 
 #if INT_INT64_T_CONFLICT != 1
-  inline bool Value::getValue(int64_t& out) const
+  inline bool operator>> (const Value& value, int64_t& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getInt64();
+    out = value.getInt64();
     return true;
   }
 #endif
 
 #if UNSIGNED_UINT64_T_CONFLICT != 1
-  inline bool Value::getValue(uint64_t& out) const
+  inline bool operator>> (const Value& value, uint64_t& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getUnsigned64();
+    out = value.getUnsigned64();
     return true;
   }
 #endif
 
-  inline bool Value::getValue(Decimal& out) const
+  inline bool operator>> (const Value& value, Decimal& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getDecimal();
+    out = value.getDecimal();
     return true;
   }
 
-  inline bool Value::getValue(float& out) const
+  inline bool operator>> (const Value& value, float& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getFloat();
+    out = value.getFloat();
     return true;
   }
 
-  inline bool Value::getValue(double& out) const
+  inline bool operator>> (const Value& value, double& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getDouble();
+    out = value.getDouble();
     return true;
   }
 
-  inline bool Value::getValue(char& out) const
+  inline bool operator>> (const Value& value, char& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getChar();
+    out = value.getChar();
     return true;
   }
 
-  inline bool Value::getValue(std::string& out) const
+  inline bool operator>> (const Value& value, std::string& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    getString(out);
+    value.getString(out);
     return true;
   }
 
-  inline bool Value::getValue(Blob& out) const
+  inline bool operator>> (const Value& value, Blob& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    getBlob(out);
+    value.getBlob(out);
     return true;
   }
 
-  inline bool Value::getValue(Date& out) const
+  inline bool operator>> (const Value& value, Date& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getDate();
+    out = value.getDate();
     return true;
   }
 
-  inline bool Value::getValue(Time& out) const
+  inline bool operator>> (const Value& value, Time& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getTime();
+    out = value.getTime();
     return true;
   }
 
-  inline bool Value::getValue(Datetime& out) const
+  inline bool operator>> (const Value& value, Datetime& out)
   {
-    if (isNull())
+    if (value.isNull())
       return false;
 
-    out = getDatetime();
+    out = value.getDatetime();
     return true;
   }
 
