@@ -313,18 +313,15 @@ namespace tntdb
 
     Statement::size_type Statement::execute()
     {
-      log_debug("execute statement " << getHandle());
+      log_debug("execute statement " << getHandle() << " mode=" << (conn->isTransactionActive() ? "OCI_DEFAULT" : "OCI_COMMIT_ON_SUCCESS"));
       sword ret = OCIStmtExecute(conn->getSvcCtxHandle(), getHandle(), conn->getErrorHandle(),
-        1, 0, 0, 0, OCI_DEFAULT);
+        1, 0, 0, 0, conn->isTransactionActive() ? OCI_DEFAULT : OCI_COMMIT_ON_SUCCESS);
       checkError(ret, "OCIStmtExecute");
 
       ub4 rowcnt = 0;
       ret = OCIAttrGet(getHandle(), OCI_HTYPE_STMT, &rowcnt, 0, OCI_ATTR_ROW_COUNT,
         conn->getErrorHandle());
       checkError(ret, "OCIAttrGet");
-
-      if (!conn->isTransactionActive())
-        conn->commitTransaction();
 
       return rowcnt;
     }
