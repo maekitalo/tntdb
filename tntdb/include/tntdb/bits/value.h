@@ -81,7 +81,7 @@ namespace tntdb
       float getFloat() const              { return value->getFloat(); }
       /// tries to convert value into an double.
       double getDouble() const            { return value->getDouble(); }
-      /// returns the first character of the texte-representation.
+      /// returns the first character of the text-representation.
       char getChar() const                { return value->getChar(); }
       /// returns the value as a string.
       std::string getString() const
