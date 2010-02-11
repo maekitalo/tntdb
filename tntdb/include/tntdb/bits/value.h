@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Tommi Maekitalo
+ * Copyright (C) 2005,2010 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -107,20 +107,29 @@ namespace tntdb
       Datetime getDatetime() const        { return value->getDatetime(); }
       //@}
 
-      //@{
       /**
        * Explicit data-access.
-       * The get-methods return false if the value is null. Otherwise the
+       * The get-template return false if the value is null. Otherwise the
        * passed reference is filled with the value.
        * If the value can't be converted to the requested type, a exception of
        * type tntdb::TypeError is thrown.
+       *
        * In contrast to the getXXX-methods the type is not specified explictely
        * but determined by the passed reference.
+       *
+       * The extraction is actually done using the operator>> with a l-value of
+       * const Value& and a r-value of a reference to the actual type. This
+       * operator is defined for standard types and may be defined for user
+       * defined types.
        */
       template <typename T>
       bool getValue(T& ret) const
         { return *this >> ret; }
-      //@}
+
+      /// Shorter name for getValue.
+      template <typename T>
+      bool get(T& ret) const
+        { return *this >> ret; }
 
       /// Returns true, if this class is not connected to a actual statement.
       bool operator!() const              { return !value; }
@@ -128,6 +137,10 @@ namespace tntdb
       const IValue* getImpl() const       { return &*value; }
   };
 
+  //@{
+  /**
+    Extraction operators for standard types.
+   */
   inline bool operator>> (const Value& value, bool& out)
   {
     if (value.isNull())
@@ -279,6 +292,7 @@ namespace tntdb
     out = value.getDatetime();
     return true;
   }
+  //@}
 
 }
 

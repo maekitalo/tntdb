@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Tommi Maekitalo
+ * Copyright (C) 2005,2010 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -171,7 +171,11 @@ namespace tntdb
       //@{
       /**
        * Set the hostvariable with the given name to the passed value.
-       * These set-methods choose the right bound type by parametertype.
+       *
+       * The method uses the operator<< with a l-value of tntdb::Hostvar&
+       * and r-value of a const reference to the actual type to read the
+       * value. The operator is defined for standard types and may be defined
+       * for user defined types.
        */
       template <typename T>
       Statement& set(const std::string& col, const T& data);
@@ -224,6 +228,9 @@ namespace tntdb
       const IStatement* getImpl() const  { return &*stmt; }
   };
 
+  /**
+   * Helper class to hold a tntdb::Statement and a column name.
+   */
   class Hostvar
   {
       Statement& stmt;
@@ -282,6 +289,10 @@ namespace tntdb
       void set(const T& data);
   };
 
+  //@{
+  /**
+   * Set operators for host variables.
+   */
   inline void operator<< (Hostvar& hostvar, bool data)
   {
     hostvar.setBool(data);
@@ -375,6 +386,7 @@ namespace tntdb
   {
     hostvar.setDatetime(data);
   }
+  //@}
 
   template <typename T>
   Statement& Statement::set(const std::string& name, const T& data)
@@ -389,6 +401,7 @@ namespace tntdb
   {
     *this << data;
   }
+
 }
 
 #endif // TNTDB_BITS_STATEMENT_H
