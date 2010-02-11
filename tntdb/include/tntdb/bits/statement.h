@@ -232,7 +232,7 @@ namespace tntdb
     public:
       Hostvar(Statement& stmt_, const std::string& name_)
         : stmt(stmt_),
-          name(name)
+          name(name_)
           { }
       Statement& getStatement()   { return stmt; }
       const std::string& getName() { return name; }
