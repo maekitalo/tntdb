@@ -32,6 +32,7 @@
 #include <tntdb/iface/iconnection.h>
 #include <tntdb/statement.h>
 #include <oci.h>
+#include <map>
 
 namespace tntdb
 {
@@ -45,6 +46,8 @@ namespace tntdb
         OCISession* usrhp;   /* user session handle */
         OCISvcCtx*  svchp;   /* the service handle */
         tntdb::Statement pingStmt;
+        typedef std::map<std::string, tntdb::Statement> SeqStmtType;
+        SeqStmtType seqStmt;
 
         void logon(const std::string& dblink, const std::string& user, const std::string& password);
 
@@ -66,6 +69,7 @@ namespace tntdb
         tntdb::Value selectValue(const std::string& query);
         tntdb::Statement prepare(const std::string& query);
         bool ping();
+        long lastInsertId(const std::string& name);
 
         OCIEnv* getEnvHandle() const        { return envhp; }
         OCIError* getErrorHandle() const    { return errhp; }

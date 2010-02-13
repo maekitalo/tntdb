@@ -291,5 +291,32 @@ namespace tntdb
         return false;
       }
     }
+
+    long Connection::lastInsertId(const std::string& name)
+    {
+      tntdb::Statement stmt;
+      SeqStmtType::iterator s = seqStmt.find(name);
+      if (s == seqStmt.end())
+      {
+        // check for valid sequence name
+        for (std::string::const_iterator it = name.begin(); it != name.end(); ++it)
+          if (! ((*it >= 'a' && *it <= 'z')
+              || (*it >= 'A' && *it <= 'Z')
+              || (*it >= '0' && *it <= '9')
+              || *it == '_'))
+            throw Error("invalid sequence name \"" + name + '"');
+
+        stmt = prepare(
+            "select " + name + ".currval from dual");
+        seqStmt[name] = stmt;
+      }
+      else
+        stmt = s->second;
+
+      long ret;
+      stmt.selectValue().get(ret);
+      return ret;
+    }
+
   }
 }
