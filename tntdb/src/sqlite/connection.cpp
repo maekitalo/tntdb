@@ -132,5 +132,10 @@ namespace tntdb
     {
       return db != 0;
     }
+
+    long Connection::lastInsertId(const std::string& name)
+    {
+      return static_cast<int>(sqlite3_last_insert_rowid(db));
+    }
   }
 }

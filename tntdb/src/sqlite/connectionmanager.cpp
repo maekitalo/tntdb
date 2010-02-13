@@ -29,9 +29,6 @@
 #include <tntdb/sqlite/impl/connectionmanager.h>
 #include <tntdb/sqlite/impl/connection.h>
 #include <tntdb/connection.h>
-#include <cxxtools/log.h>
-
-log_define("tntdb.sqlite.connectionmanager")
 
 namespace tntdb
 {

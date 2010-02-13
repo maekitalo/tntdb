@@ -32,9 +32,6 @@
 #include <tntdb/bits/row.h>
 #include <tntdb/bits/value.h>
 #include <tntdb/error.h>
-#include <cxxtools/log.h>
-
-log_define("tntdb.postgresql.resultrow")
 
 namespace tntdb
 {

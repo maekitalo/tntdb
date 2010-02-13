@@ -29,9 +29,6 @@
 #include <tntdb/postgresql/impl/connectionmanager.h>
 #include <tntdb/postgresql/impl/connection.h>
 #include <tntdb/connection.h>
-#include <cxxtools/log.h>
-
-log_define("tntdb.postgresql.connectionmanager")
 
 namespace tntdb
 {

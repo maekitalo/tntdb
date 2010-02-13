@@ -79,7 +79,17 @@ namespace tntdb
       return ::sqlite3_column_int(getStmt(), iCol);
     }
 
+    long StmtValue::getLong() const
+    {
+      return static_cast<long>(getInt64());
+    }
+
     unsigned StmtValue::getUnsigned() const
+    {
+      return static_cast<unsigned>(getInt64());
+    }
+
+    unsigned long StmtValue::getUnsignedLong() const
     {
       return static_cast<unsigned>(getInt64());
     }

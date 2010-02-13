@@ -28,9 +28,6 @@
 
 #include <tntdb/impl/result.h>
 #include <tntdb/row.h>
-#include <cxxtools/log.h>
-
-log_define("tntdb.result")
 
 namespace tntdb
 {

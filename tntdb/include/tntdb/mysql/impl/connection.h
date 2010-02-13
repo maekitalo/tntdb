@@ -66,9 +66,7 @@ namespace tntdb
         tntdb::Value selectValue(const std::string& query);
         tntdb::Statement prepare(const std::string& query);
         bool ping();
-
-        // specific methods
-        my_ulonglong getInsertId();
+        long lastInsertId(const std::string& name);
     };
   }
 }

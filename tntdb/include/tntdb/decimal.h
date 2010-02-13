@@ -180,6 +180,12 @@ namespace tntdb
     int getInt() const throw(std::overflow_error)
       { return getInteger<int>(); }
 
+    /// Return this decimal number rounded as a C++ long.
+    /// @return long result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
+    int getLong() const throw(std::overflow_error)
+      { return getInteger<long>(); }
+
     /// Return this decimal number rounded as a C++ int32_t.
     /// @return int32_t result if the result will fit.
     /// @throw std::overflow_error if the result will not fit
@@ -191,6 +197,12 @@ namespace tntdb
     /// @throw std::overflow_error if the result will not fit
     unsigned getUnsigned() const throw(std::overflow_error)
       { return getInteger<unsigned>(); }
+
+    /// Return this decimal number rounded as a C++ unsigned long.
+    /// @return unsigned long result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
+    unsigned long getUnsignedLong() const throw(std::overflow_error)
+      { return getInteger<unsigned long>(); }
 
     /// Return this decimal number rounded as a C++ uint32_t.
     /// @return uint32_t result if the result will fit.

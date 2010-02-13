@@ -65,12 +65,16 @@ namespace tntdb
       bool getBool() const                { return value->getBool(); }
       /// tries to convert value into an int.
       int getInt() const                  { return value->getInt(); }
+      /// tries to convert value into an long.
+      long getLong() const                { return value->getLong(); }
       /// tries to convert value into an unsigned.
       unsigned getUnsigned() const        { return value->getUnsigned(); }
+      /// tries to convert value into an unsigned.
+      unsigned getUnsignedLong() const    { return value->getUnsignedLong(); }
       /// tries to convert value into an int32_t.
       int32_t getInt32() const            { return value->getInt32(); }
       /// tries to convert value into an uint32_t.
-      uint32_t getUnsigned32() const       { return value->getUnsigned32(); }
+      uint32_t getUnsigned32() const      { return value->getUnsigned32(); }
       /// tries to convert value into an int64_t.
       int64_t getInt64() const            { return value->getInt64(); }
       /// tries to convert value into an uint64_t.
@@ -159,12 +163,30 @@ namespace tntdb
     return true;
   }
 
+  inline bool operator>> (const Value& value, long& out)
+  {
+    if (value.isNull())
+      return false;
+
+    out = value.getLong();
+    return true;
+  }
+
   inline bool operator>> (const Value& value, unsigned& out)
   {
     if (value.isNull())
       return false;
 
     out = value.getUnsigned();
+    return true;
+  }
+
+  inline bool operator>> (const Value& value, unsigned long& out)
+  {
+    if (value.isNull())
+      return false;
+
+    out = value.getUnsignedLong();
     return true;
   }
 

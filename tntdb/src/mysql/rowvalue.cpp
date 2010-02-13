@@ -32,10 +32,7 @@
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
 #include <tntdb/decimal.h>
-#include <cxxtools/log.h>
 #include <sstream>
-
-log_define("tntdb.mysql.rowvalue")
 
 namespace tntdb
 {
@@ -63,9 +60,25 @@ namespace tntdb
       return ret;
     }
 
+    long RowValue::getLong() const
+    {
+      long ret = 0;
+      std::istringstream v(getString());
+      v >> ret;
+      return ret;
+    }
+
     unsigned RowValue::getUnsigned() const
     {
       unsigned ret = 0;
+      std::istringstream v(getString());
+      v >> ret;
+      return ret;
+    }
+
+    unsigned long RowValue::getUnsignedLong() const
+    {
+      unsigned long ret = 0;
       std::istringstream v(getString());
       v >> ret;
       return ret;

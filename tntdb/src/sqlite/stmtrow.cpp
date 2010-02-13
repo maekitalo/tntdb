@@ -29,9 +29,6 @@
 #include <tntdb/sqlite/impl/stmtrow.h>
 #include <tntdb/sqlite/impl/stmtvalue.h>
 #include <tntdb/value.h>
-#include <cxxtools/log.h>
-
-log_define("tntdb.sqlite.stmtrow")
 
 namespace tntdb
 {

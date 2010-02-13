@@ -68,11 +68,21 @@ namespace tntdb
       return getValue<int>(getString(), "int");
     }
 
+    long ResultValue::getLong() const
+    {
+      return getValue<long>(getString(), "long");
+    }
+
     unsigned ResultValue::getUnsigned() const
     {
       return getValue<unsigned>(getString(), "unsigned");
     }
-    
+
+    unsigned long ResultValue::getUnsignedLong() const
+    {
+      return getValue<unsigned>(getString(), "unsigned long");
+    }
+
     int32_t ResultValue::getInt32() const
     {
       return getValue<int32_t>(getString(), "int32_t");

@@ -157,9 +157,15 @@ namespace tntdb
       void clearStatementCache()         { conn->clearStatementCache(); }
 
       /**
-       * returns true, if connection is alive
+       * returns true, if connection is alive.
        */
       bool ping()                        { return conn->ping(); }
+
+      /**
+       * returns the last inserted insert id.
+       */
+      int lastInsertId(const std::string& name)
+      { return conn->lastInsertId(name); }
 
       /**
        * Returns true, when there is no connection established.

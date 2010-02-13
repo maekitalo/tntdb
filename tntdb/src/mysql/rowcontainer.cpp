@@ -30,8 +30,6 @@
 #include <tntdb/row.h>
 #include <cxxtools/log.h>
 
-log_define("tntdb.mysql.rowcontainer")
-
 namespace tntdb
 {
   namespace mysql

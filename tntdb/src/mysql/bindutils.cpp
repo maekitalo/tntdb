@@ -423,14 +423,19 @@ namespace tntdb
       return getInteger<int>(bind);
     }
 
+    long getLong(const MYSQL_BIND& bind)
+    {
+      return getInteger<long>(bind);
+    }
+
     unsigned getUnsigned(const MYSQL_BIND& bind)
     {
       return getInteger<unsigned>(bind);
     }
 
-    long getLong(const MYSQL_BIND& bind)
+    unsigned long getUnsignedLong(const MYSQL_BIND& bind)
     {
-      return getInteger<long>(bind);
+      return getInteger<unsigned long>(bind);
     }
 
     int32_t getInt32(const MYSQL_BIND& bind)

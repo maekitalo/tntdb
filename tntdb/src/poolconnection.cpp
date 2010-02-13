@@ -118,4 +118,10 @@ namespace tntdb
       drop = true;
     return ok;
   }
+
+  long PoolConnection::lastInsertId(const std::string& name)
+  {
+    return connection->lastInsertId(name);
+  }
+
 }

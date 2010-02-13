@@ -327,10 +327,9 @@ namespace tntdb
       return ret == 0;
     }
 
-    my_ulonglong Connection::getInsertId()
+    long Connection::lastInsertId(const std::string& name)
     {
-      log_debug("mysql_insert_id(" << &mysql << ')');
-      return ::mysql_insert_id(&mysql);
+      return static_cast<long>(::mysql_insert_id(&mysql));
     }
   }
 }

@@ -27,6 +27,7 @@ AC_PROG_LIBTOOL
 AC_COMPILE_IFELSE([
 #include <stdint.h>
 void foo(int) {}
+void foo(long) {}
 void foo(int32_t) {}
 ],
 INT_INT32_T_CONFLICT=0,
@@ -36,6 +37,7 @@ AC_SUBST(INT_INT32_T_CONFLICT)
 AC_COMPILE_IFELSE([
 #include <stdint.h>
 void foo(unsigned) {}
+void foo(unsigned long) {}
 void foo(uint32_t) {}
 ],
 UNSIGNED_UINT32_T_CONFLICT=0,
@@ -45,6 +47,7 @@ AC_SUBST(UNSIGNED_UINT32_T_CONFLICT)
 AC_COMPILE_IFELSE([
 #include <stdint.h>
 void foo(int) {}
+void foo(long) {}
 void foo(int64_t) {}
 ],
 INT_INT64_T_CONFLICT=0,
@@ -54,6 +57,7 @@ AC_SUBST(INT_INT64_T_CONFLICT)
 AC_COMPILE_IFELSE([
 #include <stdint.h>
 void foo(unsigned) {}
+void foo(unsigned long) {}
 void foo(uint64_t) {}
 ],
 UNSIGNED_UINT64_T_CONFLICT=0,

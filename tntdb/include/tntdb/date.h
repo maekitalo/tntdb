@@ -97,12 +97,13 @@ namespace tntdb
         { return !operator==(dt); }
 
       bool operator< (const Date& dt) const
-      { return year < dt.year
-            || year == dt.year
-             && ( month < dt.month
-               || month == dt.month
-                && day < dt.day
-                ); }
+      {
+        return year   < dt.year   ? true
+             : year   > dt.year   ? false
+             : month  < dt.month  ? true
+             : month  > dt.month  ? false
+             : day    < dt.day;
+      }
 
       bool operator> (const Date& dt) const
         { return dt < *this; }

@@ -30,9 +30,6 @@
 #include <tntdb/mysql/impl/boundvalue.h>
 #include <tntdb/value.h>
 #include <tntdb/error.h>
-#include <cxxtools/log.h>
-
-log_define("tntdb.mysql.boundrow")
 
 namespace tntdb
 {

@@ -54,6 +54,7 @@ namespace tntdb
         tntdb::Value selectValue(const std::string& query);
         tntdb::Statement prepare(const std::string& query);
         bool ping();
+        long lastInsertId(const std::string& name);
 
         sqlite3* getSqlite3() const  { return db; }
     };

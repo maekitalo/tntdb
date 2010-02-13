@@ -31,7 +31,6 @@
 #include <algorithm>
 
 #include <cxxtools/loginit.h>
-#include <cxxtools/log.h>
 #include <cxxtools/arg.h>
 
 #include <tntdb/connect.h>
@@ -43,8 +42,6 @@
 
 #include "util.h"
 
-log_define("sqlcmd.main")
-
 int main(int argc, char* argv[])
 {
   try
@@ -55,11 +52,7 @@ int main(int argc, char* argv[])
     cxxtools::Arg<bool> statement(argc, argv, 'p');
     cxxtools::Arg<bool> cursor(argc, argv, 'c');
 
-    cxxtools::Arg<bool> debug(argc, argv, 'd');
-    if (debug)
-      log_init_debug();
-    else
-      log_init();
+    log_init();
 
     if (argc < 2)
     {
@@ -72,7 +65,6 @@ int main(int argc, char* argv[])
                    "  -r        select row\n"
                    "  -p        select with prepared statement\n"
                    "  -c        select with cursor\n"
-                   "  -d        enable debug\n\n"
                    "When no sql-query is passed, sqlcmd reads a sql-query from standard-input.\n"
                 << std::endl;
       return -1;

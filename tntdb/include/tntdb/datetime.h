@@ -149,24 +149,21 @@ namespace tntdb
         { return !operator==(dt); }
 
       bool operator< (const Datetime& dt) const
-      { return year < dt.year
-            || year == dt.year
-             && ( month < dt.month
-               || month == dt.month
-                && ( day < dt.day
-                  || day == dt.day
-                   && ( hour < dt.hour
-                     || hour == dt.hour
-                      && ( minute < dt.minute
-                        || minute == dt.minute
-                         && ( second < dt.second
-                           || second == dt.second
-                            && millis < dt.millis
-                            )
-                         )
-                       )
-                    )
-                ); }
+      {
+        return year   < dt.year   ? true
+             : year   > dt.year   ? false
+             : month  < dt.month  ? true
+             : month  > dt.month  ? false
+             : day    < dt.day    ? true
+             : day    > dt.day    ? false
+             : hour   < dt.hour   ? true
+             : hour   > dt.hour   ? false
+             : minute < dt.minute ? true
+             : minute > dt.minute ? false
+             : second < dt.second ? true
+             : second > dt.second ? false
+             : millis < dt.millis;
+      }
 
       bool operator> (const Datetime& dt) const
         { return dt < *this; }

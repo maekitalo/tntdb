@@ -56,6 +56,7 @@ namespace tntdb
       virtual Statement prepareCached(const std::string& query, const std::string& key);
       virtual void clearStatementCache();
       virtual bool ping();
+      virtual long lastInsertId(const std::string& name);
   };
 }
 

@@ -30,9 +30,6 @@
 #include <tntdb/impl/value.h>
 #include <tntdb/value.h>
 #include <tntdb/error.h>
-#include <cxxtools/log.h>
-
-log_define("tntdb.row")
 
 namespace tntdb
 {

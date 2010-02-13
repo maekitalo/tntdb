@@ -156,5 +156,19 @@ namespace tntdb
         return false;
       }
     }
+
+    long Connection::lastInsertId(const std::string& name)
+    {
+      if (!currvalStmt)
+        currvalStmt = prepare("select currval(:name)");
+
+      long ret;
+      currvalStmt.set("name", name)
+        .selectValue()
+        .get(ret);
+
+      return ret;
+    }
+
   }
 }

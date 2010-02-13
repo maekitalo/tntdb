@@ -30,6 +30,7 @@
 #define TNTDB_POSTGRESQL_IMPL_CONNECTION_H
 
 #include <tntdb/iface/iconnection.h>
+#include <tntdb/statement.h>
 #include <libpq-fe.h>
 
 namespace tntdb
@@ -39,6 +40,7 @@ namespace tntdb
     class Connection : public IStmtCacheConnection
     {
         PGconn* conn;
+        tntdb::Statement currvalStmt;
 
       public:
         explicit Connection(const char* conninfo);
@@ -54,6 +56,7 @@ namespace tntdb
         tntdb::Value selectValue(const std::string& query);
         tntdb::Statement prepare(const std::string& query);
         bool ping();
+        long lastInsertId(const std::string& name);
 
         PGconn* getPGConn() const  { return conn; }
     };

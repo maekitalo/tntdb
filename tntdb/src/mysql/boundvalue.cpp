@@ -32,9 +32,6 @@
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
 #include <tntdb/decimal.h>
-#include <cxxtools/log.h>
-
-log_define("tntdb.mysql.boundvalue")
 
 namespace tntdb
 {
@@ -55,9 +52,19 @@ namespace tntdb
       return mysql::getInt(mysql_bind);
     }
 
+    long BoundValue::getLong() const
+    {
+      return mysql::getInt(mysql_bind);
+    }
+
     unsigned BoundValue::getUnsigned() const
     {
       return mysql::getUnsigned(mysql_bind);
+    }
+
+    unsigned long BoundValue::getUnsignedLong() const
+    {
+      return mysql::getUnsignedLong(mysql_bind);
     }
 
     int32_t BoundValue::getInt32() const

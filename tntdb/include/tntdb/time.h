@@ -107,15 +107,15 @@ namespace tntdb
         { return !operator==(dt); }
 
       bool operator< (const Time& dt) const
-      { return hour < dt.hour
-            || hour == dt.hour
-             && ( minute < dt.minute
-              || minute == dt.minute
-               && ( second < dt.second
-                 || second == dt.second
-                  && millis < dt.millis
-                  )
-                ); }
+      {
+        return hour   < dt.hour   ? true
+             : hour   > dt.hour   ? false
+             : minute < dt.minute ? true
+             : minute > dt.minute ? false
+             : second < dt.second ? true
+             : second > dt.second ? false
+             : millis < dt.millis;
+      }
 
       bool operator> (const Time& dt) const
         { return dt < *this; }

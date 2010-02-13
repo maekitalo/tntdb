@@ -29,9 +29,6 @@
 #include <tntdb/mysql/impl/connectionmanager.h>
 #include <tntdb/mysql/impl/connection.h>
 #include <tntdb/connection.h>
-#include <cxxtools/log.h>
-
-log_define("tntdb.mysql.connectionmanager")
 
 namespace tntdb
 {

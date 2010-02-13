@@ -33,10 +33,7 @@
 #include <tntdb/decimal.h>
 #include <tntdb/blob.h>
 #include <tntdb/error.h>
-#include <cxxtools/log.h>
 #include <sstream>
-
-log_define("tntdb.value")
 
 namespace
 {
@@ -84,11 +81,25 @@ namespace tntdb
     return getValue<int>(data, "int");
   }
 
+  long ValueImpl::getLong() const
+  {
+    if (null)
+      throw NullValue();
+    return getValue<long>(data, "long");
+  }
+
   unsigned ValueImpl::getUnsigned() const
   {
     if (null)
       throw NullValue();
     return getValue<unsigned>(data, "unsigned");
+  }
+
+  unsigned long ValueImpl::getUnsignedLong() const
+  {
+    if (null)
+      throw NullValue();
+    return getValue<unsigned long>(data, "unsigned long");
   }
 
   int32_t ValueImpl::getInt32() const
