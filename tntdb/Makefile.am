@@ -8,6 +8,7 @@ SUBDIRS = \
     src/oracle \
     include \
     demo \
+    test \
     doc
 
 EXTRA_DIST = \

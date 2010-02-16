@@ -210,11 +210,27 @@ namespace tntdb
       }
     }
 
+    void Statement::setLong(const std::string& col, long data)
+    {
+      int idx = getBindIndex(col);
+      sqlite3_stmt* stmt = getBindStmt();
+      if (idx != 0)
+      {
+        reset();
+
+        log_debug("sqlite3_bind_int64(" << stmt << ", " << idx << ')');
+        int ret = ::sqlite3_bind_int64(stmt, idx, data);
+
+        if (ret != SQLITE_OK)
+          throw Execerror("sqlite3_bind_int", stmt, ret);
+      }
+    }
+
     void Statement::setInt32(const std::string& col, int32_t data)
     {
       setInt(col, data);
     }
-    
+
     void Statement::setUnsigned(const std::string& col, unsigned data)
     {
       if (data > static_cast<unsigned>(std::numeric_limits<int>::max()))
@@ -225,6 +241,18 @@ namespace tntdb
       }
       else
         setInt(col, static_cast<int>(data));
+    }
+
+    void Statement::setUnsignedLong(const std::string& col, unsigned long data)
+    {
+      if (data > static_cast<unsigned long>(std::numeric_limits<long>::max()))
+      {
+        log_warn("possible loss of precision while converting large unsigned " << data
+          << " to double");
+        setDouble(col, static_cast<double>(data));
+      }
+      else
+        setLong(col, static_cast<long>(data));
     }
 
     void Statement::setUnsigned32(const std::string& col, uint32_t data)

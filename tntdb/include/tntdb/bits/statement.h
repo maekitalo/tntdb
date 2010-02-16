@@ -91,10 +91,20 @@ namespace tntdb
       Statement& setInt(const std::string& col, int data)
         { stmt->setInt(col, data); return *this; }
       /**
+       * Sets the hostvariable with the given name to a int value.
+       */
+      Statement& setLong(const std::string& col, long data)
+        { stmt->setLong(col, data); return *this; }
+      /**
        * Sets the hostvariable with the given name to a unsigned value.
        */
       Statement& setUnsigned(const std::string& col, unsigned data)
         { stmt->setUnsigned(col, data); return *this; }
+      /**
+       * Sets the hostvariable with the given name to a unsigned value.
+       */
+      Statement& setUnsignedLong(const std::string& col, unsigned long data)
+        { stmt->setUnsignedLong(col, data); return *this; }
       /**
        * Sets the hostvariable with the given name to a int32_t value.
        */
@@ -250,8 +260,12 @@ namespace tntdb
         { stmt.setBool(name, data); }
       void setInt(int data)
         { stmt.setInt(name, data); }
+      void setLong(int data)
+        { stmt.setLong(name, data); }
       void setUnsigned(unsigned data)
         { stmt.setUnsigned(name, data); }
+      void setUnsignedLong(unsigned data)
+        { stmt.setUnsignedLong(name, data); }
       void setInt32(int32_t data)
         { stmt.setInt32(name, data); }
       void setUnsigned32(uint32_t data)
@@ -303,9 +317,19 @@ namespace tntdb
     hostvar.setInt(data);
   }
 
+  inline void operator<< (Hostvar& hostvar, long data)
+  {
+    hostvar.setLong(data);
+  }
+
   inline void operator<< (Hostvar& hostvar, unsigned data)
   {
     hostvar.setUnsigned(data);
+  }
+
+  inline void operator<< (Hostvar& hostvar, unsigned long data)
+  {
+    hostvar.setUnsignedLong(data);
   }
 
 #if INT_INT32_T_CONFLICT != 1

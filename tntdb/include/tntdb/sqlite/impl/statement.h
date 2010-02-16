@@ -61,7 +61,9 @@ namespace tntdb
         virtual void setNull(const std::string& col);
         virtual void setBool(const std::string& col, bool data);
         virtual void setInt(const std::string& col, int data);
+        virtual void setLong(const std::string& col, long data);
         virtual void setUnsigned(const std::string& col, unsigned data);
+        virtual void setUnsignedLong(const std::string& col, unsigned long data);
         virtual void setInt32(const std::string& col, int32_t data);
         virtual void setUnsigned32(const std::string& col, uint32_t data);
         virtual void setInt64(const std::string& col, int64_t data);

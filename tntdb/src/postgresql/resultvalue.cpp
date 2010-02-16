@@ -197,11 +197,16 @@ namespace tntdb
     {
       std::string value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
       char ch;
-      unsigned short hour, min, sec;
+      unsigned short hour, min, sec, msec;
+      float fsec;
       std::istringstream in(value);
-      in >> hour >> ch >> min >> ch >> sec;
+      in >> hour >> ch >> min >> ch >> fsec;
       if (in)
-        return Time(hour, min, sec);
+      {
+        sec = static_cast<unsigned short>(fsec);
+        msec = (fsec - sec + .0005) * 1000;
+        return Time(hour, min, sec, msec);
+      }
 
       std::ostringstream msg;
       msg << "can't convert \"" << value << "\" to Time";
@@ -211,19 +216,25 @@ namespace tntdb
     Datetime ResultValue::getDatetime() const
     {
       std::string value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
+      log_debug("datetime value=" << value);
       if (value.find('-') != std::string::npos)
       {
         // ISO 8601/SQL standard
         char ch;
-        unsigned short year, month, day, hour, min, sec;
+        unsigned short year, month, day, hour, min, sec, msec;
+        float fsec;
         std::istringstream in(value);
-        in >> year >> ch >> month >> ch >> day >> hour >> ch >> min >> ch >> sec;
+        in >> year >> ch >> month >> ch >> day >> hour >> ch >> min >> ch >> fsec;
         if (in)
-          return Datetime(year, month, day, hour, min, sec);
+        {
+          sec = static_cast<unsigned short>(fsec);
+          msec = (fsec - sec + .0005) * 1000;
+          return Datetime(year, month, day, hour, min, sec, msec);
+        }
       }
       else if (value.find('/') != std::string::npos)
       {
-        // tradition style
+        // traditional style
         char ch;
         unsigned short year, month, day, hour, min, sec;
         std::istringstream in(value);

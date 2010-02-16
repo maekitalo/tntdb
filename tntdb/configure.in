@@ -242,6 +242,7 @@ AC_CONFIG_FILES([
   src/oracle/Makefile
   include/Makefile
   demo/Makefile
+  test/Makefile
   doc/Makefile
   doc/tntdb.doxygen
   ])

@@ -97,7 +97,7 @@ namespace tntdb
     /// @param man integer decimal mantissa value to set this Decimal number to.
     /// @param exp integer base 10 exponent to set this Decimal number to.
     Decimal(int64_t man, ExponentType exp);
-    
+
     /// Initializes the Decimal-object with the given MantissaType mantissa
     /// and ExponentType exponent
     /// @param man integer decimal mantissa value to set this Decimal number to.
@@ -123,7 +123,7 @@ namespace tntdb
     bool isInfinity() const;
 
     /// Is this Decimal number positive or negative infinity?
-    /// @param positiveInfinity 
+    /// @param positiveInfinity
     /// @return If postitiveInfinity is true, then return true if this
     /// Decimal number is postitive infinity.
     /// Else if postitiveInfinity is false, then return true if this
@@ -139,7 +139,7 @@ namespace tntdb
     /// Is this Decimal number zero?
     /// @return true if this Number object is zero, else return false.
     bool isZero() const;
-      
+
     /// Split this decimal number into integral part, fractional
     /// and exponent parts.  An optional user specified exponent
     /// offset can be used to first scale the decimal number.
@@ -158,9 +158,9 @@ namespace tntdb
                                        ExponentType optionalUserSpecifiedExponentOffset = 0) const throw(std::overflow_error);
 
     /// Return the number of decimal digits in n.
-    template <typename IntegerType> 
+    template <typename IntegerType>
     IntegerType numberOfDigits(IntegerType n) const;
-    
+
     /// Return this number as a C++ integer type.
     /// @param roundingAlgorithm @link Decimal::RoundingAlgorithmType @endlink
     /// @return integer result if the result will fit.
@@ -191,7 +191,7 @@ namespace tntdb
     /// @throw std::overflow_error if the result will not fit
     int32_t getInt32() const throw(std::overflow_error)
       { return getInteger<int32_t>(); }
-      
+
     /// Return this decimal number rounded as a C++ unsigned.
     /// @return unsigned result if the result will fit.
     /// @throw std::overflow_error if the result will not fit
@@ -221,7 +221,7 @@ namespace tntdb
     /// @throw std::overflow_error if the result will not fit
     uint64_t getUnsigned64() const throw(std::overflow_error)
       { return getInteger<uint64_t>(); }
-    
+
     /// Convert to a C++ float.
     /// @return float result, which is computed with binary floating point
     /// arithmetic, and hence is an approximation.
@@ -245,14 +245,14 @@ namespace tntdb
     /// @param num floating point value to set this Decimal number to.
     template <typename FloatingPointType>
     void setFloatingPoint(FloatingPointType num);
-    
+
     /// Set this this tntdb::Decimal object to the value of the given
     /// integer type mantissa and base 10 exponent.
     /// @param num integer decimal mantissa value to set this Decimal number to.
     /// @param exponent integer base 10 exponent to set this Decimal number to.
     template <typename IntegerType>
     void setDecimalInteger(IntegerType num, int32_t exponent);
-      
+
     /// Set this this tntdb::Decimal object to the value of the given int.
     /// @param num integer value to set this Decimal number to.
     void setInt(int num)
@@ -262,7 +262,7 @@ namespace tntdb
     /// @param num integer value to set this Decimal number to.
     void setInt32(int32_t num)
       { setInteger<int32_t>(num); }
-      
+
     /// Set this this tntdb::Decimal object to the value of the given unsigned.
     /// @param num integer value to set this Decimal number to.
     void setUnsigned(unsigned num)
@@ -310,7 +310,7 @@ namespace tntdb
     /// Return this Decimal number as a string.
     /// @return string representation of this decimal number.
     std::string toString() const;
-      
+
     /// Print this Decimal number.  If out.precision() != 0, then this
     /// decimal number is printed with out.precision() significant digits.
     /// @param out output stream
@@ -322,7 +322,7 @@ namespace tntdb
     /// @param printFlags the optional printFlags only affect
     /// how positive and negative infinity are printed.
     std::ostream &print(std::ostream &out, PrintFlagsType printFlags) const;
-    
+
     /// Read a Decimal number.
     /// @param in input stream
     /// @param ignoreOverflowReadingFraction if true, ignore overflow errors
@@ -336,7 +336,7 @@ namespace tntdb
     /// read(ostr.str(), true);
     std::istream &read(std::istream &in, bool ignoreOverflowReadingFraction = false);
 
-    ///@name Low level arithmetic methods 
+    ///@name Low level arithmetic methods
     //\@{
     /// Multiply an integer type by 10, checking for overflow.
     /// @param n on input: the number to multply by 10, on output, the
@@ -359,7 +359,26 @@ namespace tntdb
                                    ManType &remainder,
                                    ManType divisorPowerOfTenDigits) throw(std::overflow_error);
     //\@}
-  protected:    
+
+    void normalize();
+
+    bool operator== (const tntdb::Decimal& other) const;
+
+    bool operator!= (const tntdb::Decimal& other) const
+    { return !(*this == other); }
+
+    bool operator< (const tntdb::Decimal& other) const;
+
+    bool operator> (const tntdb::Decimal& other) const
+    { return other < *this; }
+
+    bool operator<= (const tntdb::Decimal& other) const
+    { return !(other < *this); }
+
+    bool operator>= (const tntdb::Decimal& other) const
+    { return !(*this < other); }
+
+  protected:
     ///@internal
     //\@{
     /// Initialize this Decimal number, called by the constructors.
@@ -375,7 +394,7 @@ namespace tntdb
                               MantissaType fractional);
     //\@}
   };
-  
+
   template <typename T>
   bool Decimal::overflowDetectedInMultiplyByTen(T &n)
   {
@@ -393,7 +412,7 @@ namespace tntdb
     return overflowDetected;
   }
 
-  template <typename IntegerType> 
+  template <typename IntegerType>
   IntegerType Decimal::numberOfDigits(IntegerType n) const
   {
     IntegerType multiplier = IntegerType(Base);
@@ -408,7 +427,7 @@ namespace tntdb
     }
     return noDigits;
   }
-  
+
   template <typename ManType>
   void Decimal::divideByPowerOfTen(const ManType dividend,
                                    ManType &quotient,
@@ -477,7 +496,7 @@ namespace tntdb
     quotient = ManType(dividend) / exponentDivisor;
     remainder = ManType(dividend) % exponentDivisor;
   }
-  
+
   template <typename ManType>
   void Decimal::getIntegralFractionalExponent(ManType &integral,
                                               ManType &fractional,
@@ -530,7 +549,7 @@ namespace tntdb
     fractional = ManType(fractionalPart);
     ex = exp;
   }
-  
+
   template <typename IntegerType>
   IntegerType Decimal::getInteger(RoundingAlgorithmType roundingAlgorithm) const throw(std::overflow_error)
   {
@@ -616,7 +635,7 @@ namespace tntdb
       }
     }
   }
-    
+
   template <typename IntegerType>
   void Decimal::setInteger(IntegerType num)
   {
@@ -650,7 +669,7 @@ namespace tntdb
     std::istringstream istr(numStr);
     read(istr, true);
   }
-  
+
   /// Print this Decimal number.  If out.precision() != 0, then this
   /// decimal number is printed with out.precision() significant digits.
   std::ostream &operator<<(std::ostream &out, const Decimal& decimal);

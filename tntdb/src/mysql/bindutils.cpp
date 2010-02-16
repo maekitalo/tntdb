@@ -268,7 +268,19 @@ namespace tntdb
       bind.is_unsigned = 0;
     }
 
+    void setLong(MYSQL_BIND& bind, long data)
+    {
+      setValue(bind, data, MYSQL_TYPE_LONG);
+      bind.is_unsigned = 0;
+    }
+
     void setUnsigned(MYSQL_BIND& bind, unsigned data)
+    {
+      setValue(bind, data, MYSQL_TYPE_LONG);
+      bind.is_unsigned = 1;
+    }
+
+    void setUnsignedLong(MYSQL_BIND& bind, unsigned long data)
     {
       setValue(bind, data, MYSQL_TYPE_LONG);
       bind.is_unsigned = 1;

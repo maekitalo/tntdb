@@ -46,7 +46,9 @@ namespace tntdb
     void setNull(MYSQL_BIND& value);
     void setBool(MYSQL_BIND& value, bool data);
     void setInt(MYSQL_BIND& value, int data);
+    void setLong(MYSQL_BIND& value, long data);
     void setUnsigned(MYSQL_BIND& value, unsigned data);
+    void setUnsignedLong(MYSQL_BIND& value, unsigned long data);
     void setInt32(MYSQL_BIND& value, int32_t data);
     void setUnsigned32(MYSQL_BIND& value, uint32_t data);
     void setInt64(MYSQL_BIND& value, int64_t data);

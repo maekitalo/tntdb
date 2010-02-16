@@ -280,6 +280,47 @@ namespace tntdb
     return decimal.print(out);
   }
 
+  void Decimal::normalize()
+  {
+    while (mantissa && mantissa % 10 == 0)
+    {
+      mantissa /= 10;
+      ++exponent;
+    }
+  }
+
+  bool Decimal::operator== (const tntdb::Decimal& other) const
+  {
+    tntdb::Decimal d0(*this);
+    tntdb::Decimal d1(other);
+    d0.normalize();
+    d1.normalize();
+    return d0.mantissa == d1.mantissa
+        && d0.exponent == d1.exponent
+        && d0.isPositive() == d1.isPositive();
+  }
+
+  bool Decimal::operator< (const tntdb::Decimal& other) const
+  {
+    tntdb::Decimal d0(*this);
+    tntdb::Decimal d1(other);
+    d0.normalize();
+    d1.normalize();
+    if (!d0.isPositive() && d1.isPositive())
+      return true;
+    if (d0.isPositive() && !d1.isPositive())
+      return false;
+    if (d0.exponent < d1.exponent)
+      return d0.isPositive();
+    if (d0.exponent > d1.exponent)
+      return !d0.isPositive();
+    if (d0.mantissa < d1.mantissa)
+      return d0.isPositive();
+    if (d0.mantissa > d1.mantissa)
+      return !d0.isPositive();
+    return false;
+  }
+
   void Decimal::init(MantissaType m, ExponentType e, FlagsType f, PrintFlagsType pf)
   {
     mantissa = m;
@@ -287,7 +328,7 @@ namespace tntdb
     flags = f;
     defaultPrintFlags = pf;
   }
-  
+
   std::istream &Decimal::read(std::istream& in, bool ignoreOverflowReadingFraction)
   {
     enum DecimalReadStateEnum

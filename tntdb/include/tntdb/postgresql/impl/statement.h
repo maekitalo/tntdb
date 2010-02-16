@@ -108,7 +108,9 @@ namespace tntdb
         void setNull(const std::string& col);
         void setBool(const std::string& col, bool data);
         void setInt(const std::string& col, int data);
+        void setLong(const std::string& col, long data);
         void setUnsigned(const std::string& col, unsigned data);
+        void setUnsignedLong(const std::string& col, unsigned long data);
         void setInt32(const std::string& col, int32_t data);
         void setUnsigned32(const std::string& col, uint32_t data);
         void setInt64(const std::string& col, int64_t data);

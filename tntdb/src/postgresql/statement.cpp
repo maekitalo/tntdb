@@ -328,11 +328,25 @@ namespace tntdb
       SET_TYPE(col, "int");
     }
 
+    void Statement::setLong(const std::string& col, long data)
+    {
+      log_debug("setLong(\"" << col << "\", " << data << ')');
+      setValue(col, data);
+      SET_TYPE(col, "long");
+    }
+
     void Statement::setUnsigned(const std::string& col, unsigned data)
     {
       log_debug("setUnsigned(\"" << col << "\", " << data << ')');
       setValue(col, data);
-      SET_TYPE(col, "int");
+      SET_TYPE(col, "unsigned");
+    }
+
+    void Statement::setUnsignedLong(const std::string& col, unsigned long data)
+    {
+      log_debug("setUnsignedLong(\"" << col << "\", " << data << ')');
+      setValue(col, data);
+      SET_TYPE(col, "unsigned long");
     }
 
     void Statement::setInt32(const std::string& col, int32_t data)
