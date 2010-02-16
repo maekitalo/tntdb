@@ -258,6 +258,11 @@ namespace tntdb
     void setInt(int num)
       { setInteger<int>(num); }
 
+    /// Set this this tntdb::Decimal object to the value of the given long.
+    /// @param num integer value to set this Decimal number to.
+    void setLong(long num)
+      { setInteger<long>(num); }
+
     /// Set this this tntdb::Decimal object to the value of the given int32_t.
     /// @param num integer value to set this Decimal number to.
     void setInt32(int32_t num)
@@ -267,6 +272,11 @@ namespace tntdb
     /// @param num integer value to set this Decimal number to.
     void setUnsigned(unsigned num)
       { setInteger<unsigned>(num); }
+
+    /// Set this this tntdb::Decimal object to the value of the given unsigned.
+    /// @param num integer value to set this Decimal number to.
+    void setUnsignedLong(unsigned long num)
+      { setInteger<unsigned long>(num); }
 
     /// Set this this tntdb::Decimal object to the value of the given uint32_t.
     /// @param num integer value to set this Decimal number to.

@@ -130,6 +130,22 @@ namespace tntdb
       checkError(ret, "OCIBindByName");
     }
 
+    void Statement::setLong(const std::string& col, long data)
+    {
+      Bind &b = getBind(col);
+      tntdb::Decimal decimal;
+      decimal.setLong(data);
+      b.number = Number(decimal);
+      
+      log_debug("OCIBindByName, setLong(\"" << col << "\", " << data << ')');
+      sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
+        reinterpret_cast<const text*>(col.data()), col.size(),
+        (void *)b.number.getHandle(), OCI_NUMBER_SIZE,
+        SQLT_VNU, 0, 0, 0, 0, 0, OCI_DEFAULT);
+
+      checkError(ret, "OCIBindByName");
+    }
+
     void Statement::setUnsigned(const std::string& col, unsigned data)
     {
       Bind &b = getBind(col);
@@ -140,6 +156,22 @@ namespace tntdb
         reinterpret_cast<const text*>(col.data()), col.size(),
         &b.data[0], sizeof(unsigned),
         SQLT_UIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
+
+      checkError(ret, "OCIBindByName");
+    }
+
+    void Statement::setUnsignedLong(const std::string& col, unsigned long data)
+    {
+      Bind &b = getBind(col);
+      tntdb::Decimal decimal;
+      decimal.setUnsignedLong(data);
+      b.number = Number(decimal);
+      
+      log_debug("OCIBindByName, setUnsignedLong(\"" << col << "\", " << data << ')');
+      sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
+        reinterpret_cast<const text*>(col.data()), col.size(),
+        (void *)b.number.getHandle(), OCI_NUMBER_SIZE,
+        SQLT_VNU, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
     }
@@ -166,7 +198,7 @@ namespace tntdb
         reinterpret_cast<const text*>(col.data()), col.size(),
         (void *)b.number.getHandle(), OCI_NUMBER_SIZE,
         SQLT_VNU, 0, 0, 0, 0, 0, OCI_DEFAULT);
-      
+
       checkError(ret, "OCIBindByName");
     }
 
