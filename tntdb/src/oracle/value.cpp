@@ -31,6 +31,8 @@
 #include <tntdb/error.h>
 #include <tntdb/decimal.h>
 #include <sstream>
+#include <algorithm>
+#include <iterator>
 #include <cxxtools/log.h>
 
 log_define("tntdb.oracle.value")
@@ -54,6 +56,17 @@ namespace tntdb
           throw TypeError(msg.str());
         }
         return ret;
+      }
+
+      template <typename T, typename I>
+      T getValueFloat(I from, I to, const char* tname)
+      {
+        // This is a stupid workaround for converting decimal comma into decimal point
+        // It should be actually done in OCI
+        std::string o;
+        o.reserve(to - from);
+        std::replace_copy(from, to, std::back_inserter(o), ',', '.');
+        return getValue<T>(o, tname);
       }
 
       template <typename T>
@@ -488,9 +501,9 @@ namespace tntdb
         case SQLT_NUM:
         case SQLT_VNU:
           return number.getDecimal().getFloat();
-          
+
         default:
-          return getValue<float>(std::string(&data[0], len), "float");
+          return getValueFloat<float>(data.begin(), data.begin() + len, "float");
       }
     }
 
@@ -519,7 +532,7 @@ namespace tntdb
           return number.getDecimal().getDouble();
           
         default:
-          return getValue<double>(std::string(&data[0], len), "double");
+          return getValueFloat<double>(data.begin(), data.begin() + len, "double");
       }
     }
 
