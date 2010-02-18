@@ -65,6 +65,7 @@
 
 class TntdbTypesTest : public cxxtools::unit::TestSuite
 {
+    const char* dburl;
     tntdb::Connection conn;
     tntdb::Statement del;
 
@@ -72,7 +73,6 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
     TntdbTypesTest()
       : cxxtools::unit::TestSuite("tntdb-types-Test")
     {
-      registerMethod("testAll", *this, &TntdbTypesTest::testAll);
       registerMethod("testLimits", *this, &TntdbTypesTest::testLimits);
       registerMethod("testNull", *this, &TntdbTypesTest::testNull);
 
@@ -96,14 +96,20 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       registerMethod("testDatetime", *this, &TntdbTypesTest::testDatetime);
       registerMethod("testSequence", *this, &TntdbTypesTest::testSequence);
 
-      const char* dburl = getenv("TNTDBURL");
+      dburl = getenv("TNTDBURL");
       if (!dburl)
         dburl = "sqlite:test.db";
 
       std::cout << "testing with dburl=" << dburl << std::endl;
+    }
 
-      conn = tntdb::connect(dburl);
-      del = conn.prepare("delete from tntdbtest");
+    void setUp()
+    {
+      if (!conn)
+      {
+        conn = tntdb::connect(dburl);
+        del = conn.prepare("delete from tntdbtest");
+      }
     }
 
     void testBool()
@@ -270,140 +276,6 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       long serialres = -1;
       dbvalue.get(serialres);
       CXXTOOLS_UNIT_ASSERT_EQUALS(serialval, serialres);
-    }
-
-    void testAll()
-    {
-      del.execute();
-
-      tntdb::Statement ins = conn.prepare(
-        "insert into tntdbtest("
-        "    boolcol, intcol, longcol, unsignedcol, unsignedlongcol,"
-        "    int32col, uint32col, int64col, uint64col,"
-        "    decimalcol, floatcol, doublecol,"
-        "    charcol, stringcol, blobcol,"
-        "    datecol, timecol, datetimecol)"
-        " values("
-        "    :boolcol, :intcol, :longcol, :unsignedcol, :unsignedlongcol,"
-        "    :int32col, :uint32col, :int64col, :uint64col,"
-        "    :decimalcol, :floatcol, :doublecol,"
-        "    :charcol, :stringcol, :blobcol,"
-        "    :datecol, :timecol, :datetimecol)");
-
-      bool boolval                = true;
-      int intval                  = 42;
-      long longval                = 43;
-      unsigned uval               = 44;
-      unsigned long ulongval      = 45;
-      int32_t int32val            = 47;
-      uint32_t uint32val          = 50;
-      int64_t int64val            = 52;
-      uint64_t uint64val          = 55;
-      tntdb::Decimal decimalval   = tntdb::Decimal(456, 8);
-      float floatval              = 42.195;
-      double doubleval            = 3.1415926535;
-      char charval                = 'q';
-      std::string stringval       = "tntdb test string\n";
-      tntdb::Blob blobval         = tntdb::Blob("\0\1\2\3\0xff", 5);
-      tntdb::Date dateval         = tntdb::Date(2010, 2, 15);
-      tntdb::Time timeval         = tntdb::Time(20, 9, 31, 12);
-      tntdb::Datetime datetimeval = tntdb::Datetime(2010, 2, 15, 20, 9, 31, 12);
-
-      ins.set("boolcol", boolval)
-         .set("intcol", intval)
-         .set("longcol", longval)
-         .set("unsignedcol", uval)
-         .set("unsignedlongcol", ulongval)
-         .set("int32col", int32val)
-         .set("uint32col", uint32val)
-         .set("int64col", int64val)
-         .set("uint64col", uint64val)
-         .set("decimalcol", decimalval)
-         .set("floatcol", floatval)
-         .set("doublecol", doubleval)
-         .set("charcol", charval)
-         .set("stringcol", stringval)
-         .set("blobcol", blobval)
-         .set("datecol", dateval)
-         .set("timecol", timeval)
-         .set("datetimecol", datetimeval)
-         .execute();
-
-      long serialval = conn.lastInsertId("tntdbtest_seq");
-
-      long serialres;
-      bool boolres;
-      int intres;
-      long longres;
-      unsigned ures;
-      unsigned long ulongres;
-      int32_t int32res;
-      uint32_t uint32res;
-      int64_t int64res;
-      uint64_t uint64res;
-      tntdb::Decimal decimalres;
-      float floatres;
-      double doubleres;
-      char charres;
-      std::string stringres;
-      tntdb::Blob blobres;
-      tntdb::Date dateres;
-      tntdb::Time timeres;
-      tntdb::Datetime datetimeres;
-
-      tntdb::Statement sel = conn.prepare(
-        "select"
-        "    id,"
-        "    boolcol, intcol, longcol, unsignedcol, unsignedlongcol,"
-        "    int32col, uint32col, int64col, uint64col,"
-        "    decimalcol, floatcol, doublecol,"
-        "    charcol, stringcol, blobcol,"
-        "    datecol, timecol, datetimecol"
-        " from tntdbtest");
-
-      tntdb::Row row = sel.selectRow();
-      row[0].get(serialres);
-      row[1].get(boolres);
-      row[2].get(intres);
-      row[3].get(longres);
-      row[4].get(ures);
-      row[5].get(ulongres);
-      row[6].get(int32res);
-      row[7].get(uint32res);
-      row[8].get(int64res);
-      row[9].get(uint64res);
-      row[10].get(decimalres);
-      row[11].get(floatres);
-      row[12].get(doubleres);
-      row[13].get(charres);
-      row[14].get(stringres);
-      row[15].get(blobres);
-      row[16].get(dateres);
-      row[17].get(timeres);
-      row[18].get(datetimeres);
-
-      float fq = floatval / floatres;
-      double dq = doubleval / doubleres;
-
-      CXXTOOLS_UNIT_ASSERT_EQUALS(serialval, serialres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(boolval, boolres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(intval, intres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(longval, longres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(uval, ures);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(ulongval, ulongres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(int32val, int32res);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(uint32val, uint32res);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(int64val, int64res);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(uint64val, uint64res);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(decimalval, decimalres);
-      CXXTOOLS_UNIT_ASSERT(fq >= .9999 && fq <= 1.0001);
-      CXXTOOLS_UNIT_ASSERT(dq >= .9999 && dq <= 1.0001);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(charval, charres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(stringval, stringres);
-      CXXTOOLS_UNIT_ASSERT(blobval == blobres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(dateval.getIso(), dateres.getIso());
-      CXXTOOLS_UNIT_ASSERT_EQUALS(timeval.getIso(), timeres.getIso());
-      CXXTOOLS_UNIT_ASSERT_EQUALS(datetimeval.getIso(), datetimeres.getIso());
     }
 
     void testLimits()

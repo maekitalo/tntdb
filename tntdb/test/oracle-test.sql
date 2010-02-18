@@ -1,18 +1,20 @@
+--drop table tntdbtest;
+--drop sequence tntdbtest_seq;
 
 create sequence tntdbtest_seq;
 create table tntdbtest
 (
   id integer not null primary key,
   boolcol number(1),
-  intcol integer,
-  longcol integer,
-  unsignedcol integer,
-  unsignedlongcol integer,
-  int32col integer,
-  uint32col integer,
-  int64col integer,
-  uint64col integer,
-  decimalcol decimal(16, 4),
+  intcol number(10),
+  longcol number(24),
+  unsignedcol number(10),
+  unsignedlongcol number(24),
+  int32col number(10),
+  uint32col number(10),
+  int64col number(24),
+  uint64col number(24),
+  decimalcol decimal(24, 4),
   floatcol binary_float,
   doublecol binary_double,
   charcol char,
