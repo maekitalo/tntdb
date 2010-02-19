@@ -21,8 +21,8 @@ create table tntdbtest
   stringcol varchar2(255),
   blobcol blob,
   datecol date,
-  timecol date,
-  datetimecol date
+  timecol timestamp,
+  datetimecol timestamp
 );
 create trigger tntdbtest_trigger
 before insert on tntdbtest

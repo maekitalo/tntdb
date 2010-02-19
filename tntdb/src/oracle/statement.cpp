@@ -97,7 +97,7 @@ namespace tntdb
       sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
         reinterpret_cast<const text*>(col.data()), col.size(),
         0, 0,
-        SQLT_INT, &b.indicator, 0, 0, 0, 0, OCI_DEFAULT);
+        SQLT_CHR, &b.indicator, 0, 0, 0, 0, OCI_DEFAULT);
 
       checkError(ret, "OCIBindByName");
     }
