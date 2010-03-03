@@ -55,7 +55,7 @@ namespace tntdb
     {
       log_debug("OCIDateTimeConstruct(" << conn->getEnvHandle() << ')');
       sword ret = OCIDateTimeConstruct(conn->getEnvHandle(), conn->getErrorHandle(),
-        datetime, year, month, day, hour, min, sec, fsec, 0, 0);
+        datetime, year, month, day, hour, min, sec, fsec * 1000000, 0, 0);
       conn->checkError(ret, "OCIDateTimeConstruct");
     }
 
@@ -198,7 +198,7 @@ namespace tntdb
       ociGetDate(year, month, day);
       ociGetTime(hour, min, sec, fsec);
 
-      return tntdb::Datetime(year, month, day, hour, min, sec, fsec / 1e6);
+      return tntdb::Datetime(year, month, day, hour, min, sec, fsec / 1000000);
     }
 
     tntdb::Time Datetime::getTime() const
@@ -208,7 +208,7 @@ namespace tntdb
 
       ociGetTime(hour, min, sec, fsec);
 
-      return tntdb::Time(hour, min, sec, fsec / 1e6);
+      return tntdb::Time(hour, min, sec, fsec / 1000000);
     }
 
   }
