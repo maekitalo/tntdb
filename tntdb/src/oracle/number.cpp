@@ -27,11 +27,14 @@
  */
 
 #include <tntdb/oracle/number.h>
+#include <tntdb/oracle/error.h>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <sstream>
 #include <string.h>
 #include <math.h>
+
 
 namespace tntdb
 {
@@ -39,32 +42,111 @@ namespace tntdb
   {
     Number::Number()
     {
-      memset(vnum, 0, OCI_NUMBER_SIZE);
+      memset(ociNumber.OCINumberPart, 0, OCI_NUMBER_SIZE);
     }
     
+
+    void Number::setLong(long data, OCIError* errhp)
+    {
+      sword convRet = OCINumberFromInt(errhp,
+        &data, sizeof(data), OCI_NUMBER_SIGNED,
+        &ociNumber);
+      
+      error::checkError(errhp, convRet, "OCINumberFromInt");
+    }
+
+    void Number::setUnsignedLong(unsigned long data, OCIError* errhp)
+    {
+      sword convRet = OCINumberFromInt(errhp,
+        &data, sizeof(data), OCI_NUMBER_UNSIGNED,
+        &ociNumber);
+      
+      error::checkError(errhp, convRet, "OCINumberFromInt");
+    }
+
+    void Number::setInt64(int64_t data, OCIError* errhp)
+    {
+      sword convRet = OCINumberFromInt(errhp,
+        &data, sizeof(data), OCI_NUMBER_SIGNED,
+        &ociNumber);
+      
+      error::checkError(errhp, convRet, "OCINumberFromInt");
+    }
+
+    void Number::setUnsigned64(uint64_t data, OCIError* errhp)
+    {
+      sword convRet = OCINumberFromInt(errhp,
+        &data, sizeof(data), OCI_NUMBER_UNSIGNED,
+        &ociNumber);
+      
+      error::checkError(errhp, convRet, "OCINumberFromInt");
+    }
+
+    void Number::setDecimal(const Decimal& decimal, OCIError* errhp)
+    {
+      oratext nls[]="NLS_NUMERIC_CHARACTERS='.,'";
+
+      std::string strFmt;
+      std::string strNum;
+
+      std::ostringstream out;
+
+      if( !decimal.isPositive()) // negative decimal
+      {
+        out << '-';
+        strFmt = "S";
+      }
+            
+      out << decimal.getMantissa();
+      strNum = out.str();
+
+      // fill format with 9
+      strFmt.append( strNum.size() - strFmt.size(), '9');
+
+      // find the decimal
+      if( decimal.getExponent() > 0)
+      {
+        strNum.append( decimal.getExponent(), '0');
+        strFmt.append( decimal.getExponent(), '9');
+      }
+      else if( decimal.getExponent() < 0)
+      {
+        strNum.insert( strNum.size() + decimal.getExponent(), 1, '.');
+        strFmt.insert( strFmt.size() + decimal.getExponent(), 1, 'D');
+      }
+      
+      sword convRet = OCINumberFromText( errhp,
+        reinterpret_cast<const text*>(strNum.data()), strNum.size(),
+        reinterpret_cast<const text*>(strFmt.data()), strFmt.size(),
+        nls, 27,
+        &ociNumber);
+
+      error::checkError(errhp, convRet, "OCINumberFromText");
+    }    
+
     Number::Number(const Decimal &decimal)
     {
-      memset(vnum, 0, OCI_NUMBER_SIZE);
+      memset(ociNumber.OCINumberPart, 0, OCI_NUMBER_SIZE);
       if (decimal.isInfinity())
       {
         if (decimal.isInfinity(true))
         {
-          vnum[0] = 0x01;
-          vnum[1] = 0x00;
+          ociNumber.OCINumberPart[0] = 0x01;
+          ociNumber.OCINumberPart[1] = 0x00;
         }
         else
         {
-          vnum[0] = 0x00;
-          vnum[1] = 0xff;
-          vnum[2] = 0x65;
+          ociNumber.OCINumberPart[0] = 0x00;
+          ociNumber.OCINumberPart[1] = 0xff;
+          ociNumber.OCINumberPart[2] = 0x65;
         }
       }
       else
       {
         if (decimal.isZero())
         {
-          vnum[0] = 0x01;
-          vnum[1] = 0x80;
+          ociNumber.OCINumberPart[0] = 0x01;
+          ociNumber.OCINumberPart[1] = 0x80;
         }
         else
         {
@@ -83,10 +165,10 @@ namespace tntdb
               rightNumber[rightNumberLength - (1 + noBaseOneHundredDigits)] = (unsigned char)digit;
               noBaseOneHundredDigits += 1;
             }
-            vnum[0] = (unsigned char)(noBaseOneHundredDigits + 1);
+            ociNumber.OCINumberPart[0] = (unsigned char)(noBaseOneHundredDigits + 1);
             tntdb::Decimal::ExponentType exponent_base = 64 + baseOneHundredExponent + noBaseOneHundredDigits;
-            vnum[1] = (unsigned char)(0x80 + exponent_base);
-            memcpy(&vnum[2], &rightNumber[rightNumberLength - noBaseOneHundredDigits], noBaseOneHundredDigits);
+            ociNumber.OCINumberPart[1] = (unsigned char)(0x80 + exponent_base);
+            memcpy(&ociNumber.OCINumberPart[2], &rightNumber[rightNumberLength - noBaseOneHundredDigits], noBaseOneHundredDigits);
           }
           else
           {
@@ -98,37 +180,38 @@ namespace tntdb
               rightNumber[rightNumberLength - (1 + noBaseOneHundredDigits)] = (unsigned char)digit;
               noBaseOneHundredDigits += 1;
             } 
-            memcpy(&vnum[2], &rightNumber[rightNumberLength - noBaseOneHundredDigits], noBaseOneHundredDigits);
+            memcpy(&ociNumber.OCINumberPart[2], &rightNumber[rightNumberLength - noBaseOneHundredDigits], noBaseOneHundredDigits);
             tntdb::Decimal::ExponentType exponent_base = (63 - noBaseOneHundredDigits) + baseOneHundredExponent;
-            vnum[1] = (unsigned char)exponent_base;
+            ociNumber.OCINumberPart[1] = (unsigned char)exponent_base;
             if (noBaseOneHundredDigits < 20)
             {
-              vnum[0] = (unsigned char)(noBaseOneHundredDigits + 2);
-              vnum[2 + noBaseOneHundredDigits] = (unsigned char)102;
+              ociNumber.OCINumberPart[0] = (unsigned char)(noBaseOneHundredDigits + 2);
+              ociNumber.OCINumberPart[2 + noBaseOneHundredDigits] = (unsigned char)102;
             }
             else
             {
-              vnum[0] = (unsigned char)(noBaseOneHundredDigits + 1);
+              ociNumber.OCINumberPart[0] = (unsigned char)(noBaseOneHundredDigits + 1);
             }
           }
         }
       }
     }
+
     
     Decimal Number::getDecimal() const
     {
       // Negative infinity is represented by 0x00, and positive infinity is represented by the two bytes 0xFF65
-      bool positive = vnum[1] & 0x80;
+      bool positive = ociNumber.OCINumberPart[1] & 0x80;
       bool infinity = false;
-      tntdb::Decimal::ExponentType baseOneHundredExponent = vnum[1] & 0x7f;
+      tntdb::Decimal::ExponentType baseOneHundredExponent = ociNumber.OCINumberPart[1] & 0x7f;
       tntdb::Decimal::ExponentType baseOneHundredExponentOverflowOffset = 0;
       tntdb::Decimal::MantissaType mantissa = 0;
-      int length = vnum[0];
+      int length = ociNumber.OCINumberPart[0];
       if (length > OCI_NUMBER_SIZE)
         length = OCI_NUMBER_SIZE;
       if (length == 1)
       {
-        if (vnum[1] == 0)
+        if (ociNumber.OCINumberPart[1] == 0)
         {
           // Negative infinity is represented by the single byte 0x00.
           infinity = true;
@@ -143,7 +226,7 @@ namespace tntdb
       {
         if (positive)
         {
-          mantissa = tntdb::Decimal::MantissaType(vnum[2] - 1);
+          mantissa = tntdb::Decimal::MantissaType(ociNumber.OCINumberPart[2] - 1);
           if ((length == 2) && (baseOneHundredExponent == 0x7f) && (mantissa == 0x64))
           {
             // Positive infinity is represented by the two bytes 0xff65.
@@ -162,7 +245,7 @@ namespace tntdb
               overflowDetected = Decimal::overflowDetectedInMultiplyByTen(mantissa) ||
                 Decimal::overflowDetectedInMultiplyByTen(mantissa);
               tntdb::Decimal::MantissaType mantissaTimes100 = mantissa;
-              mantissa += tntdb::Decimal::MantissaType(vnum[i] - 1);
+              mantissa += tntdb::Decimal::MantissaType(ociNumber.OCINumberPart[i] - 1);
               overflowDetected = overflowDetected || (mantissa < mantissaTimes100);
               if (overflowDetected)
               {
@@ -176,7 +259,7 @@ namespace tntdb
         {
           bool overflowDetected = false;
           baseOneHundredExponent =  -(baseOneHundredExponent - 64) - (length - 1);
-          mantissa = tntdb::Decimal::MantissaType(101 - vnum[2]);
+          mantissa = tntdb::Decimal::MantissaType(101 - ociNumber.OCINumberPart[2]);
           if (length < OCI_NUMBER_SIZE)
             --length;  // ignore terminator byte value of 102 decimal for negative numbers with less than 20 base 100 mantissa digits.
           for (int i = 3; (i <= length) && !overflowDetected; ++i)
@@ -186,7 +269,7 @@ namespace tntdb
             overflowDetected = Decimal::overflowDetectedInMultiplyByTen(mantissa) ||
               Decimal::overflowDetectedInMultiplyByTen(mantissa);
             tntdb::Decimal::MantissaType mantissaTimes100 = mantissa;
-            mantissa += tntdb::Decimal::MantissaType(101 - vnum[i]);
+            mantissa += tntdb::Decimal::MantissaType(101 - ociNumber.OCINumberPart[i]);
             overflowDetected = overflowDetected || (mantissa < mantissaTimes100);
             if (overflowDetected)
             {

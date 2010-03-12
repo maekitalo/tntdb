@@ -67,6 +67,10 @@ namespace tntdb
           { }
     };
 
+    namespace error
+    {
+      void checkError(OCIError* errhp, sword ret, const char* function);
+    }
   }
 }
 

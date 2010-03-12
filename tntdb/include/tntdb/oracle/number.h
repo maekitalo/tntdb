@@ -41,12 +41,22 @@ namespace tntdb
   {
     class Number
     {
-      unsigned char vnum[OCI_NUMBER_SIZE];
+      OCINumber ociNumber;
+        
     public:
       Number();
       Number(const Decimal &decimal);
+
+      void setLong(long data, OCIError* errhp);
+      void setUnsignedLong(unsigned long data, OCIError* errhp);
+
+      void setInt64(int64_t data, OCIError* errhp);
+      void setUnsigned64(uint64_t data, OCIError* errhp);
+      
+      void setDecimal(const Decimal &decimal, OCIError* errhp);
       Decimal getDecimal() const;
-      unsigned char* getHandle() { return vnum; }
+      
+      unsigned char* getHandle() { return ociNumber.OCINumberPart; }
     };
   };
 };

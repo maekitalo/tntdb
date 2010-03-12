@@ -43,7 +43,7 @@ namespace tntdb
     {
       log_define("tntdb.oracle.error")
 
-      inline void checkError(OCIError* errhp, sword ret, const char* function)
+      void checkError(OCIError* errhp, sword ret, const char* function)
       {
         switch (ret)
         {
