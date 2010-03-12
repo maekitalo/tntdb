@@ -183,7 +183,7 @@ namespace tntdb
     /// Return this decimal number rounded as a C++ long.
     /// @return long result if the result will fit.
     /// @throw std::overflow_error if the result will not fit
-    int getLong() const throw(std::overflow_error)
+    long getLong() const throw(std::overflow_error)
       { return getInteger<long>(); }
 
     /// Return this decimal number rounded as a C++ int32_t.
