@@ -28,6 +28,7 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
     TntdbDecimalTest()
       : cxxtools::unit::TestSuite("tntdb-decimal-Test")
     {
+      registerMethod("testSetLong", *this, &TntdbDecimalTest::testSetLong);
       registerMethod("testCompare", *this, &TntdbDecimalTest::testCompare);
     }
 
@@ -67,6 +68,15 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
       CXXTOOLS_UNIT_ASSERT(d0 >= d2);
       CXXTOOLS_UNIT_ASSERT(d0 >= d1);
       CXXTOOLS_UNIT_ASSERT(d1 >= d2);
+    }
+
+    void testSetLong()
+    {
+      tntdb::Decimal d;
+      d.setLong(100);
+      long l = d.getLong();
+
+      CXXTOOLS_UNIT_ASSERT_EQUALS(l, 100);
     }
 
 };
