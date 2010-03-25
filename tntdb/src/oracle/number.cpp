@@ -111,8 +111,14 @@ namespace tntdb
       }
       else if( decimal.getExponent() < 0)
       {
-        strNum.insert( strNum.size() + decimal.getExponent(), 1, '.');
-        strFmt.insert( strFmt.size() + decimal.getExponent(), 1, 'D');
+        if( (long)strNum.size() + decimal.getExponent() <= 0)
+        {
+          strNum.insert( 0, -(long)strNum.size() - decimal.getExponent() + 1, '0');
+          strFmt.insert( 0, -(long)strFmt.size() - decimal.getExponent() + 1, '9');
+        }
+              
+        strNum.insert( (long)strNum.size() + decimal.getExponent(), 1, '.');
+        strFmt.insert( (long)strFmt.size() + decimal.getExponent(), 1, 'D');
       }
       
       sword convRet = OCINumberFromText( errhp,
