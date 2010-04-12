@@ -314,7 +314,7 @@ namespace tntdb
         log_warn("hostvariable :" << col << " not found");
       else
       {
-        values[it->second].setValue(data ? "T" : "F");
+        values[it->second].setValue(data ? "1" : "0");
         paramFormats[it->second] = 0;
       }
 
