@@ -59,7 +59,7 @@ namespace tntdb
             throw Error(errhp, function);
 
           case OCI_NO_DATA:
-            log_warn(function << ": OCI_NO_DATA");
+            log_debug(function << ": OCI_NO_DATA");
             throw NotFound();
 
           case OCI_ERROR:
