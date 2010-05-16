@@ -51,7 +51,7 @@ namespace tntdb
         throw std::bad_alloc();
 
       if (PQstatus(conn) == CONNECTION_BAD )
-        throw PgConnError("PQconnect", conn);
+        throw PgConnError("PQconnectdb", conn);
     }
 
     Connection::~Connection()
