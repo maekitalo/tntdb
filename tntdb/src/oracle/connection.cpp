@@ -32,6 +32,7 @@
 #include <tntdb/result.h>
 #include <tntdb/statement.h>
 #include <cxxtools/log.h>
+#include <signal.h>
 
 log_define("tntdb.oracle.connection")
 
@@ -85,9 +86,33 @@ namespace tntdb
       error::checkError(getErrorHandle(), ret, function);
     }
 
+    namespace
+    {
+        class SighandlerSaver
+        {
+                int signum;
+                sighandler_t sighandler;
+
+            public:
+                explicit SighandlerSaver(int signum_)
+                    : signum(signum_)
+                {
+                    sighandler = signal(signum, SIG_DFL);
+                }
+
+                ~SighandlerSaver()
+                {
+                    signal(signum, sighandler);
+                }
+        };
+    }
+
     void Connection::logon(const std::string& dblink, const std::string& user, const std::string& password)
     {
       log_debug("logon \"" << dblink << "\" user=\"" << user << '"');
+
+      // workaround for OCI problem: OCI redirects SIGINT, which causes Ctrl-C to fail
+      SighandlerSaver sighandlerSaver(SIGINT);
 
       sword ret;
 
