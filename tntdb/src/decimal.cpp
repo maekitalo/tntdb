@@ -304,20 +304,47 @@ namespace tntdb
   {
     tntdb::Decimal d0(*this);
     tntdb::Decimal d1(other);
-    d0.normalize();
-    d1.normalize();
+    
+    // d0.normalize();
+    // d1.normalize();
+    
     if (!d0.isPositive() && d1.isPositive())
-      return true;
+        return true;
+    
     if (d0.isPositive() && !d1.isPositive())
-      return false;
+        return false;
+
+    if( d0.exponent > d1.exponent)
+        while( d0.exponent != d1.exponent)
+        {
+            if( d0.mantissa > std::numeric_limits<MantissaType>::max()/10)
+                return !d0.isPositive();
+                    
+            d0.mantissa *= 10;
+            d0.exponent--;
+        }
+    else if( d0.exponent < d1.exponent)
+        while( d0.exponent != d1.exponent)
+        {
+            if( d1.mantissa > std::numeric_limits<MantissaType>::max()/10)
+                return !d1.isPositive();
+            
+            d1.mantissa *= 10;
+            d1.exponent--;
+        }
+    
     if (d0.exponent < d1.exponent)
-      return d0.isPositive();
+        return d0.isPositive();
+    
     if (d0.exponent > d1.exponent)
-      return !d0.isPositive();
+        return !d0.isPositive();
+    
     if (d0.mantissa < d1.mantissa)
-      return d0.isPositive();
+        return d0.isPositive();
+    
     if (d0.mantissa > d1.mantissa)
-      return !d0.isPositive();
+        return !d0.isPositive();
+    
     return false;
   }
 
