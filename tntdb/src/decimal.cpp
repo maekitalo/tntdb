@@ -30,6 +30,7 @@
 #include <sstream>
 #include <iomanip>
 #include <ios>
+#include <limits>
 
 namespace tntdb
 {
@@ -57,7 +58,7 @@ namespace tntdb
       defaultPrintFlags(infinityShort)
   {
   }
-  
+
   Decimal::Decimal(MantissaType man, ExponentType exp, FlagsType f, PrintFlagsType pf)
     : mantissa(man),
       exponent(exp),
@@ -95,7 +96,7 @@ namespace tntdb
   {
     return (flags & NaN);
   }
-  
+
   bool Decimal::isZero() const
   {
     if (flags & (infinity | NaN))
@@ -138,7 +139,7 @@ namespace tntdb
     if (digitsOutput > 0)
       out << "." << &buffer[maxDigits - digitsOutput];
   }
-  
+
   std::ostream &Decimal::print(std::ostream &out) const
   {
     return print(out, defaultPrintFlags);
@@ -200,7 +201,7 @@ namespace tntdb
             out << "+";
           }
         }
-        // Count number of mantissa digits 
+        // Count number of mantissa digits
         ExponentType manDigits = ExponentType(numberOfDigits<MantissaType>(mantissa));
         ExponentType exp = 0;
         MantissaType integral = 0;
@@ -274,7 +275,7 @@ namespace tntdb
     out.flags(saveFlags);
     return out;
   }
-    
+
   std::ostream &operator<<(std::ostream& out, const Decimal& decimal)
   {
     return decimal.print(out);
@@ -304,47 +305,48 @@ namespace tntdb
   {
     tntdb::Decimal d0(*this);
     tntdb::Decimal d1(other);
-    
-    // d0.normalize();
-    // d1.normalize();
-    
+
     if (!d0.isPositive() && d1.isPositive())
-        return true;
-    
+      return true;
+
     if (d0.isPositive() && !d1.isPositive())
-        return false;
+      return false;
 
     if( d0.exponent > d1.exponent)
-        while( d0.exponent != d1.exponent)
-        {
-            if( d0.mantissa > std::numeric_limits<MantissaType>::max()/10)
-                return !d0.isPositive();
-                    
-            d0.mantissa *= 10;
-            d0.exponent--;
-        }
+    {
+      while( d0.exponent != d1.exponent)
+      {
+        if( d0.mantissa > std::numeric_limits<MantissaType>::max()/10)
+          return !d0.isPositive();
+
+        d0.mantissa *= 10;
+        --d0.exponent;
+      }
+    }
     else if( d0.exponent < d1.exponent)
-        while( d0.exponent != d1.exponent)
-        {
-            if( d1.mantissa > std::numeric_limits<MantissaType>::max()/10)
-                return !d1.isPositive();
-            
-            d1.mantissa *= 10;
-            d1.exponent--;
-        }
-    
+    {
+      while( d0.exponent != d1.exponent)
+      {
+        if( d1.mantissa > std::numeric_limits<MantissaType>::max()/10)
+          return !d1.isPositive();
+
+        d1.mantissa *= 10;
+        --d1.exponent;
+      }
+    }
+
     if (d0.exponent < d1.exponent)
-        return d0.isPositive();
-    
+      return d0.isPositive();
+
     if (d0.exponent > d1.exponent)
-        return !d0.isPositive();
-    
+      return !d0.isPositive();
+
     if (d0.mantissa < d1.mantissa)
-        return d0.isPositive();
-    
+      return d0.isPositive();
+
     if (d0.mantissa > d1.mantissa)
-        return !d0.isPositive();
-    
+      return !d0.isPositive();
+
     return false;
   }
 
@@ -700,7 +702,7 @@ namespace tntdb
     else
     {
       in.setstate(std::ios_base::failbit);
-    } 
+    }
     return in;
   }
 
