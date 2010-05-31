@@ -302,6 +302,12 @@ namespace tntdb
       return tntdb::Statement(new Statement(this, query));
     }
 
+    void Connection::clearStatementCache()
+    {
+      IStmtCacheConnection::clearStatementCache();
+      seqStmt.clear();
+    }
+
     bool Connection::ping()
     {
       try
