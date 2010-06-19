@@ -1,3 +1,29 @@
+2010-03-25 adi
+ - error for decimal number < 1 fixed
+
+2010-02-16 maekitalo
+ - tntdb::Statement::setLong and setUnsignedLong
+ - add unittest
+ - add relational operators to tntdb::Decimal
+
+2010-02-13 maekitalo
+ - add support for auto-incremented values with new method
+   tntdb::Connection::lastInsertId(std::string)
+ - new methods getLong and getUnsignedLong in tntdb::Value
+
+2010-02-11 maekitalo
+ - add tempalte method tntdb::Value::get(T&)
+
+2010-02-09 maekitalo
+ - remove automatic conversion operators from tntdb::Value
+ - add an extendable system for retrieving and setting values by overriding 2
+   operators
+
+2010-02-06 maekitalo
+ - let the user specify a short key for statement cache in prepareCached
+ - add getValue-methods to tntdb::Row, which returns the data to variables,
+   passed by reference
+
 2009-12-31 maekitalo
  - replace obsolete cxxtools::Dynbuffer with std::vector
 
