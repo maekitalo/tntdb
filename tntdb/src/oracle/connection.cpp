@@ -36,6 +36,10 @@
 
 log_define("tntdb.oracle.connection")
 
+#ifndef HAVE_SIGHANDLER_T
+typedef void (*sighandler_t)(int);
+#endif
+
 namespace tntdb
 {
   namespace oracle

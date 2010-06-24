@@ -20,6 +20,14 @@ ACX_PTHREAD
 
 AC_PROG_LIBTOOL
 
+AC_MSG_CHECKING([for sighandler_t])
+AC_TRY_COMPILE([#include <signal.h>],[sighandler_t *f;],
+  has_sighandler_t=yes,has_sighandler_t=no)
+AC_MSG_RESULT($has_sighandler_t)
+if test "$has_sighandler_t" = "yes" ; then
+    AC_DEFINE( HAVE_SIGHANDLER_T, 1, [Define if sighandler_t available] )
+fi
+
 #
 # check standard integer types
 #
