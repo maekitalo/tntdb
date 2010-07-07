@@ -111,15 +111,30 @@ namespace tntdb
       }
       else if( decimal.getExponent() < 0)
       {
-        if( (long)strNum.size() + decimal.getExponent() <= 0)
-        {
-          strNum.insert( 0, -(long)strNum.size() - decimal.getExponent() + 1, '0');
-          strFmt.insert( 0, -(long)strFmt.size() - decimal.getExponent() + 1, '9');
-        }
-              
-        strNum.insert( (long)strNum.size() + decimal.getExponent(), 1, '.');
-        strFmt.insert( (long)strFmt.size() + decimal.getExponent(), 1, 'D');
+          if( decimal.isPositive())
+          {
+            if( (long)strNum.size() + decimal.getExponent() <= 0)
+            {
+              strNum.insert( 0, -(long)strNum.size() - decimal.getExponent() + 1, '0');
+              strFmt.insert( 0, -(long)strFmt.size() - decimal.getExponent() + 1, '9');
+            }
+            
+            strNum.insert( (long)strNum.size() + decimal.getExponent(), 1, '.');
+            strFmt.insert( (long)strFmt.size() + decimal.getExponent(), 1, 'D');
+          }
+          else
+          {
+            if( (long)strNum.size() - 1 + decimal.getExponent() <= 0)
+            {
+              strNum.insert( 1, -(long)strNum.size() - decimal.getExponent() + 2, '0');
+              strFmt.insert( 1, -(long)strFmt.size() - decimal.getExponent() + 2, '9');
+            }
+            
+            strNum.insert( (long)strNum.size() + decimal.getExponent() - 1, 1, '.');
+            strFmt.insert( (long)strFmt.size() + decimal.getExponent() - 1, 1, 'D');
+          }              
       }
+    
       
       sword convRet = OCINumberFromText( errhp,
         reinterpret_cast<const text*>(strNum.data()), strNum.size(),
