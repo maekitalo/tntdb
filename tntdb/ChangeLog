@@ -1,39 +1,39 @@
 2010-03-25 adi
  - error for decimal number < 1 fixed
 
-2010-02-16 maekitalo
+2010-02-16 tommi@tntnet.org
  - tntdb::Statement::setLong and setUnsignedLong
  - add unittest
  - add relational operators to tntdb::Decimal
 
-2010-02-13 maekitalo
+2010-02-13 tommi@tntnet.org
  - add support for auto-incremented values with new method
    tntdb::Connection::lastInsertId(std::string)
  - new methods getLong and getUnsignedLong in tntdb::Value
 
-2010-02-11 maekitalo
+2010-02-11 tommi@tntnet.org
  - add tempalte method tntdb::Value::get(T&)
 
-2010-02-09 maekitalo
+2010-02-09 tommi@tntnet.org
  - remove automatic conversion operators from tntdb::Value
  - add an extendable system for retrieving and setting values by overriding 2
    operators
 
-2010-02-06 maekitalo
+2010-02-06 tommi@tntnet.org
  - let the user specify a short key for statement cache in prepareCached
  - add getValue-methods to tntdb::Row, which returns the data to variables,
    passed by reference
 
-2009-12-31 maekitalo
+2009-12-31 tommi@tntnet.org
  - replace obsolete cxxtools::Dynbuffer with std::vector
 
-2009-12-14 maekitalo
+2009-12-14 tommi@tntnet.org
  - add method tntdb::Value::getValue
 
-2009-12-12 maekitalo
+2009-12-12 tommi@tntnet.org
  - check if int and int32_t and others are distinct types
 
-2009-09-09 maekitalo
+2009-09-09 tommi@tntnet.org
  - extend syntax of connection string in mysql driver:
  - allow values to be enclosed in single or double quotes
  - escape special characters in values with backslash
@@ -41,74 +41,69 @@
  - check for duplicate keys in connection string
  - add key "app" with a default "tntdb" and use my.cnf with this section
 
-2009-06-29 maekitalo
+2009-06-29 tommi@tntnet.org
  - clean up of oracle connection in proper order
 
-2009-06-29 maekitalo
+2009-06-29 tommi@tntnet.org
  - close oracle connection correctly
 
-2009-06-16 maekitalo
+2009-06-16 tommi@tntnet.org
  - fix sporadic error in string to number conversion in oracle driver
 
-2009-05-15 maekitalo
+2009-05-15 tommi@tntnet.org
  - clear statement cache at transaction end with sqlite since statement handles are invalidated
 
-2008-12-18 maekitalo
+2008-12-18 tommi@tntnet.org
  - fix error in oracle driver when shutting down the connection after ping
 
-2008-12-05 maekitalo
+2008-12-05 tommi@tntnet.org
  - bump so number
  - simplify cxxtools configuration
 
-2008-12-05 maekitalo
+2008-12-05 tommi@tntnet.org
  - fix crash in sqlite driver in Connection::execute
 
-2008-12-05 maekitalo
+2008-12-05 tommi@tntnet.org
  - fix driver loading (was broken after cxxtools update)
 
-2008-11-28 maekitalo
+2008-11-28 tommi@tntnet.org
  - wrong exception was caught for not found driver libraries
 
-2008-11-28 maekitalo
+2008-11-28 tommi@tntnet.org
  - cache ping statement handle in oracle driver
 
-2008-11-21 maekitalo
+2008-11-21 tommi@tntnet.org
  - throw NullValue-excpetion, when a null-column is read in a postgresql result set
 
-2008-11-15 maekitalo
+2008-11-15 tommi@tntnet.org
  - use fetchsize hint of statement in mysql driver
 
-2008-11-15 maekitalo
+2008-11-15 tommi@tntnet.org
  - fix getWDay of date class
 
-2008-07-04 maekitalo
+2008-07-04 tommi@tntnet.org
  - remove aix specific handling
 
-2008-07-01 maekitalo
+2008-07-01 tommi@tntnet.org
  - fix linkflags for aix 6
 
-2008-07-01 maekitalo
+2008-07-01 tommi@tntnet.org
  - support for aix version > 5
 
-2008-07-01 maekitalo
+2008-07-01 tommi@tntnet.org
  - don't use ORACLE_HOME to find oracle includes and libraries, since we cannot know, which library the user needs to link (lib or lib32 or whatever)
 
-2008-06-30 maekitalo
+2008-06-30 tommi@tntnet.org
  - slightly improved date and time classes
 
-2008-06-07 maekitalo
+2008-06-07 tommi@tntnet.org
  - fix Statement::setBool in postgresql driver
 
 2008-06-03 tommi@tntnet.org
   - release version 1.0.1
 
-2008-06-02 maekitalo
+2008-06-02 tommi@tntnet.org
  - fix crash when creating 2 cursors for one statement and destroying in different order
-
-
-
-
-
 
 2008-05-30 tommi@tntnet.org
  - fix string handling in sqlite-driver
