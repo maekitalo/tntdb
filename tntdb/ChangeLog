@@ -1,3 +1,6 @@
+2010-08-01 tommi@tntnet.org
+ - release 1.1
+
 2010-03-25 adi
  - error for decimal number < 1 fixed
 
@@ -12,7 +15,7 @@
  - new methods getLong and getUnsignedLong in tntdb::Value
 
 2010-02-11 tommi@tntnet.org
- - add tempalte method tntdb::Value::get(T&)
+ - add template method tntdb::Value::get(T&)
 
 2010-02-09 tommi@tntnet.org
  - remove automatic conversion operators from tntdb::Value
