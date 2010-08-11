@@ -1,3 +1,6 @@
+2010-08-11 tommi@tntnet.org
+ - unify handling of nested transactions (ignore nested transactions like oracle driver did it already)
+
 2010-08-01 tommi@tntnet.org
  - release 1.1
 

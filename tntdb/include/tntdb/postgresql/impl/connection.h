@@ -41,6 +41,7 @@ namespace tntdb
     {
         PGconn* conn;
         tntdb::Statement currvalStmt;
+        unsigned transactionActive;
 
       public:
         explicit Connection(const char* conninfo);

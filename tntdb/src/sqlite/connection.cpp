@@ -45,6 +45,7 @@ namespace tntdb
   namespace sqlite
   {
     Connection::Connection(const char* conninfo)
+      : transactionActive(0)
     {
       log_debug("sqlite3_open(\"" << conninfo << "\")");
       int errcode = ::sqlite3_open(conninfo, &db);
@@ -68,27 +69,35 @@ namespace tntdb
 
     void Connection::beginTransaction()
     {
-      execute("BEGIN TRANSACTION");
+      if (transactionActive == 0)
+        execute("BEGIN TRANSACTION");
+      ++transactionActive;
     }
 
     void Connection::commitTransaction()
     {
-      // Statement handles are invalidated at transaction end, therefore we
-      // release all cached statements here.
-      // The problem still remains since the application might preserve a
-      // statement handle, which can't be released here.
-      clearStatementCache();
-      execute("COMMIT TRANSACTION");
+      if (transactionActive == 0 || --transactionActive == 0)
+      {
+        // Statement handles are invalidated at transaction end, therefore we
+        // release all cached statements here.
+        // The problem still remains since the application might preserve a
+        // statement handle, which can't be released here.
+        clearStatementCache();
+        execute("COMMIT TRANSACTION");
+      }
     }
 
     void Connection::rollbackTransaction()
     {
-      // Statement handles are invalidated at transaction end, therefore we
-      // release all cached statements here.
-      // The problem still remains since the application might preserve a
-      // statement handle, which can't be released here.
-      clearStatementCache();
-      execute("ROLLBACK TRANSACTION");
+      if (transactionActive == 0 || --transactionActive == 0)
+      {
+        // Statement handles are invalidated at transaction end, therefore we
+        // release all cached statements here.
+        // The problem still remains since the application might preserve a
+        // statement handle, which can't be released here.
+        clearStatementCache();
+        execute("ROLLBACK TRANSACTION");
+      }
     }
 
     Connection::size_type Connection::execute(const std::string& query)

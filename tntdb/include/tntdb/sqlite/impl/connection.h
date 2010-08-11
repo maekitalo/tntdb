@@ -39,6 +39,7 @@ namespace tntdb
     class Connection : public IStmtCacheConnection
     {
         sqlite3* db;
+        unsigned transactionActive;
 
       public:
         explicit Connection(const char* conninfo);

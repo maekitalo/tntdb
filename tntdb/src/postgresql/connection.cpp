@@ -43,6 +43,7 @@ namespace tntdb
   namespace postgresql
   {
     Connection::Connection(const char* conninfo)
+      : transactionActive(0)
     {
       log_debug("PQconnectdb(\"" << conninfo << "\")");
 
@@ -67,17 +68,21 @@ namespace tntdb
 
     void Connection::beginTransaction()
     {
-      execute("BEGIN");
+      if (transactionActive == 0)
+        execute("BEGIN");
+      ++transactionActive;
     }
 
     void Connection::commitTransaction()
     {
-      execute("COMMIT");
+      if (transactionActive == 0 || --transactionActive == 0)
+        execute("COMMIT");
     }
 
     void Connection::rollbackTransaction()
     {
-      execute("ROLLBACK");
+      if (transactionActive == 0 || --transactionActive == 0)
+        execute("ROLLBACK");
     }
 
     Connection::size_type Connection::execute(const std::string& query)

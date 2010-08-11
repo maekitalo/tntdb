@@ -40,6 +40,7 @@ namespace tntdb
     {
         MYSQL mysql;
         bool initialized;
+        unsigned transactionActive;
 
         void open(const char* app, const char* host,
           const char* user, const char* passwd,

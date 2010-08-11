@@ -82,7 +82,8 @@ namespace tntdb
     Connection::Connection(const char* app, const char* host, const char* user,
       const char* passwd, const char* db, unsigned int port,
       const char* unix_socket, unsigned long client_flag)
-      : initialized(false)
+      : initialized(false),
+        transactionActive(0)
     {
       open(app, host, user, passwd, db, port, unix_socket, client_flag);
     }
@@ -248,31 +249,42 @@ namespace tntdb
 
     void Connection::beginTransaction()
     {
-      log_debug("mysql_autocomit(" << &mysql << ", " << 0 << ')');
-      if (::mysql_autocommit(&mysql, 0) != 0)
-        throw MysqlError("mysql_autocommit", &mysql);
+      if (transactionActive == 0)
+      {
+        log_debug("mysql_autocomit(" << &mysql << ", " << 0 << ')');
+        if (::mysql_autocommit(&mysql, 0) != 0)
+          throw MysqlError("mysql_autocommit", &mysql);
+      }
+
+      ++transactionActive;
     }
 
     void Connection::commitTransaction()
     {
-      log_debug("mysql_commit(" << &mysql << ')');
-      if (::mysql_commit(&mysql) != 0)
-        throw MysqlError("mysql_commit", &mysql);
+      if (transactionActive == 0 || --transactionActive == 0)
+      {
+        log_debug("mysql_commit(" << &mysql << ')');
+        if (::mysql_commit(&mysql) != 0)
+          throw MysqlError("mysql_commit", &mysql);
 
-      log_debug("mysql_autocomit(" << &mysql << ", " << 1 << ')');
-      if (::mysql_autocommit(&mysql, 1) != 0)
-        throw MysqlError("mysql_autocommit", &mysql);
+        log_debug("mysql_autocomit(" << &mysql << ", " << 1 << ')');
+        if (::mysql_autocommit(&mysql, 1) != 0)
+          throw MysqlError("mysql_autocommit", &mysql);
+      }
     }
 
     void Connection::rollbackTransaction()
     {
-      log_debug("mysql_rollback(" << &mysql << ')');
-      if (::mysql_rollback(&mysql) != 0)
-        throw MysqlError("mysql_rollback", &mysql);
+      if (transactionActive == 0 || --transactionActive == 0)
+      {
+        log_debug("mysql_rollback(" << &mysql << ')');
+        if (::mysql_rollback(&mysql) != 0)
+          throw MysqlError("mysql_rollback", &mysql);
 
-      log_debug("mysql_autocommit(" << &mysql << ", " << 1 << ')');
-      if (::mysql_autocommit(&mysql, 1) != 0)
-        throw MysqlError("mysql_autocommit", &mysql);
+        log_debug("mysql_autocommit(" << &mysql << ", " << 1 << ')');
+        if (::mysql_autocommit(&mysql, 1) != 0)
+          throw MysqlError("mysql_autocommit", &mysql);
+      }
     }
 
     Connection::size_type Connection::execute(const std::string& query)
