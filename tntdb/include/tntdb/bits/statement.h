@@ -191,6 +191,21 @@ namespace tntdb
       Statement& set(const std::string& col, const T& data);
       //@}
 
+      /**
+       * Set the hostvariable with the given name to the passed value or null.
+       *
+       * The method sets the hostvariable to the given value if the 2nd
+       * argument is true. Otherwise the hostvariable is set to null.
+       */
+      template <typename T>
+      Statement& setIf(const std::string& col, bool notNull, const T& data)
+      {
+        if (notNull)
+          set(col, data);
+        else
+          setNull(col);
+      }
+
       /// statement-execution-methods
       /**
        * Executes a query with the current parameters. The query should not
