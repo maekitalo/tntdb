@@ -204,6 +204,7 @@ namespace tntdb
           set(col, data);
         else
           setNull(col);
+        return *this;
       }
 
       /// statement-execution-methods
