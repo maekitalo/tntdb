@@ -50,30 +50,12 @@ namespace tntdb
       /**
        * Start a transaction when instructed.
        */
-      Transaction(const Connection& db_, bool starttransaction = true)
-        : db(db_),
-          active(false)
-      {
-        if (starttransaction)
-          begin();
-      }
+      Transaction(const Connection& db_, bool starttransaction = true);
 
       /**
        * roll back transaction when still active
        */
-      ~Transaction()
-      {
-        if (active)
-        {
-          try
-          {
-            rollback();
-          }
-          catch (const std::exception& e)
-          {
-          }
-        }
-      }
+      ~Transaction();
 
       const Connection& getConnection() const  { return db; }
 
@@ -81,39 +63,19 @@ namespace tntdb
        * Starts a new transaction. If there is a active transaction, it is
        * rolled back first
        */
-      void begin()
-      {
-        if (active)
-          rollback();
-        db.beginTransaction();
-        active = true;
-      }
+      void begin();
 
       /**
        * commits the current transaction. If there is no active transaction,
        * then nothing is done. The transactionstate is reset.
        */
-      void commit()
-      {
-        if (active)
-        {
-          db.commitTransaction();
-          active = false;
-        }
-      }
+      void commit();
 
       /**
        * rolls back the current transaction. If there is no active transaction,
        * then nothing is done. The transactionstate is reset.
        */
-      void rollback()
-      {
-        if (active)
-        {
-          db.rollbackTransaction();
-          active = false;
-        }
-      }
+      void rollback();
   };
 }
 

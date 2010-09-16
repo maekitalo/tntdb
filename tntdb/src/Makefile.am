@@ -21,6 +21,7 @@ libtntdb_la_SOURCES = \
 	statement_iterator.cpp \
 	stmtparser.cpp \
 	time.cpp \
+	transaction.cpp \
 	valueimpl.cpp
 
 libtntdb_la_LDFLAGS = -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
