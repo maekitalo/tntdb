@@ -69,8 +69,8 @@ namespace tntdb
       long getLong() const                { return value->getLong(); }
       /// tries to convert value into an unsigned.
       unsigned getUnsigned() const        { return value->getUnsigned(); }
-      /// tries to convert value into an unsigned.
-      unsigned getUnsignedLong() const    { return value->getUnsignedLong(); }
+      /// tries to convert value into an unsigned long.
+      unsigned long getUnsignedLong() const { return value->getUnsignedLong(); }
       /// tries to convert value into an int32_t.
       int32_t getInt32() const            { return value->getInt32(); }
       /// tries to convert value into an uint32_t.
