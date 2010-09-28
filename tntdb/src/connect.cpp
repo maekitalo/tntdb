@@ -58,10 +58,13 @@ namespace tntdb
 {
   typedef std::map<std::string, LibraryManager> librariesType;
   static librariesType libraries;
+  static cxxtools::Mutex mutex;
 
   Connection connect(const std::string& url)
   {
     log_debug("connect(\"" << url << "\")");
+
+    cxxtools::MutexLock lock(mutex);
 
     std::string::size_type n = url.find(':');
     if (n == std::string::npos)
