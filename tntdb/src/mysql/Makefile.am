@@ -7,10 +7,10 @@ AM_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 if MAKE_MYSQL
 
-driver_LTLIBRARIES = tntdb2-mysql.la
+driver_LTLIBRARIES = tntdb@abi_current@-mysql.la
 
-tntdb2_mysql_la_SOURCES = $(sources)
-tntdb2_mysql_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) @MYSQL_LDFLAGS@ @SHARED_LIB_FLAG@
-tntdb2_mysql_la_LIBADD = $(top_srcdir)/src/libtntdb.la
+tntdb@abi_current@_mysql_la_SOURCES = $(sources)
+tntdb@abi_current@_mysql_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) @MYSQL_LDFLAGS@ @SHARED_LIB_FLAG@
+tntdb@abi_current@_mysql_la_LIBADD = $(top_srcdir)/src/libtntdb.la
 
 endif

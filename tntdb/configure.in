@@ -6,6 +6,7 @@ abi_revision=0
 abi_age=0
 sonumber=${abi_current}:${abi_revision}:${abi_age}
 AC_SUBST(sonumber)
+AC_SUBST(abi_current)
 
 unset CDPATH
 
@@ -165,7 +166,6 @@ then
 fi
 
 AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes)
-AC_SUBST(MYSQL_LDFLAGS)
 
 #
 # Oracle
