@@ -47,7 +47,7 @@ namespace tntdb
     implementation class derived from IBlob. A default implementation, called
     BlobImpl, is provided, that uses new/delete and the implementation class.
 */
-class IBlob : public cxxtools::RefCounted
+class IBlob : public cxxtools::AtomicRefCounted
 {
     public:
         /** @brief Destructor
