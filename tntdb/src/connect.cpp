@@ -48,8 +48,6 @@ namespace tntdb
   {
     log_debug("connect(\"" << url << "\")");
 
-    cxxtools::MutexLock lock(mutex);
-
     std::string::size_type n = url.find(':');
     if (n == std::string::npos)
       throw Error("invalid dburl \"" + url + '"');
@@ -58,6 +56,8 @@ namespace tntdb
 
     std::string libraryUrl = url.substr(n + 1);
     log_debug("driver \"" << driverName << "\" url=\"" << libraryUrl << '"');
+
+    cxxtools::MutexLock lock(mutex);
 
     // lookup library-manager
     LibraryManager libraryManager;
