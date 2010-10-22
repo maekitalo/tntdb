@@ -81,7 +81,10 @@ namespace tntdb
               state = STATE_NAME;
             }
             else if (ch == ':')
-              sql += ':';
+            {
+              sql += "::";
+              state = STATE_0;
+            }
             else if (ch == '\\')
             {
               sql += ':';
@@ -98,6 +101,8 @@ namespace tntdb
               sql += event.onHostVar(name);
               if (ch == '\\')
                 state = STATE_ESC;
+              else if (ch == ':')
+                state = STATE_NAME0;
               else
               {
                 sql += ch;
