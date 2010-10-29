@@ -60,6 +60,7 @@ namespace tntdb
       if (conn)
       {
         clearStatementCache();
+        currvalStmt = tntdb::Statement();
 
         log_debug("PQfinish(" << conn << ")");
         PQfinish(conn);
