@@ -35,6 +35,7 @@
 #include <cxxtools/log.h>
 #include <new>
 #include <sstream>
+#include <poll.h>
 
 log_define("tntdb.postgresql.connection")
 
@@ -152,14 +153,45 @@ namespace tntdb
     bool Connection::ping()
     {
       log_debug("ping()");
-      try
+
+      if (PQsendQuery(conn, "select 1") == 0)
       {
-        select("select 1");
-        return true;
-      }
-      catch (const PgError&)
-      {
+        log_debug("failed to send statement \"select 1\" to database in Connection::ping()");
         return false;
+      }
+
+      while (true)
+      {
+        struct pollfd fd;
+        fd.fd = PQsocket(conn);
+        fd.events = POLLIN;
+        log_debug("wait for input on fd " << fd.fd);
+        if (::poll(&fd, 1, 10000) != 1)
+        {
+          log_debug("no data received in Connection::ping()");
+          return false;
+        }
+
+        log_debug("consumeInput");
+        if (PQconsumeInput(conn) == 0)
+        {
+          log_debug("PQconsumeInput failed in Connection::ping()");
+          return false;
+        }
+
+        log_debug("check PQisBusy");
+        while (PQisBusy(conn) == 0)
+        {
+          log_debug("PQgetResult");
+          PGresult* result = PQgetResult(conn);
+
+          log_debug("PQgetResult => " << static_cast<void*>(result));
+          if (result == 0)
+            return true;
+
+          log_debug("PQfree");
+          PQclear(result);
+        }
       }
     }
 
