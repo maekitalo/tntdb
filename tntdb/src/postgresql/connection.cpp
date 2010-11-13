@@ -54,6 +54,8 @@ namespace tntdb
 
       if (PQstatus(conn) == CONNECTION_BAD )
         throw PgConnError("PQconnectdb", conn);
+
+      log_debug("connected to postgresql backend process " << PQbackendPID(conn));
     }
 
     Connection::~Connection()
