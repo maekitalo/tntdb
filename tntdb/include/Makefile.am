@@ -1,5 +1,6 @@
 nobase_include_HEADERS = \
 	tntdb/bits/blob.h \
+	tntdb/bits/blobstream.h \
 	tntdb/bits/connection.h \
 	tntdb/bits/result.h \
 	tntdb/bits/result_iterator.h \

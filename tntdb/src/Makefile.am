@@ -4,6 +4,7 @@ lib_LTLIBRARIES = libtntdb.la
 
 libtntdb_la_SOURCES = \
 	blob.cpp \
+	blobstream.cpp \
 	connect.cpp \
 	connection.cpp \
 	connectionpool.cpp \

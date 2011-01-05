@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2007 Tommi Maekitalo
- * Copyright (C) 2007-2008 Marc Boris Duerner
+ * Copyright (C) 2011 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,11 +26,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TNTDB_BLOB_H
-#define TNTDB_BLOB_H
-
-#include <tntdb/bits/blob.h>
 #include <tntdb/bits/blobstream.h>
+#include <tntdb/bits/blob.h>
 
-#endif // TNTDB_BLOB_H
+namespace tntdb
+{
+  BlobStreamBuf::BlobStreamBuf(Blob& blob)
+  {
+    char* ptr = const_cast<char*>(blob.data());
+    if (ptr)
+      setg(ptr, ptr, ptr + blob.size());
+  }
 
+  BlobStreamBuf::int_type BlobStreamBuf::overflow(BlobStreamBuf::int_type c)
+  {
+    return traits_type::eof();
+  }
+
+  BlobStreamBuf::int_type BlobStreamBuf::underflow()
+  {
+    return traits_type::eof();
+  }
+
+  int BlobStreamBuf::sync()
+  {
+    return 0;
+  }
+}

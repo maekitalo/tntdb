@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2007 Tommi Maekitalo
- * Copyright (C) 2007-2008 Marc Boris Duerner
+ * Copyright (C) 2011 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,11 +26,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TNTDB_BLOB_H
-#define TNTDB_BLOB_H
+#include <iostream>
 
-#include <tntdb/bits/blob.h>
-#include <tntdb/bits/blobstream.h>
+namespace tntdb
+{
+  class Blob;
 
-#endif // TNTDB_BLOB_H
+  /** @brief streambuf for reading from a tntdb::Blob
+   */
+  class BlobStreamBuf : public std::streambuf
+  {
+    public:
+      explicit BlobStreamBuf(Blob& blob);
 
+      /// see std::streambuf
+      int_type overflow(int_type c);
+      /// see std::streambuf
+      int_type underflow();
+      /// see std::streambuf
+      int sync();
+
+  };
+
+  /** @brief istream for reading from a tntdb::Blob
+   */
+  class BlobIStream : public std::istream
+  {
+      BlobStreamBuf streambuf;
+
+    public:
+      explicit BlobIStream(Blob& blob)
+        : std::istream(0),
+          streambuf(blob)
+      { init(&streambuf); }
+  };
+
+}
