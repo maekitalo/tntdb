@@ -1,3 +1,39 @@
+2011-01-05 tommi@tntnet.org
+ - add tntdb::BlobIStream: a std::istream interface to tntdb::Blob
+
+2010-11-14 tommi@tntnet.org
+ - do not generate doxygen documentation by default
+
+2010-11-13 tommi@tntnet.org
+ - use async calls when testing connection with ping in postgresql driver to monitor timeout
+
+2010-10-29 tommi@tntnet.org
+ - fix warning in postgresql driver about failed deallocation of statement on close connection when lastInserId was used
+
+2010-10-23 tommi@tntnet.org
+ - statement parser fixes: do not convert type of cast expressions like
+   a::integer into host variable and parse 2 consecutive hostvars
+   correctly
+
+2010-10-06 tommi@tntnet.org
+ - make tntdb::Blob thread safe - the empty instance may be shared between connections in different threads
+
+2010-09-29 tommi@tntnet.org
+ - remove obsolete code for statically bind drivers to tntdb
+ - build driver name from abi_current from configure.in
+
+2010-09-28 tommi@tntnet.org
+ - make tntdb::connect thread safe
+
+2010-09-27 tommi@tntnet.org
+ - bugfix: tntdb::Value::getUnsignedLong should return an unsigned long instead of an unsigned
+
+2010-09-16 tommi@tntnet.org
+ - add logging to transaction class and do not inline it
+
+2010-09-08 tommi@tntnet.org
+ - add convenience method tntdb::Statement::setIf to set to a value or null depending on a bool
+
 2010-08-11 tommi@tntnet.org
  - unify handling of nested transactions (ignore nested transactions like oracle driver did it already)
 
