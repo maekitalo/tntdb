@@ -193,7 +193,7 @@ AC_ARG_WITH(
   AS_HELP_STRING([--with-doxygen],
                  [generate doxygen documentation]),
   [doxygenFlag=$withval],
-  [doxygenFlag=doxygen])
+  [doxygenFlag=no])
 
 if test "$doxygenFlag" != "no"
   then
