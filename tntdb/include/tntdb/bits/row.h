@@ -94,8 +94,12 @@ namespace tntdb
         { return getValue(field_num).getBool(); }
       int getInt(size_type field_num) const
         { return getValue(field_num).getInt(); }
+      long getLong(size_type field_num) const
+        { return getValue(field_num).getLong(); }
       unsigned getUnsigned(size_type field_num) const
         { return getValue(field_num).getUnsigned(); }
+      unsigned long getUnsignedLong(size_type field_num) const
+        { return getValue(field_num).getUnsignedLong(); }
       int32_t getInt32(size_type field_num) const
         { return getValue(field_num).getInt32(); }
       uint32_t getUnsigned32(size_type field_num) const
@@ -131,8 +135,12 @@ namespace tntdb
         { return getValue(field_name).getBool(); }
       int getInt(const std::string& field_name) const
         { return getValue(field_name).getInt(); }
+      long getLong(const std::string& field_name) const
+        { return getValue(field_name).getLong(); }
       unsigned getUnsigned(const std::string& field_name) const
         { return getValue(field_name).getUnsigned(); }
+      unsigned long getUnsignedLong(const std::string& field_name) const
+        { return getValue(field_name).getUnsignedLong(); }
       int32_t getInt32(const std::string& field_name) const
         { return getValue(field_name).getInt32(); }
       uint32_t getUnsigned32(const std::string& field_name) const
