@@ -30,6 +30,8 @@
 #include <tntdb/error.h>
 #include <sstream>
 #include <cxxtools/log.h>
+#include <cxxtools/convert.h>
+#include <limits>
 
 log_define("tntdb.postgresql.resultvalue")
 
@@ -50,57 +52,44 @@ namespace tntdb
           || value[0] == '1';
     }
 
-    template <typename T>
-    T getValue(const std::string& s, const char* tname)
-    {
-      std::istringstream in(s);
-      T ret;
-      in >> ret;
-      if (in.eof() || !in.fail())
-        return ret;
-      std::ostringstream msg;
-      msg << "can't convert \"" << s << "\" to " << tname;
-      throw TypeError(msg.str());
-    }
-
     int ResultValue::getInt() const
     {
-      return getValue<int>(getString(), "int");
+      return cxxtools::convert<int>(getString());
     }
 
     long ResultValue::getLong() const
     {
-      return getValue<long>(getString(), "long");
+      return cxxtools::convert<long>(getString());
     }
 
     unsigned ResultValue::getUnsigned() const
     {
-      return getValue<unsigned>(getString(), "unsigned");
+      return cxxtools::convert<unsigned>(getString());
     }
 
     unsigned long ResultValue::getUnsignedLong() const
     {
-      return getValue<unsigned>(getString(), "unsigned long");
+      return cxxtools::convert<unsigned long>(getString());
     }
 
     int32_t ResultValue::getInt32() const
     {
-      return getValue<int32_t>(getString(), "int32_t");
+      return cxxtools::convert<int32_t>(getString());
     }
 
     uint32_t ResultValue::getUnsigned32() const
     {
-      return getValue<uint32_t>(getString(), "uint32_t");
+      return cxxtools::convert<uint32_t>(getString());
     }
 
     int64_t ResultValue::getInt64() const
     {
-      return getValue<int64_t>(getString(), "int64_t");
+      return cxxtools::convert<int64_t>(getString());
     }
 
     uint64_t ResultValue::getUnsigned64() const
     {
-      return getValue<uint64_t>(getString(), "uint64_t");
+      return cxxtools::convert<uint64_t>(getString());
     }
     
     Decimal ResultValue::getDecimal() const
@@ -120,12 +109,12 @@ namespace tntdb
 
     float ResultValue::getFloat() const
     {
-      return getValue<float>(getString(), "float");
+      return cxxtools::convert<float>(getString());
     }
 
     double ResultValue::getDouble() const
     {
-      return getValue<double>(getString(), "double");
+      return cxxtools::convert<double>(getString());
     }
 
     char ResultValue::getChar() const

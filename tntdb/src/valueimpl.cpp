@@ -34,6 +34,7 @@
 #include <tntdb/blob.h>
 #include <tntdb/error.h>
 #include <sstream>
+#include <cxxtools/convert.h>
 
 namespace
 {
@@ -45,16 +46,16 @@ namespace
   template <typename T>
   T getValue(const std::string& s, const char* tname)
   {
-    std::istringstream in(s);
-    T ret;
-    in >> ret;
-    if (!in)
+    try
+    {
+        return cxxtools::convert<T>(s);
+    }
+    catch (const cxxtools::ConversionError&)
     {
       std::ostringstream msg;
       msg << "can't convert \"" << s << "\" to " << tname;
       throw tntdb::TypeError(msg.str());
     }
-    return ret;
   }
 
 }

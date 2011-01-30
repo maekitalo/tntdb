@@ -73,6 +73,7 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
     TntdbTypesTest()
       : cxxtools::unit::TestSuite("tntdb-types-Test")
     {
+      /*
       registerMethod("testLimits", *this, &TntdbTypesTest::testLimits);
       registerMethod("testNull", *this, &TntdbTypesTest::testNull);
 
@@ -95,6 +96,9 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       registerMethod("testTime", *this, &TntdbTypesTest::testTime);
       registerMethod("testDatetime", *this, &TntdbTypesTest::testDatetime);
       registerMethod("testSequence", *this, &TntdbTypesTest::testSequence);
+      registerMethod("testFloatNan", *this, &TntdbTypesTest::testFloatNan);
+      */
+      registerMethod("testDoubleNan", *this, &TntdbTypesTest::testDoubleNan);
 
       dburl = getenv("TNTDBURL");
       if (!dburl)
@@ -202,6 +206,8 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       TESTFLOAT(static_cast<float>(-123));
       TESTFLOAT(std::numeric_limits<float>::max() * .999999);
       TESTFLOAT(std::numeric_limits<float>::min() * 1.00001);
+      TEST(std::numeric_limits<double>::infinity());
+      TEST(-std::numeric_limits<double>::infinity());
     }
 
     void testDouble()
@@ -211,6 +217,8 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       TESTFLOAT(static_cast<double>(-123));
       TESTFLOAT(std::numeric_limits<double>::max() * .999999);
       TESTFLOAT(std::numeric_limits<double>::min() * 1.00001);
+      TEST(std::numeric_limits<double>::infinity());
+      TEST(-std::numeric_limits<double>::infinity());
     }
 
     void testChar()
@@ -384,6 +392,28 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       bool longnotnull = row[1].get(longres);
       CXXTOOLS_UNIT_ASSERT(!intnotnull);
       CXXTOOLS_UNIT_ASSERT(longnotnull);
+    }
+
+    void testFloatNan()
+    {
+      BEGIN_TEST(float, "floatcol");
+      float n = std::numeric_limits<float>::quiet_NaN();
+      del.execute();                                 \
+      ins.set("floatcol", n).execute();
+      dbvalue = sel.selectValue();
+      dbvalue.get(res);
+      CXXTOOLS_UNIT_ASSERT(res != res);
+    }
+
+    void testDoubleNan()
+    {
+      BEGIN_TEST(double, "doublecol");
+      double n = std::numeric_limits<double>::quiet_NaN();
+      del.execute();                                 \
+      ins.set("doublecol", n).execute();
+      dbvalue = sel.selectValue();
+      dbvalue.get(res);
+      CXXTOOLS_UNIT_ASSERT(res != res);
     }
 
 };

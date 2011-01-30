@@ -276,11 +276,11 @@ namespace tntdb
         { stmt.setBool(name, data); }
       void setInt(int data)
         { stmt.setInt(name, data); }
-      void setLong(int data)
+      void setLong(long data)
         { stmt.setLong(name, data); }
       void setUnsigned(unsigned data)
         { stmt.setUnsigned(name, data); }
-      void setUnsignedLong(unsigned data)
+      void setUnsignedLong(unsigned long data)
         { stmt.setUnsignedLong(name, data); }
       void setInt32(int32_t data)
         { stmt.setInt32(name, data); }
