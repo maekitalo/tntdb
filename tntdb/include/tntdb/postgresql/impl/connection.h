@@ -41,6 +41,7 @@ namespace tntdb
     {
         PGconn* conn;
         tntdb::Statement currvalStmt;
+        tntdb::Statement lastvalStmt;
         unsigned transactionActive;
 
       public:

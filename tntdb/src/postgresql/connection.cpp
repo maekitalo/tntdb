@@ -199,13 +199,27 @@ namespace tntdb
 
     long Connection::lastInsertId(const std::string& name)
     {
-      if (!currvalStmt)
-        currvalStmt = prepare("select currval(:name)");
-
       long ret;
-      currvalStmt.set("name", name)
-        .selectValue()
-        .get(ret);
+
+      if (name.empty())
+      {
+        if (!lastvalStmt)
+          lastvalStmt = prepare("select lastval()");
+
+        lastvalStmt
+          .selectValue()
+          .get(ret);
+      }
+      else
+      {
+        if (!currvalStmt)
+          currvalStmt = prepare("select currval(:name)");
+
+        currvalStmt.set("name", name)
+          .selectValue()
+          .get(ret);
+
+      }
 
       return ret;
     }
