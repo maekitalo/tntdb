@@ -70,6 +70,8 @@ namespace tntdb
     else
       libraryManager = it->second;
 
+    lock.unlock();
+
     return libraryManager.connect(libraryUrl);
   }
 
