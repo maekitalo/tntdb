@@ -36,7 +36,9 @@
 #include <tntdb/bits/value.h>
 #include <tntdb/stmtparser.h>
 #include <sstream>
+#include <limits>
 #include <cxxtools/log.h>
+#include <cxxtools/convert.h>
 #include "config.h"
 
 log_define("tntdb.postgresql.statement")
@@ -194,9 +196,8 @@ namespace tntdb
         log_warn("hostvariable :" << col << " not found");
       else
       {
-        std::ostringstream v;
-        v << data;
-        values[it->second].setValue(v.str());
+        std::string v = cxxtools::convert<std::string>(data);
+        values[it->second].setValue(v);
         paramFormats[it->second] = 0;
       }
     }
@@ -387,14 +388,28 @@ namespace tntdb
     void Statement::setFloat(const std::string& col, float data)
     {
       log_debug("setFloat(\"" << col << "\", " << data << ')');
-      setValue(col, data);
+      if (data != data)
+        setValue(col, "NaN");
+      else if (data == std::numeric_limits<float>::infinity())
+        setValue(col, "Infinity");
+      else if (data == -std::numeric_limits<float>::infinity())
+        setValue(col, "-Infinity");
+      else
+        setValue(col, data);
       SET_TYPE(col, "numeric");
     }
 
     void Statement::setDouble(const std::string& col, double data)
     {
       log_debug("setDouble(\"" << col << "\", " << data << ')');
-      setValue(col, data);
+      if (data != data)
+        setValue(col, "NaN");
+      else if (data == std::numeric_limits<double>::infinity())
+        setValue(col, "Infinity");
+      else if (data == -std::numeric_limits<double>::infinity())
+        setValue(col, "-Infinity");
+      else
+        setValue(col, data);
       SET_TYPE(col, "numeric");
     }
 
