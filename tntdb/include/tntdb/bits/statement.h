@@ -252,6 +252,7 @@ namespace tntdb
        * Returns the actual implementation-class.
        */
       const IStatement* getImpl() const  { return &*stmt; }
+      IStatement* getImpl()              { return &*stmt; }
   };
 
   /**

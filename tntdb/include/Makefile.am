@@ -58,6 +58,9 @@ nobase_noinst_HEADERS = \
 	tntdb/postgresql/impl/resultrow.h \
 	tntdb/postgresql/impl/resultvalue.h \
 	tntdb/postgresql/impl/statement.h \
+	tntdb/replicate/connection.h \
+	tntdb/replicate/connectionmanager.h \
+	tntdb/replicate/statement.h \
 	tntdb/sqlite/error.h \
 	tntdb/sqlite/impl/connection.h \
 	tntdb/sqlite/impl/connectionmanager.h \

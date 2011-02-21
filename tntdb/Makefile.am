@@ -2,8 +2,9 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = \
     src \
-    src/postgresql \
     src/mysql \
+    src/postgresql \
+    src/replicate \
     src/sqlite \
     src/oracle \
     include \

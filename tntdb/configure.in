@@ -117,6 +117,18 @@ fi
 AM_CONDITIONAL(MAKE_POSTGRESQL, test "$with_postgresql" = yes)
 
 #
+# Replicate
+#
+AC_ARG_WITH(
+  [replicate],
+  AS_HELP_STRING([--with-replicate],
+                 [build replicate-driver (default: yes)]),
+  [with_replicate=$withval],
+  [with_replicate=yes])
+
+AM_CONDITIONAL(MAKE_REPLICATE, test "$with_replicate" = yes)
+
+#
 # mysql
 #
 AC_ARG_WITH(
@@ -246,6 +258,7 @@ AC_CONFIG_FILES([
   src/Makefile
   src/mysql/Makefile
   src/postgresql/Makefile
+  src/replicate/Makefile
   src/sqlite/Makefile
   src/oracle/Makefile
   include/Makefile
