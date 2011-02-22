@@ -39,6 +39,7 @@ namespace tntdb
 
       public:
         explicit Connection(const char* conninfo);
+        ~Connection();
 
         void beginTransaction();
         void commitTransaction();

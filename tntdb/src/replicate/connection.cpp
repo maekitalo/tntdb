@@ -45,6 +45,11 @@ namespace tntdb
       connections.push_back(connect(std::string(b, e)));
     }
 
+    Connection::~Connection()
+    {
+      clearStatementCache();
+    }
+
     void Connection::beginTransaction()
     {
       for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
