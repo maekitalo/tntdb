@@ -22,6 +22,9 @@
 #include <tntdb/result.h>
 #include <tntdb/row.h>
 #include <tntdb/value.h>
+#include <cxxtools/log.h>
+
+log_define("tntdb.replicate.statement")
 
 namespace tntdb
 {
@@ -29,8 +32,25 @@ namespace tntdb
   {
     Statement::Statement(Connection* conn, const std::string& query)
     {
-      for (Connection::Connections::iterator it = conn->connections.begin(); it != conn->connections.end(); ++it)
-        statements.push_back(it->prepare(query));
+      // check if it a select statement
+      // a select statement need to be prepared only on the first connection
+
+      // skip white space first
+      const char* p = query.c_str();
+      while (*p && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r'))
+        ++p;
+
+      if (strncasecmp(p, "select", 6) == 0)
+      {
+        log_debug("select statement detected - prepare on first connection only");
+        statements.push_back(conn->connections.begin()->prepare(query));
+      }
+      else
+      {
+        log_debug("non-select statement detected - prepare on all " << conn->connections.size() << " connections");
+        for (Connection::Connections::iterator it = conn->connections.begin(); it != conn->connections.end(); ++it)
+          statements.push_back(it->prepare(query));
+      }
     }
 
     void Statement::clear()
