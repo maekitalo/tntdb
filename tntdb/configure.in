@@ -252,6 +252,10 @@ AC_SUBST(SHARED_LIB_FLAG)
 # check header
 #
 AC_CHECK_HEADER([cxxtools/log.h], AC_DEFINE(HAVE_CXXTOOLS_LOG_H, ,[cxxtools/log.h found]), AC_MSG_ERROR([cxxtools-logging not found]))
+AC_COMPILE_IFELSE(
+  [#include <cxxtools/pool.h>
+   cxxtools::Pool<int>::Ptr p;], ,
+  AC_MSG_ERROR([looks like your cxxtools is outdated - try to update to at least version 2.1 or svn revison 1203]))
 
 AC_CONFIG_FILES([
   Makefile
