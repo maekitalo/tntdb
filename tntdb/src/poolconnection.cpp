@@ -52,7 +52,7 @@ namespace tntdb
     if (inTransaction || drop)
     {
       log_debug("don't reuse connection " << connection->getImpl());
-      connection.release(false);
+      connection.release();
     }
     else
       log_debug("reuse connection " << connection->getImpl());

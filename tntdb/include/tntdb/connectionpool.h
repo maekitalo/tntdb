@@ -56,7 +56,7 @@ namespace tntdb
       PoolType pool;
 
     public:
-      typedef PoolType::PoolObject PoolObjectType;
+      typedef PoolType::Ptr PoolObjectType;
 
     public:
       explicit ConnectionPool(const std::string& url, unsigned maxcount = 0)
