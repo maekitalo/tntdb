@@ -164,7 +164,7 @@ namespace tntdb
       /**
        * returns the last inserted insert id.
        */
-      long lastInsertId(const std::string& name)
+      long lastInsertId(const std::string& name = std::string())
       { return conn->lastInsertId(name); }
 
       /**
