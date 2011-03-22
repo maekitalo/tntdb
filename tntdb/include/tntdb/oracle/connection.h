@@ -45,7 +45,6 @@ namespace tntdb
         OCIError*   errhp;   /* the error handle */
         OCISession* usrhp;   /* user session handle */
         OCISvcCtx*  svchp;   /* the service handle */
-        tntdb::Statement pingStmt;
         typedef std::map<std::string, tntdb::Statement> SeqStmtType;
         SeqStmtType seqStmt;
 

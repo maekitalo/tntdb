@@ -223,7 +223,6 @@ namespace tntdb
         sword ret;
 
         clearStatementCache();
-        pingStmt = tntdb::Statement();
 
         try
         {
@@ -316,9 +315,7 @@ namespace tntdb
     {
       try
       {
-        if (!pingStmt)
-          pingStmt = prepare("select 1 from dual");
-        pingStmt.selectValue();
+        checkError(OCIPing(svchp, errhp, OCI_DEFAULT), "OCIPing");
         return true;
       }
       catch (const Error&)
