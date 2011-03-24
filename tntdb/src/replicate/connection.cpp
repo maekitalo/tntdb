@@ -32,6 +32,7 @@
 #include <tntdb/result.h>
 #include <tntdb/row.h>
 #include <tntdb/value.h>
+#include <tntdb/transaction.h>
 
 namespace tntdb
 {
@@ -79,10 +80,13 @@ namespace tntdb
 
     Connection::size_type Connection::execute(const std::string& query)
     {
+      tntdb::Connection c(this);
+      Transaction transaction(c);
       Connections::iterator it = connections.begin();
       size_type ret = it->execute(query);
       for (++it; it != connections.end(); ++it)
         it->execute(query);
+      transaction.commit();
       return ret;
     }
 

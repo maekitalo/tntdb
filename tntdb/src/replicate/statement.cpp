@@ -31,6 +31,7 @@
 #include <tntdb/result.h>
 #include <tntdb/row.h>
 #include <tntdb/value.h>
+#include <tntdb/transaction.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.replicate.statement")
@@ -39,7 +40,8 @@ namespace tntdb
 {
   namespace replicate
   {
-    Statement::Statement(Connection* conn, const std::string& query)
+    Statement::Statement(Connection* conn_, const std::string& query)
+      : conn(conn_)
     {
       // check if it a select statement
       // a select statement need to be prepared only on the first connection
@@ -184,8 +186,11 @@ namespace tntdb
 
     Statement::size_type Statement::execute()
     {
+      tntdb::Connection c(conn);
+      Transaction transaction(c);
       for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->execute();
+      transaction.commit();
     }
 
     tntdb::Result Statement::select()

@@ -41,6 +41,7 @@ namespace tntdb
 
     class Statement : public IStatement
     {
+        Connection* conn;
         typedef std::vector<tntdb::Statement> Statements;
         Statements statements;
 
