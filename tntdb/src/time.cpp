@@ -40,7 +40,8 @@ namespace tntdb
     struct tm tm;
 
     gettimeofday(&tv, 0);
-    localtime_r(&tv.tv_sec, &tm);
+    time_t t = static_cast<time_t>(tv.tv_sec);
+    localtime_r(&t, &tm);
 
     return Time(tm.tm_hour, tm.tm_min, tm.tm_sec,
                 tv.tv_usec / 1000);
@@ -52,7 +53,8 @@ namespace tntdb
     struct tm tm;
 
     gettimeofday(&tv, 0);
-    gmtime_r(&tv.tv_sec, &tm);
+    time_t t = static_cast<time_t>(tv.tv_sec);
+    gmtime_r(&t, &tm);
 
     return Time(tm.tm_hour, tm.tm_min, tm.tm_sec,
                 tv.tv_usec / 1000);
