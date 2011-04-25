@@ -9,6 +9,9 @@ nobase_include_HEADERS = \
 	tntdb/bits/statement.h \
 	tntdb/bits/statement_iterator.h \
 	tntdb/bits/value.h \
+	tntdb/cxxtools/date.h \
+	tntdb/cxxtools/time.h \
+	tntdb/cxxtools/datetime.h \
 	tntdb/blob.h \
 	tntdb/connect.h \
 	tntdb/connection.h \
