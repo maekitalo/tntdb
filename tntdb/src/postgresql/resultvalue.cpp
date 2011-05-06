@@ -192,8 +192,9 @@ namespace tntdb
       in >> hour >> ch >> min >> ch >> fsec;
       if (in)
       {
+        fsec += .0005;
         sec = static_cast<unsigned short>(fsec);
-        msec = (fsec - sec + .0005) * 1000;
+        msec = static_cast<unsigned short>((fsec - sec) * 1000);
         return Time(hour, min, sec, msec);
       }
 
@@ -216,8 +217,9 @@ namespace tntdb
         in >> year >> ch >> month >> ch >> day >> hour >> ch >> min >> ch >> fsec;
         if (in)
         {
+          fsec += .0005;
           sec = static_cast<unsigned short>(fsec);
-          msec = (fsec - sec + .0005) * 1000;
+          msec = static_cast<unsigned short>((fsec - sec) * 1000);
           return Datetime(year, month, day, hour, min, sec, msec);
         }
       }
