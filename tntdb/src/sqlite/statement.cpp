@@ -194,6 +194,11 @@ namespace tntdb
       setInt(col, data ? 1 : 0);
     }
 
+    void Statement::setShort(const std::string& col, short data)
+    {
+      setInt(col, data);
+    }
+
     void Statement::setInt(const std::string& col, int data)
     {
       int idx = getBindIndex(col);
@@ -231,11 +236,23 @@ namespace tntdb
       setInt(col, data);
     }
 
+    void Statement::setUnsignedShort(const std::string& col, unsigned short data)
+    {
+      if (data > static_cast<unsigned short>(std::numeric_limits<unsigned short>::max()))
+      {
+        log_warn("possible loss of precision while converting unsigned short " << data
+          << " to double");
+        setDouble(col, static_cast<double>(data));
+      }
+      else
+        setInt(col, static_cast<int>(data));
+    }
+
     void Statement::setUnsigned(const std::string& col, unsigned data)
     {
       if (data > static_cast<unsigned>(std::numeric_limits<int>::max()))
       {
-        log_warn("possible loss of precision while converting large unsigned " << data
+        log_warn("possible loss of precision while converting unsigned " << data
           << " to double");
         setDouble(col, static_cast<double>(data));
       }
@@ -247,7 +264,7 @@ namespace tntdb
     {
       if (data > static_cast<unsigned long>(std::numeric_limits<long>::max()))
       {
-        log_warn("possible loss of precision while converting large unsigned " << data
+        log_warn("possible loss of precision while converting long unsigned " << data
           << " to double");
         setDouble(col, static_cast<double>(data));
       }

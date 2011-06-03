@@ -52,6 +52,11 @@ namespace tntdb
           || value[0] == '1';
     }
 
+    short ResultValue::getShort() const
+    {
+      return cxxtools::convert<short>(getString());
+    }
+
     int ResultValue::getInt() const
     {
       return cxxtools::convert<int>(getString());
@@ -60,6 +65,11 @@ namespace tntdb
     long ResultValue::getLong() const
     {
       return cxxtools::convert<long>(getString());
+    }
+
+    unsigned short ResultValue::getUnsignedShort() const
+    {
+      return cxxtools::convert<unsigned short>(getString());
     }
 
     unsigned ResultValue::getUnsigned() const

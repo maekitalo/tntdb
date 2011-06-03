@@ -63,10 +63,14 @@ namespace tntdb
       bool isNull() const                 { return !value || value->isNull(); }
       /// return true, when value represents boolean true.
       bool getBool() const                { return value->getBool(); }
+      /// tries to convert value into an short.
+      short getShort() const              { return value->getShort(); }
       /// tries to convert value into an int.
       int getInt() const                  { return value->getInt(); }
       /// tries to convert value into an long.
       long getLong() const                { return value->getLong(); }
+      /// tries to convert value into an unsigned short.
+      unsigned short getUnsignedShort() const { return value->getUnsignedShort(); }
       /// tries to convert value into an unsigned.
       unsigned getUnsigned() const        { return value->getUnsigned(); }
       /// tries to convert value into an unsigned long.
@@ -154,6 +158,15 @@ namespace tntdb
     return true;
   }
 
+  inline bool operator>> (const Value& value, short& out)
+  {
+    if (value.isNull())
+      return false;
+
+    out = value.getShort();
+    return true;
+  }
+
   inline bool operator>> (const Value& value, int& out)
   {
     if (value.isNull())
@@ -169,6 +182,15 @@ namespace tntdb
       return false;
 
     out = value.getLong();
+    return true;
+  }
+
+  inline bool operator>> (const Value& value, unsigned short& out)
+  {
+    if (value.isNull())
+      return false;
+
+    out = value.getUnsignedShort();
     return true;
   }
 

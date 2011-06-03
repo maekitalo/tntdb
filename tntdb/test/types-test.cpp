@@ -86,8 +86,10 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       registerMethod("testNull", *this, &TntdbTypesTest::testNull);
 
       registerMethod("testBool", *this, &TntdbTypesTest::testBool);
+      registerMethod("testShort", *this, &TntdbTypesTest::testShort);
       registerMethod("testInt", *this, &TntdbTypesTest::testInt);
       registerMethod("testLong", *this, &TntdbTypesTest::testLong);
+      registerMethod("testUnsignedShort", *this, &TntdbTypesTest::testUnsignedShort);
       registerMethod("testUnsigned", *this, &TntdbTypesTest::testUnsigned);
       registerMethod("testUnsignedLong", *this, &TntdbTypesTest::testUnsignedLong);
       registerMethod("testInt32", *this, &TntdbTypesTest::testInt32);
@@ -130,6 +132,15 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       TEST(false);
     }
 
+    void testShort()
+    {
+      BEGIN_TEST(short, "shortcol");
+      TEST(static_cast<short>(42));
+      TEST(static_cast<short>(-123));
+      TEST(std::numeric_limits<short>::max());
+      TEST(std::numeric_limits<short>::min());
+    }
+
     void testInt()
     {
       BEGIN_TEST(int, "intcol");
@@ -146,6 +157,14 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       TEST(static_cast<long>(-123));
       TEST(std::numeric_limits<long>::max());
       TEST(std::numeric_limits<long>::min());
+    }
+
+    void testUnsignedShort()
+    {
+      BEGIN_TEST(unsigned short, "unsignedshortcol");
+      TEST(static_cast<unsigned short>(42));
+      TEST(std::numeric_limits<unsigned short>::max());
+      TEST(std::numeric_limits<unsigned short>::min());
     }
 
     void testUnsigned()

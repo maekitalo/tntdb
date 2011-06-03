@@ -322,6 +322,13 @@ namespace tntdb
       SET_TYPE(col, "bool");
     }
 
+    void Statement::setShort(const std::string& col, short data)
+    {
+      log_debug("setShort(\"" << col << "\", " << data << ')');
+      setValue(col, data);
+      SET_TYPE(col, "short");
+    }
+
     void Statement::setInt(const std::string& col, int data)
     {
       log_debug("setInt(\"" << col << "\", " << data << ')');
@@ -334,6 +341,13 @@ namespace tntdb
       log_debug("setLong(\"" << col << "\", " << data << ')');
       setValue(col, data);
       SET_TYPE(col, "long");
+    }
+
+    void Statement::setUnsignedShort(const std::string& col, unsigned short data)
+    {
+      log_debug("setUnsignedShort(\"" << col << "\", " << data << ')');
+      setValue(col, data);
+      SET_TYPE(col, "unsigned short");
     }
 
     void Statement::setUnsigned(const std::string& col, unsigned data)

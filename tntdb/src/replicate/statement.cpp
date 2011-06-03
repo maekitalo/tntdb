@@ -82,6 +82,12 @@ namespace tntdb
         it->setBool(col, data);
     }
 
+    void Statement::setShort(const std::string& col, short data)
+    {
+      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+        it->setShort(col, data);
+    }
+
     void Statement::setInt(const std::string& col, int data)
     {
       for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
@@ -92,6 +98,12 @@ namespace tntdb
     {
       for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setLong(col, data);
+    }
+
+    void Statement::setUnsignedShort(const std::string& col, unsigned short data)
+    {
+      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+        it->setUnsignedShort(col, data);
     }
 
     void Statement::setUnsigned(const std::string& col, unsigned data)

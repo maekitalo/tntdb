@@ -73,6 +73,11 @@ namespace tntdb
       return getInt() != 0;
     }
 
+    short StmtValue::getShort() const
+    {
+      return getInt();
+    }
+
     int StmtValue::getInt() const
     {
       log_debug("sqlite3_column_int(" << getStmt() << ", " << iCol << ')');
@@ -82,6 +87,11 @@ namespace tntdb
     long StmtValue::getLong() const
     {
       return static_cast<long>(getInt64());
+    }
+
+    unsigned short StmtValue::getUnsignedShort() const
+    {
+      return static_cast<unsigned short>(getUnsigned());
     }
 
     unsigned StmtValue::getUnsigned() const

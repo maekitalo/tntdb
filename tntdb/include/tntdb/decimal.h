@@ -174,6 +174,12 @@ namespace tntdb
     template <typename FloatingPointType>
     FloatingPointType getFloatingPoint() const;
 
+    /// Return this decimal number rounded as a C++ short.
+    /// @return int result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
+    short getShort() const throw(std::overflow_error)
+      { return getInteger<short>(); }
+
     /// Return this decimal number rounded as a C++ int.
     /// @return int result if the result will fit.
     /// @throw std::overflow_error if the result will not fit
@@ -191,6 +197,12 @@ namespace tntdb
     /// @throw std::overflow_error if the result will not fit
     int32_t getInt32() const throw(std::overflow_error)
       { return getInteger<int32_t>(); }
+
+    /// Return this decimal number rounded as a C++ unsigned.
+    /// @return unsigned result if the result will fit.
+    /// @throw std::overflow_error if the result will not fit
+    unsigned short getUnsignedShort() const throw(std::overflow_error)
+      { return getInteger<unsigned>(); }
 
     /// Return this decimal number rounded as a C++ unsigned.
     /// @return unsigned result if the result will fit.

@@ -50,8 +50,10 @@ namespace tntdb
 
       virtual bool isNull() const;
       virtual bool getBool() const;
+      virtual short getShort() const;
       virtual int getInt() const;
       virtual long getLong() const;
+      virtual unsigned short getUnsignedShort() const;
       virtual unsigned getUnsigned() const;
       virtual unsigned long getUnsignedLong() const;
       virtual int32_t getInt32() const;

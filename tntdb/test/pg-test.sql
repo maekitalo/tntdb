@@ -3,8 +3,10 @@ create table tntdbtest
 (
   id integer not null primary key default nextval('tntdbtest_seq'),
   boolcol boolean,
+  shortcol integer,
   intcol integer,
   longcol bigint,
+  unsignedshortcol integer,
   unsignedcol bigint,
   unsignedlongcol decimal(24),
   int32col integer,

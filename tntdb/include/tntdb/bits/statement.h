@@ -86,6 +86,11 @@ namespace tntdb
       Statement& setBool(const std::string& col, bool data)
         { stmt->setBool(col, data); return *this; }
       /**
+       * Sets the hostvariable with the given name to a short value.
+       */
+      Statement& setShort(const std::string& col, short data)
+        { stmt->setShort(col, data); return *this; }
+      /**
        * Sets the hostvariable with the given name to a int value.
        */
       Statement& setInt(const std::string& col, int data)
@@ -96,12 +101,17 @@ namespace tntdb
       Statement& setLong(const std::string& col, long data)
         { stmt->setLong(col, data); return *this; }
       /**
+       * Sets the hostvariable with the given name to a unsigned short value.
+       */
+      Statement& setUnsignedShort(const std::string& col, unsigned short data)
+        { stmt->setUnsignedShort(col, data); return *this; }
+      /**
        * Sets the hostvariable with the given name to a unsigned value.
        */
       Statement& setUnsigned(const std::string& col, unsigned data)
         { stmt->setUnsigned(col, data); return *this; }
       /**
-       * Sets the hostvariable with the given name to a unsigned value.
+       * Sets the hostvariable with the given name to a unsigned long value.
        */
       Statement& setUnsignedLong(const std::string& col, unsigned long data)
         { stmt->setUnsignedLong(col, data); return *this; }

@@ -52,6 +52,14 @@ namespace tntdb
           || row[col][0] == 'T';
     }
 
+    short RowValue::getShort() const
+    {
+      short ret = 0;
+      std::istringstream v(getString());
+      v >> ret;
+      return ret;
+    }
+
     int RowValue::getInt() const
     {
       int ret = 0;
@@ -63,6 +71,14 @@ namespace tntdb
     long RowValue::getLong() const
     {
       long ret = 0;
+      std::istringstream v(getString());
+      v >> ret;
+      return ret;
+    }
+
+    unsigned short RowValue::getUnsignedShort() const
+    {
+      unsigned short ret = 0;
       std::istringstream v(getString());
       v >> ret;
       return ret;

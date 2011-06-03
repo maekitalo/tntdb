@@ -262,6 +262,12 @@ namespace tntdb
       bind.is_unsigned = 1;
     }
 
+    void setShort(MYSQL_BIND& bind, short data)
+    {
+      setValue(bind, data, MYSQL_TYPE_LONG);
+      bind.is_unsigned = 0;
+    }
+
     void setInt(MYSQL_BIND& bind, int data)
     {
       setValue(bind, data, MYSQL_TYPE_LONG);
@@ -272,6 +278,12 @@ namespace tntdb
     {
       setValue(bind, data, MYSQL_TYPE_LONG);
       bind.is_unsigned = 0;
+    }
+
+    void setUnsignedShort(MYSQL_BIND& bind, unsigned short data)
+    {
+      setValue(bind, data, MYSQL_TYPE_LONG);
+      bind.is_unsigned = 1;
     }
 
     void setUnsigned(MYSQL_BIND& bind, unsigned data)
@@ -430,6 +442,11 @@ namespace tntdb
       return getInteger<bool>(bind);
     }
 
+    short getShort(const MYSQL_BIND& bind)
+    {
+      return getInteger<short>(bind);
+    }
+
     int getInt(const MYSQL_BIND& bind)
     {
       return getInteger<int>(bind);
@@ -438,6 +455,11 @@ namespace tntdb
     long getLong(const MYSQL_BIND& bind)
     {
       return getInteger<long>(bind);
+    }
+
+    unsigned short getUnsignedShort(const MYSQL_BIND& bind)
+    {
+      return getInteger<unsigned short>(bind);
     }
 
     unsigned getUnsigned(const MYSQL_BIND& bind)

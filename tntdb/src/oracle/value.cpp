@@ -257,6 +257,35 @@ namespace tntdb
       }
     }
 
+    short Value::getShort() const
+    {
+      if (isNull())
+        throw NullValue();
+
+      switch (type)
+      {
+        case SQLT_DAT:
+        case SQLT_TIMESTAMP:
+        case SQLT_TIMESTAMP_TZ:
+        case SQLT_TIMESTAMP_LTZ:
+          throw TypeError();
+
+        case SQLT_INT:
+        case SQLT_UIN:
+          return static_cast<short>(longValue);
+
+        case SQLT_FLT:
+          return static_cast<short>(doubleValue);
+
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal().getShort();
+          
+        default:
+          return getValue<short>(std::string(&data[0], len), "int");
+      }
+    }
+
     int Value::getInt() const
     {
       if (isNull())
@@ -318,6 +347,35 @@ namespace tntdb
     int32_t Value::getInt32() const
     {
       return getInt();
+    }
+
+    unsigned short Value::getUnsignedShort() const
+    {
+      if (isNull())
+        throw NullValue();
+
+      switch (type)
+      {
+        case SQLT_DAT:
+        case SQLT_TIMESTAMP:
+        case SQLT_TIMESTAMP_TZ:
+        case SQLT_TIMESTAMP_LTZ:
+          throw TypeError();
+
+        case SQLT_INT:
+        case SQLT_UIN:
+          return static_cast<unsigned short>(longValue);
+
+        case SQLT_FLT:
+          return static_cast<unsigned short>(doubleValue);
+
+        case SQLT_NUM:
+        case SQLT_VNU:
+          return number.getDecimal().getUnsignedShort();
+          
+        default:
+          return getValue<unsigned>(std::string(&data[0], len), "unsigned");
+      }
     }
 
     unsigned Value::getUnsigned() const

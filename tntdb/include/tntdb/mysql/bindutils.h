@@ -45,8 +45,10 @@ namespace tntdb
   {
     void setNull(MYSQL_BIND& value);
     void setBool(MYSQL_BIND& value, bool data);
+    void setShort(MYSQL_BIND& value, short data);
     void setInt(MYSQL_BIND& value, int data);
     void setLong(MYSQL_BIND& value, long data);
+    void setUnsignedShort(MYSQL_BIND& value, unsigned short data);
     void setUnsigned(MYSQL_BIND& value, unsigned data);
     void setUnsignedLong(MYSQL_BIND& value, unsigned long data);
     void setInt32(MYSQL_BIND& value, int32_t data);
@@ -64,26 +66,28 @@ namespace tntdb
     void setTime(MYSQL_BIND& value, const Time& data);
     void setDatetime(MYSQL_BIND& value, const Datetime& data);
 
-    bool          isNull(const MYSQL_BIND& value);
-    bool          getBool(const MYSQL_BIND& value);
-    int           getInt(const MYSQL_BIND& value);
-    long          getLong(const MYSQL_BIND& value);
-    unsigned      getUnsigned(const MYSQL_BIND& value);
-    unsigned long getUnsignedLong(const MYSQL_BIND& value);
-    int32_t       getInt32(const MYSQL_BIND& value);
-    uint32_t      getUnsigned32(const MYSQL_BIND& value);
-    int64_t       getInt64(const MYSQL_BIND& value);
-    uint64_t      getUnsigned64(const MYSQL_BIND& value);
-    Decimal       getDecimal(const MYSQL_BIND& value);
-    long          getLong(const MYSQL_BIND& value);
-    float         getFloat(const MYSQL_BIND& value);
-    double        getDouble(const MYSQL_BIND& value);
-    char          getChar(const MYSQL_BIND& value);
-    void          getString(const MYSQL_BIND& value, std::string& ret);
-    void          getBlob(const MYSQL_BIND& value, Blob& ret);
-    Date          getDate(const MYSQL_BIND& value);
-    Time          getTime(const MYSQL_BIND& value);
-    Datetime      getDatetime(const MYSQL_BIND& value);
+    bool           isNull(const MYSQL_BIND& value);
+    bool           getBool(const MYSQL_BIND& value);
+    short          getShort(const MYSQL_BIND& value);
+    int            getInt(const MYSQL_BIND& value);
+    long           getLong(const MYSQL_BIND& value);
+    unsigned       getUnsigned(const MYSQL_BIND& value);
+    unsigned short getUnsignedShort(const MYSQL_BIND& value);
+    unsigned long  getUnsignedLong(const MYSQL_BIND& value);
+    int32_t        getInt32(const MYSQL_BIND& value);
+    uint32_t       getUnsigned32(const MYSQL_BIND& value);
+    int64_t        getInt64(const MYSQL_BIND& value);
+    uint64_t       getUnsigned64(const MYSQL_BIND& value);
+    Decimal        getDecimal(const MYSQL_BIND& value);
+    long           getLong(const MYSQL_BIND& value);
+    float          getFloat(const MYSQL_BIND& value);
+    double         getDouble(const MYSQL_BIND& value);
+    char           getChar(const MYSQL_BIND& value);
+    void           getString(const MYSQL_BIND& value, std::string& ret);
+    void           getBlob(const MYSQL_BIND& value, Blob& ret);
+    Date           getDate(const MYSQL_BIND& value);
+    Time           getTime(const MYSQL_BIND& value);
+    Datetime       getDatetime(const MYSQL_BIND& value);
 
     void transferValue(MYSQL_BIND& fromValue, MYSQL_BIND& toValue,
                        bool doRelease = true);

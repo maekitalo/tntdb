@@ -70,10 +70,14 @@ namespace tntdb
           { mysql::setNull(values[n]); }
         void setBool(unsigned n, bool data)
           { mysql::setBool(values[n], data); }
+        void setShort(unsigned n, short data)
+          { mysql::setShort(values[n], data); }
         void setInt(unsigned n, int data)
           { mysql::setInt(values[n], data); }
         void setLong(unsigned n, int data)
           { mysql::setLong(values[n], data); }
+        void setUnsignedShort(unsigned n, unsigned short data)
+          { mysql::setUnsignedShort(values[n], data); }
         void setUnsigned(unsigned n, unsigned data)
           { mysql::setUnsigned(values[n], data); }
         void setUnsignedLong(unsigned n, unsigned data)

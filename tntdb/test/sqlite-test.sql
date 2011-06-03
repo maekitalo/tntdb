@@ -2,8 +2,10 @@ create table tntdbtest
 (
   id integer not null primary key autoincrement,
   boolcol boolean,
+  shortcol integer,
   intcol integer,
   longcol integer,
+  unsignedshortcol integer,
   unsignedcol integer,
   unsignedlongcol integer,
   int32col integer,

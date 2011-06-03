@@ -75,6 +75,13 @@ namespace tntdb
         && isTrue(data.at(0));
   }
 
+  short ValueImpl::getShort() const
+  {
+    if (null)
+      throw NullValue();
+    return getValue<short>(data, "short");
+  }
+
   int ValueImpl::getInt() const
   {
     if (null)
@@ -87,6 +94,13 @@ namespace tntdb
     if (null)
       throw NullValue();
     return getValue<long>(data, "long");
+  }
+
+  unsigned short ValueImpl::getUnsignedShort() const
+  {
+    if (null)
+      throw NullValue();
+    return getValue<unsigned short>(data, "unsigned short");
   }
 
   unsigned ValueImpl::getUnsigned() const

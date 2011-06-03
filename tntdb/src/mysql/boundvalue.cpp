@@ -47,6 +47,11 @@ namespace tntdb
       return mysql::getBool(mysql_bind);
     }
 
+    short BoundValue::getShort() const
+    {
+      return mysql::getShort(mysql_bind);
+    }
+
     int BoundValue::getInt() const
     {
       return mysql::getInt(mysql_bind);
@@ -55,6 +60,11 @@ namespace tntdb
     long BoundValue::getLong() const
     {
       return mysql::getInt(mysql_bind);
+    }
+
+    unsigned short BoundValue::getUnsignedShort() const
+    {
+      return mysql::getUnsignedShort(mysql_bind);
     }
 
     unsigned BoundValue::getUnsigned() const

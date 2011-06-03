@@ -92,10 +92,14 @@ namespace tntdb
 
       bool getBool(size_type field_num) const
         { return getValue(field_num).getBool(); }
+      short getShort(size_type field_num) const
+        { return getValue(field_num).getShort(); }
       int getInt(size_type field_num) const
         { return getValue(field_num).getInt(); }
       long getLong(size_type field_num) const
         { return getValue(field_num).getLong(); }
+      unsigned short getUnsignedShort(size_type field_num) const
+        { return getValue(field_num).getUnsignedShort(); }
       unsigned getUnsigned(size_type field_num) const
         { return getValue(field_num).getUnsigned(); }
       unsigned long getUnsignedLong(size_type field_num) const

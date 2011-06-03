@@ -191,6 +191,22 @@ namespace tntdb
         log_warn("hostvar \"" << col << "\" not found");
     }
 
+    void Statement::setShort(const std::string& col, short data)
+    {
+      log_debug("statement " << stmt << " setShort(\"" << col << "\", " << data << ')');
+
+      bool found = false;
+      for (hostvarMapType::const_iterator it = hostvarMap.find(col);
+           it != hostvarMap.end() && it->first == col; ++it)
+      {
+        found = true;
+        inVars.setShort(it->second, data);
+      }
+
+      if (!found)
+        log_warn("hostvar \"" << col << "\" not found");
+    }
+
     void Statement::setInt(const std::string& col, int data)
     {
       log_debug("statement " << stmt << " setInt(\"" << col << "\", " << data << ')');
@@ -217,6 +233,22 @@ namespace tntdb
       {
         found = true;
         inVars.setLong(it->second, data);
+      }
+
+      if (!found)
+        log_warn("hostvar \"" << col << "\" not found");
+    }
+
+    void Statement::setUnsignedShort(const std::string& col, unsigned short data)
+    {
+      log_debug("statement " << stmt << " setUnsignedShort(\"" << col << "\", " << data << ')');
+
+      bool found = false;
+      for (hostvarMapType::const_iterator it = hostvarMap.find(col);
+           it != hostvarMap.end() && it->first == col; ++it)
+      {
+        found = true;
+        inVars.setUnsignedShort(it->second, data);
       }
 
       if (!found)
