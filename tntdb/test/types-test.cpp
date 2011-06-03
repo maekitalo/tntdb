@@ -82,7 +82,6 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
     TntdbTypesTest()
       : cxxtools::unit::TestSuite("tntdb-types-Test")
     {
-      /*
       registerMethod("testLimits", *this, &TntdbTypesTest::testLimits);
       registerMethod("testNull", *this, &TntdbTypesTest::testNull);
 
@@ -106,7 +105,6 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       registerMethod("testDatetime", *this, &TntdbTypesTest::testDatetime);
       registerMethod("testSequence", *this, &TntdbTypesTest::testSequence);
       registerMethod("testFloatNan", *this, &TntdbTypesTest::testFloatNan);
-      */
       registerMethod("testDoubleNan", *this, &TntdbTypesTest::testDoubleNan);
 
       dburl = getenv("TNTDBURL");
