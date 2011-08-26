@@ -37,6 +37,8 @@
 
 namespace tntdb
 {
+  class RowReader;
+
   /**
    * Row represents a row, which is fetched from the database.
    */
@@ -190,6 +192,8 @@ namespace tntdb
       bool operator!() const         { return !row; }
       /// Returns the actual implementation-class.
       const IRow* getImpl() const    { return &*row; }
+
+      RowReader reader(size_type n = 0) const;
   };
 }
 

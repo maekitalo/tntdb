@@ -31,6 +31,7 @@
 
 #include <tntdb/bits/result.h>
 #include <tntdb/bits/row.h>
+#include <tntdb/bits/rowreader.h>
 #include <tntdb/bits/row_iterator.h>
 
 #endif // TNTDB_ROW_H
