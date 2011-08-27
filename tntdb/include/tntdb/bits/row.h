@@ -193,6 +193,7 @@ namespace tntdb
       /// Returns the actual implementation-class.
       const IRow* getImpl() const    { return &*row; }
 
+      /// Instantiates a tntdb::RowReader with the passed initial column counter.
       RowReader reader(size_type n = 0) const;
   };
 }
