@@ -5,6 +5,7 @@ nobase_include_HEADERS = \
 	tntdb/bits/result.h \
 	tntdb/bits/result_iterator.h \
 	tntdb/bits/row.h \
+	tntdb/bits/rowreader.h \
 	tntdb/bits/row_iterator.h \
 	tntdb/bits/statement.h \
 	tntdb/bits/statement_iterator.h \
