@@ -37,9 +37,12 @@ namespace tntdb
    * A RowReader is a class which helps reading multiple columns from a row.
    *
    * This class helds a field number counter, which is incremented each time
-   * a value is fetched from the underlying row using the get method.
+   * a value is fetched from the underlying row using one of the get methods.
    * This class is normally instantiated implicitly using the tntdb::Row::reader
    * method.
+   *
+   * The get methods return a reference to the row reader to make chaining of
+   * calls easy.
    *
    * Example:
    * \code
@@ -76,7 +79,7 @@ namespace tntdb
 
       /// Reads the current column value and increments the field counter.
       /// If the value is null, the passed variable is not changed.
-      /// There is no straight forward way to determine, wether the value was null.
+      /// There is no straight forward way to determine, whether the value was null.
       /// You should use the get method with the null indicator, if the value
       /// might be null or just initialize your value with a suitable default.
       template <typename T>
@@ -89,6 +92,11 @@ namespace tntdb
       template <typename T>
       RowReader& get(T& ret, bool& nullInd)
       { nullInd = row[field_num++].get(ret); return *this; }
+
+      /// Reads the current value into a tntdb::Value and increments the field
+      /// counter.
+      RowReader& get(tntdb::Value& v)
+      { v = row[field_num++]; return *this; }
 
       /// Returns true, if the current value is null.
       bool isNull() const
