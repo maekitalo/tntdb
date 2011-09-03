@@ -1,3 +1,63 @@
+2011-09-01 tommi@tntnet.org
+
+- add get method for tntdb::Value to RowReader
+
+2011-08-26 tommi@tntnet.org
+
+- implement new helper class tntdb::RowReader, which makes it easier to read all values from a row
+
+2011-06-03 tommi@tntnet.org
+
+- add support for short and unsigned short
+
+2011-05-06 tommi@tntnet.org
+
+- fix reading time with second fractional part >0.9999, which resulted in a invalid time in postgresql driver
+
+2011-04-25 tommi@tntnet.org
+
+- add operators for cxxtools::Date, Time and DateTime classes
+
+2011-04-02 tommi@tntnet.org
+
+- fix compile problem on BSD (timeval.tv_sec is not of type time_t)
+
+2011-03-24 tommi@tntnet.org
+
+- use transacions to make sure replication works also on error on the second db in replication driver
+
+2011-03-22 tommi@tntnet.org
+
+- use OCIPing to check if oracle connection is still alive
+
+2011-03-22 tommi@tntnet.org
+
+- default to empty string of serial name when retrieving last insert id, which means: get the last inserted id regardless of name
+
+2011-02-27 tommi@tntnet.org
+
+- update tntdb to latest cxxtools (svn release 1203 or cxxtools 2.1)
+
+2011-02-21 tommi@tntnet.org
+
+- support for nan and inf in postgresql driver
+
+2011-02-21 tommi@tntnet.org
+
+- deliver last incremented serial if passed empty string to lastInsertId method in postgresql driver
+
+2011-02-21 tommi@tntnet.org
+
+- add replicating driver to tntdb
+
+2011-01-30 tommi@tntnet.org
+
+- fix: long was casted to int when set in statement
+
+2011-01-10 tommi@tntnet.org
+
+- implement getLong and getUnsignedLong in tntdb::row
+
 2011-01-05 tommi@tntnet.org
  - add tntdb::BlobIStream: a std::istream interface to tntdb::Blob
 
