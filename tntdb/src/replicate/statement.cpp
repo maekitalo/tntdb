@@ -200,9 +200,15 @@ namespace tntdb
     {
       tntdb::Connection c(conn);
       Transaction transaction(c);
+      Statement::size_type ret = 0;
       for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
-        it->execute();
+      {
+        Statement::size_type r = it->execute();
+        if (it == statements.begin())
+          ret = r;
+      }
       transaction.commit();
+      return ret;
     }
 
     tntdb::Result Statement::select()
