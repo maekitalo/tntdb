@@ -202,7 +202,7 @@ namespace tntdb
     /// @return unsigned result if the result will fit.
     /// @throw std::overflow_error if the result will not fit
     unsigned short getUnsignedShort() const throw(std::overflow_error)
-      { return getInteger<unsigned>(); }
+      { return getInteger<unsigned short>(); }
 
     /// Return this decimal number rounded as a C++ unsigned.
     /// @return unsigned result if the result will fit.
