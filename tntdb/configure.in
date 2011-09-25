@@ -22,8 +22,12 @@ ACX_PTHREAD
 AC_PROG_LIBTOOL
 
 AC_MSG_CHECKING([for sighandler_t])
-AC_TRY_COMPILE([#include <signal.h>],[sighandler_t *f;],
+AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([
+    #include <signal.h>
+    sighandler_t *f;])],
   has_sighandler_t=yes,has_sighandler_t=no)
+
 AC_MSG_RESULT($has_sighandler_t)
 if test "$has_sighandler_t" = "yes" ; then
     AC_DEFINE( HAVE_SIGHANDLER_T, 1, [Define if sighandler_t available] )
@@ -33,42 +37,46 @@ fi
 # check standard integer types
 #
 
-AC_COMPILE_IFELSE([
-#include <stdint.h>
-void foo(int) {}
-void foo(long) {}
-void foo(int32_t) {}
-],
+AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([
+    #include <stdint.h>
+    void foo(int) {}
+    void foo(long) {}
+    void foo(int32_t) {}
+    ])],
 INT_INT32_T_CONFLICT=0,
 INT_INT32_T_CONFLICT=1)
 AC_SUBST(INT_INT32_T_CONFLICT)
 
-AC_COMPILE_IFELSE([
-#include <stdint.h>
-void foo(unsigned) {}
-void foo(unsigned long) {}
-void foo(uint32_t) {}
-],
+AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([
+    #include <stdint.h>
+    void foo(unsigned) {}
+    void foo(unsigned long) {}
+    void foo(uint32_t) {}
+    ])],
 UNSIGNED_UINT32_T_CONFLICT=0,
 UNSIGNED_UINT32_T_CONFLICT=1)
 AC_SUBST(UNSIGNED_UINT32_T_CONFLICT)
 
-AC_COMPILE_IFELSE([
-#include <stdint.h>
-void foo(int) {}
-void foo(long) {}
-void foo(int64_t) {}
-],
+AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([
+    #include <stdint.h>
+    void foo(int) {}
+    void foo(long) {}
+    void foo(int64_t) {}
+    ])],
 INT_INT64_T_CONFLICT=0,
 INT_INT64_T_CONFLICT=1)
 AC_SUBST(INT_INT64_T_CONFLICT)
 
-AC_COMPILE_IFELSE([
-#include <stdint.h>
-void foo(unsigned) {}
-void foo(unsigned long) {}
-void foo(uint64_t) {}
-],
+AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([
+    #include <stdint.h>
+    void foo(unsigned) {}
+    void foo(unsigned long) {}
+    void foo(uint64_t) {}
+    ])],
 UNSIGNED_UINT64_T_CONFLICT=0,
 UNSIGNED_UINT64_T_CONFLICT=1)
 AC_SUBST(UNSIGNED_UINT64_T_CONFLICT)
@@ -105,8 +113,9 @@ then
   AC_MSG_CHECKING([for PQprepare in libpq-fe.h])
   save_CXXFLAGS=$CXXFLAGS
   CXXFLAGS="$CXXFLAGS $PG_CXXFLAGS"
-  AC_COMPILE_IFELSE([#include <libpq-fe.h>
-      void t() { PQprepare(0, 0, 0, 0, 0); }],
+  AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([#include <libpq-fe.h>
+      void t() { PQprepare(0, 0, 0, 0, 0); }])],
     [AC_DEFINE(HAVE_PQPREPARE, 1, [Defined if postgresql supports PQprepare])
      AC_MSG_RESULT(yes)
     ],
@@ -170,8 +179,9 @@ then
   AC_CHECK_HEADER([sqlite3.h], , AC_MSG_ERROR([header for sqlite3 not found]))
 
   # check for sqlite3_transfer_bindings
-  AC_COMPILE_IFELSE([#include <sqlite3.h>
-      void t() { sqlite3_transfer_bindings(0, 0); }],
+  AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([#include <sqlite3.h>
+      void t() { sqlite3_transfer_bindings(0, 0); }])],
     [AC_MSG_RESULT(yes)],
     [AC_MSG_ERROR([sqlite3_transfer_bindings is missing])])
 
@@ -247,15 +257,6 @@ case "${host_cpu}-${host_os}" in
     ;;
 esac
 AC_SUBST(SHARED_LIB_FLAG)
-
-#
-# check header
-#
-AC_CHECK_HEADER([cxxtools/log.h], AC_DEFINE(HAVE_CXXTOOLS_LOG_H, ,[cxxtools/log.h found]), AC_MSG_ERROR([cxxtools-logging not found]))
-AC_COMPILE_IFELSE(
-  [#include <cxxtools/pool.h>
-   cxxtools::Pool<int>::Ptr p;], ,
-  AC_MSG_ERROR([looks like your cxxtools is outdated - try to update to at least version 2.1 or svn revison 1203]))
 
 AC_CONFIG_FILES([
   Makefile
