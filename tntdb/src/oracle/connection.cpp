@@ -315,7 +315,14 @@ namespace tntdb
     {
       try
       {
+        // OCIPing crashed on oracle 10.2.0.4.0
+#if OCI_MAJOR_VERSION >= 11
         checkError(OCIPing(svchp, errhp, OCI_DEFAULT), "OCIPing");
+#else
+        char version[64];
+        checkError(OCIServerVersion(svchp, errhp, reinterpret_cast<text*>(version), sizeof(version), OCI_HTYPE_SVCCTX));
+        log_debug("oracle version " << version);
+#endif
         return true;
       }
       catch (const Error&)
