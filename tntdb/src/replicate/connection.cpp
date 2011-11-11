@@ -115,7 +115,7 @@ namespace tntdb
       for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
         if (!it->ping())
           return false;
-      return false;
+      return true;
     }
 
     long Connection::lastInsertId(const std::string& name)
