@@ -53,7 +53,9 @@ namespace tntdb
 
     log_debug("current pool-size " << getCurrentSize());
 
-    while (true)
+    unsigned max = getCurrentSize() * 2;
+
+    for (unsigned n = 0; n < max; ++n)
     {
       Connection conn(new PoolConnection(pool.get()));
 
@@ -64,7 +66,7 @@ namespace tntdb
       log_warn("drop dead connection from pool");
     }
 
-    return Connection();  // never reached
+    return Connection(new PoolConnection(pool.get()));
   }
 
   ////////////////////////////////////////////////////////////////////////
