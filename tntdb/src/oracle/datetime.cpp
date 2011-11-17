@@ -116,7 +116,7 @@ namespace tntdb
       log_debug("create oracle::Datetime from tntdb::Time");
 
       ociDescriptorAlloc();
-      ociConstruct(0, 0, 0,
+      ociConstruct(1, 1, 1,
         s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
     }
 
