@@ -35,7 +35,12 @@
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
+#include <cxxtools/convert.h>
 #include <tntdb/config.h>
+#include <vector>
+#include <list>
+#include <deque>
+#include <set>
 
 namespace tntdb
 {
@@ -200,6 +205,41 @@ namespace tntdb
       template <typename T>
       Statement& set(const std::string& col, const T& data);
       //@}
+
+      /*
+       * Sets multiple numbered parameters to the values specified by the iterator range.
+       *
+       * The method expects, that the statement has columns with the specified column name
+       * appended by a number range starting from 0. This list can be generated with
+       * the static method tntdb::Statement::paramlist.
+       *
+       * Example:
+       *
+       * \code
+       *   std::vector<int> values;
+       *   values.push_back(5);
+       *   values.push_back(12);
+       *   tntdb::Statement stmt = conn.prepare("select a, b, c from tab1 where v in (" + tntdb::Statement::paramlist("v", values.size()) + ")");
+       *   stmt.set("v", values.begin(), values.end());
+       *   // or short version:
+       *   stmt.set("v", values);
+       *
+       *   // now stmt is ready for iteration
+       * \endcode
+       */
+      template <typename Iterator>
+      Statement& set(const std::string& col, Iterator it1, Iterator it2);
+
+      /**
+       * Returns a list of numbered parameters with the praefix "key".
+       *
+       * The number is appended to the col starting from 0.
+       * E.g. a call with col="foo" and size=3 will return the string
+       * " :foo0, :foo1, :foo2 ". This is exactly what the set method of Statment
+       * which takes iterators expects. When the size is 0, the string " NULL "
+       * is returned.
+       */
+      static std::string paramlist(const std::string& col, unsigned size);
 
       /**
        * Set the hostvariable with the given name to the passed value or null.
@@ -387,7 +427,6 @@ namespace tntdb
   }
 #endif
 
-  // TODO
   inline void operator<< (Hostvar& hostvar, const Decimal& data)
   {
     hostvar.setDecimal(data);
@@ -437,6 +476,23 @@ namespace tntdb
   {
     hostvar.setDatetime(data);
   }
+
+  template <typename T>
+  void operator<< (Hostvar& hostvar, const std::vector<T>& data)
+  { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+
+  template <typename T>
+  void operator<< (Hostvar& hostvar, const std::list<T>& data)
+  { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+
+  template <typename T>
+  void operator<< (Hostvar& hostvar, const std::deque<T>& data)
+  { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+
+  template <typename T>
+  void operator<< (Hostvar& hostvar, const std::set<T>& data)
+  { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+
   //@}
 
   template <typename T>
@@ -445,6 +501,36 @@ namespace tntdb
     Hostvar h(*this, name);
     h << data;
     return *this;
+  }
+
+  inline std::string Statement::paramlist(const std::string& key, unsigned size)
+  {
+    if (size == 0)
+      return " NULL ";
+
+    std::string ret;
+    ret.reserve(2 + (5 + key.size()) * size);
+    ret = ' ';
+    for (unsigned n = 0; n < size; ++n)
+    {
+      if (n != 0)
+        ret += ',';
+      ret += ':';
+      ret += key;
+      ret += cxxtools::convert<std::string>(n);
+    }
+    ret += ' ';
+
+    return ret;
+  }
+
+  template <typename Iterator>
+  Statement& Statement::set(const std::string& col, Iterator it1, Iterator it2)
+  {
+    for (unsigned n = 0; it1 != it2; ++n, ++it1)
+    {
+      set(col + cxxtools::convert<std::string>(n), *it1);
+    }
   }
 
   template <typename T>
