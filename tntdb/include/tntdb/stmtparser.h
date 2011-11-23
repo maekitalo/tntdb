@@ -58,9 +58,14 @@ namespace tntdb
    */
   class StmtParser
   {
+      char praefixChar;
       std::string sql;
 
     public:
+      explicit StmtParser(char praefixChar_ = ':')
+        : praefixChar(praefixChar_)
+      { }
+
       void parse(const std::string& sqlIn, StmtEvent& event);
 
       const std::string& getSql() const   { return sql; }

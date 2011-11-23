@@ -59,7 +59,7 @@ namespace tntdb
         switch(state)
         {
           case STATE_0:
-            if (ch == ':')
+            if (ch == praefixChar)
               state = STATE_NAME0;
             else if (ch == '\\')
               state = STATE_ESC;
@@ -80,14 +80,15 @@ namespace tntdb
               name = ch;
               state = STATE_NAME;
             }
-            else if (ch == ':')
+            else if (ch == praefixChar)
             {
-              sql += "::";
+              sql += praefixChar;
+              sql += praefixChar;
               state = STATE_0;
             }
             else if (ch == '\\')
             {
-              sql += ':';
+              sql += praefixChar;
               state = STATE_ESC;
             }
             break;
@@ -101,7 +102,7 @@ namespace tntdb
               sql += event.onHostVar(name);
               if (ch == '\\')
                 state = STATE_ESC;
-              else if (ch == ':')
+              else if (ch == praefixChar)
                 state = STATE_NAME0;
               else
               {
@@ -134,7 +135,7 @@ namespace tntdb
       switch(state)
       {
         case STATE_NAME0:
-          sql += ':';
+          sql += praefixChar;
           break;
 
         case STATE_NAME:

@@ -531,6 +531,7 @@ namespace tntdb
     {
       set(col + cxxtools::convert<std::string>(n), *it1);
     }
+    return *this;
   }
 
   template <typename T>
