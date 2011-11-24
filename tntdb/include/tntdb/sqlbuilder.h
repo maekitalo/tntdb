@@ -36,6 +36,9 @@ namespace tntdb
   class SqlBuilder
   {
     public:
+      SqlBuilder()
+      { }
+
       SqlBuilder(const std::string& sql_)
         : sql(sql_)
       { }
@@ -44,6 +47,9 @@ namespace tntdb
       SqlBuilder& replace(const std::string& varname, const std::string& value);
       SqlBuilder& replaceIf(bool condition, const std::string& varname, const std::string& value)
       { replace(varname, condition ? value : std::string()); }
+
+      void str(const std::string& s)
+      { sql = s; }
 
       const std::string& str() const
       { return sql; }
