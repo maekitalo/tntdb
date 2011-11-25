@@ -80,7 +80,7 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
 
   public:
     TntdbTypesTest()
-      : cxxtools::unit::TestSuite("tntdb-types-Test")
+      : cxxtools::unit::TestSuite("types")
     {
       registerMethod("testLimits", *this, &TntdbTypesTest::testLimits);
       registerMethod("testNull", *this, &TntdbTypesTest::testNull);

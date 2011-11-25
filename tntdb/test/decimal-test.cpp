@@ -35,7 +35,7 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
 {
   public:
     TntdbDecimalTest()
-      : cxxtools::unit::TestSuite("tntdb-decimal-Test")
+      : cxxtools::unit::TestSuite("decimal")
     {
       registerMethod("testSetLong", *this, &TntdbDecimalTest::testSetLong);
       registerMethod("testCompare", *this, &TntdbDecimalTest::testCompare);
