@@ -210,8 +210,8 @@ namespace tntdb
        * Sets multiple numbered parameters to the values specified by the iterator range.
        *
        * The method expects, that the statement has columns with the specified column name
-       * appended by a number range starting from 0. This list can be generated with
-       * the static method tntdb::Statement::paramlist.
+       * appended by a number range starting from 0. This list can be generated for example
+       * with tntdb::SqlBuilder.
        *
        * Example:
        *
@@ -229,17 +229,6 @@ namespace tntdb
        */
       template <typename Iterator>
       Statement& set(const std::string& col, Iterator it1, Iterator it2);
-
-      /**
-       * Returns a list of numbered parameters with the praefix "key".
-       *
-       * The number is appended to the col starting from 0.
-       * E.g. a call with col="foo" and size=3 will return the string
-       * " :foo0, :foo1, :foo2 ". This is exactly what the set method of Statment
-       * which takes iterators expects. When the size is 0, the string " NULL "
-       * is returned.
-       */
-      static std::string paramlist(const std::string& col, unsigned size);
 
       /**
        * Set the hostvariable with the given name to the passed value or null.
@@ -501,27 +490,6 @@ namespace tntdb
     Hostvar h(*this, name);
     h << data;
     return *this;
-  }
-
-  inline std::string Statement::paramlist(const std::string& key, unsigned size)
-  {
-    if (size == 0)
-      return " NULL ";
-
-    std::string ret;
-    ret.reserve(2 + (5 + key.size()) * size);
-    ret = ' ';
-    for (unsigned n = 0; n < size; ++n)
-    {
-      if (n != 0)
-        ret += ',';
-      ret += ':';
-      ret += key;
-      ret += cxxtools::convert<std::string>(n);
-    }
-    ret += ' ';
-
-    return ret;
   }
 
   template <typename Iterator>

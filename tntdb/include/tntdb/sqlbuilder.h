@@ -46,7 +46,7 @@ namespace tntdb
       SqlBuilder& extendParam(const std::string& varname, unsigned count);
       SqlBuilder& replace(const std::string& varname, const std::string& value);
       SqlBuilder& replaceIf(bool condition, const std::string& varname, const std::string& value)
-      { replace(varname, condition ? value : std::string()); }
+      { replace(varname, condition ? value : std::string()); return *this; }
 
       void str(const std::string& s)
       { sql = s; }
