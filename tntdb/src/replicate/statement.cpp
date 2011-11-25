@@ -32,7 +32,9 @@
 #include <tntdb/row.h>
 #include <tntdb/value.h>
 #include <tntdb/transaction.h>
+#include <tntdb/error.h>
 #include <cxxtools/log.h>
+#include <sstream>
 
 log_define("tntdb.replicate.statement")
 
@@ -200,13 +202,23 @@ namespace tntdb
     {
       tntdb::Connection c(conn);
       Transaction transaction(c);
-      Statement::size_type ret = 0;
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+
+      Statement::size_type ret = statements[0].execute();
+
+      for (Statements::size_type n = 0; n < statements.size(); ++n)
       {
-        Statement::size_type r = it->execute();
-        if (it == statements.begin())
-          ret = r;
+        try
+        {
+          statements[n].execute();
+        }
+        catch (const tntdb::Error& e)
+        {
+          std::ostringstream msg;
+          msg << "replication failed on " << (n + 1) << ". connection: " << e.what();
+          throw tntdb::Error(msg.str());
+        }
       }
+
       transaction.commit();
       return ret;
     }

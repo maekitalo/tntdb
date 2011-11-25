@@ -33,6 +33,8 @@
 #include <tntdb/row.h>
 #include <tntdb/value.h>
 #include <tntdb/transaction.h>
+#include <tntdb/error.h>
+#include <sstream>
 
 namespace tntdb
 {
@@ -82,10 +84,23 @@ namespace tntdb
     {
       tntdb::Connection c(this);
       Transaction transaction(c);
-      Connections::iterator it = connections.begin();
-      size_type ret = it->execute(query);
-      for (++it; it != connections.end(); ++it)
-        it->execute(query);
+
+      size_type ret = connections[0].execute(query);
+
+      for (Connections::size_type n = 1; n < connections.size(); ++n)
+      {
+        try
+        {
+          connections[n].execute(query);
+        }
+        catch (const tntdb::Error& e)
+        {
+          std::ostringstream msg;
+          msg << "replication failed on " << (n + 1) << ". connection: " << e.what();
+          throw tntdb::Error(msg.str());
+        }
+      }
+
       transaction.commit();
       return ret;
     }
