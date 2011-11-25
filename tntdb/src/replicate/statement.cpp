@@ -205,7 +205,7 @@ namespace tntdb
 
       Statement::size_type ret = statements[0].execute();
 
-      for (Statements::size_type n = 0; n < statements.size(); ++n)
+      for (Statements::size_type n = 1; n < statements.size(); ++n)
       {
         try
         {
