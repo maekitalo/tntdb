@@ -9,7 +9,7 @@ if MAKE_SQLITE
 driver_LTLIBRARIES = tntdb@abi_current@-sqlite.la
 
 tntdb@abi_current@_sqlite_la_SOURCES = $(sources)
-tntdb@abi_current@_sqlite_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) -lsqlite3
+tntdb@abi_current@_sqlite_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) -lsqlite3 @SHARED_LIB_FLAG@
 tntdb@abi_current@_sqlite_la_LIBADD = $(top_builddir)/src/libtntdb.la
 
 endif

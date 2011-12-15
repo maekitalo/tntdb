@@ -1,4 +1,4 @@
-AC_INIT(tntdb, 1.1-r271, [Tommi Maekitalo <tommi@tntnet.org>])
+AC_INIT(tntdb, 1.1, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 
 abi_current=2
@@ -243,6 +243,17 @@ if test "$driverdir" == "yes"
   then
     driverdir=$libdir/tntdb
   fi
+
+# additional shared library checks
+case "${host_cpu}-${host_os}" in
+*-aix*)
+    SHARED_LIB_FLAG=-qmkshrobj
+    ;;
+*)  
+    SHARED_LIB_FLAG=
+    ;;
+esac
+AC_SUBST(SHARED_LIB_FLAG)
 
 AC_CONFIG_FILES([
   Makefile
