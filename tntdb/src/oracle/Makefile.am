@@ -20,7 +20,7 @@ if MAKE_ORACLE
 driver_LTLIBRARIES = tntdb@abi_current@-oracle.la
 
 tntdb@abi_current@_oracle_la_SOURCES = $(sources)
-tntdb@abi_current@_oracle_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
+tntdb@abi_current@_oracle_la_LDFLAGS = -module -version-info @sonumber@ $(PTHREAD_LIBS)
 tntdb@abi_current@_oracle_la_LIBADD = $(top_builddir)/src/libtntdb.la -lclntsh
 
 endif
