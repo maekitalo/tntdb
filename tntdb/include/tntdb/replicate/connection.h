@@ -45,6 +45,7 @@ namespace tntdb
 
         typedef std::vector<tntdb::Connection> Connections;
         Connections connections;
+        tntdb::Connection primaryConnection;
 
       public:
         explicit Connection(const char* conninfo);

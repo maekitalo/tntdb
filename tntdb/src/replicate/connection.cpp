@@ -35,6 +35,10 @@
 #include <tntdb/transaction.h>
 #include <tntdb/error.h>
 #include <sstream>
+#include <algorithm>
+#include <cxxtools/log.h>
+
+log_define("tntdb.replicate.connection")
 
 namespace tntdb
 {
@@ -44,17 +48,35 @@ namespace tntdb
     {
       const char* b = conninfo;
       const char* e = conninfo;
+      std::vector<std::string> urls;
       while (*e)
       {
         if (*e == '|')
         {
-          connections.push_back(connect(std::string(b, e)));
+          urls.push_back(std::string(b, e));
           b = e+1;
         }
         ++e;
       }
 
-      connections.push_back(connect(std::string(b, e)));
+      urls.push_back(std::string(b, e));
+
+      std::string primaryUrl = urls[0];
+
+      std::sort(urls.begin(), urls.end());
+
+      for (std::vector<std::string>::const_iterator it = urls.begin(); it != urls.end(); ++it)
+      {
+        log_debug("connect to " << *it);
+        connections.push_back(connect(*it));
+        if (!primaryConnection && *it == primaryUrl)
+        {
+          log_debug("primary connection " << *it);
+          primaryConnection = connections.back();
+        }
+      }
+
+      log_debug(connections.size() << " connections");
     }
 
     Connection::~Connection()
