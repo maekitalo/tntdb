@@ -123,6 +123,8 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
         conn = tntdb::connect(dburl);
         del = conn.prepare("delete from tntdbtest");
       }
+
+      del.execute();
     }
 
     void testBool()
