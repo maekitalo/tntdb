@@ -50,8 +50,6 @@ namespace tntdb
       Connection connect(const std::string url)
         { return connectionManager->connect(url); }
 
-      typedef std::vector<std::string> SearchPathType;
-      static SearchPathType& getSearchPath();
   };
 
 }

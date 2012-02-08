@@ -46,31 +46,23 @@ namespace tntdb
 
   LibraryManager::LibraryManager(const std::string& driverName)
   {
-    const SearchPathType& path = getSearchPath();
-
-    SearchPathType::const_iterator it;
-    for (it = path.begin(); it != path.end(); ++it)
+    try
     {
-      std::string d = *it + cxxtools::Directory::sep() + libraryPrefix + driverName;
-      try
-      {
-        log_debug("loading library \"" << d << '"');
-        lib = cxxtools::Library(d);
-        break;
-      }
-      catch (const cxxtools::FileNotFound& e)
-      {
-        log_debug("library \"" << d << "\" not found: " << e.what());
-      }
-      catch (const cxxtools::OpenLibraryFailed& e)
-      {
-        log_debug("opening library \"" << d << "\" failed: " << e.what());
-      }
+      log_debug("loading library \"" << libraryPrefix << driverName << '"');
+      lib = cxxtools::Library(libraryPrefix + driverName);
+    }
+    catch (const cxxtools::FileNotFound& e)
+    {
+      log_debug("library \"" << libraryPrefix << driverName << "\" not found: " << e.what());
+    }
+    catch (const cxxtools::OpenLibraryFailed& e)
+    {
+      log_debug("opening library \"" << libraryPrefix << driverName << "\" failed: " << e.what());
     }
 
     if (!lib)
     {
-      std::string d = libraryPrefix + driverName;
+      std::string d = DRIVERDIR + cxxtools::Directory::sep() + libraryPrefix + driverName;
       log_debug("loading library \"" << d << '"');
       lib = cxxtools::Library(d);
     }
@@ -82,11 +74,4 @@ namespace tntdb
     log_debug("driver " << driverName << " successfully loaded");
   }
 
-  LibraryManager::SearchPathType& LibraryManager::getSearchPath()
-  {
-    static LibraryManager::SearchPathType searchPath;
-    if (searchPath.empty())
-      searchPath.push_back(DRIVERDIR);
-    return searchPath;
-  }
 }
