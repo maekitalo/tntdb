@@ -230,6 +230,8 @@ namespace tntdb
         case MYSQL_TYPE_DOUBLE:
           return *static_cast<double*>(bind.buffer);
 
+        case MYSQL_TYPE_DECIMAL:
+        case MYSQL_TYPE_NEWDECIMAL:
         case MYSQL_TYPE_VAR_STRING:
         case MYSQL_TYPE_STRING:
         {
