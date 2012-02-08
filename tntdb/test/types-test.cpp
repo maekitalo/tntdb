@@ -29,11 +29,14 @@
 
 #include <cxxtools/unit/testsuite.h>
 #include <cxxtools/unit/registertest.h>
+#include <cxxtools/log.h>
 #include <stdlib.h>
 #include <tntdb/connect.h>
 #include <tntdb/statement.h>
 #include <tntdb/row.h>
 #include <limits>
+
+log_define("tntdb.unit.types")
 
 #define BEGIN_TEST(T, col)                           \
       const std::string colName = col;               \
@@ -74,7 +77,6 @@
 
 class TntdbTypesTest : public cxxtools::unit::TestSuite
 {
-    const char* dburl;
     tntdb::Connection conn;
     tntdb::Statement del;
 
@@ -109,21 +111,25 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       registerMethod("testFloatNan", *this, &TntdbTypesTest::testFloatNan);
       registerMethod("testDoubleNan", *this, &TntdbTypesTest::testDoubleNan);
 
-      dburl = getenv("TNTDBURL");
-      if (!dburl)
-        dburl = "sqlite:test.db";
-
-      std::cout << "testing with dburl=" << dburl << std::endl;
     }
 
     void setUp()
     {
       if (!conn)
       {
+        const char* dburl = getenv("TNTDBURL");
+        if (!dburl)
+          dburl = "sqlite:test.db";
+
+        log_info("testing with dburl=" << dburl);
+
         conn = tntdb::connect(dburl);
         del = conn.prepare("delete from tntdbtest");
       }
+    }
 
+    void tearDown()
+    {
       del.execute();
     }
 
