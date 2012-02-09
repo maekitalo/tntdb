@@ -49,6 +49,7 @@ namespace tntdb
         unsigned size() const;
         Value getValueByNumber(size_type field_num) const;
         Value getValueByName(const std::string& field_name) const;
+        std::string getColumnName(size_type field_num) const;
 
         // specific methods of sqlite-driver
         sqlite3_stmt* getStmt() const   { return stmt; }

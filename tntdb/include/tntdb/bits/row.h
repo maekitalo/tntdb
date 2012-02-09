@@ -68,16 +68,17 @@ namespace tntdb
       Value getValue(size_type field_num) const
         { return row->getValueByNumber(field_num); }
       /// Returns the value-object by name.
-      /// Note that this is less effective than fetching by number
       Value getValue(const std::string& field_name) const
         { return row->getValueByName(field_name); }
       /// Returns the field_num's value-object.
       Value operator[] (size_type field_num) const
         { return row->getValueByNumber(field_num); }
       /// Returns the value-object by name.
-      /// Note that this is less effective than fetching by number
       Value operator[] (const std::string& field_name) const
         { return row->getValueByName(field_name); }
+      /// Returns the name of the field_num's column
+      std::string getName(size_type field_num) const
+        { return row->getColumnName(field_num); }
 
       /// Return true, if the specified value is null.
       bool isNull(size_type field_num) const

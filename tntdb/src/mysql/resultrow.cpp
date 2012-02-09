@@ -73,5 +73,10 @@ namespace tntdb
       return getValueByNumber(field_num);
     }
 
+    std::string ResultRow::getColumnName(size_type field_num) const
+    {
+      return fields[field_num].name;
+    }
+
   }
 }

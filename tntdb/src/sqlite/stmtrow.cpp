@@ -49,5 +49,13 @@ namespace tntdb
       return Value(new StmtValue(stmt, field_name));
     }
 
+    std::string StmtRow::getColumnName(size_type field_num) const
+    {
+      const char* name = sqlite3_column_name(stmt, field_num);
+      if (name == 0)
+        throw std::bad_alloc();
+      return name;
+    }
+
   }
 }

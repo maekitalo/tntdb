@@ -50,6 +50,7 @@ namespace tntdb
         virtual size_type size() const;
         virtual tntdb::Value getValueByNumber(size_type field_num) const;
         virtual tntdb::Value getValueByName(const std::string& field_name) const;
+        virtual std::string getColumnName(size_type field_num) const;
     };
   }
 }

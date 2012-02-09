@@ -57,4 +57,9 @@ namespace tntdb
     return it->value;
   }
 
+  std::string RowImpl::getColumnName(size_type field_num) const
+  {
+    return data[field_num].name;
+  }
+
 }

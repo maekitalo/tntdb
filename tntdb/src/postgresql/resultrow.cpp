@@ -68,6 +68,11 @@ namespace tntdb
       return getValueByNumber(n);
     }
 
+    std::string ResultRow::getColumnName(size_type field_num) const
+    {
+        return PQfname(getPGresult(), field_num);
+    }
+
     PGresult* ResultRow::getPGresult() const
     {
       return result->getPGresult();
