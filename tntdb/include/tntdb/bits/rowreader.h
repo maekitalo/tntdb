@@ -104,7 +104,7 @@ namespace tntdb
 
       /// Resets the field counter to the passed value.
       void rewind(Row::size_type n_ = 0)
-      { field_num = 0; }
+      { field_num = n_; }
 
       /// returns the underlying row.
       const Row& currentRow() const
