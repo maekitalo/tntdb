@@ -282,18 +282,18 @@ namespace tntdb
 
     /// Set this this tntdb::Decimal object to the value of the given unsigned.
     /// @param num integer value to set this Decimal number to.
-    void setUnsigned(unsigned num)
-      { setInteger<unsigned>(num); }
+    template <typename UnsignedType>
+    void setUnsigned(UnsignedType num);
 
     /// Set this this tntdb::Decimal object to the value of the given unsigned.
     /// @param num integer value to set this Decimal number to.
     void setUnsignedLong(unsigned long num)
-      { setInteger<unsigned long>(num); }
+      { setUnsigned<unsigned long>(num); }
 
     /// Set this this tntdb::Decimal object to the value of the given uint32_t.
     /// @param num integer value to set this Decimal number to.
     void setUnsigned32(uint32_t num)
-      { setInteger<uint32_t>(num); }
+      { setUnsigned<uint32_t>(num); }
 
     /// Set this this tntdb::Decimal object to the value of the given int64_t.
     /// @param num integer value to set this Decimal number to.
@@ -303,7 +303,7 @@ namespace tntdb
     /// Set this this tntdb::Decimal object to the value of the given uint64_t.
     /// @param num integer value to set this Decimal number to.
     void setUnsigned64(uint64_t num)
-      { setInteger<int64_t>(num); }
+      { setUnsigned<int64_t>(num); }
 
     /// Set this this tntdb::Decimal object to the value of the given int64_t
     /// decimal mantissa and base 10 exponent.
@@ -532,11 +532,9 @@ namespace tntdb
     {
       if (optionalUserSpecifiedExponentOffset >= 0)
       {
-        MantissaType previousIntegralPart = MantissaType(0);
         bool overflowDetected = false;
         for (ExponentType i = 0; (i < optionalUserSpecifiedExponentOffset) && !overflowDetected; ++i)
         {
-          previousIntegralPart = integralPart;
           overflowDetected = overflowDetectedInMultiplyByTen(integralPart);
         }
         if (overflowDetected)
@@ -671,6 +669,15 @@ namespace tntdb
       flags &= ~positive;
       mantissa = MantissaType(-num);
     }
+    flags &= ~(infinity | NaN);
+    exponent = 0;
+  }
+
+  template <typename UnsignedType>
+  void Decimal::setUnsigned(UnsignedType num)
+  {
+    flags |= positive;
+    mantissa = MantissaType(num);
     flags &= ~(infinity | NaN);
     exponent = 0;
   }
