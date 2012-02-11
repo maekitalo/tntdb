@@ -1,5 +1,11 @@
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
 
+dist_noinst_DATA = \
+	mysql-test.sql \
+	oracle-test.sql \
+	pg-test.sql \
+	sqlite-test.sql
+
 noinst_PROGRAMS = \
 	tntdb-test
 
