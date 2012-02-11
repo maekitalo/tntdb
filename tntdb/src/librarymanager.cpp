@@ -42,7 +42,7 @@ log_define("tntdb.librarymanager")
 
 namespace tntdb
 {
-  static const std::string libraryPrefix = "tntdb2-";
+  static const std::string libraryPrefix = "tntdb" ABI_CURRENT "-";
 
   LibraryManager::LibraryManager(const std::string& driverName)
   {
