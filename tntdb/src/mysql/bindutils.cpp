@@ -436,7 +436,7 @@ namespace tntdb
     bool isNull(const MYSQL_BIND& bind)
     {
       return bind.buffer_type == MYSQL_TYPE_NULL
-          || bind.is_null && *bind.is_null;
+          || (bind.is_null && *bind.is_null);
     }
 
     bool getBool(const MYSQL_BIND& bind)

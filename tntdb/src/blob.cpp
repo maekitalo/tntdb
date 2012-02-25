@@ -51,7 +51,7 @@ namespace tntdb
         }
         else
         {
-          if (shrink && len != this->size() || len > this->size())
+          if ((shrink && len != this->size()) || len > this->size())
           {
               delete[] _data;
               _data = new char[len];
