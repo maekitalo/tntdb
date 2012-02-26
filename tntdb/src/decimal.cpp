@@ -373,7 +373,6 @@ namespace tntdb
       failed
     };
     DecimalReadStateEnum decimalReadState = start;
-    const char infinityCharArray[] = "Infinity";
     int readIndex = 0;
     MantissaType mantissaMultiplier = 10;
     MantissaType man = 0;
@@ -385,7 +384,6 @@ namespace tntdb
     ExponentType fracDigits = 0;
     FlagsType f = positive;
     PrintFlagsType pf = infinityShort;
-    char readCharArray[sizeof(infinityCharArray)];
     int c = 0;
     for (c = in.peek(); (c != std::istream::traits_type::eof()) && (decimalReadState != finished) && (decimalReadState != failed); c = in.peek())
     {
@@ -411,11 +409,9 @@ namespace tntdb
                 break;
                 case 'I':
                 case 'i':
-                  readCharArray[readIndex++] = c;
                   decimalReadState = readingInfinity;
                   break;
                 case 'N':
-                  readCharArray[readIndex++] = c;
                   decimalReadState = readingInfinity;
                   break;
                 case '0':
@@ -583,7 +579,6 @@ namespace tntdb
                   switch(c)
                   {
                       case 'a':
-                        readCharArray[readIndex++] = c;
                         break;
                       default:
                         decimalReadState = failed;
@@ -593,7 +588,6 @@ namespace tntdb
                   switch(c)
                   {
                       case 'N':
-                        readCharArray[readIndex++] = c;
                         f = NaN;
                         decimalReadState = finished;
                         break;
@@ -613,7 +607,6 @@ namespace tntdb
                   switch(c)
                   {
                       case 'n':
-                        readCharArray[readIndex++] = c;
                         break;
                       default:
                         decimalReadState = failed;
@@ -623,7 +616,6 @@ namespace tntdb
                   switch(c)
                   {
                       case 'f':
-                        readCharArray[readIndex++] = c;
                         break;
                       default:
                         decimalReadState = failed;
@@ -633,7 +625,6 @@ namespace tntdb
                   switch(c)
                   {
                       case 'i':
-                        readCharArray[readIndex++] = c;
                         break;
                       default:
                         // Accept Inf or -Inf, ignore anything following
@@ -648,7 +639,6 @@ namespace tntdb
                   switch(c)
                   {
                       case 'n':
-                        readCharArray[readIndex++] = c;
                         break;
                       default:
                         decimalReadState = failed;
@@ -658,7 +648,6 @@ namespace tntdb
                   switch(c)
                   {
                       case 'i':
-                        readCharArray[readIndex++] = c;
                         break;
                       default:
                         decimalReadState = failed;
@@ -668,7 +657,6 @@ namespace tntdb
                   switch(c)
                   {
                       case 't':
-                        readCharArray[readIndex++] = c;
                         break;
                       default:
                         decimalReadState = failed;
@@ -678,7 +666,6 @@ namespace tntdb
                   switch(c)
                   {
                       case 'y':
-                        readCharArray[readIndex++] = c;
                         f |= infinity;
                         decimalReadState = finished;
                         break;
@@ -691,6 +678,11 @@ namespace tntdb
                   break;
             }
             break;
+
+          case finished:
+          case failed:
+            break;
+
       }
       if (!skipRead)
         c = in.get();

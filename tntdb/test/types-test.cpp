@@ -100,6 +100,7 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       registerMethod("testUint64", *this, &TntdbTypesTest::testUint64);
       registerMethod("testDecimal", *this, &TntdbTypesTest::testDecimal);
       registerMethod("testFloat", *this, &TntdbTypesTest::testFloat);
+      registerMethod("testFloatFromDecimal", *this, &TntdbTypesTest::testFloatFromDecimal);
       registerMethod("testDouble", *this, &TntdbTypesTest::testDouble);
       registerMethod("testChar", *this, &TntdbTypesTest::testChar);
       registerMethod("testString", *this, &TntdbTypesTest::testString);
@@ -242,6 +243,13 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       TESTFLOAT(std::numeric_limits<float>::min() * 1.00001);
       TEST(std::numeric_limits<double>::infinity());
       TEST(-std::numeric_limits<double>::infinity());
+    }
+
+    void testFloatFromDecimal()
+    {
+      BEGIN_TEST(float, "decimalcol");
+      TESTFLOAT(static_cast<float>(42));
+      TESTFLOAT(static_cast<float>(-123));
     }
 
     void testDouble()

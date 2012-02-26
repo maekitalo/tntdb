@@ -467,7 +467,6 @@ namespace tntdb
     const ManType maxDivisorDigits = ((sizeof(ManType) >= 8) ? ((ManType(-1) > 0) ? 19 : 18) :
                                       ((sizeof(ManType) == 4) ? 9 : ((sizeof(ManType) == 2) ? 4 : 2 )));
     ManType exponentDivisor = ManType(Base);
-    ManType previousExponentDivisor = ManType(Base);
     bool overflowDetected = false;
     if (divisorExponentPowerOfTenDigitsRemaining > maxDivisorDigits)
     {
@@ -477,7 +476,6 @@ namespace tntdb
       ManType firstDivideDigits = divisorExponentPowerOfTenDigitsRemaining % maxDivisorDigits;
       for (ManType i = 1; (i < firstDivideDigits) && !overflowDetected; ++i)
       {
-        previousExponentDivisor = exponentDivisor;
         overflowDetected = overflowDetectedInMultiplyByTen(exponentDivisor);
       }
       if (overflowDetected)
@@ -493,7 +491,6 @@ namespace tntdb
         // Calculate the 10^maxDivisorDigits divisor
         for (ManType i = 1; (i < maxDivisorDigits) && !overflowDetected; ++i)
         {
-          previousExponentDivisor = exponentDivisor;
           overflowDetected = overflowDetectedInMultiplyByTen(exponentDivisor);
         }
         if (overflowDetected)
@@ -510,7 +507,6 @@ namespace tntdb
     }
     for (ManType i = 1; (i < divisorExponentPowerOfTenDigitsRemaining) && !overflowDetected; ++i)
     {
-      previousExponentDivisor = exponentDivisor;
       overflowDetected = overflowDetectedInMultiplyByTen(exponentDivisor);
     }
     if (overflowDetected)
