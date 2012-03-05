@@ -104,17 +104,7 @@ namespace tntdb
     
     Decimal ResultValue::getDecimal() const
     {
-      std::string s(getString());
-      std::istringstream in(s);
-      Decimal ret;
-      // Ignore overflow errors while reading the fractional part of the
-      // decimal number.
-      ret.read(in, true);
-      if (in.eof() || !in.fail())
-        return ret;
-      std::ostringstream msg;
-      msg << "can't convert \"" << s << "\" to Decimal";
-      throw TypeError(msg.str());
+      return Decimal(getString());
     }
 
     float ResultValue::getFloat() const

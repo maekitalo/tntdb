@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Tommi Maekitalo, Mark Wright
+ * Copyright (C) 2007,2012 Tommi Maekitalo, Mark Wright
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,680 +27,521 @@
  */
 
 #include <tntdb/decimal.h>
-#include <sstream>
-#include <iomanip>
-#include <ios>
-#include <limits>
+#include <cctype>
+#include <stdexcept>
+#include <iostream>
+#include <cxxtools/convert.h>
+#include <cxxtools/log.h>
+#include <math.h>
+
+log_define("tntdb.decimal")
 
 namespace tntdb
 {
-  Decimal::Decimal()
-    : mantissa(0),
-      exponent(0),
-      flags(positive),
-      defaultPrintFlags(infinityShort)
+  namespace
   {
-  }
-
-  Decimal::Decimal(double value)
-    : mantissa(0),
-      exponent(0),
-      flags(positive),
-      defaultPrintFlags(infinityShort)
-  {
-    setDouble(value);
-  }
-
-  Decimal::Decimal(int64_t man, ExponentType exp)
-    : mantissa(MantissaType(man >= int64_t(0) ? man : -man)),
-      exponent(exp),
-      flags(man >=int64_t(0) ? positive : 0),
-      defaultPrintFlags(infinityShort)
-  {
-  }
-
-  Decimal::Decimal(MantissaType man, ExponentType exp, FlagsType f, PrintFlagsType pf)
-    : mantissa(man),
-      exponent(exp),
-      flags(f),
-      defaultPrintFlags(pf)
-  {
-  }
-
-  Decimal::MantissaType Decimal::getMantissa() const
-  {
-    return mantissa;
-  }
-
-  Decimal::ExponentType Decimal::getExponent() const
-  {
-    return exponent;
-  }
-
-  bool Decimal::isInfinity() const
-  {
-    return (flags & infinity);
-  }
-
-  bool Decimal::isInfinity(bool positiveInf) const
-  {
-    if (flags & infinity)
+    void throwConversionError(const std::string& s)
     {
-      return ((flags & positive) == positiveInf);
+      throw std::runtime_error("failed to convert \"" + s + "\" to decimal");
+    }
+
+    int stringCompareIgnoreCase(const char* const& s1, const char* const& s2)
+    {
+      const char* it1 = s1;
+      const char* it2 = s2;
+      while (*it1 && *it2)
+      {
+          if (*it1 != *it2)
+          {
+              char c1 = std::toupper(*it1);
+              char c2 = std::toupper(*it2);
+              if (c1 < c2)
+                  return -1;
+              else if (c2 < c1)
+                  return 1;
+          }
+          ++it1;
+          ++it2;
+      }
+
+      return *it1 ? 1
+                  : *it2 ? -1 : 0;
+    }
+
+    void stripZeros(std::string& s)
+    {
+      std::string::size_type pos;
+      for (pos = s.size(); pos > 1; --pos)
+      {
+        if (s[pos - 1] != '0')
+          break;
+      }
+      s.erase(pos);
+    }
+  }
+
+  class Decimal::Parser
+  {
+      enum {
+        state_0,
+        state_man0,
+        state_man,
+        state_fract0,
+        state_fract,
+        state_exp0,
+        state_exp1,
+        state_exp,
+        state_special,
+        state_end
+      } _state;
+
+      Decimal* _value;
+      std::string _str;
+      short _eoff;
+      bool _eneg;
+
+    public:
+      Parser()
+        : _value(0),
+          _eoff(0),
+          _eneg(false)
+      { }
+
+      void begin(Decimal& d);
+      void parse(char ch);
+      void finish();
+  };
+  
+  void Decimal::Parser::begin(Decimal& d)
+  {
+    _state = state_0;
+    _value = &d;
+    _str.clear();
+    _eoff = 0;
+    _eneg = false;
+    d._mantissa.clear();
+    d._exponent = 0;
+    d._negative = false;
+  }
+
+  void Decimal::Parser::parse(char ch)
+  {
+    _str += ch;
+    switch (_state)
+    {
+      case state_0:
+        if (ch == '+')
+        {
+          _state = state_man0;
+        }
+        else if (ch == '-')
+        {
+          _value->_negative = true;
+          _state = state_man0;
+        }
+        else if (ch == '.')
+        {
+          _state = state_fract0;
+        }
+        else if (ch == '0')
+        {
+          _state = state_man0;
+        }
+        else if (ch >= '1' && ch <= '9')
+        {
+          _value->_mantissa = ch;
+          _state = state_man;
+        }
+        else if (std::isalpha(ch))
+          _state = state_special;
+        else
+          throwConversionError(_str);
+        break;
+
+      case state_man0:
+        if (ch == '.')
+        {
+          _state = state_fract0;
+        }
+        else if (ch == '0')
+        {
+          _state = state_man;
+        }
+        else if (ch >= '1' && ch <= '9')
+        {
+          _value->_mantissa = ch;
+          _state = state_man;
+        }
+        else if (std::isalpha(ch))
+          _state = state_special;
+        else
+          throwConversionError(_str);
+        break;
+
+      case state_man:
+        if (ch >= '0' && ch <= '9')
+        {
+          _value->_mantissa += ch;
+        }
+        else
+        {
+          _eoff = _value->_mantissa.size();
+          if (_eoff == 0)
+            _value->_mantissa = '0';
+
+          if (ch == '.')
+          {
+            _state = state_fract0;
+          }
+          else if (ch == 'e' || ch == 'E')
+          {
+            _state = state_exp0;
+          }
+          else
+            throwConversionError(_str);
+        }
+        break;
+
+      case state_fract0:
+        if (ch == '0')
+        {
+          --_eoff;
+          break;
+        }
+        _state = state_fract;
+        // nobreak
+
+      case state_fract:
+        if (ch >= '0' && ch <= '9')
+        {
+          _value->_mantissa += ch;
+        }
+        else if (ch == 'e' || ch == 'E')
+        {
+          _state = state_exp0;
+        }
+        else
+          throwConversionError(_str);
+        break;
+
+      case state_exp0:
+        if (ch == '+')
+        {
+          _state = state_exp1;
+          break;
+        }
+        else if (ch == '-')
+        {
+          _eneg = true;
+          break;
+        }
+
+        _state = state_exp1;
+
+        // nobreak
+
+      case state_exp1:
+      case state_exp:
+        if (ch >= '0' && ch <= '9')
+        {
+          if (_value->_exponent > (std::numeric_limits<short>::max() - (ch - '0') / 10))
+            throw std::overflow_error("overflow error when converting \"" + _str + "\" to decimal");
+
+          _value->_exponent = _value->_exponent * 10 + (ch - '0');
+          _state = state_exp;
+        }
+        else
+          throwConversionError(_str);
+        break;
+
+      case state_special:
+        if (_str.size() > 4)
+          throwConversionError(_str);
+
+        if (std::isalpha(ch) && _str.size() >= 3)
+        {
+          if (stringCompareIgnoreCase(_str.c_str(), "inf") == 0
+           || stringCompareIgnoreCase(_str.c_str(), "+inf") == 0)
+          {
+            _value->_exponent = std::numeric_limits<short>::max();
+            _state = state_end;
+          }
+          else if (stringCompareIgnoreCase(_str.c_str(), "-inf") == 0)
+          {
+            _value->_negative = true;
+            _value->_exponent = std::numeric_limits<short>::max();
+            _state = state_end;
+          }
+          else if (stringCompareIgnoreCase(_str.c_str(), "nan") == 0)
+          {
+            _value->_exponent = 0;
+            _state = state_end;
+          }
+        }
+
+        break;
+
+      case state_end:
+        throwConversionError(_str);
+    }
+  }
+
+  void Decimal::Parser::finish()
+  {
+    if (_state == state_0 || _state == state_man0 || _state == state_exp0 || _state == state_exp1 || _state == state_special)
+      throwConversionError(_str);
+
+    if (_state == state_man)
+      _eoff = _value->_mantissa.size();
+
+    if (_eneg)
+      _value->_exponent = -_value->_exponent;
+
+    _value->_exponent += _eoff;
+
+    stripZeros(_value->_mantissa);
+  }
+
+  Decimal::Decimal()
+    : _mantissa("0"),
+      _exponent(0),
+      _negative(false)
+  {
+  }
+
+  void Decimal::setDouble(long double value)
+  {
+    if (value == std::numeric_limits<long double>::infinity())
+    {
+      _negative = false;
+      _exponent = std::numeric_limits<short>::max();
+    }
+    else if (value == -std::numeric_limits<long double>::infinity())
+    {
+      _negative = true;
+      _exponent = std::numeric_limits<short>::max();
+    }
+    else if (value != value) // check for nan
+    {
+      _negative = false;
+      _exponent = 0;
     }
     else
-      return false;
+    {
+      long double v = value;
+      _negative = v < 0;
+      if (_negative)
+        v = -v;
+
+      _exponent = static_cast<short>(log10(v)) + 1;
+
+      if (_exponent > std::numeric_limits<long double>::max_exponent10)
+      {
+        v /= 10;
+        v /= powl(static_cast<long double>(10), static_cast<long double>(_exponent - 1));
+      }
+      else if (_exponent < -std::numeric_limits<long double>::max_exponent10)
+      {
+        v *= 10;
+        v /= powl(static_cast<long double>(10), static_cast<long double>(_exponent + 1));
+      }
+      else
+        v /= powl(static_cast<long double>(10), static_cast<long double>(_exponent));
+
+      for (int n = 0; n <= std::numeric_limits<long double>::digits10; ++n)
+      {
+        unsigned short d = static_cast<unsigned short>(v * 10);
+        v = v * 10 - d;
+        _mantissa += static_cast<char>(d + '0');
+      }
+
+      stripZeros(_mantissa);
+    }
+
+    log_debug("double value=" << value << " => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);
   }
 
-  bool Decimal::isNaN() const
+  Decimal::Decimal(const std::string& value)
+    : _exponent(0),
+      _negative(false)
   {
-    return (flags & NaN);
+    Parser parser;
+
+    parser.begin(*this);
+
+    for (std::string::const_iterator it = value.begin(); it != value.end(); ++it)
+      parser.parse(*it);
+
+    parser.finish();
+
+    log_debug("string value \"" << value << "\" => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);
   }
 
-  bool Decimal::isZero() const
+  long double Decimal::getDouble() const
   {
-    if (flags & (infinity | NaN))
-      return false;
+    if (isPositiveInfinity())
+      return std::numeric_limits<long double>::infinity();
+
+    if (isNegativeInfinity())
+      return -std::numeric_limits<long double>::infinity();
+
+    if (isNaN())
+      return std::numeric_limits<long double>::quiet_NaN();
+
+    long double ret = 0;
+    long double mul = 1;
+    for (std::string::const_iterator it = _mantissa.begin(); it != _mantissa.end(); ++it)
+    {
+      mul /= 10;
+      ret += (*it - '0') * mul;
+    }
+
+    ret *= powl(10, static_cast<long double>(_exponent));
+    if (_negative)
+      ret = -ret;
+
+    log_debug("getDouble mantissa=" << _mantissa << " exponent=" << _exponent << " negative=" << _negative << " => " << ret);
+
+    return ret;
+  }
+
+  void Decimal::setLong(long l, short exponent)
+  {
+    _negative = l < 0;
+    _mantissa = cxxtools::convert<std::string>(_negative ? -l : l);
+    _exponent = exponent + _mantissa.size();
+    stripZeros(_mantissa);
+    log_debug("setLong(" << l << ", " << exponent << ") => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);
+  }
+
+  void Decimal::setUnsigned(unsigned long l, short exponent)
+  {
+    _negative = false;
+    _mantissa = cxxtools::convert<std::string>(l);
+    _exponent = exponent + _mantissa.size();
+    stripZeros(_mantissa);
+    log_debug("setUnsigned(" << l << ", " << exponent << ") => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);
+  }
+
+  bool Decimal::operator< (const Decimal& other) const
+  {
+    if (_negative != other._negative)
+      return _negative;
+
+    if (_exponent != other._exponent)
+      return _exponent < other._exponent;
+
+    return _mantissa < other._mantissa;
+  }
+
+  long double Decimal::toDouble() const
+  {
+    if (isPositiveInfinity())
+      return std::numeric_limits<long double>::infinity();
+    else if (isNegativeInfinity())
+      return -std::numeric_limits<long double>::infinity();
+    else if (isNaN())
+      return -std::numeric_limits<long double>::quiet_NaN();
     else
-      return (mantissa == 0);
+    {
+      long double ret = 0;
+      long double f = 0.1;
+      for (std::string::const_iterator it = _mantissa.begin(); it != _mantissa.end(); ++it)
+      {
+        ret += (*it - '0') * f;
+        f /= 10;
+      }
+      ret *= powl(10, _exponent);
+      return _negative ? -ret : ret;
+    }
   }
 
   std::string Decimal::toString() const
   {
-    std::ostringstream ostr;
-    ostr.precision(24);
-    print(ostr);
-    return ostr.str();
+    return (_exponent < 0 || _exponent > 8) ? toStringSci() : toStringFix();
   }
 
-  void Decimal::printFraction(std::ostream &out,
-                              ExponentType fracDigits,
-                              MantissaType fractional)
+  std::string Decimal::toStringSci() const
   {
-    // 2^64 = 18446744073709551616, which has 20 digits.
-    const int maxDigits = 20;
-    char buffer[maxDigits + 1];
-    if (fracDigits > maxDigits)
-      fracDigits = maxDigits;
-    int digitsOutput = 0;
-    int digitsProcessed = 0;
-    MantissaType frac = fractional;
-    buffer[maxDigits] = '\0';
-    do
-    {
-      MantissaType fracQuotient = frac / MantissaType(Base);
-      MantissaType fracRemainder = frac % MantissaType(Base);
-      // Trailing zeros are not output
-      if ((digitsOutput != 0) || (fracRemainder != 0))
-        buffer[maxDigits - ++digitsOutput] = char(fracRemainder + '0');
-      frac = fracQuotient;
-    }
-    while (++digitsProcessed < fracDigits);
-    if (digitsOutput > 0)
-      out << "." << &buffer[maxDigits - digitsOutput];
-  }
-
-  std::ostream &Decimal::print(std::ostream &out) const
-  {
-    return print(out, defaultPrintFlags);
-  }
-
-  std::ostream &Decimal::print(std::ostream &out, PrintFlagsType printFlags) const
-  {
-    int savePrecision = out.precision();
-    std::ios::fmtflags saveFlags = out.flags(std::ios_base::left | std::ios_base::dec);
-    if (flags & infinity)
-    {
-      if (flags & positive)
-      {
-        switch(printFlags)
-        {
-            case infinityTilde:
-              out << "~";
-              break;
-            case infinityLong:
-              out << "Infinity";
-              break;
-            default:
-              out << "Inf";
-              break;
-        }
-      }
-      else
-      {
-        switch(printFlags)
-        {
-            case infinityTilde:
-              out << "-~";
-              break;
-            case infinityLong:
-              out << "-Infinity";
-              break;
-            default:
-              out << "-Inf";
-              break;
-        }
-      }
-    }
+    if (isPositiveInfinity())
+      return "inf";
+    else if (isNegativeInfinity())
+      return "-inf";
+    else if (isNaN())
+      return "nan";
     else
     {
-      if (flags & NaN)
+      std::string ret;
+      if (_negative)
+        ret = '-';
+      ret += _mantissa[0];
+      if (_mantissa.size() > 1)
       {
-        out << "NaN";
+        ret += '.';
+        ret.append(_mantissa, 1, _mantissa.size() - 1);
+      }
+
+      ret += 'e';
+      ret += cxxtools::convert<std::string>(_exponent - 1);
+
+      return ret;
+    }
+  }
+
+  std::string Decimal::toStringFix() const
+  {
+    if (isPositiveInfinity())
+      return "inf";
+    else if (isNegativeInfinity())
+      return "-inf";
+    else if (isNaN())
+      return "nan";
+    else
+    {
+      std::string ret;
+
+      if (_exponent < 1)
+      {
+        ret = "0.";
+        ret.append(-_exponent, '0');
+        ret.append(_mantissa);
       }
       else
       {
-        if (!(flags & positive))
-        {
-          out << "-";
-        }
+        ret = _mantissa;
+        if (_exponent < static_cast<short>(_mantissa.size()))
+          ret.insert(_exponent, 1, '.');
         else
-        {
-          if (saveFlags & std::ios_base::showpos)
-          {
-            out << "+";
-          }
-        }
-        // Count number of mantissa digits
-        ExponentType manDigits = ExponentType(numberOfDigits<MantissaType>(mantissa));
-        ExponentType exp = 0;
-        MantissaType integral = 0;
-        MantissaType fractional = 0;
-        ExponentType exponentOffset = 0;
-        ExponentType fracDigits = 0;
-        ExponentType precisionFracDigits = 0;
-        if ((savePrecision != 0) && (manDigits > savePrecision))
-        {
-          // Then the number will not fit in precision digits without printing an exponent
-          exponentOffset = 1 - manDigits;
-          if (exponentOffset < 0)
-            fracDigits = -exponentOffset;
-          precisionFracDigits = savePrecision - 1;
-        }
-        else
-        {
-          exponentOffset = exponent;
-          if (exponentOffset < 0)
-            fracDigits = -exponentOffset;
-          precisionFracDigits = fracDigits;
-        }
-        try
-        {
-          getIntegralFractionalExponent<MantissaType>(integral,
-                                                      fractional,
-                                                      exp,
-                                                      ExponentType(exponentOffset));
-          out << std::noshowpos << integral;
-          if ((fracDigits > 0) && (precisionFracDigits > 0))
-          {
-            if (fracDigits > precisionFracDigits)
-            {
-              MantissaType precisionFractional = 0;
-              MantissaType precisionFractionalRemainder = 0;
-              MantissaType precisionFractionalDivisorDigits = MantissaType(fracDigits - precisionFracDigits);
-              Decimal::divideByPowerOfTen(fractional,
-                                          precisionFractional,
-                                          precisionFractionalRemainder,
-                                          precisionFractionalDivisorDigits);
-              MantissaType oneHalf = MantissaType(Base / 2);
-              bool overflowDetected = false;
-              for (MantissaType j = 0; !overflowDetected && (j < precisionFractionalDivisorDigits - 1); ++j)
-              {
-                overflowDetected = Decimal::overflowDetectedInMultiplyByTen(oneHalf);
-              }
-              if (!overflowDetected && (oneHalf > 0) && (precisionFractionalRemainder >= oneHalf))
-                ++precisionFractional;
-              Decimal::printFraction(out, precisionFracDigits, precisionFractional);
-            }
-            else
-            {
-              Decimal::printFraction(out, fracDigits, fractional);
-            }
-          }
-          if (exp != 0)
-          {
-            out << std::setw(0) << "e" << std::left << std::showpos << std::setw(0) << exp;
-          }
-        }
-        catch(const std::overflow_error&)
-        {
-          out << std::noshowpos << mantissa;
-          if (exponent != 0)
-          {
-            out << std::setw(0) << "e" << std::left << std::showpos << std::setw(0) << exponent;
-          }
-        }
+          ret.append(_exponent - _mantissa.size(), '0');
       }
+
+      if (_negative)
+        ret.insert(0, 1, '-');
+
+      return ret;
     }
-    out.flags(saveFlags);
+  }
+
+  std::istream& operator>> (std::istream& in, Decimal& dec)
+  {
+    Decimal::Parser parser;
+    parser.begin(dec);
+
+    int ch;
+    while ((ch = in.rdbuf()->sbumpc()) != std::istream::traits_type::eof() && !std::isspace(std::istream::traits_type::to_char_type(ch)))
+    {
+      parser.parse(std::istream::traits_type::to_char_type(ch));
+    }
+
+    parser.finish();
+
+    return in;
+  }
+
+  std::ostream& operator<< (std::ostream& out, const Decimal& dec)
+  {
+    out << dec.toString();
     return out;
   }
-
-  std::ostream &operator<<(std::ostream& out, const Decimal& decimal)
-  {
-    return decimal.print(out);
-  }
-
-  void Decimal::normalize()
-  {
-    while (mantissa && mantissa % 10 == 0)
-    {
-      mantissa /= 10;
-      ++exponent;
-    }
-  }
-
-  bool Decimal::operator== (const tntdb::Decimal& other) const
-  {
-    tntdb::Decimal d0(*this);
-    tntdb::Decimal d1(other);
-    d0.normalize();
-    d1.normalize();
-    return d0.mantissa == d1.mantissa
-        && d0.exponent == d1.exponent
-        && d0.isPositive() == d1.isPositive();
-  }
-
-  bool Decimal::operator< (const tntdb::Decimal& other) const
-  {
-    tntdb::Decimal d0(*this);
-    tntdb::Decimal d1(other);
-
-    if (!d0.isPositive() && d1.isPositive())
-      return true;
-
-    if (d0.isPositive() && !d1.isPositive())
-      return false;
-
-    if( d0.exponent > d1.exponent)
-    {
-      while( d0.exponent != d1.exponent)
-      {
-        if( d0.mantissa > std::numeric_limits<MantissaType>::max()/10)
-          return !d0.isPositive();
-
-        d0.mantissa *= 10;
-        --d0.exponent;
-      }
-    }
-    else if( d0.exponent < d1.exponent)
-    {
-      while( d0.exponent != d1.exponent)
-      {
-        if( d1.mantissa > std::numeric_limits<MantissaType>::max()/10)
-          return !d1.isPositive();
-
-        d1.mantissa *= 10;
-        --d1.exponent;
-      }
-    }
-
-    if (d0.exponent < d1.exponent)
-      return d0.isPositive();
-
-    if (d0.exponent > d1.exponent)
-      return !d0.isPositive();
-
-    if (d0.mantissa < d1.mantissa)
-      return d0.isPositive();
-
-    if (d0.mantissa > d1.mantissa)
-      return !d0.isPositive();
-
-    return false;
-  }
-
-  void Decimal::init(MantissaType m, ExponentType e, FlagsType f, PrintFlagsType pf)
-  {
-    mantissa = m;
-    exponent = e;
-    flags = f;
-    defaultPrintFlags = pf;
-  }
-
-  std::istream &Decimal::read(std::istream& in, bool ignoreOverflowReadingFraction)
-  {
-    enum DecimalReadStateEnum
-    {
-      start,
-      readingMantissa,
-      readingFraction,
-      ignoringFraction,
-      readingExponent,
-      readingNaN,
-      readingInfinity,
-      finished,
-      failed
-    };
-    DecimalReadStateEnum decimalReadState = start;
-    int readIndex = 0;
-    MantissaType mantissaMultiplier = 10;
-    MantissaType man = 0;
-    MantissaType previousMan = 0;
-    typedef uint32_t UnsignedExponentType;
-    UnsignedExponentType absExp = 0;
-    UnsignedExponentType previousAbsExp = 0;
-    ExponentType exponentSign = 1;
-    ExponentType fracDigits = 0;
-    FlagsType f = positive;
-    PrintFlagsType pf = infinityShort;
-    int c = 0;
-    for (c = in.peek(); (c != std::istream::traits_type::eof()) && (decimalReadState != finished) && (decimalReadState != failed); c = in.peek())
-    {
-      bool skipRead = false;
-      switch (decimalReadState)
-      {
-          case start:
-            switch (c)
-            {
-                case '-':
-                  f &= ~positive;
-                  decimalReadState = readingMantissa;
-                  break;
-                case '+':
-                  decimalReadState = readingMantissa;
-                  break;
-                case '~':
-                {
-                  f |= infinity;
-                  pf = infinityTilde;
-                  decimalReadState = finished;
-                }
-                break;
-                case 'I':
-                case 'i':
-                  decimalReadState = readingInfinity;
-                  break;
-                case 'N':
-                  decimalReadState = readingInfinity;
-                  break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                  man = (man * mantissaMultiplier) + (c - '0');
-                  decimalReadState = readingMantissa;
-                  break;
-                case 'e':
-                case 'E':
-                  decimalReadState = readingExponent;
-                  break;
-                case '.':
-                  decimalReadState = readingFraction;
-                  break;
-                default:
-                  skipRead = true;
-                  decimalReadState = finished;
-                  break;
-            }
-            break;
-          case readingMantissa:
-            switch(c)
-            {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                  previousMan = man;
-                  if (Decimal::overflowDetectedInMultiplyByTen(man) ||
-                      ((man += (c - '0')) < previousMan))
-                  {
-                    // overflow detected
-                    decimalReadState = failed;
-                  }
-                  break;
-                case 'e':
-                case 'E':
-                  decimalReadState = readingExponent;
-                  break;
-                case '.':
-                  decimalReadState = readingFraction;
-                  break;
-                default:
-                  skipRead = true;
-                  decimalReadState = finished;
-                  break;
-            }
-            break;
-          case readingFraction:
-            switch(c)
-            {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                  previousMan = man;
-                  if (Decimal::overflowDetectedInMultiplyByTen(man) ||
-                      ((man += (c - '0')) < previousMan))
-                  {
-                    // overflow detected
-                    if (ignoreOverflowReadingFraction)
-                    {
-                      man = previousMan;
-                      decimalReadState = ignoringFraction;
-                    }
-                    else
-                    {
-                      decimalReadState = failed;
-                    }
-                  }
-                  else
-                    fracDigits += 1;
-                  break;
-                case 'e':
-                case 'E':
-                  decimalReadState = readingExponent;
-                  break;
-                default:
-                  skipRead = true;
-                  decimalReadState = finished;
-                  break;
-            }
-            break;
-          case ignoringFraction:
-            switch(c)
-            {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                  break;
-                case 'e':
-                case 'E':
-                  decimalReadState = readingExponent;
-                  break;
-                default:
-                  skipRead = true;
-                  decimalReadState = finished;
-                  break;
-            }
-            break;
-          case readingExponent:
-            switch(c)
-            {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                  previousAbsExp = absExp;
-                  if (Decimal::overflowDetectedInMultiplyByTen(absExp) ||
-                      ((absExp += (c - '0')) < previousAbsExp))
-                  {
-                    // overflow detected
-                    decimalReadState = failed;
-                  }
-                  break;
-                case '-':
-                  exponentSign = -1;
-                  break;
-                case '+':
-                  exponentSign = 1;
-                  break;
-                default:
-                  skipRead = true;
-                  decimalReadState = finished;
-                  break;
-            }
-            break;
-          case readingNaN:
-            switch(readIndex)
-            {
-                case 1:
-                  switch(c)
-                  {
-                      case 'a':
-                        break;
-                      default:
-                        decimalReadState = failed;
-                  }
-                  break;
-                case 2:
-                  switch(c)
-                  {
-                      case 'N':
-                        f = NaN;
-                        decimalReadState = finished;
-                        break;
-                      default:
-                        decimalReadState = failed;
-                  }
-                  break;
-                default:
-                  decimalReadState = failed;
-                  break;
-            }
-            break;
-          case readingInfinity:
-            switch(readIndex)
-            {
-                case 1:
-                  switch(c)
-                  {
-                      case 'n':
-                        break;
-                      default:
-                        decimalReadState = failed;
-                  }
-                  break;
-                case 2:
-                  switch(c)
-                  {
-                      case 'f':
-                        break;
-                      default:
-                        decimalReadState = failed;
-                  }
-                  break;
-                case 3:
-                  switch(c)
-                  {
-                      case 'i':
-                        break;
-                      default:
-                        // Accept Inf or -Inf, ignore anything following
-                        // other than i.  If an i follows, we keep looking
-                        // for Infinity or -Infinity
-                        skipRead = true;
-                        f |= infinity;
-                        decimalReadState = finished;
-                  }
-                  break;
-                case 4:
-                  switch(c)
-                  {
-                      case 'n':
-                        break;
-                      default:
-                        decimalReadState = failed;
-                  }
-                  break;
-                case 5:
-                  switch(c)
-                  {
-                      case 'i':
-                        break;
-                      default:
-                        decimalReadState = failed;
-                  }
-                  break;
-                case 6:
-                  switch(c)
-                  {
-                      case 't':
-                        break;
-                      default:
-                        decimalReadState = failed;
-                  }
-                  break;
-                case 7:
-                  switch(c)
-                  {
-                      case 'y':
-                        f |= infinity;
-                        decimalReadState = finished;
-                        break;
-                      default:
-                        decimalReadState = failed;
-                  }
-                  break;
-                default:
-                  decimalReadState = failed;
-                  break;
-            }
-            break;
-
-          case finished:
-          case failed:
-            break;
-
-      }
-      if (!skipRead)
-        c = in.get();
-    }
-    if ((c == std::istream::traits_type::eof()) || (decimalReadState == finished))
-    {
-      init(man, (ExponentType(absExp) * exponentSign) - fracDigits, f, pf);
-    }
-    else
-    {
-      in.setstate(std::ios_base::failbit);
-    }
-    return in;
-  }
-
-  std::istream &operator>>(std::istream& in, Decimal& decimal)
-  {
-    decimal.read(in);
-    return in;
-  }
 }
+// vim:et:sw=2

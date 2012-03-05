@@ -178,16 +178,9 @@ namespace tntdb
         {
           std::string data(static_cast<char*>(bind.buffer), *bind.length);
           log_debug("extract integer-type from decimal \"" << data << '"');
-          std::istringstream in(data);
-          Decimal decimal;
-          decimal.read(in);
-          if (in.eof() || !in.fail())
-          {
-            int_type ret = decimal.getInteger<int_type>();
-            return ret;
-          }
-          log_error("type-error in getInteger, type=" << bind.buffer_type);
-          throw TypeError("type-error in getInteger");
+          Decimal decimal(data);
+          double d = decimal.getDouble();
+          return static_cast<int_type>(d >= 0 ? (d + .5) : (d - .5));
         }
           
         case MYSQL_TYPE_VAR_STRING:
@@ -326,10 +319,7 @@ namespace tntdb
 
     void setDecimal(MYSQL_BIND& bind, unsigned long& length, const Decimal& data)
     {
-      std::ostringstream ds;
-      ds.precision(24);
-      data.print(ds, Decimal::infinityLong);
-      std::string d = ds.str();
+      std::string d = data.toString();
       reserve(bind, d.size());
       d.copy(static_cast<char*>(bind.buffer), d.size());
       bind.buffer_type = MYSQL_TYPE_NEWDECIMAL;
@@ -508,7 +498,7 @@ namespace tntdb
         case MYSQL_TYPE_LONGLONG:
         {
           int64_t i = getInteger<int64_t>(bind);
-          Decimal d(i);
+          Decimal d(i, 0);
           return d;
         }
 
@@ -526,13 +516,7 @@ namespace tntdb
         case MYSQL_TYPE_STRING:
         {
           std::string data(static_cast<char*>(bind.buffer), *bind.length);
-          log_debug("extract Decimal from string \"" << data << '"');
-          std::istringstream in(data);
-          Decimal ret;
-          in >> ret;
-          if (in.eof() || !in.fail())
-            return ret;
-
+          return Decimal(data);
           // no break!!!
         }
 
