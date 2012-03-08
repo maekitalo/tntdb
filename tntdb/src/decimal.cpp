@@ -414,15 +414,6 @@ namespace tntdb
     log_debug("setLong(" << l << ", " << exponent << ") => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);
   }
 
-  void Decimal::setUnsigned(unsigned long l, short exponent)
-  {
-    _negative = false;
-    _mantissa = cxxtools::convert<std::string>(l);
-    _exponent = exponent + _mantissa.size();
-    stripZeros(_mantissa);
-    log_debug("setUnsigned(" << l << ", " << exponent << ") => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);
-  }
-
   bool Decimal::operator< (const Decimal& other) const
   {
     if (_negative != other._negative)

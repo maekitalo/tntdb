@@ -55,34 +55,14 @@ namespace tntdb
       class Parser;
 
       Decimal();
-      explicit Decimal(float value)
-      { setDouble(value); }
-
-      explicit Decimal(double value)
-      { setDouble(value); }
 
       explicit Decimal(long double value)
       { setDouble(value); }
 
       explicit Decimal(const std::string& value);
 
-      explicit Decimal(short mantissa, short exponent = 0)
+      explicit Decimal(long mantissa, short exponent)
       { setLong(mantissa, exponent); }
-
-      explicit Decimal(int mantissa, short exponent = 0)
-      { setLong(mantissa, exponent); }
-
-      explicit Decimal(long mantissa, short exponent = 0)
-      { setLong(mantissa, exponent); }
-
-      explicit Decimal(unsigned short mantissa, short exponent = 0)
-      { setUnsigned(mantissa, exponent); }
-
-      explicit Decimal(unsigned int mantissa, short exponent = 0)
-      { setUnsigned(mantissa, exponent); }
-
-      explicit Decimal(unsigned long mantissa, short exponent = 0)
-      { setUnsigned(mantissa, exponent); }
 
       static Decimal infinity()
       { return Decimal(std::string(), std::numeric_limits<short>::max(), false); }
@@ -120,13 +100,14 @@ namespace tntdb
 
       void setLong(long l, short exponent = 0);
 
-      void setUnsigned(unsigned long l, short exponent = 0);
-
       long double toDouble() const;
 
       std::string toString() const;
       std::string toStringSci() const;
       std::string toStringFix() const;
+
+      Decimal operator- () const
+        { return Decimal(_mantissa, _exponent, !_negative); }
 
       bool operator== (const Decimal& other) const
         { return !isNaN() && _mantissa == other._mantissa && _exponent == other._exponent && _negative == other._negative; }
