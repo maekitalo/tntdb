@@ -403,7 +403,21 @@ namespace tntdb
       ret += (*it - '0') * mul;
     }
 
-    ret *= powl(10, static_cast<long double>(_exponent));
+    if (_exponent == std::numeric_limits<long double>::max_exponent10 + 1)
+    {
+      ret *= powl(10, static_cast<long double>(_exponent - 1));
+      ret *= 10;
+    }
+    else if (_exponent == std::numeric_limits<long double>::min_exponent10 - 1)
+    {
+      ret *= powl(10, static_cast<long double>(_exponent + 1));
+      ret /= 10;
+    }
+    else
+    {
+      ret *= powl(10, static_cast<long double>(_exponent));
+    }
+
     if (_negative)
       ret = -ret;
 
