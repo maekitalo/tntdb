@@ -145,7 +145,7 @@ namespace tntdb
         }
         else if (ch == '0')
         {
-          _state = state_man0;
+          _state = state_man;
         }
         else if (ch >= '1' && ch <= '9')
         {
@@ -179,19 +179,20 @@ namespace tntdb
         break;
 
       case state_man:
-        if (ch >= '0' && ch <= '9')
+        if (ch == '0' && _value->_mantissa.empty())
+        {
+        }
+        else if (ch >= '0' && ch <= '9')
         {
           _value->_mantissa += ch;
         }
         else
         {
           _eoff = _value->_mantissa.size();
-          if (_eoff == 0)
-            _value->_mantissa = '0';
 
           if (ch == '.')
           {
-            _state = state_fract;
+            _state = _value->_mantissa.empty() ? state_fract0 : state_fract;
           }
           else if (ch == 'e' || ch == 'E')
           {
@@ -210,6 +211,17 @@ namespace tntdb
           --_eoff;
           break;
         }
+        else if (ch == 'e' || ch == 'E')
+        {
+          if (_eoff == 0)
+            throwConversionError(_str);
+
+          _value->_mantissa = '0';
+          _eoff = 0;
+          _state = state_exp0;
+          break;
+        }
+
         _state = state_fract;
         // nobreak
 
@@ -299,7 +311,12 @@ namespace tntdb
       throwConversionError(_str);
 
     if (_state == state_man)
-      _eoff = _value->_mantissa.size();
+    {
+      if (_value->_mantissa.empty())
+        _value->_mantissa = '0';
+      else
+        _eoff = _value->_mantissa.size();
+    }
 
     if (_eneg)
       _value->_exponent = -_value->_exponent;

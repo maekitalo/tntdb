@@ -128,6 +128,12 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
       d = tntdb::Decimal("  0.1e1  ");
       CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
 
+      d = tntdb::Decimal("  .00000000000000000000000000000000000000E+00");
+      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 0);
+
+      d = tntdb::Decimal("0");
+      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 0);
+
     }
 
     void testToString()
