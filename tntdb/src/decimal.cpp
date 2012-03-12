@@ -154,7 +154,7 @@ namespace tntdb
         }
         else if (std::isalpha(ch))
           _state = state_special;
-        else
+        else if (!std::isspace(ch))
           throwConversionError(_str);
         break;
 
@@ -191,12 +191,14 @@ namespace tntdb
 
           if (ch == '.')
           {
-            _state = state_fract0;
+            _state = state_fract;
           }
           else if (ch == 'e' || ch == 'E')
           {
             _state = state_exp0;
           }
+          else if (std::isspace(ch))
+            _state = state_end;
           else
             throwConversionError(_str);
         }
@@ -220,6 +222,8 @@ namespace tntdb
         {
           _state = state_exp0;
         }
+        else if (std::isspace(ch))
+          _state = state_end;
         else
           throwConversionError(_str);
         break;
@@ -250,6 +254,8 @@ namespace tntdb
           _value->_exponent = _value->_exponent * 10 + (ch - '0');
           _state = state_exp;
         }
+        else if (std::isspace(ch))
+          _state = state_end;
         else
           throwConversionError(_str);
         break;
@@ -282,7 +288,8 @@ namespace tntdb
         break;
 
       case state_end:
-        throwConversionError(_str);
+        if (!std::isspace(ch))
+          throwConversionError(_str);
     }
   }
 

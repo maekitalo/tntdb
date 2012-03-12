@@ -113,6 +113,21 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
       d = tntdb::Decimal("nan");
       CXXTOOLS_UNIT_ASSERT(d.getDouble() != d.getDouble());
 
+      d = tntdb::Decimal("  1.00000000000000000000000000000000000000E+00  ");
+      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+
+      d = tntdb::Decimal("  1  ");
+      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+
+      d = tntdb::Decimal("  1.0  ");
+      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+
+      d = tntdb::Decimal("  1e0  ");
+      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+
+      d = tntdb::Decimal("  0.1e1  ");
+      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+
     }
 
     void testToString()
