@@ -33,6 +33,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <iomanip>
 #include <cxxtools/log.h>
 
 log_define("tntdb.oracle.value")
@@ -85,7 +86,7 @@ namespace tntdb
         ret << v;
         return ret.str();
       }
-      
+
       template <>
       std::string toString(double v)
       {
@@ -94,7 +95,7 @@ namespace tntdb
         ret << v;
         return ret.str();
       }
-      
+
       template <>
       std::string toString(Decimal v)
       {
@@ -103,6 +104,19 @@ namespace tntdb
         ret << v;
         return ret.str();
       }
+
+      template <typename IntType>
+      IntType round(double d)
+      {
+        if (d > std::numeric_limits<IntType>::max() + .5 || d < std::numeric_limits<IntType>::min() - .5)
+        {
+          log_warn("overflow when trying to read integer from float " << d);
+          throw std::overflow_error("overflow when trying to read integer from float");
+        }
+
+        return static_cast<IntType>(d >= 0 ? d + .5 : d - .5);
+      }
+
     }
 
     Value::Value(Statement* stmt, ub4 pos)
@@ -129,6 +143,8 @@ namespace tntdb
     void Value::init(Statement* stmt, OCIParam* paramp, ub4 pos)
     {
       sword ret;
+
+      errhp = stmt->getErrorHandle();
 
       /* retrieve column name */
       ub4 col_name_len = 0;
@@ -247,8 +263,8 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return !number.getDecimal().isZero();
-          
+          return !number.getDecimal(errhp).isZero();
+
         default:
           return data[0] == 't' || data[0] == 'T'
               || data[0] == 'y' || data[0] == 'Y'
@@ -275,12 +291,12 @@ namespace tntdb
           return static_cast<short>(longValue);
 
         case SQLT_FLT:
-          return static_cast<short>(doubleValue);
+          return round<short>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getShort();
-          
+          return number.getDecimal(errhp).getInteger<short>();
+
         default:
           return getValue<short>(std::string(&data[0], len), "int");
       }
@@ -304,12 +320,12 @@ namespace tntdb
           return static_cast<int>(longValue);
 
         case SQLT_FLT:
-          return static_cast<int>(doubleValue);
+          return round<int>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getInt();
-          
+          return number.getDecimal(errhp).getInteger<int>();
+
         default:
           return getValue<int>(std::string(&data[0], len), "int");
       }
@@ -333,12 +349,12 @@ namespace tntdb
           return static_cast<long>(longValue);
 
         case SQLT_FLT:
-          return static_cast<long>(doubleValue);
+          return round<long>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getLong();
-          
+          return number.getDecimal(errhp).getInteger<long>();
+
         default:
           return getValue<long>(std::string(&data[0], len), "long");
       }
@@ -367,12 +383,12 @@ namespace tntdb
           return static_cast<unsigned short>(longValue);
 
         case SQLT_FLT:
-          return static_cast<unsigned short>(doubleValue);
+          return round<unsigned short>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getUnsignedShort();
-          
+          return number.getDecimal(errhp).getUnsigned<unsigned short>();
+
         default:
           return getValue<unsigned>(std::string(&data[0], len), "unsigned");
       }
@@ -396,12 +412,12 @@ namespace tntdb
           return static_cast<unsigned>(longValue);
 
         case SQLT_FLT:
-          return static_cast<unsigned>(doubleValue);
+          return round<unsigned>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getUnsigned();
-          
+          return number.getDecimal(errhp).getUnsigned<unsigned>();
+
         default:
           return getValue<unsigned>(std::string(&data[0], len), "unsigned");
       }
@@ -425,12 +441,12 @@ namespace tntdb
           return static_cast<unsigned long>(longValue);
 
         case SQLT_FLT:
-          return static_cast<unsigned long>(doubleValue);
+          return round<unsigned long>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getUnsignedLong();
-          
+          return number.getDecimal(errhp).getUnsigned<unsigned long>();
+
         default:
           return getValue<unsigned long>(std::string(&data[0], len), "unsigned long");
       }
@@ -459,12 +475,12 @@ namespace tntdb
           return static_cast<int64_t>(longValue);
 
         case SQLT_FLT:
-          return static_cast<int64_t>(doubleValue);
+          return round<int64_t>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getInt64();
-          
+          return number.getDecimal(errhp).getInteger<int64_t>();
+
         default:
           return getValue<int64_t>(std::string(&data[0], len), "int64_t");
       }
@@ -488,12 +504,12 @@ namespace tntdb
           return static_cast<uint64_t>(longValue);
 
         case SQLT_FLT:
-          return static_cast<uint64_t>(doubleValue);
+          return round<uint64_t>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getUnsigned64();
-          
+          return number.getDecimal(errhp).getUnsigned<uint64_t>();
+
         default:
           return getValue<uint64_t>(std::string(&data[0], len), "uint64_t");
       }
@@ -514,28 +530,20 @@ namespace tntdb
 
         case SQLT_INT:
         case SQLT_UIN:
-        {
-          Decimal decimal;
-          decimal.setInt(longValue);
-          return decimal;
-        }
+          return Decimal(longValue, 0);
 
         case SQLT_FLT:
-        {
-          Decimal decimal;
-          decimal.setDouble(doubleValue);
-          return decimal;
-        }
+          return Decimal(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal();
-          
+          return number.getDecimal(errhp);
+
         default:
-          return getValue<Decimal>(std::string(&data[0], len), "Decimal");
+          return Decimal(std::string(&data[0], len));
       }
     }
-    
+
     float Value::getFloat() const
     {
       if (isNull())
@@ -554,11 +562,11 @@ namespace tntdb
           return static_cast<float>(longValue);
 
         case SQLT_FLT:
-          return static_cast<float>(doubleValue);
+          return round<float>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getFloat();
+          return number.getDecimal(errhp).toDouble();
 
         default:
           return getValueFloat<float>(data.begin(), data.begin() + len, "float");
@@ -587,8 +595,8 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal().getDouble();
-          
+          return number.getDecimal(errhp).getDouble();
+
         default:
           return getValueFloat<double>(data.begin(), data.begin() + len, "double");
       }
@@ -605,19 +613,13 @@ namespace tntdb
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
-
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<char>(longValue);
-
         case SQLT_FLT:
-          return static_cast<char>(doubleValue);
-
         case SQLT_NUM:
         case SQLT_VNU:
-          return static_cast<char>(number.getDecimal().getInt());
-          
+          throw TypeError();
+
         default:
           return data[0];
       }
@@ -651,7 +653,7 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          ret = number.getDecimal().toString();
+          ret = number.getDecimal(errhp).toString();
           break;
 
         default:

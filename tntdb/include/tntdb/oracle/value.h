@@ -46,6 +46,7 @@ namespace tntdb
     {
         OCIDefine* defp;
         OCIParam* paramp;
+        OCIError* errhp;
         ub2 len;
         ub2 type;
         ub2 nullind;

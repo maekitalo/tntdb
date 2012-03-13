@@ -42,11 +42,13 @@ namespace tntdb
   {
     void throwConversionError(const std::string& s)
     {
+      log_warn("failed to convert \"" << s << "\" to decimal");
       throw std::runtime_error("failed to convert \"" + s + "\" to decimal");
     }
 
     void throwOverflowError(const Decimal& d)
     {
+      log_warn("overflow when trying to read integer from decimal " << d.toString());
       throw std::overflow_error("overflow when trying to read integer from decimal " + d.toString());
     }
 
@@ -340,6 +342,8 @@ namespace tntdb
 
   Decimal::LongType Decimal::_getInteger(LongType min, LongType max) const
   {
+    log_debug("getInteger; min=" << min << " max=" << max << " value=" << toDouble());
+
     if (!negative())
       return static_cast<LongType>(_getUnsigned(static_cast<UnsignedLongType>(max)));
 
@@ -358,7 +362,7 @@ namespace tntdb
     {
       LongType d = n < _mantissa.size() ? (_mantissa[n] - '0') : 0;
 
-      if (ret < (min - d) / 10)
+      if (ret < (min + d) / 10)
         throwOverflowError(*this);
 
       ret = ret * 10 - d;
@@ -376,6 +380,8 @@ namespace tntdb
 
   Decimal::UnsignedLongType Decimal::_getUnsigned(UnsignedLongType max) const
   {
+    log_debug("getUnsigned; max=" << max << " value=" << toDouble());
+
     if (negative() || isPositiveInfinity() || isNegativeInfinity() || isNaN())
       throwOverflowError(*this);
 
@@ -502,11 +508,15 @@ namespace tntdb
     {
       ret *= powl(10, static_cast<long double>(_exponent - 1));
       ret *= 10;
+      if (ret == std::numeric_limits<long double>::infinity())
+        ret = std::numeric_limits<long double>::max();
     }
     else if (_exponent == std::numeric_limits<long double>::min_exponent10 - 1)
     {
       ret *= powl(10, static_cast<long double>(_exponent + 1));
       ret /= 10;
+      if (ret == -std::numeric_limits<long double>::infinity())
+        ret = std::numeric_limits<long double>::min();
     }
     else
     {
