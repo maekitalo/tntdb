@@ -32,11 +32,25 @@
 #include <string>
 #include <limits>
 #include <iosfwd>
+#include <tntdb/config.h>
 
 namespace tntdb
 {
   class Decimal
   {
+    public:
+#ifdef HAVE_LONG_LONG
+      typedef long long LongType;
+#else
+      typedef long LongType;
+#endif
+#ifdef HAVE_UNSIGNED_LONG_LONG
+      typedef unsigned long long UnsignedLongType;
+#else
+      typedef unsigned long UnsignedLongType;
+#endif
+    private:
+
       // inf: _mantissa is empty, _exponent = numeric_limits<short>::max()
       // nan: _mantissa is empty, _exponent==0
       std::string _mantissa;  // just '0'-'9'
@@ -51,7 +65,12 @@ namespace tntdb
 
       friend class Parser;
 
+      LongType _getInteger(LongType min, LongType max) const;
+
+      UnsignedLongType _getUnsigned(UnsignedLongType max) const;
+
     public:
+
       class Parser;
 
       Decimal();
@@ -101,6 +120,19 @@ namespace tntdb
       void setLong(long l, short exponent = 0);
 
       long double toDouble() const;
+
+      template <typename IntType>
+      IntType getInteger() const
+      {
+        return _getInteger(static_cast<LongType>(std::numeric_limits<IntType>::min()),
+                           static_cast<LongType>(std::numeric_limits<IntType>::max()));
+      }
+
+      template <typename UnsignedType>
+      UnsignedType getUnsigned() const
+      {
+        return _getUnsigned(static_cast<UnsignedLongType>(std::numeric_limits<UnsignedType>::max()));
+      }
 
       std::string toString() const;
       std::string toStringSci() const;

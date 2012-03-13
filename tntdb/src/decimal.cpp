@@ -45,6 +45,11 @@ namespace tntdb
       throw std::runtime_error("failed to convert \"" + s + "\" to decimal");
     }
 
+    void throwOverflowError(const Decimal& d)
+    {
+      throw std::overflow_error("overflow when trying to read integer from decimal " + d.toString());
+    }
+
     int stringCompareIgnoreCase(const char* const& s1, const char* const& s2)
     {
       const char* it1 = s1;
@@ -333,6 +338,75 @@ namespace tntdb
   {
   }
 
+  Decimal::LongType Decimal::_getInteger(LongType min, LongType max) const
+  {
+    if (!negative())
+      return static_cast<LongType>(_getUnsigned(static_cast<UnsignedLongType>(max)));
+
+    if (isPositiveInfinity() || isNegativeInfinity() || isNaN())
+      throwOverflowError(*this);
+
+    if (_exponent < 0)
+      return 0;
+
+    if (_exponent == 0)
+      return !_mantissa.empty() && _mantissa[0] >= '5' ? -1 : 0;
+
+    LongType ret = 0;
+    std::string::size_type n;
+    for (n = 0; _exponent - n > 0; ++n)
+    {
+      LongType d = n < _mantissa.size() ? (_mantissa[n] - '0') : 0;
+
+      if (ret < (min - d) / 10)
+        throwOverflowError(*this);
+
+      ret = ret * 10 - d;
+    }
+
+    if (n < _mantissa.size() && _mantissa[n] >= '5')
+    {
+      if (ret == min)
+        throwOverflowError(*this);
+      --ret;
+    }
+
+    return ret;
+  }
+
+  Decimal::UnsignedLongType Decimal::_getUnsigned(UnsignedLongType max) const
+  {
+    if (negative() || isPositiveInfinity() || isNegativeInfinity() || isNaN())
+      throwOverflowError(*this);
+
+    if (_exponent < 0)
+      return 0;
+
+    if (_exponent == 0)
+      return !_mantissa.empty() && _mantissa[0] >= '5' ? 1 : 0;
+
+    UnsignedLongType ret = 0;
+    std::string::size_type n;
+    for (n = 0; _exponent - n > 0; ++n)
+    {
+      UnsignedLongType d = n < _mantissa.size() ? (_mantissa[n] - '0') : 0;
+
+      if (ret > (max - d) / 10)
+        throwOverflowError(*this);
+
+      ret = ret * 10 + d;
+    }
+
+    if (n < _mantissa.size() && _mantissa[n] >= '5')
+    {
+      if (ret == max)
+        throwOverflowError(*this);
+      ++ret;
+    }
+
+    return ret;
+  }
+
   void Decimal::setDouble(long double value)
   {
     if (value == std::numeric_limits<long double>::infinity())
@@ -378,6 +452,10 @@ namespace tntdb
         v = v * 10 - d;
         _mantissa += static_cast<char>(d + '0');
       }
+
+      unsigned short d = static_cast<unsigned short>(v * 10);
+      if (d >= 5)
+        ++_mantissa[_mantissa.size()-1];
 
       stripZeros(_mantissa);
     }
@@ -445,8 +523,16 @@ namespace tntdb
 
   void Decimal::setLong(long l, short exponent)
   {
-    _negative = l < 0;
-    _mantissa = cxxtools::convert<std::string>(_negative ? -l : l);
+    _mantissa = cxxtools::convert<std::string>(l);
+
+    if (_mantissa[0] == '-')
+    {
+      _mantissa.erase(0, 1);
+      _negative = true;
+    }
+    else
+      _negative = false;
+
     _exponent = exponent + _mantissa.size();
     stripZeros(_mantissa);
     log_debug("setLong(" << l << ", " << exponent << ") => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);

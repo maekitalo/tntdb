@@ -66,7 +66,7 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
       CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), -3.14));
 
       d = tntdb::Decimal(5e97);
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), 5e97));
+      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 5e97);
 
       d = tntdb::Decimal(-123e-154);
       CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), -123e-154));
@@ -186,20 +186,20 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
       tntdb::Decimal d;
       long l;
 
-      d = tntdb::Decimal(100);
-      l = static_cast<long>(roundl(d.getDouble()));
+      d = tntdb::Decimal(100, 0);
+      l = d.getInteger<long>();
       CXXTOOLS_UNIT_ASSERT_EQUALS(l, 100l);
 
-      d = tntdb::Decimal(std::numeric_limits<long>::max());
-      l = static_cast<long>(roundl(d.getDouble()));
+      d = tntdb::Decimal(std::numeric_limits<long>::max(), 0);
+      l = d.getInteger<long>();
       CXXTOOLS_UNIT_ASSERT_EQUALS(l, std::numeric_limits<long>::max());
 
-      d = tntdb::Decimal(std::numeric_limits<long>::min());
-      l = static_cast<long>(roundl(d.getDouble()));
+      d = tntdb::Decimal(std::numeric_limits<long>::min(), 0);
+      l = d.getInteger<long>();
       CXXTOOLS_UNIT_ASSERT_EQUALS(l, std::numeric_limits<long>::min());
 
-      d = tntdb::Decimal(-100);
-      l = static_cast<long>(roundl(d.getDouble()));
+      d = tntdb::Decimal(-100, 0);
+      l = d.getInteger<long>();
       CXXTOOLS_UNIT_ASSERT_EQUALS(l, -100l);
 
     }
