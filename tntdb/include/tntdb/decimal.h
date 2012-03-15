@@ -66,8 +66,30 @@ namespace tntdb
       friend class Parser;
 
       LongType _getInteger(LongType min, LongType max) const;
-
       UnsignedLongType _getUnsigned(UnsignedLongType max) const;
+
+      template <typename IntType> IntType _getInteger() const
+      { return _getInteger(std::numeric_limits<IntType>::min(),
+                           std::numeric_limits<IntType>::max()); }
+
+      template <typename UnsignedType> UnsignedType _getUnsigned() const
+      { return _getUnsigned(std::numeric_limits<UnsignedLongType>::max()); }
+
+      void _getInteger(short& ret) const                         { ret = _getInteger<short>(); }
+      void _getInteger(int& ret) const                           { ret = _getInteger<int>(); }
+      void _getInteger(long& ret) const                          { ret = _getInteger<long>(); }
+#ifdef HAVE_LONG_LONG
+      void _getInteger(long long& ret) const                     { ret = _getInteger<long long>(); }
+#endif
+      void _getInteger(unsigned short& ret) const                { ret = _getUnsigned<unsigned short>(); }
+      void _getInteger(unsigned int& ret) const                  { ret = _getUnsigned<unsigned int>(); }
+      void _getInteger(unsigned long& ret) const                 { ret = _getUnsigned<unsigned long>(); }
+#ifdef HAVE_UNSIGNED_LONG_LONG
+      void _getInteger(unsigned long long& ret) const            { ret = _getUnsigned<unsigned long long>(); }
+#endif
+
+      void _setInteger(LongType l, short exponent);
+      void _setUnsigned(UnsignedLongType l, short exponent);
 
     public:
 
@@ -81,7 +103,7 @@ namespace tntdb
       explicit Decimal(const std::string& value);
 
       explicit Decimal(long mantissa, short exponent)
-      { setLong(mantissa, exponent); }
+      { setInteger(mantissa, exponent); }
 
       static Decimal infinity()
       { return Decimal(std::string(), std::numeric_limits<short>::max(), false); }
@@ -117,21 +139,21 @@ namespace tntdb
 
       long double getDouble() const;
 
-      void setLong(long l, short exponent = 0);
-
-      long double toDouble() const;
+      void setInteger(short l, short exponent = 0)               { _setInteger(l, exponent); }
+      void setInteger(int l, short exponent = 0)                 { _setInteger(l, exponent); }
+      void setInteger(long l, short exponent = 0)                { _setInteger(l, exponent); }
+      void setInteger(long long l, short exponent = 0)           { _setInteger(l, exponent); }
+      void setInteger(unsigned short l, short exponent = 0)      { _setUnsigned(l, exponent); }
+      void setInteger(unsigned int l, short exponent = 0)        { _setUnsigned(l, exponent); }
+      void setInteger(unsigned long l, short exponent = 0)       { _setUnsigned(l, exponent); }
+      void setInteger(unsigned long long l, short exponent = 0)  { _setUnsigned(l, exponent); }
 
       template <typename IntType>
       IntType getInteger() const
       {
-        return _getInteger(static_cast<LongType>(std::numeric_limits<IntType>::min()),
-                           static_cast<LongType>(std::numeric_limits<IntType>::max()));
-      }
-
-      template <typename UnsignedType>
-      UnsignedType getUnsigned() const
-      {
-        return _getUnsigned(static_cast<UnsignedLongType>(std::numeric_limits<UnsignedType>::max()));
+        IntType ret;
+        _getInteger(ret);
+        return ret;
       }
 
       std::string toString() const;

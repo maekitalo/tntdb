@@ -342,7 +342,7 @@ namespace tntdb
 
   Decimal::LongType Decimal::_getInteger(LongType min, LongType max) const
   {
-    log_debug("getInteger; min=" << min << " max=" << max << " value=" << toDouble());
+    log_debug("getInteger; min=" << min << " max=" << max << " value=" << getDouble());
 
     if (!negative())
       return static_cast<LongType>(_getUnsigned(static_cast<UnsignedLongType>(max)));
@@ -380,7 +380,7 @@ namespace tntdb
 
   Decimal::UnsignedLongType Decimal::_getUnsigned(UnsignedLongType max) const
   {
-    log_debug("getUnsigned; max=" << max << " value=" << toDouble());
+    log_debug("getUnsigned; max=" << max << " value=" << getDouble());
 
     if (negative() || isPositiveInfinity() || isNegativeInfinity() || isNaN())
       throwOverflowError(*this);
@@ -531,7 +531,7 @@ namespace tntdb
     return ret;
   }
 
-  void Decimal::setLong(long l, short exponent)
+  void Decimal::_setInteger(LongType l, short exponent)
   {
     _mantissa = cxxtools::convert<std::string>(l);
 
@@ -545,7 +545,16 @@ namespace tntdb
 
     _exponent = exponent + _mantissa.size();
     stripZeros(_mantissa);
-    log_debug("setLong(" << l << ", " << exponent << ") => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);
+    log_debug("setInteger(" << l << ", " << exponent << ") => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);
+  }
+
+  void Decimal::_setUnsigned(UnsignedLongType l, short exponent)
+  {
+    _mantissa = cxxtools::convert<std::string>(l);
+    _negative = false;
+    _exponent = exponent + _mantissa.size();
+    stripZeros(_mantissa);
+    log_debug("setUnsigned(" << l << ", " << exponent << ") => mantissa=" << _mantissa << " exponent=" << _exponent);
   }
 
   bool Decimal::operator< (const Decimal& other) const
@@ -557,28 +566,6 @@ namespace tntdb
       return _exponent < other._exponent;
 
     return _mantissa < other._mantissa;
-  }
-
-  long double Decimal::toDouble() const
-  {
-    if (isPositiveInfinity())
-      return std::numeric_limits<long double>::infinity();
-    else if (isNegativeInfinity())
-      return -std::numeric_limits<long double>::infinity();
-    else if (isNaN())
-      return -std::numeric_limits<long double>::quiet_NaN();
-    else
-    {
-      long double ret = 0;
-      long double f = 0.1;
-      for (std::string::const_iterator it = _mantissa.begin(); it != _mantissa.end(); ++it)
-      {
-        ret += (*it - '0') * f;
-        f /= 10;
-      }
-      ret *= powl(10, _exponent);
-      return _negative ? -ret : ret;
-    }
   }
 
   std::string Decimal::toString() const

@@ -387,7 +387,7 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getUnsigned<unsigned short>();
+          return number.getDecimal(errhp).getInteger<unsigned short>();
 
         default:
           return getValue<unsigned>(std::string(&data[0], len), "unsigned");
@@ -416,7 +416,7 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getUnsigned<unsigned>();
+          return number.getDecimal(errhp).getInteger<unsigned>();
 
         default:
           return getValue<unsigned>(std::string(&data[0], len), "unsigned");
@@ -445,7 +445,7 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getUnsigned<unsigned long>();
+          return number.getDecimal(errhp).getInteger<unsigned long>();
 
         default:
           return getValue<unsigned long>(std::string(&data[0], len), "unsigned long");
@@ -508,7 +508,7 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getUnsigned<uint64_t>();
+          return number.getDecimal(errhp).getInteger<uint64_t>();
 
         default:
           return getValue<uint64_t>(std::string(&data[0], len), "uint64_t");

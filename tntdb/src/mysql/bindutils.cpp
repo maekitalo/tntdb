@@ -179,8 +179,7 @@ namespace tntdb
           std::string data(static_cast<char*>(bind.buffer), *bind.length);
           log_debug("extract integer-type from decimal \"" << data << '"');
           Decimal decimal(data);
-          double d = decimal.getDouble();
-          return static_cast<int_type>(d >= 0 ? (d + .5) : (d - .5));
+          return decimal.getInteger<int_type>();
         }
           
         case MYSQL_TYPE_VAR_STRING:
@@ -431,7 +430,7 @@ namespace tntdb
 
     bool getBool(const MYSQL_BIND& bind)
     {
-      return getInteger<bool>(bind);
+      return getInteger<long>(bind) != 0;
     }
 
     short getShort(const MYSQL_BIND& bind)
