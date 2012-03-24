@@ -32,6 +32,7 @@
 #include <tntdb/iface/istatement.h>
 #include <tntdb/iface/irow.h>
 #include <tntdb/mysql/bindvalues.h>
+#include <tntdb/mysql/impl/boundrow.h>
 #include <tntdb/connection.h>
 #include <map>
 
@@ -49,9 +50,12 @@ namespace tntdb
         hostvarMapType hostvarMap;
         MYSQL* mysql;
         MYSQL_STMT* stmt;
-        MYSQL_RES* metadata;
+        MYSQL_FIELD* fields;
+        unsigned field_count;
+        cxxtools::SmartPtr<BoundRow> rowPtr;
 
-        cxxtools::SmartPtr<IRow> fetchRow(MYSQL_FIELD* fields, unsigned field_count);
+        cxxtools::SmartPtr<BoundRow> getRow();
+        cxxtools::SmartPtr<IRow> fetchRow();
 
       public:
         Statement(const tntdb::Connection& conn, MYSQL* mysql,
@@ -102,8 +106,6 @@ namespace tntdb
         /// If there is already a statement, the offered statement is closed.
         void putback(MYSQL_STMT* stmt);
 
-        MYSQL_RES* getMetadata();
-        void freeMetadata();
         MYSQL_FIELD* getFields();
         unsigned getFieldCount();
     };

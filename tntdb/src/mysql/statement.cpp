@@ -76,9 +76,14 @@ namespace tntdb
       const std::string SE::hostvarInd = "?";
     }
 
-    cxxtools::SmartPtr<IRow> Statement::fetchRow(MYSQL_FIELD* fields, unsigned field_count)
+    cxxtools::SmartPtr<BoundRow> Statement::getRow()
     {
-      cxxtools::SmartPtr<BoundRow> ptr = new BoundRow(field_count);
+      if (rowPtr && rowPtr->refs() == 1)
+        return rowPtr;
+
+      getFields();
+
+      rowPtr = new BoundRow(field_count);
 
       for (unsigned n = 0; n < field_count; ++n)
       {
@@ -86,8 +91,15 @@ namespace tntdb
           // do not allocate buffers > 64k - use mysql_stmt_fetch_column instead later
           fields[n].length = 0x10000;
 
-        ptr->initOutBuffer(n, fields[n]);
+        rowPtr->initOutBuffer(n, fields[n]);
       }
+
+      return rowPtr;
+    }
+
+    cxxtools::SmartPtr<IRow> Statement::fetchRow()
+    {
+      cxxtools::SmartPtr<BoundRow> ptr = getRow();
 
       log_debug("mysql_stmt_bind_result(" << stmt << ", " << ptr->getMysqlBind() << ')');
       if (mysql_stmt_bind_result(stmt, ptr->getMysqlBind()) != 0)
@@ -127,7 +139,8 @@ namespace tntdb
       : conn(conn_),
         mysql(mysql_),
         stmt(0),
-        metadata(0)
+        fields(0),
+        field_count(0)
     {
       // parse hostvars
       StmtParser parser;
@@ -142,8 +155,6 @@ namespace tntdb
 
     Statement::~Statement()
     {
-      freeMetadata();
-
       if (stmt)
       {
         log_debug("mysql_stmt_close(" << stmt << ')');
@@ -521,21 +532,20 @@ namespace tntdb
       if (hostvarMap.empty())
         return conn.select(query);
 
+      if (fields)
+        getRow();
+
       stmt = getStmt();
       execute(stmt, 16);
 
       if (mysql_stmt_store_result(stmt) != 0)
         throw MysqlStmtError("mysql_stmt_store_result", stmt);
 
-      MYSQL_FIELD* fields = getFields();
-      unsigned field_count = getFieldCount();
-      freeMetadata();
-
       RowContainer* result = new RowContainer();
       cxxtools::SmartPtr<RowContainer> sresult = result;
 
       cxxtools::SmartPtr<IRow> ptr;
-      while ((ptr = fetchRow(fields, field_count)).getPointer() != 0)
+      while ((ptr = fetchRow()).getPointer() != 0)
         result->addRow(ptr);
 
       return Result(result);
@@ -548,17 +558,16 @@ namespace tntdb
       if (hostvarMap.empty())
         return conn.selectRow(query);
 
+      if (fields)
+        getRow();
+
       stmt = getStmt();
       execute(stmt, 1);
 
       if (mysql_stmt_store_result(stmt) != 0)
         throw MysqlStmtError("mysql_stmt_store_result", stmt);
 
-      MYSQL_FIELD* fields = getFields();
-      unsigned field_count = getFieldCount();
-      freeMetadata();
-
-      cxxtools::SmartPtr<IRow> ptr = fetchRow(fields, field_count);
+      cxxtools::SmartPtr<IRow> ptr = fetchRow();
 
       if (!ptr)
         throw NotFound();
@@ -676,46 +685,36 @@ namespace tntdb
       }
     }
 
-    MYSQL_RES* Statement::getMetadata()
+    MYSQL_FIELD* Statement::getFields()
     {
-      if (!metadata)
+      if (fields == 0)
       {
         stmt = getStmt();
 
         log_debug("mysql_stmt_result_metadata(" << stmt << ')');
-        metadata = mysql_stmt_result_metadata(stmt);
+        MYSQL_RES* metadata = mysql_stmt_result_metadata(stmt);
         if (!metadata)
           throw Error("no metadata avaliable");
         log_debug("mysql_stmt_result_metadata(" << stmt << ") => " << metadata);
-      }
 
-      return metadata;
-    }
+        log_debug("mysql_fetch_fields(" << metadata << ')');
+        fields = mysql_fetch_fields(metadata);
 
-    void Statement::freeMetadata()
-    {
-      if (metadata)
-      {
+        log_debug("mysql_num_fields(" << metadata << ')');
+        field_count = mysql_num_fields(metadata);
+
         log_debug("mysql_free_result(" << metadata << ") (metadata)");
         ::mysql_free_result(metadata);
-        metadata = 0;
       }
-    }
 
-    MYSQL_FIELD* Statement::getFields()
-    {
-      MYSQL_RES* mt = getMetadata();
-      log_debug("mysql_fetch_fields(" << mt << ')');
-      MYSQL_FIELD* fields = mysql_fetch_fields(mt);
       return fields;
     }
 
     unsigned Statement::getFieldCount()
     {
-      MYSQL_RES* mt = getMetadata();
-      log_debug("mysql_num_fields(" << mt << ')');
-      unsigned field_count = mysql_num_fields(mt);
+      getFields();
       return field_count;
     }
+
   }
 }

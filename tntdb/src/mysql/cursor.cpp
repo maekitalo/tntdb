@@ -47,7 +47,6 @@ namespace tntdb
     {
       MYSQL_FIELD* fields = statement->getFields();
       unsigned field_count = row->getSize();
-      statement->freeMetadata();
 
       for (unsigned n = 0; n < field_count; ++n)
       {
