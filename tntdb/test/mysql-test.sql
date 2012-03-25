@@ -18,7 +18,7 @@ create table tntdbtest
   charcol char,
   stringcol varchar(255),
   blobcol blob,
-  datecol date,
+  datecol date null,
   timecol time,
-  datetimecol timestamp
+  datetimecol timestamp null
 );

@@ -97,7 +97,7 @@ namespace tntdb
         void setDouble(unsigned n, double data)
           { mysql::setDouble(values[n], data); }
         void setChar(unsigned n, char data)
-          { mysql::setChar(values[n], data); }
+          { mysql::setChar(values[n], bindAttributes[n].length, data); }
         void setString(unsigned n, const char* data)
           { mysql::setString(values[n], bindAttributes[n].length, data); }
         void setString(unsigned n, const std::string& data)
@@ -144,6 +144,7 @@ namespace tntdb
           { return bindAttributes[n].name; }
 
         void initOutBuffer(unsigned n, MYSQL_FIELD& f);
+        void clear();
     };
   }
 }

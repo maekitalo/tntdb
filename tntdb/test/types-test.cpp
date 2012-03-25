@@ -40,6 +40,7 @@ log_define("tntdb.unit.types")
 
 #define BEGIN_TEST(T, col)                           \
       const std::string colName = col;               \
+      bool isNotNull = false;                        \
       tntdb::Statement ins = conn.prepare(           \
         "insert into tntdbtest(" col  ") values(:" col ")"); \
       tntdb::Statement sel = conn.prepare(           \
@@ -51,29 +52,38 @@ log_define("tntdb.unit.types")
       del.execute();                                 \
       ins.set(colName, val).execute();               \
       dbvalue = sel.selectValue();                   \
-      dbvalue.get(res);                              \
+      isNotNull = dbvalue.get(res);                  \
+      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);
 
 #define TESTEQ(val)                                  \
       del.execute();                                 \
       ins.set(colName, val).execute();               \
       dbvalue = sel.selectValue();                   \
-      dbvalue.get(res);                              \
+      isNotNull = dbvalue.get(res);                  \
+      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT(val == res);
 
 #define TESTFLOAT(val)                               \
       del.execute();                                 \
       ins.set(colName, val).execute();               \
       dbvalue = sel.selectValue();                   \
-      dbvalue.get(res);                              \
+      isNotNull = dbvalue.get(res);                  \
+      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT(val / res >= .9999 && val / res <= 1.0001);
 
 #define TESTDT(val)                                  \
       del.execute();                                 \
       ins.set(colName, val).execute();               \
       dbvalue = sel.selectValue();                   \
-      dbvalue.get(res);                              \
-      CXXTOOLS_UNIT_ASSERT_EQUALS(val.getIso(), res.getIso());
+      isNotNull = dbvalue.get(res);                  \
+      if (isNotNull)                                 \
+      {                                              \
+        CXXTOOLS_UNIT_ASSERT(!res.isNull());         \
+        CXXTOOLS_UNIT_ASSERT_EQUALS(val.getIso(), res.getIso()); \
+      }                                              \
+      else                                           \
+        CXXTOOLS_UNIT_ASSERT(val.isNull());          \
 
 class TntdbTypesTest : public cxxtools::unit::TestSuite
 {
@@ -288,22 +298,22 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
     void testDate()
     {
       BEGIN_TEST(tntdb::Date, "datecol");
-      TESTDT(tntdb::Date());
       TESTDT(tntdb::Date(2010, 2, 15));
+      TESTDT(tntdb::Date());
     }
 
     void testTime()
     {
       BEGIN_TEST(tntdb::Time, "timecol");
-      TESTDT(tntdb::Time());
       TESTDT(tntdb::Time(20, 9, 31, 12));
+      TESTDT(tntdb::Time());
     }
 
     void testDatetime()
     {
       BEGIN_TEST(tntdb::Datetime, "datetimecol");
-      TESTDT(tntdb::Datetime());
       TESTDT(tntdb::Datetime(2010, 2, 15, 20, 9, 31, 12));
+      TESTDT(tntdb::Datetime());
     }
 
     void testSequence()
@@ -443,7 +453,7 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       del.execute();                                 \
       ins.set("floatcol", n).execute();
       dbvalue = sel.selectValue();
-      dbvalue.get(res);
+      isNotNull = dbvalue.get(res);
       CXXTOOLS_UNIT_ASSERT(res != res);
     }
 
@@ -454,7 +464,7 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
       del.execute();                                 \
       ins.set("doublecol", n).execute();
       dbvalue = sel.selectValue();
-      dbvalue.get(res);
+      isNotNull = dbvalue.get(res);
       CXXTOOLS_UNIT_ASSERT(res != res);
     }
 

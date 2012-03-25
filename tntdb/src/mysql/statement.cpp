@@ -79,7 +79,10 @@ namespace tntdb
     cxxtools::SmartPtr<BoundRow> Statement::getRow()
     {
       if (rowPtr && rowPtr->refs() == 1)
+      {
+        rowPtr->clear();
         return rowPtr;
+      }
 
       getFields();
 

@@ -106,14 +106,33 @@ namespace tntdb
 
   Time Time::fromIso(const std::string& s)
   {
-    if (s.size() < 11
-      || s.at(2) != ':'
-      || s.at(5) != ':'
-      || s.at(8) != '.')
-      throw TypeError();
+    Time ret;
     const char* d = s.data();
-    return Time(getNumber2(d), getNumber2(d + 3), getNumber2(d + 6),
+    try
+    {
+      if (s.size() == 12
+        && d[2] == ':'
+        && d[5] == ':'
+        && d[8] == '.')
+      {
+        ret.set(getNumber2(d), getNumber2(d + 3), getNumber2(d + 6),
                 getNumber3(d + 9));
+      }
+      else if (s.size() == 8
+        && d[2] == ':'
+        && d[5] == ':')
+      {
+        ret.set(getNumber2(d), getNumber2(d + 3), getNumber2(d + 6));
+      }
+      else
+        throw TypeError();
+    }
+    catch (const TypeError&)
+    {
+      throw TypeError("failed to convert string \"" + s + "\" into time");
+    }
+
+    return ret;
   }
 
 }

@@ -121,12 +121,22 @@ namespace tntdb
 
   Date Date::fromIso(const std::string& s)
   {
-    if (s.size() < 10
-      || s.at(4) != '-'
-      || s.at(7) != '-')
-      throw TypeError();
+    Date ret;
     const char* d = s.data();
-    return Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
+    try
+    {
+      if (s.size() < 10
+        || d[4] != '-'
+        || d[7] != '-')
+        throw TypeError();
+      ret.set(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
+    }
+    catch (const TypeError&)
+    {
+      throw TypeError("failed to convert string \"" + s + "\" into date");
+    }
+
+    return ret;
   }
 
 }

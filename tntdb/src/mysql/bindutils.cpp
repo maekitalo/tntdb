@@ -338,9 +338,15 @@ namespace tntdb
       setValue(bind, data, MYSQL_TYPE_DOUBLE);
     }
 
-    void setChar(MYSQL_BIND& bind, char data)
+    void setChar(MYSQL_BIND& bind, unsigned long& length, char data)
     {
-      setValue(bind, data, MYSQL_TYPE_TINY);
+      length = 1;
+      reserve(bind, length);
+      *static_cast<char*>(bind.buffer) = data;
+
+      bind.buffer_type = MYSQL_TYPE_VAR_STRING;
+      bind.is_null = 0;
+      bind.length = &length;
     }
 
     void setString(MYSQL_BIND& bind, unsigned long& length, const char* data)
@@ -389,6 +395,7 @@ namespace tntdb
 
       bind.buffer_type = MYSQL_TYPE_DATE;
       bind.is_null = 0;
+      bind.length = 0;
     }
 
     void setTime(MYSQL_BIND& bind, const Time& data)
@@ -401,8 +408,9 @@ namespace tntdb
       ts->minute = data.getMinute();
       ts->second = data.getSecond();
 
-      bind.buffer_type = MYSQL_TYPE_DATE;
+      bind.buffer_type = MYSQL_TYPE_TIME;
       bind.is_null = 0;
+      bind.length = 0;
     }
 
     void setDatetime(MYSQL_BIND& bind, const Datetime& data)
@@ -418,8 +426,9 @@ namespace tntdb
       ts->minute = data.getMinute();
       ts->second = data.getSecond();
 
-      bind.buffer_type = MYSQL_TYPE_DATE;
+      bind.buffer_type = MYSQL_TYPE_DATETIME;
       bind.is_null = 0;
+      bind.length = 0;
     }
 
     bool isNull(const MYSQL_BIND& bind)

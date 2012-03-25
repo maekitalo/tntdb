@@ -58,7 +58,7 @@ namespace tntdb
     void setDecimal(MYSQL_BIND& value, unsigned long& length, const Decimal& data);
     void setFloat(MYSQL_BIND& value, float data);
     void setDouble(MYSQL_BIND& value, double data);
-    void setChar(MYSQL_BIND& value, char data);
+    void setChar(MYSQL_BIND& value, unsigned long& length, char data);
     void setString(MYSQL_BIND& value, unsigned long& length, const char* data);
     void setString(MYSQL_BIND& value, unsigned long& length, const std::string& data);
     void setBlob(MYSQL_BIND& value, unsigned long& length, const Blob& data);

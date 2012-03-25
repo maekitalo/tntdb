@@ -136,18 +136,42 @@ namespace tntdb
 
   Datetime Datetime::fromIso(const std::string& s)
   {
-    if (s.size() < 23
-      || s.at(4) != '-'
-      || s.at(7) != '-'
-      || s.at(10) != ' '
-      || s.at(13) != ':'
-      || s.at(16) != ':'
-      || s.at(19) != '.')
-      throw TypeError();
+    Datetime ret;
     const char* d = s.data();
-    return Datetime(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8),
-                    getNumber2(d + 11), getNumber2(d + 14), getNumber2(d + 17),
-                    getNumber3(d + 20));
+    unsigned ss = s.size();
+    try
+    {
+      if (s.size() == 23
+        && d[4] == '-'
+        && d[7] == '-'
+        && d[10] == ' '
+        && d[13] == ':'
+        && d[16] == ':'
+        && d[19] == '.')
+      {
+        ret.set(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8),
+                getNumber2(d + 11), getNumber2(d + 14), getNumber2(d + 17),
+                getNumber3(d + 20));
+      }
+      else if (s.size() == 19
+        && d[4] == '-'
+        && d[7] == '-'
+        && d[10] == ' '
+        && d[13] == ':'
+        && d[16] == ':')
+      {
+        ret.set(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8),
+                getNumber2(d + 11), getNumber2(d + 14), getNumber2(d + 17));
+      }
+      else
+        throw TypeError();
+    }
+    catch (const TypeError&)
+    {
+      throw TypeError("failed to convert string \"" + s + "\" into datetime");
+    }
+
+    return ret;
   }
 
 }

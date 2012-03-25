@@ -107,5 +107,11 @@ namespace tntdb
       else
         bindAttributes[n].name.clear();
     }
+
+    void BindValues::clear()
+    {
+      for (unsigned n = 0; n < valuesSize; ++n)
+        bindAttributes[n].isNull = 1;
+    }
   }
 }
