@@ -10,6 +10,7 @@ noinst_PROGRAMS = \
 	tntdb-test
 
 tntdb_test_SOURCES = \
+	base-test.cpp \
 	colname-test.cpp \
 	decimal-test.cpp \
 	sqlbuilder-test.cpp \
