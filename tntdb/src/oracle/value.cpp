@@ -566,7 +566,7 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).toDouble();
+          return number.getDecimal(errhp).getDouble();
 
         default:
           return getValueFloat<float>(data.begin(), data.begin() + len, "float");

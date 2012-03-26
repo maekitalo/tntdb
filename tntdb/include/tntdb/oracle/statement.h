@@ -64,9 +64,16 @@ namespace tntdb
             Blob blob;
             Number number;
 
+            const char* boundPtr;
+            int boundType;
+            unsigned boundLength;
+
             Bind()
               : ptr(0),
-                indicator(0)
+                indicator(0),
+                boundPtr(0),
+                boundType(0),
+                boundLength(0)
               { }
             void setData(const std::string& value)
             {
