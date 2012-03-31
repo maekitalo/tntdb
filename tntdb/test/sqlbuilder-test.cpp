@@ -41,6 +41,7 @@ class SqlBuilderTest : public cxxtools::unit::TestSuite
     {
       registerMethod("testExtendParam", *this, &SqlBuilderTest::testExtendParam);
       registerMethod("testReplace", *this, &SqlBuilderTest::testReplace);
+      registerMethod("testReplaceQ", *this, &SqlBuilderTest::testReplaceQ);
       registerMethod("testReplaceIf", *this, &SqlBuilderTest::testReplaceIf);
     }
 
@@ -56,6 +57,17 @@ class SqlBuilderTest : public cxxtools::unit::TestSuite
       tntdb::SqlBuilder s("select a from %table where b = 5");
       s.replace("table", "foo");
       CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from foo where b = 5");
+    }
+
+    void testReplaceQ()
+    {
+      tntdb::SqlBuilder s("select a from tab1 where b = 'Hi' and %col = 5");
+      s.replace("col", "c");
+      CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from tab1 where b = 'Hi' and c = 5");
+
+      tntdb::SqlBuilder s2("select a from tab1 where b = '\\' and %col = 5");
+      s2.replace("col", "c");
+      CXXTOOLS_UNIT_ASSERT_EQUALS(s2.str(), "select a from tab1 where b = '\\' and c = 5");
     }
 
     void testReplaceIf()

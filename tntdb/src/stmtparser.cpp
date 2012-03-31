@@ -122,7 +122,7 @@ namespace tntdb
 
           case STATE_STRING_ESC:
             sql += ch;
-            state = STATE_STRING;
+            state = (ch == end_token ? STATE_0 : STATE_STRING);
             break;
 
           case STATE_ESC:
