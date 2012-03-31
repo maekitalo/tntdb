@@ -32,7 +32,7 @@
 #include <iostream>
 #include <cxxtools/convert.h>
 #include <cxxtools/log.h>
-#include <math.h>
+#include <cmath>
 
 log_define("tntdb.decimal")
 
@@ -442,15 +442,15 @@ namespace tntdb
       if (_exponent > std::numeric_limits<long double>::max_exponent10)
       {
         v /= 10;
-        v /= powl(static_cast<long double>(10), static_cast<long double>(_exponent - 1));
+        v /= std::pow(static_cast<long double>(10), static_cast<int>(_exponent - 1));
       }
       else if (_exponent < -std::numeric_limits<long double>::max_exponent10)
       {
         v *= 10;
-        v /= powl(static_cast<long double>(10), static_cast<long double>(_exponent + 1));
+        v /= std::pow(static_cast<long double>(10), static_cast<int>(_exponent + 1));
       }
       else
-        v /= powl(static_cast<long double>(10), static_cast<long double>(_exponent));
+        v /= std::pow(static_cast<long double>(10), static_cast<int>(_exponent));
 
       for (int n = 0; n <= std::numeric_limits<long double>::digits10; ++n)
       {
@@ -506,21 +506,21 @@ namespace tntdb
 
     if (_exponent == std::numeric_limits<long double>::max_exponent10 + 1)
     {
-      ret *= powl(10, static_cast<long double>(_exponent - 1));
+      ret *= std::pow(static_cast<long double>(10), static_cast<int>(_exponent - 1));
       ret *= 10;
       if (ret == std::numeric_limits<long double>::infinity())
         ret = std::numeric_limits<long double>::max();
     }
     else if (_exponent == std::numeric_limits<long double>::min_exponent10 - 1)
     {
-      ret *= powl(10, static_cast<long double>(_exponent + 1));
+      ret *= std::pow(static_cast<long double>(10), static_cast<int>(_exponent + 1));
       ret /= 10;
       if (ret == -std::numeric_limits<long double>::infinity())
         ret = std::numeric_limits<long double>::min();
     }
     else
     {
-      ret *= powl(10, static_cast<long double>(_exponent));
+      ret *= std::pow(static_cast<long double>(10), static_cast<int>(_exponent));
     }
 
     if (_negative)
@@ -628,7 +628,7 @@ namespace tntdb
       }
 
       if (_negative)
-        ret.insert(0, 1, '-');
+        ret.insert(0u, 1u, '-');
 
       return ret;
     }
