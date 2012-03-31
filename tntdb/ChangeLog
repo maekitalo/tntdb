@@ -1,62 +1,187 @@
+2012-03-31 tommi@tntnet.org
+
+ - fix a special case in conjunction with quotes when parsing sql statements
+
+2012-03-26 tommi@tntnet.org
+
+ - some fixes concerning new tntdb::Decimal class and optimization in oralce driver (rebind only when needed)
+
+2012-03-25 tommi@tntnet.org
+
+ - fix mysql driver: mysql_stmt_execute accesses bound data even when it is deleted
+ - add unit tests for basic tntdb functionality
+ - fix setting char, date, time and datetime in mysql
+
+2012-03-15 tommi@tntnet.org
+
+ - improve support for integer type in Decimal class
+
+2012-03-13 tommi@tntnet.org
+
+ - new method getInteger in tntdb::Decimal
+ - update oracle driver to new decimal class
+
+2012-03-12 tommi@tntnet.org
+
+ - fix parsing some decimal numbers and allow leading and trailing white space
+ - avoid possible wrong overflow in decimal class
+ - fixes for decimal parser
+
+2012-03-08 tommi@tntnet.org
+
+ - remove some constructors from Decimal to reduce abiguity
+
+2012-03-05 tommi@tntnet.org
+
+ - simplify tntdb::Decimal and make its use more efficient
+
+2012-02-26 tommi@tntnet.org
+
+ - fix compiler warnings in decimal class and add some unit tests for decimal class
+
+2012-02-25 tommi@tntnet.org
+
+ - set compile flags for ibm xlc and fix some warnings
+
+2012-02-11 tommi@tntnet.org
+
+ - set abi version to 3
+ - add sql scripts for creating test tables into dist package
+
+2012-02-09 tommi@tntnet.org
+
+ - implement method tntdb::Row::getColumnName(size_type)
+
+2012-02-09 tommi@tntnet.org
+
+ - fix resetting rowreader
+ - fix some compiler warnings in Decimal class
+
+2012-02-08 tommi@tntnet.org
+
+ - remove search path from tntdb since people should use LD_LIBRARY_PATH if really needed and prefer that over configured driver directory
+ - better cleanup in tntdb unit test
+ - fix reading floating point number from decimal column in mysql driver
+
+2012-02-05 tommi@tntnet.org
+
+ - initialize tests correctly - null test did not work as it should have
+
+2012-02-01 tommi@tntnet.org
+
+ - sort connections in replicate driver to reduce risk of dead locks but still use first connection as primary connection for selects
+
+2011-11-25 tommi@tntnet.org
+
+ - remove now obsolete method tntdb::Statement::paramlist (replaced by tntdb::SqlBuilder)
+ - add missing return statement into tntdb::SqlBuilder::replaceIf
+ - add else value into tntdb::SqlBuilder::replaceIf
+ - when replication fails in replication driver add the number of the connection, which fails to the exception message
+ - add unit test for tntdb::SqlBuilder
+ - fix replication driver - after last fix statements were executed twice on the first connection
+
+2011-11-24 tommi@tntnet.org
+
+ - add default constructor and setter for sql builder
+
+2011-11-23 tommi@tntnet.org
+
+ - add class tntdb::SqlBuilder as a helper for dynamically built sql statements
+
+2011-11-22 tommi@tntnet.org
+
+ - add support for parameter lists in Statement
+
+2011-11-17 tommi@tntnet.org
+
+ - Datetime must not have a zero year, month or day in oracle
+
+2011-11-11 tommi@tntnet.org
+
+ - fix ping in replicate driver
+ - prevent endless retry to create new connections in connectionpool
+
+2011-11-10 tommi@tntnet.org
+
+ - OCIPing did not work on our oracle server 10.2.0.4.0; replace with OCIServerVersion on oracle before 11
+
+2011-11-04 tommi@tntnet.org
+
+ - fix out of tree build
+
+2011-09-25 tommi@tntnet.org
+
+ - fix wrong data type in tntdb::Decimal::getUnsignedShort()
+ - fix build for autoconf 2.68
+
+2011-09-20 tommi@tntnet.org
+
+ - add missing return statements in replicate driver
+
 2011-09-01 tommi@tntnet.org
 
-- add get method for tntdb::Value to RowReader
+ - add get method for tntdb::Value to RowReader
+ - add rowreader.h to Makefile.am
+
+2011-08-27 tommi@tntnet.org
+
+ - add documentation for tntdb::RowReader
 
 2011-08-26 tommi@tntnet.org
 
-- implement new helper class tntdb::RowReader, which makes it easier to read all values from a row
+ - implement new helper class tntdb::RowReader, which makes it easier to read all values from a row
 
 2011-06-03 tommi@tntnet.org
 
-- add support for short and unsigned short
+ - add support for short and unsigned short
 
 2011-05-06 tommi@tntnet.org
 
-- fix reading time with second fractional part >0.9999, which resulted in a invalid time in postgresql driver
+ - fix reading time with second fractional part >0.9999, which resulted in a invalid time in postgresql driver
 
 2011-04-25 tommi@tntnet.org
 
-- add operators for cxxtools::Date, Time and DateTime classes
+ - add operators for cxxtools::Date, Time and DateTime classes
 
 2011-04-02 tommi@tntnet.org
 
-- fix compile problem on BSD (timeval.tv_sec is not of type time_t)
+ - fix compile problem on BSD (timeval.tv_sec is not of type time_t)
 
 2011-03-24 tommi@tntnet.org
 
-- use transacions to make sure replication works also on error on the second db in replication driver
+ - use transacions to make sure replication works also on error on the second db in replication driver
 
 2011-03-22 tommi@tntnet.org
 
-- use OCIPing to check if oracle connection is still alive
+ - use OCIPing to check if oracle connection is still alive
 
 2011-03-22 tommi@tntnet.org
 
-- default to empty string of serial name when retrieving last insert id, which means: get the last inserted id regardless of name
+ - default to empty string of serial name when retrieving last insert id, which means: get the last inserted id regardless of name
 
 2011-02-27 tommi@tntnet.org
 
-- update tntdb to latest cxxtools (svn release 1203 or cxxtools 2.1)
+ - update tntdb to latest cxxtools (svn release 1203 or cxxtools 2.1)
 
 2011-02-21 tommi@tntnet.org
 
-- support for nan and inf in postgresql driver
+ - support for nan and inf in postgresql driver
 
 2011-02-21 tommi@tntnet.org
 
-- deliver last incremented serial if passed empty string to lastInsertId method in postgresql driver
+ - deliver last incremented serial if passed empty string to lastInsertId method in postgresql driver
 
 2011-02-21 tommi@tntnet.org
 
-- add replicating driver to tntdb
+ - add replicating driver to tntdb
 
 2011-01-30 tommi@tntnet.org
 
-- fix: long was casted to int when set in statement
+ - fix: long was casted to int when set in statement
 
 2011-01-10 tommi@tntnet.org
 
-- implement getLong and getUnsignedLong in tntdb::row
+ - implement getLong and getUnsignedLong in tntdb::row
 
 2011-01-05 tommi@tntnet.org
  - add tntdb::BlobIStream: a std::istream interface to tntdb::Blob
