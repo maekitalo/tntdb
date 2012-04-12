@@ -7,8 +7,12 @@ sources = \
 	cursor.cpp \
 	datetime.cpp \
 	error.cpp \
+	multirow.cpp \
+	multivalue.cpp \
 	result.cpp \
 	row.cpp \
+	singlerow.cpp \
+	singlevalue.cpp \
 	statement.cpp \
 	value.cpp \
 	number.cpp

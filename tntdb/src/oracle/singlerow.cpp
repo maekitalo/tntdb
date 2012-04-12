@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Tommi Maekitalo
+ * Copyright (C) 2012 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,40 +26,62 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TNTDB_ORACLE_CURSOR_H
-#define TNTDB_ORACLE_CURSOR_H
+#include <tntdb/oracle/singlerow.h>
+#include <cxxtools/log.h>
 
-#include <tntdb/iface/icursor.h>
-#include <tntdb/row.h>
-#include <cxxtools/smartptr.h>
-#include <oci.h>
+log_define("tntdb.oracle.singlerow")
 
 namespace tntdb
 {
   namespace oracle
   {
-    class Statement;
-    class SingleRow;
-
-    class Cursor : public ICursor
+    SingleRow::SingleRow(MultiRow::Ptr mr, unsigned row)
+      : _mr(mr),
+        _row(row)
     {
-        cxxtools::SmartPtr<Statement> stmt;
-        OCIStmt* stmtp;
-        tntdb::Row row;
+        _values.resize(mr->size());
+    }
 
-        unsigned fetchsize;
-        SingleRow* srow;
-        ub4 rowcount;
+    void SingleRow::row(unsigned r)
+    {
+      if (r != _row)
+      {
+        for (unsigned n = 0; n < _values.size(); ++n)
+        {
+          if (_values[n])
+            _values[n]->row(r);
+        }
 
-      public:
-        Cursor(Statement* stmt, unsigned fetchsize);
-        ~Cursor();
+        _row = r;
+      }
+    }
 
-        // method for ICursor
-        tntdb::Row fetch();
-    };
+    SingleRow::size_type SingleRow::size() const
+    {
+      return _mr->size();
+    }
+
+    tntdb::Value SingleRow::getValueByNumber(size_type field_num) const
+    {
+      Values& v = const_cast<Values&>(_values);
+
+      if (!v[field_num])
+      {
+        v[field_num] = new SingleValue(_mr->getValuesByNumber(field_num), _row);
+      }
+
+      return tntdb::Value(v[field_num]);
+    }
+
+    tntdb::Value SingleRow::getValueByName(const std::string& field_name) const
+    {
+      return getValueByNumber(_mr->getColIndexByName(field_name));
+    }
+
+    std::string SingleRow::getColumnName(size_type field_num) const
+    {
+      return _mr->getColumnName(field_num);
+    }
+
   }
 }
-
-#endif // TNTDB_ORACLE_CURSOR_H
-

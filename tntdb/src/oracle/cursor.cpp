@@ -28,6 +28,7 @@
 
 #include <tntdb/oracle/cursor.h>
 #include <tntdb/oracle/row.h>
+#include <tntdb/oracle/singlerow.h>
 #include <tntdb/oracle/statement.h>
 #include <cxxtools/log.h>
 
@@ -37,15 +38,20 @@ namespace tntdb
 {
   namespace oracle
   {
-    Cursor::Cursor(Statement* stmt_, unsigned)
-      : stmt(stmt_)
+    Cursor::Cursor(Statement* stmt_, unsigned fetchsize_)
+      : stmt(stmt_),
+        fetchsize(fetchsize_),
+        srow(0),
+        rowcount(0)
     {
       log_debug("execute statement " << stmt->getHandle());
       sword ret = OCIStmtExecute(stmt->getConnection()->getSvcCtxHandle(),
         stmt->getHandle(), stmt->getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
       stmt->checkError(ret, "OCIStmtExecute");
 
-      row = tntdb::Row(new oracle::Row(stmt));
+      MultiRow::Ptr mr = new MultiRow(stmt, fetchsize);
+      srow = new SingleRow(mr, 0);
+      row = tntdb::Row(srow);
 
       stmtp = stmt->getHandle();
       stmt->stmtp = 0;
@@ -71,13 +77,42 @@ namespace tntdb
 
     tntdb::Row Cursor::fetch()
     {
-      log_debug("OCIStmtFetch(" << stmtp << ')');
-      sword ret = OCIStmtFetch(stmtp, stmt->getErrorHandle(), 1,
-          OCI_FETCH_NEXT, OCI_DEFAULT);
-      if (ret == OCI_NO_DATA)
+      if (rowcount > 0 && srow->row() < rowcount - 1)
+      {
+        log_debug("increase row counter to " << (srow->row() + 1));
+        srow->row(srow->row()+1);
+      }
+      else if (rowcount > 0 && rowcount < fetchsize)
+      {
+        log_debug("last fetch returned " << rowcount << " rows but " << fetchsize << " was expected - finish cursor");
         row = tntdb::Row();
-      else
-        stmt->checkError(ret, "OCIStmtFetch");
+        srow = 0;
+      }
+      else if (rowcount == 0 || rowcount >= srow->row())
+      {
+        log_debug("OCIStmtFetch(" << stmtp << ')');
+        sword ret = OCIStmtFetch(stmtp, stmt->getErrorHandle(), fetchsize,
+            OCI_FETCH_NEXT, OCI_DEFAULT);
+
+        if (ret != OCI_NO_DATA && ret != OCI_SUCCESS)
+          stmt->checkError(ret, "OCIStmtFetch");
+
+        // get number of rows fetched
+        ret = OCIAttrGet(stmtp, OCI_HTYPE_STMT, &rowcount,
+          0, OCI_ATTR_ROWS_FETCHED, stmt->getErrorHandle());
+        stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_ROWS_FETCHED)");
+        log_debug(rowcount << " rows fetched");
+
+        if (rowcount == 0)
+        {
+          row = tntdb::Row();
+          srow = 0;
+        }
+        else
+        {
+          srow->row(0);
+        }
+      }
 
       return row;
     }

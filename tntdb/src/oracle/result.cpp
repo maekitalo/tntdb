@@ -28,6 +28,8 @@
 
 #include <tntdb/oracle/result.h>
 #include <tntdb/oracle/row.h>
+#include <tntdb/oracle/multirow.h>
+#include <tntdb/oracle/singlerow.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.oracle.result")
@@ -65,6 +67,51 @@ namespace tntdb
       }
 
       if (ret != OCI_NO_DATA)
+        stmt->checkError(ret, "OCIStmtFetch");
+    }
+
+    Result::Result(Statement* stmt, unsigned fetchsize)
+    {
+      sword ret;
+
+      log_debug("execute select-statement " << stmt->getHandle());
+
+      ret = OCIStmtExecute(stmt->getConnection()->getSvcCtxHandle(),
+        stmt->getHandle(), stmt->getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
+      stmt->checkError(ret, "OCIStmtExecute");
+
+      log_debug("select-statement " << stmt->getHandle() << " executed");
+
+      // get columncount
+      ret = OCIAttrGet(stmt->getHandle(), OCI_HTYPE_STMT, &columncount,
+        0, OCI_ATTR_PARAM_COUNT, stmt->getErrorHandle());
+      stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
+
+      log_debug("define multirow");
+      MultiRow::Ptr mr = new MultiRow(stmt, fetchsize, columncount);
+
+      log_debug("fetch results");
+      while ((ret = OCIStmtFetch(stmt->getHandle(), stmt->getErrorHandle(), fetchsize,
+          OCI_FETCH_NEXT, OCI_DEFAULT)) != OCI_ERROR)
+      {
+        // get number of rows fetched
+        ub4 rowsFetched;
+        sword ret = OCIAttrGet(stmt->getHandle(), OCI_HTYPE_STMT, &rowsFetched,
+          0, OCI_ATTR_ROWS_FETCHED, stmt->getErrorHandle());
+        stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_ROWS_FETCHED)");
+
+        for (unsigned n = 0; n < rowsFetched; ++n)
+        {
+          rows.push_back(tntdb::Row(new SingleRow(mr, n)));
+        }
+
+        if (rowsFetched < fetchsize)
+          return;
+
+        mr = new MultiRow(stmt, fetchsize, columncount);
+      }
+
+      if (ret != OCI_NO_DATA && ret != OCI_SUCCESS)
         stmt->checkError(ret, "OCIStmtFetch");
     }
 

@@ -54,7 +54,9 @@ namespace tntdb
       void setUnsigned64(uint64_t data, OCIError* errhp);
 
       void setDecimal(const Decimal &decimal, OCIError* errhp);
-      Decimal getDecimal(OCIError* errhp) const;
+      static Decimal getDecimal(const OCINumber* handle, OCIError* errhp);
+      Decimal getDecimal(OCIError* errhp) const
+      { return getDecimal(const_cast<OCINumber*>(&ociNumber), errhp); }
 
       unsigned char* getHandle() { return ociNumber.OCINumberPart; }
     };

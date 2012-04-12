@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Tommi Maekitalo
+ * Copyright (C) 2012 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,40 +26,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TNTDB_ORACLE_CURSOR_H
-#define TNTDB_ORACLE_CURSOR_H
+#ifndef TNTDB_ORACLE_SINGLEROW_H
+#define TNTDB_ORACLE_SINGLEROW_H
 
-#include <tntdb/iface/icursor.h>
-#include <tntdb/row.h>
-#include <cxxtools/smartptr.h>
-#include <oci.h>
+#include <tntdb/oracle/multirow.h>
+#include <tntdb/oracle/singlevalue.h>
+#include <tntdb/iface/irow.h>
 
 namespace tntdb
 {
   namespace oracle
   {
-    class Statement;
-    class SingleRow;
-
-    class Cursor : public ICursor
+    class SingleRow : public IRow
     {
-        cxxtools::SmartPtr<Statement> stmt;
-        OCIStmt* stmtp;
-        tntdb::Row row;
-
-        unsigned fetchsize;
-        SingleRow* srow;
-        ub4 rowcount;
+        MultiRow::Ptr _mr;
+        unsigned _row;
+        typedef std::vector<SingleValue::Ptr> Values;
+        Values _values;
 
       public:
-        Cursor(Statement* stmt, unsigned fetchsize);
-        ~Cursor();
+        SingleRow(MultiRow::Ptr mr, unsigned row);
 
-        // method for ICursor
-        tntdb::Row fetch();
+        unsigned row() const  { return _row; }
+        void row(unsigned r);
+
+        virtual size_type size() const;
+        virtual tntdb::Value getValueByNumber(size_type field_num) const;
+        virtual tntdb::Value getValueByName(const std::string& field_name) const;
+        virtual std::string getColumnName(size_type field_num) const;
     };
   }
 }
 
-#endif // TNTDB_ORACLE_CURSOR_H
+#endif // TNTDB_ORACLE_SINGLEROW_H
 

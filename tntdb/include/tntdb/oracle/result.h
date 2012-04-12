@@ -47,6 +47,7 @@ namespace tntdb
 
       public:
         Result(oracle::Statement* conn);
+        Result(oracle::Statement* conn, unsigned fetchsize);
 
         Row getRow(size_type tup_num) const;
         size_type size() const;

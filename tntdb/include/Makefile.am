@@ -84,9 +84,13 @@ nobase_noinst_HEADERS = \
 	tntdb/oracle/cursor.h \
 	tntdb/oracle/datetime.h \
 	tntdb/oracle/error.h \
+	tntdb/oracle/multirow.h \
+	tntdb/oracle/multivalue.h \
 	tntdb/oracle/number.h \
 	tntdb/oracle/result.h \
 	tntdb/oracle/row.h \
+	tntdb/oracle/singlerow.h \
+	tntdb/oracle/singlevalue.h \
 	tntdb/oracle/statement.h \
 	tntdb/oracle/value.h
 

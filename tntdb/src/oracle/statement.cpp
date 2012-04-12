@@ -582,7 +582,7 @@ namespace tntdb
 
     tntdb::Result Statement::select()
     {
-      return tntdb::Result(new Result(this));
+      return tntdb::Result(new Result(this, 64));
     }
 
     tntdb::Row Statement::selectRow()

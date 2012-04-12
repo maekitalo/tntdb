@@ -98,15 +98,15 @@ namespace tntdb
     }
 
 
-    Decimal Number::getDecimal(OCIError* errhp) const
+    Decimal Number::getDecimal(const OCINumber* handle, OCIError* errhp)
     {
       char buffer[64];
       ub4 bufsize = sizeof(buffer);
 
-      log_debug("OCINumberToText");
+      log_debug("OCINumberToText(" << static_cast<const void*>(handle) << ", fmt, fmtsize, \"\", 0, " << bufsize << ", " << static_cast<void*>(buffer) << ')');
       static const text fmt[] = "9.99999999999999999999999999999999999999EEEE";
       sword convRet = OCINumberToText(errhp,
-        const_cast<OCINumber*>(&ociNumber), fmt, sizeof(fmt) - 1,
+        const_cast<OCINumber*>(handle), fmt, sizeof(fmt) - 1,
         reinterpret_cast<const text*>(""), 0,
         &bufsize, reinterpret_cast<text*>(buffer));
 
