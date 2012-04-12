@@ -341,7 +341,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).isZero();
+        {
+          int value;
+          log_debug("OCINumberToInt");
+          sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(int), OCI_NUMBER_SIGNED, &value);
+          _conn->checkError(ret, "OCINumberToInt");
+          return value != 0;
+        }
 
         default:
           return data(n)[0] == 't' || data(n)[0] == 'T'
@@ -373,7 +379,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getInteger<short>();
+        {
+          short value;
+          log_debug("OCINumberToInt");
+          sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(short), OCI_NUMBER_SIGNED, &value);
+          _conn->checkError(ret, "OCINumberToInt");
+          return value;
+        }
 
         default:
           return getValue<short>(std::string(data(n), _len[n]), "short");
@@ -402,7 +414,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getInteger<int>();
+        {
+          int value;
+          log_debug("OCINumberToInt");
+          sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(int), OCI_NUMBER_SIGNED, &value);
+          _conn->checkError(ret, "OCINumberToInt");
+          return value;
+        }
 
         default:
           return getValue<int>(std::string(data(n), _len[n]), "int");
@@ -431,7 +449,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getInteger<long>();
+        {
+          long value;
+          log_debug("OCINumberToInt");
+          sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(long), OCI_NUMBER_SIGNED, &value);
+          _conn->checkError(ret, "OCINumberToInt");
+          return value;
+        }
 
         default:
           return getValue<long>(std::string(data(n), _len[n]), "long");
@@ -465,7 +489,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getInteger<unsigned short>();
+        {
+          unsigned short value;
+          log_debug("OCINumberToInt");
+          sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(unsigned short), OCI_NUMBER_UNSIGNED, &value);
+          _conn->checkError(ret, "OCINumberToInt");
+          return value;
+        }
 
         default:
           return getValue<unsigned short>(std::string(data(n), _len[n]), "unsigned short");
@@ -494,7 +524,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getInteger<unsigned>();
+        {
+          unsigned value;
+          log_debug("OCINumberToInt");
+          sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(unsigned), OCI_NUMBER_UNSIGNED, &value);
+          _conn->checkError(ret, "OCINumberToInt");
+          return value;
+        }
 
         default:
           return getValue<unsigned>(std::string(data(n), _len[n]), "long");
@@ -523,7 +559,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getInteger<unsigned long>();
+        {
+          unsigned long value;
+          log_debug("OCINumberToInt");
+          sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(unsigned long), OCI_NUMBER_UNSIGNED, &value);
+          _conn->checkError(ret, "OCINumberToInt");
+          return value;
+        }
 
         default:
           return getValue<unsigned long>(std::string(data(n), _len[n]), "unsigned long");
@@ -557,7 +599,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getInteger<int64_t>();
+        {
+          int64_t value;
+          log_debug("OCINumberToInt");
+          sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(int64_t), OCI_NUMBER_SIGNED, &value);
+          _conn->checkError(ret, "OCINumberToInt");
+          return value;
+        }
 
         default:
           return getValue<int64_t>(std::string(data(n), _len[n]), "int64_t");
@@ -586,7 +634,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getInteger<uint64_t>();
+        {
+          uint64_t value;
+          log_debug("OCINumberToInt");
+          sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(uint64_t), OCI_NUMBER_UNSIGNED, &value);
+          _conn->checkError(ret, "OCINumberToInt");
+          return value;
+        }
 
         default:
           return getValue<uint64_t>(std::string(data(n), _len[n]), "uint64_t");
@@ -618,7 +672,7 @@ namespace tntdb
           return decimal(n);
 
         default:
-          return Decimal(std::string(data(n), _len[n]));
+          return getValue<Decimal>(std::string(data(n), _len[n]), "Decimal");
       }
     }
 
@@ -644,7 +698,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getDouble();
+        {
+          float value;
+          log_debug("OCINumberToReal");
+          sword ret = OCINumberToReal(_conn->getErrorHandle(), &number(n), sizeof(float), &value);
+          _conn->checkError(ret, "OCINumberToReal");
+          return value;
+        }
 
         default:
           return getValueFloat<float>(data(n), data(n) + _len[n], "float");
@@ -673,7 +733,13 @@ namespace tntdb
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return decimal(n).getDouble();
+        {
+          double value;
+          log_debug("OCINumberToReal");
+          sword ret = OCINumberToReal(_conn->getErrorHandle(), &number(n), sizeof(double), &value);
+          _conn->checkError(ret, "OCINumberToReal");
+          return value;
+        }
 
         default:
           return getValueFloat<double>(data(n), data(n) + _len[n], "double");
