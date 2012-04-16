@@ -190,13 +190,13 @@ namespace tntdb
           {
             log_debug("OCIDefineByPos(SQLT_TIMESTAMP)");
 
-            _data = new char[_n * sizeof(OCIDateTime**)];
-            Datetime** p = reinterpret_cast<Datetime**>(_data);
+            _data = new char[_n * sizeof(OCIDateTime*)];
+            OCIDateTime** p = reinterpret_cast<OCIDateTime**>(_data);
             log_debug("OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP) (" << _n << " times)");
             for (unsigned n = 0; n < _n; ++n)
             {
               ret = OCIDescriptorAlloc(stmt->getConnection()->getEnvHandle(),
-                reinterpret_cast<void**>(p[n]), OCI_DTYPE_TIMESTAMP, 0, 0);
+                reinterpret_cast<void**>(&p[n]), OCI_DTYPE_TIMESTAMP, 0, 0);
               stmt->checkError(ret, "OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP)");
             }
 
@@ -245,18 +245,9 @@ namespace tntdb
             log_debug("OCIDefineByPos(SQLT_LOB)");
 
             _data = new char[_n * sizeof(OCILobLocator*)];
-            OCILobLocator** p = reinterpret_cast<OCILobLocator**>(_data);
-            log_debug("OCIDescriptorAlloc(OCI_DTYPE_LOB) (" << _n << " times)");
-            for (unsigned n = 0; n < _n; ++n)
-            {
-              ret = OCIDescriptorAlloc(stmt->getConnection()->getEnvHandle(),
-                reinterpret_cast<void**>(&p[n]), OCI_DTYPE_LOB, 0, 0);
-              stmt->checkError(ret, "OCIDescriptorAlloc(OCI_DTYPE_LOB)");
-            }
-
             ret = OCIDefineByPos(stmt->getHandle(), &_defp,
               stmt->getErrorHandle(), pos + 1, _data,
-              sizeof(OCIDateTime*), SQLT_TIMESTAMP, _nullind, _len, 0, OCI_DEFAULT);
+              sizeof(OCILobLocator*), SQLT_BLOB, _nullind, _len, 0, OCI_DEFAULT);
           }
           break;
 
