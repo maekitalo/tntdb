@@ -84,8 +84,8 @@ namespace tntdb
         { return reinterpret_cast<const OCINumber*>(_data)[n]; }
         Decimal decimal(unsigned n) const
         { return Number::getDecimal(&number(n), _conn->getErrorHandle()); }
-        const Blob& blob(unsigned n) const
-        { return reinterpret_cast<Blob*>(_data)[n]; }
+        OCILobLocator* blob(unsigned n) const
+        { return reinterpret_cast<OCILobLocator**>(_data)[n]; }
         const char* data(unsigned n) const
         { return &_data[n * (_collen + 16)]; }
 

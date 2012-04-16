@@ -54,6 +54,10 @@ log_define("tntdb.unit.types")
       dbvalue = sel.selectValue();                   \
       isNotNull = dbvalue.get(res);                  \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
+      CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);         \
+      dbvalue = sel.select()[0][0];                  \
+      isNotNull = dbvalue.get(res);                  \
+      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);
 
 #define TESTEQ(val)                                  \
@@ -62,12 +66,20 @@ log_define("tntdb.unit.types")
       dbvalue = sel.selectValue();                   \
       isNotNull = dbvalue.get(res);                  \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
+      CXXTOOLS_UNIT_ASSERT(val == res);              \
+      dbvalue = sel.select()[0][0];                  \
+      isNotNull = dbvalue.get(res);                  \
+      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT(val == res);
 
 #define TESTFLOAT(val)                               \
       del.execute();                                 \
       ins.set(colName, val).execute();               \
       dbvalue = sel.selectValue();                   \
+      isNotNull = dbvalue.get(res);                  \
+      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
+      CXXTOOLS_UNIT_ASSERT(val / res >= .9999 && val / res <= 1.0001); \
+      dbvalue = sel.select()[0][0];                  \
       isNotNull = dbvalue.get(res);                  \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT(val / res >= .9999 && val / res <= 1.0001);
@@ -84,6 +96,15 @@ log_define("tntdb.unit.types")
       }                                              \
       else                                           \
         CXXTOOLS_UNIT_ASSERT(val.isNull());          \
+      dbvalue = sel.select()[0][0];                   \
+      isNotNull = dbvalue.get(res);                  \
+      if (isNotNull)                                 \
+      {                                              \
+        CXXTOOLS_UNIT_ASSERT(!res.isNull());         \
+        CXXTOOLS_UNIT_ASSERT_EQUALS(val.getIso(), res.getIso()); \
+      }                                              \
+      else                                           \
+        CXXTOOLS_UNIT_ASSERT(val.isNull());
 
 class TntdbTypesTest : public cxxtools::unit::TestSuite
 {

@@ -58,7 +58,7 @@ namespace tntdb
 
         ~Blob()
         {
-          if (lob)
+          if (release && lob)
             ociDescriptorFree();
         }
 
