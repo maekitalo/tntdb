@@ -245,6 +245,16 @@ namespace tntdb
             log_debug("OCIDefineByPos(SQLT_LOB)");
 
             _data = new char[_n * sizeof(OCILobLocator*)];
+
+            OCIDateTime** p = reinterpret_cast<OCIDateTime**>(_data);
+            log_debug("OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP) (" << _n << " times)");
+            for (unsigned n = 0; n < _n; ++n)
+            {
+              ret = OCIDescriptorAlloc(stmt->getConnection()->getEnvHandle(),
+                reinterpret_cast<void**>(&p[n]), OCI_DTYPE_LOB, 0, 0);
+              stmt->checkError(ret, "OCIDescriptorAlloc(OCI_DTYPE_LOB)");
+            }
+
             ret = OCIDefineByPos(stmt->getHandle(), &_defp,
               stmt->getErrorHandle(), pos + 1, _data,
               sizeof(OCILobLocator*), SQLT_BLOB, _nullind, _len, 0, OCI_DEFAULT);
@@ -812,7 +822,7 @@ namespace tntdb
           throw TypeError();
 
         case SQLT_BLOB:
-          blob(n).getData(ret);
+          Blob(_conn, blob(n)).getData(ret);
           break;
 
         default:
