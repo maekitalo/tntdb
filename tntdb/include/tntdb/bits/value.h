@@ -99,6 +99,11 @@ namespace tntdb
       /// string since one copy is saved.
       void getString(std::string& ret) const
         { value->getString(ret); }
+      /// returns the value as a unicode string.
+      cxxtools::String getUString() const
+        { cxxtools::String ret; value->getUString(ret); return ret; }
+      void getUString(cxxtools::String& ret) const
+        { value->getUString(ret); }
       /// Returns the value as a blob.
       /// This is more or less an alias to getString just to stress, that
       /// the data is truly binary and not some text value.
@@ -298,6 +303,15 @@ namespace tntdb
       return false;
 
     value.getString(out);
+    return true;
+  }
+
+  inline bool operator>> (const Value& value, cxxtools::String& out)
+  {
+    if (value.isNull())
+      return false;
+
+    value.getUString(out);
     return true;
   }
 

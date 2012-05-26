@@ -30,6 +30,7 @@
 #define TNTDB_IFACE_IVALUE_H
 
 #include <cxxtools/refcounted.h>
+#include <cxxtools/string.h>
 #include <string>
 #include <stdint.h>
 
@@ -66,6 +67,7 @@ namespace tntdb
       virtual Date getDate() const = 0;
       virtual Time getTime() const = 0;
       virtual Datetime getDatetime() const = 0;
+      virtual void getUString(cxxtools::String& ret) const;
   };
 }
 

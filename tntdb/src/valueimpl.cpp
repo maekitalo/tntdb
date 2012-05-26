@@ -35,6 +35,7 @@
 #include <tntdb/error.h>
 #include <sstream>
 #include <cxxtools/convert.h>
+#include <cxxtools/utf8codec.h>
 
 namespace
 {
@@ -206,6 +207,13 @@ namespace tntdb
     if (null)
       throw NullValue();
     return Datetime::fromIso(data);
+  }
+
+  void IValue::getUString(cxxtools::String& ret) const
+  {
+    std::string r;
+    getString(r);
+    ret = cxxtools::Utf8Codec::decode(r);
   }
 
 }

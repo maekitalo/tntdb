@@ -30,6 +30,7 @@
 #define TNTDB_IFACE_ISTATEMENT_H
 
 #include <cxxtools/refcounted.h>
+#include <cxxtools/string.h>
 #include <string>
 #include <stdint.h>
 
@@ -73,6 +74,7 @@ namespace tntdb
       virtual void setDate(const std::string& col, const Date& data) = 0;
       virtual void setTime(const std::string& col, const Time& data) = 0;
       virtual void setDatetime(const std::string& col, const Datetime& data) = 0;
+      virtual void setUString(const std::string& col, const cxxtools::String& data);
 
       virtual size_type execute() = 0;
       virtual Result select() = 0;

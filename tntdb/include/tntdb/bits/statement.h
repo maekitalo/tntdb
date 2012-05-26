@@ -172,6 +172,14 @@ namespace tntdb
       Statement& setString(const std::string& col, const char* data)
         { data == 0 ? stmt->setNull(col)
                     : stmt->setString(col, data); return *this; }
+      /**
+       * Sets the hostvariable with the given name to a unicode string value.
+       */
+      Statement& setUString(const std::string& col, const cxxtools::String& data)
+        { stmt->setUString(col, data); return *this; }
+      /**
+       * Sets the hostvariable with the given name to a blob value.
+       */
       Statement& setBlob(const std::string& col, const Blob& data)
         { stmt->setBlob(col, data); return *this; }
       /**
@@ -343,6 +351,8 @@ namespace tntdb
       void setString(const char* data)
         { data == 0 ? stmt.setNull(name)
                     : stmt.setString(name, data); }
+      void setUString(const cxxtools::String& data)
+        { stmt.setUString(name, data); }
       void setBlob(const Blob& data)
         { stmt.setBlob(name, data); }
       void setDate(const Date& data)
@@ -444,6 +454,11 @@ namespace tntdb
   inline void operator<< (Hostvar& hostvar, const char* data)
   {
     hostvar.setString(data);
+  }
+
+  inline void operator<< (Hostvar& hostvar, const cxxtools::String& data)
+  {
+    hostvar.setUString(data);
   }
 
   inline void operator<< (Hostvar& hostvar, const Blob& data)

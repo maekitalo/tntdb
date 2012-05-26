@@ -30,6 +30,7 @@
 #include <tntdb/result.h>
 #include <tntdb/row.h>
 #include <tntdb/value.h>
+#include <cxxtools/utf8codec.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.statement")
@@ -64,6 +65,11 @@ namespace tntdb
   {
     log_trace("Statement::begin(" << fetchsize << ')');
     return const_iterator(stmt->createCursor(fetchsize));
+  }
+
+  void IStatement::setUString(const std::string& col, const cxxtools::String& data)
+  {
+    setString(col, cxxtools::Utf8Codec::encode(data));
   }
 
 }
