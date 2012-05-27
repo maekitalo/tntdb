@@ -30,7 +30,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include <cxxtools/loginit.h>
+#include <cxxtools/log.h>
 #include <cxxtools/arg.h>
 
 #include <tntdb/connect.h>

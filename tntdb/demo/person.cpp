@@ -35,7 +35,7 @@
 #include <tntdb/result.h>
 #include <tntdb/transaction.h>
 #include <cxxtools/arg.h>
-#include <cxxtools/loginit.h>
+#include <cxxtools/log.h>
 
 #include "util.h"
 
@@ -44,12 +44,8 @@ int main(int argc, char* argv[])
   try
   {
     cxxtools::Arg<bool> cursor(argc, argv, 'c');
-    cxxtools::Arg<bool> debug(argc, argv, 'd');
 
-    if (debug)
-      log_init_debug();
-    else
-      log_init();
+    log_init();
 
     if (argc != 3)
     {

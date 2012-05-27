@@ -28,7 +28,6 @@
 
 #include <exception>
 #include <iostream>
-#include <cxxtools/loginit.h>
 #include <cxxtools/log.h>
 #include <tntdb/connect.h>
 

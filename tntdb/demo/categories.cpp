@@ -32,7 +32,6 @@
 #include <tntdb/row.h>
 #include <tntdb/result.h>
 #include <cxxtools/arg.h>
-#include <cxxtools/loginit.h>
 #include <cxxtools/log.h>
 
 #include "util.h"
@@ -43,11 +42,7 @@ int main(int argc, char* argv[])
 {
   try
   {
-    cxxtools::Arg<bool> debug(argc, argv, 'd');
-    if (debug)
-      log_init_debug();
-    else
-      log_init();
+    log_init();
 
     cxxtools::Arg<bool> use_cursor(argc, argv, 'c');
 
