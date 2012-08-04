@@ -138,7 +138,6 @@ namespace tntdb
   {
     Datetime ret;
     const char* d = s.data();
-    unsigned ss = s.size();
     try
     {
       if (s.size() == 23
