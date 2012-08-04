@@ -80,7 +80,7 @@ namespace tntdb
         PGresult* result = PQexecParams(getPGConn(), sql.c_str(),
           stmt->getNParams(), 0,
           stmt->getParamValues(), stmt->getParamLengths(),
-          0, 0);
+          stmt->getParamFormats(), 0);
 
         if (isError(result))
         {
