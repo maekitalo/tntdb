@@ -32,6 +32,7 @@
 #include <tntdb/iface/iconnection.h>
 #include <tntdb/statement.h>
 #include <libpq-fe.h>
+#include <vector>
 
 namespace tntdb
 {
@@ -43,6 +44,8 @@ namespace tntdb
         tntdb::Statement currvalStmt;
         tntdb::Statement lastvalStmt;
         unsigned transactionActive;
+        unsigned stmtCounter;
+        std::vector<std::string> stmtsToDeallocate;
 
       public:
         explicit Connection(const char* conninfo);
@@ -60,7 +63,10 @@ namespace tntdb
         bool ping();
         long lastInsertId(const std::string& name);
 
-        PGconn* getPGConn() const  { return conn; }
+        PGconn* getPGConn() const      { return conn; }
+        unsigned getNextStmtNumber()   { return ++stmtCounter; }
+        void deallocateStatement(const std::string& stmtName);
+        void deallocateStatements();
     };
 
     inline bool isError(const PGresult* res)

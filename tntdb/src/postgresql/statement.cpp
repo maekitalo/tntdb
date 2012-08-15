@@ -112,25 +112,14 @@ namespace tntdb
     Statement::~Statement()
     {
       if (!stmtName.empty())
-      {
-        std::string sql = "DEALLOCATE " + stmtName;
-
-        log_debug("PQexec(" << getPGConn() << ", \"" << sql << "\")");
-        PGresult* result = PQexec(getPGConn(), sql.c_str());
-
-        if (isError(result))
-          log_error("error deallocating statement: " << PQresultErrorMessage(result));
-
-        log_debug("PQclear(" << result << ')');
-        PQclear(result);
-      }
+        conn->deallocateStatement(stmtName);
     }
 
     void Statement::doPrepare()
     {
       // create statementname
       std::ostringstream s;
-      s << "tntdbstmt" << this;
+      s << "tntdbstmt" << conn->getNextStmtNumber();
 
       // prepare statement
 #ifdef HAVE_PQPREPARE

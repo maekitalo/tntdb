@@ -44,7 +44,8 @@ namespace tntdb
   namespace postgresql
   {
     Connection::Connection(const char* conninfo)
-      : transactionActive(0)
+      : transactionActive(0),
+        stmtCounter(0)
     {
       log_debug("PQconnectdb(\"" << conninfo << "\")");
 
@@ -80,13 +81,19 @@ namespace tntdb
     void Connection::commitTransaction()
     {
       if (transactionActive == 0 || --transactionActive == 0)
+      {
         execute("COMMIT");
+        deallocateStatements();
+      }
     }
 
     void Connection::rollbackTransaction()
     {
       if (transactionActive == 0 || --transactionActive == 0)
+      {
         execute("ROLLBACK");
+        deallocateStatements();
+      }
     }
 
     Connection::size_type Connection::execute(const std::string& query)
@@ -224,5 +231,33 @@ namespace tntdb
       return ret;
     }
 
+    void Connection::deallocateStatement(const std::string& stmtName)
+    {
+      // Delay deallocation since a postgresql fail to execute anything including
+      // deallocate statements when a failed transaction is active.
+
+      stmtsToDeallocate.push_back(stmtName);
+      if (transactionActive == 0)
+        deallocateStatements();
+    }
+
+    void Connection::deallocateStatements()
+    {
+      for (std::vector<std::string>::size_type n = 0; n < stmtsToDeallocate.size(); ++n)
+      {
+        std::string sql = "DEALLOCATE " + stmtsToDeallocate[n];
+
+        log_debug("PQexec(" << getPGConn() << ", \"" << sql << "\")");
+        PGresult* result = PQexec(getPGConn(), sql.c_str());
+
+        if (isError(result))
+          log_error("error deallocating statement: " << PQresultErrorMessage(result));
+
+        log_debug("PQclear(" << result << ')');
+        PQclear(result);
+      }
+
+      stmtsToDeallocate.clear();
+    }
   }
 }
