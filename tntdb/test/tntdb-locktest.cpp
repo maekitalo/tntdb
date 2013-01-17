@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
   try
   {
     cxxtools::Arg<unsigned> wait(argc, argv, 'w', 0);
+    cxxtools::Arg<bool> readLock(argc, argv, 'r');
 
     if (argc < 3)
     {
@@ -61,7 +62,7 @@ int main(int argc, char* argv[])
     {
       const char* tablename = argv[a];
       log_info("lock table " << tablename);
-      trans.lockTable(tablename);
+      trans.lockTable(tablename, !readLock);
       log_info("table " << tablename << " locked");
       cxxtools::Thread::sleep(wait);
     }
