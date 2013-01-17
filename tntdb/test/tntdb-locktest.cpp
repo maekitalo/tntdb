@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2006 Tommi Maekitalo
- * 
+ * Copyright (C) 2013 Tommi Maekitalo
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,41 +26,52 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TNTDB_IMPL_POOLCONNECTION_H
-#define TNTDB_IMPL_POOLCONNECTION_H
+#include <iostream>
+#include <tntdb/connect.h>
+#include <tntdb/connection.h>
+#include <tntdb/transaction.h>
+#include <cxxtools/log.h>
+#include <cxxtools/arg.h>
+#include <cxxtools/thread.h>
 
-#include <tntdb/connectionpool.h>
-#include <tntdb/iface/iconnection.h>
+log_define("locktest")
 
-namespace tntdb
+int main(int argc, char* argv[])
 {
-  class PoolConnection : public IConnection
+  try
   {
-      ConnectionPool::PoolObjectType connection;
-      bool inTransaction;
-      bool drop;
+    cxxtools::Arg<unsigned> wait(argc, argv, 'w', 0);
 
-    public:
-      PoolConnection(ConnectionPool::PoolObjectType connection);
-      ~PoolConnection();
+    if (argc < 3)
+    {
+      std::cerr << "usage: " << argv[0] << " dburl {tables}\n" << std::endl;
+      return 1;
+    }
 
-      virtual void beginTransaction();
-      virtual void commitTransaction();
-      virtual void rollbackTransaction();
+    const char* dburl = argv[1];
 
-      virtual size_type execute(const std::string& query);
-      virtual Result select(const std::string& query);
-      virtual Row selectRow(const std::string& query);
-      virtual Value selectValue(const std::string& query);
-      virtual Statement prepare(const std::string& query);
-      virtual Statement prepareCached(const std::string& query, const std::string& key);
-      virtual void clearStatementCache();
-      virtual bool clearStatementCache(const std::string& key);
-      virtual bool ping();
-      virtual long lastInsertId(const std::string& name);
-      virtual void lockTable(const std::string& tablename, bool exclusive);
-  };
+    log_init();
+    std::cout << "connect" << std::endl;
+    tntdb::Connection conn = tntdb::connect(dburl);
+
+    std::cout << "start transaction" << std::endl;
+    tntdb::Transaction trans(conn);
+
+    for (int a = 2; a < argc; ++a)
+    {
+      const char* tablename = argv[a];
+      log_info("lock table " << tablename);
+      trans.lockTable(tablename);
+      log_info("table " << tablename << " locked");
+      cxxtools::Thread::sleep(wait);
+    }
+
+    trans.commit();
+    log_info("transaction finished");
+  }
+  catch (const std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
 }
-
-#endif // TNTDB_IMPL_POOLCONNECTION_H
 

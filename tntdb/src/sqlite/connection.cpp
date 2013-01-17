@@ -54,6 +54,11 @@ namespace tntdb
         throw Execerror("sqlite3_open", db, errcode);
 
       log_debug("sqlite3 = " << db);
+
+      log_debug("sqlite3_busy_timeout(\"" << db << "\", 60000)");
+      errcode = ::sqlite3_busy_timeout(db, 60000);
+      if (errcode != SQLITE_OK)
+        throw Execerror("sqlite3_busy_timeout", db, errcode);
     }
 
     Connection::~Connection()
@@ -70,7 +75,7 @@ namespace tntdb
     void Connection::beginTransaction()
     {
       if (transactionActive == 0)
-        execute("BEGIN TRANSACTION");
+        execute("BEGIN IMMEDIATE TRANSACTION");
       ++transactionActive;
     }
 
@@ -146,5 +151,12 @@ namespace tntdb
     {
       return static_cast<int>(sqlite3_last_insert_rowid(db));
     }
+
+    void Connection::lockTable(const std::string& tablename, bool exclusive)
+    {
+      // nothing to do - the database is locked by the exclusive transaction
+      // already
+    }
+
   }
 }

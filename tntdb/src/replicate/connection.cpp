@@ -160,5 +160,10 @@ namespace tntdb
       return connections.begin()->lastInsertId(name);
     }
 
+    void Connection::lockTable(const std::string& tablename, bool exclusive)
+    {
+      connections.begin()->getImpl()->lockTable(tablename, exclusive);
+    }
+
   }
 }

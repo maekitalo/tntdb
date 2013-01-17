@@ -70,6 +70,7 @@ namespace tntdb
         void clearStatementCache();
         bool ping();
         long lastInsertId(const std::string& name);
+        void lockTable(const std::string& tablename, bool exclusive);
 
         OCIEnv* getEnvHandle() const        { return envhp; }
         OCIError* getErrorHandle() const    { return errhp; }

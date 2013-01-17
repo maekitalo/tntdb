@@ -62,6 +62,7 @@ namespace tntdb
         tntdb::Statement prepare(const std::string& query);
         bool ping();
         long lastInsertId(const std::string& name);
+        void lockTable(const std::string& tablename, bool exclusive);
     };
 
   }

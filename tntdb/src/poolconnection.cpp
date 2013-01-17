@@ -111,6 +111,11 @@ namespace tntdb
     return connection->clearStatementCache();
   }
 
+  bool PoolConnection::clearStatementCache(const std::string& key)
+  {
+    return connection->clearStatementCache(key);
+  }
+
   bool PoolConnection::ping()
   {
     bool ok = connection->ping();
@@ -122,6 +127,11 @@ namespace tntdb
   long PoolConnection::lastInsertId(const std::string& name)
   {
     return connection->lastInsertId(name);
+  }
+
+  void PoolConnection::lockTable(const std::string& tablename, bool exclusive)
+  {
+    connection->getImpl()->lockTable(tablename, exclusive);
   }
 
 }

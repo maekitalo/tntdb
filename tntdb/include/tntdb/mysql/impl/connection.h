@@ -41,6 +41,7 @@ namespace tntdb
         MYSQL mysql;
         bool initialized;
         unsigned transactionActive;
+        std::string lockTablesQuery;
 
         void open(const char* app, const char* host,
           const char* user, const char* passwd,
@@ -68,6 +69,7 @@ namespace tntdb
         tntdb::Statement prepare(const std::string& query);
         bool ping();
         long lastInsertId(const std::string& name);
+        void lockTable(const std::string& tablename, bool exclusive);
     };
   }
 }

@@ -58,6 +58,7 @@ namespace tntdb
       ~Transaction();
 
       const Connection& getConnection() const  { return db; }
+      Connection& getConnection()              { return db; }
 
       /**
        * Starts a new transaction. If there is a active transaction, it is
@@ -76,6 +77,14 @@ namespace tntdb
        * then nothing is done. The transactionstate is reset.
        */
       void rollback();
+
+      /**
+       * Locks the specified table.
+       * Locks are released when the transaction is committed or rolled back
+       * either explicitly or implicitly by the destructor of the transaction
+       * object.
+       */
+      void lockTable(const std::string& tableName, bool exclusive = true);
   };
 }
 

@@ -242,6 +242,13 @@ namespace tntdb
       {
         clearStatementCache();
 
+        if (!lockTablesQuery.empty())
+        {
+          log_debug("mysql_query(\"UNLOCK TABLES\")");
+          if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
+            log_warn(MysqlError("mysql_query", &mysql).what());
+        }
+
         log_debug("mysql_close(" << &mysql << ')');
         ::mysql_close(&mysql);
       }
@@ -267,9 +274,18 @@ namespace tntdb
         if (::mysql_commit(&mysql) != 0)
           throw MysqlError("mysql_commit", &mysql);
 
+        if (!lockTablesQuery.empty())
+        {
+          log_debug("mysql_query(\"UNLOCK TABLES\")");
+          if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
+            throw MysqlError("mysql_query", &mysql);
+          lockTablesQuery.clear();
+        }
+
         log_debug("mysql_autocomit(" << &mysql << ", " << 1 << ')');
         if (::mysql_autocommit(&mysql, 1) != 0)
           throw MysqlError("mysql_autocommit", &mysql);
+
       }
     }
 
@@ -281,9 +297,18 @@ namespace tntdb
         if (::mysql_rollback(&mysql) != 0)
           throw MysqlError("mysql_rollback", &mysql);
 
+        if (!lockTablesQuery.empty())
+        {
+          log_debug("mysql_query(\"UNLOCK TABLES\")");
+          if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
+            throw MysqlError("mysql_query", &mysql);
+          lockTablesQuery.clear();
+        }
+
         log_debug("mysql_autocommit(" << &mysql << ", " << 1 << ')');
         if (::mysql_autocommit(&mysql, 1) != 0)
           throw MysqlError("mysql_autocommit", &mysql);
+
       }
     }
 
@@ -343,5 +368,21 @@ namespace tntdb
     {
       return static_cast<long>(::mysql_insert_id(&mysql));
     }
+
+    void Connection::lockTable(const std::string& tablename, bool exclusive)
+    {
+      if (lockTablesQuery.empty())
+        lockTablesQuery = "LOCK TABLES ";
+      else
+        lockTablesQuery += ", ";
+
+      lockTablesQuery += tablename;
+      lockTablesQuery += exclusive ? " WRITE" : " READ";
+
+      log_debug("mysql_query(\"" << lockTablesQuery << "\")");
+      if (::mysql_query(&mysql, lockTablesQuery.c_str()) != 0)
+        throw MysqlError("mysql_query", &mysql);
+    }
+
   }
 }

@@ -357,5 +357,14 @@ namespace tntdb
       return ret;
     }
 
+    void Connection::lockTable(const std::string& tablename, bool exclusive)
+    {
+      std::string sql = "LOCK TABLE ";
+      sql += tablename;
+      sql += exclusive ? " EXCLUSIVE MODE" : " SHARE MODE";
+      execute(sql);
+      tableLocks.push_back(tablename);
+    }
+
   }
 }

@@ -95,4 +95,10 @@ namespace tntdb
       log_warn("transaction not active in rollback");
     }
   }
+
+  void Transaction::lockTable(const std::string& tableName, bool exclusive)
+  {
+    db.getImpl()->lockTable(tableName, exclusive);
+  }
+
 }

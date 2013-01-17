@@ -32,9 +32,9 @@
 #include <tntdb/postgresql/error.h>
 #include <tntdb/result.h>
 #include <tntdb/statement.h>
+#include <cxxtools/convert.h>
 #include <cxxtools/log.h>
 #include <new>
-#include <sstream>
 #include <poll.h>
 
 log_define("tntdb.postgresql.connection")
@@ -108,9 +108,9 @@ namespace tntdb
         throw PgSqlError(query, "PQexec", result, true);
       }
 
-      std::istringstream tuples(PQcmdTuples(result));
-      Connection::size_type ret = 0;
-      tuples >> ret;
+      std::string t = PQcmdTuples(result);
+      Connection::size_type ret = t.empty() ? 0
+                                            : cxxtools::convert<Connection::size_type>(t);
 
       log_debug("PQclear(" << result << ')');
       PQclear(result);
@@ -258,6 +258,21 @@ namespace tntdb
       }
 
       stmtsToDeallocate.clear();
+    }
+
+    void Connection::lockTable(const std::string& tablename, bool exclusive)
+    {
+      std::string query = "LOCK TABLE ";
+      query += tablename;
+      query += exclusive ? " IN ACCESS EXCLUSIVE MODE" : " IN SHARE MODE";
+      log_debug("execute(\"" << query << "\")");
+
+      PGresult* result = PQexec(conn, query.c_str());
+      if (isError(result))
+      {
+        log_error(PQresultErrorMessage(result));
+        throw PgSqlError(query, "PQexec", result, true);
+      }
     }
   }
 }

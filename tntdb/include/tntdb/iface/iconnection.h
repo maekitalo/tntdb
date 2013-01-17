@@ -58,8 +58,10 @@ namespace tntdb
       virtual Statement prepare(const std::string& query) = 0;
       virtual Statement prepareCached(const std::string& query, const std::string& key) = 0;
       virtual void clearStatementCache() = 0;
+      virtual bool clearStatementCache(const std::string& key) = 0;
       virtual bool ping() = 0;
       virtual long lastInsertId(const std::string& name) = 0;
+      virtual void lockTable(const std::string& tablename, bool exclusive) = 0;
   };
 
   class IStmtCacheConnection : public IConnection
@@ -70,6 +72,7 @@ namespace tntdb
     public:
       virtual Statement prepareCached(const std::string& query, const std::string& key);
       virtual void clearStatementCache();
+      virtual bool clearStatementCache(const std::string& key);
   };
 }
 

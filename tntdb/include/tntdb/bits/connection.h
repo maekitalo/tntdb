@@ -157,6 +157,13 @@ namespace tntdb
       void clearStatementCache()         { conn->clearStatementCache(); }
 
       /**
+       * Remove a query from the statement cache.
+       * The return value indicates, if the query was found in the cache.
+       * When the query was found, true is returned.
+       */
+      bool clearStatementCache(const std::string& key)   { return conn->clearStatementCache(key); }
+
+      /**
        * returns true, if connection is alive.
        */
       bool ping()                        { return conn->ping(); }
@@ -175,6 +182,11 @@ namespace tntdb
        * Returns the actual implementation-class.
        */
       const IConnection* getImpl() const { return &*conn; }
+
+      /**
+       * Returns the actual implementation-class.
+       */
+      IConnection* getImpl()             { return &*conn; }
   };
 }
 
