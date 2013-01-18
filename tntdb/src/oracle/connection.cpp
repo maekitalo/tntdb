@@ -361,9 +361,8 @@ namespace tntdb
     {
       std::string sql = "LOCK TABLE ";
       sql += tablename;
-      sql += exclusive ? " EXCLUSIVE MODE" : " SHARE MODE";
+      sql += exclusive ? " IN EXCLUSIVE MODE" : " IN SHARE MODE";
       execute(sql);
-      tableLocks.push_back(tablename);
     }
 
   }
