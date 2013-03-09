@@ -1,5 +1,50 @@
+2013-01-18 tommi@tntnet.org
+
+ - fix table locking in oracle driver
+
+2013-01-17 tommi@tntnet.org
+
+ - extend locktest program with facility to create read locks
+ - implement lockTable method in tntdb::Transaction
+ - compile with -Wall and -pedantic if compiler supports it
+
+2012-08-15 tommi@tntnet.org
+
+ - delay deallocation of statements in postgresql during transactions since failed transactions causes deallocation to fail
+
+2012-08-04 tommi@tntnet.org
+
+ - remove unused variable
+ - pass param format array to PQexecParams correctly when opening cursor in postgresql driver
+
+2012-05-28 tommi@tntnet.org
+
+ - remove deprecated header cxxtools/loginit.h
+ - add test reading with cursor into unit test
+
+2012-05-26 tommi@tntnet.org
+
+ - add support for cxxtools::String (unicode string class)
+
+2012-04-16 tommi@tntnet.org
+
+ - fix fetching blob fields in oracle driver and extend unit test for type for using tntdb::Result
+ - fix fetching datetime and blob fields in oracle driver
+
+2012-04-12 tommi@tntnet.org
+
+ - use OCI number conversion functions where feasible in oracle driver
+ - optimize oracle driver by fetching multiple values at once (reading larger amounts of data is dramatically faster now)
+
+2012-04-02 tommi@tntnet.org
+
+ - update version number to 1.2
+ - remove old debian directory
+
 2012-03-31 tommi@tntnet.org
 
+ - update ChangeLog and version number
+ - fix tntdb::Decimal for freebsd
  - fix a special case in conjunction with quotes when parsing sql statements
 
 2012-03-26 tommi@tntnet.org
