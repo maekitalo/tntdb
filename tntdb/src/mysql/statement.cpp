@@ -549,7 +549,7 @@ namespace tntdb
 
       cxxtools::SmartPtr<IRow> ptr;
       while ((ptr = fetchRow()).getPointer() != 0)
-        result->addRow(ptr);
+        result->addRow(ptr.getPointer());
 
       return Result(result);
     }
@@ -575,7 +575,7 @@ namespace tntdb
       if (!ptr)
         throw NotFound();
 
-      return Row(ptr);
+      return Row(ptr.getPointer());
     }
 
     Value Statement::selectValue()

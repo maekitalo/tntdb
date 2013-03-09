@@ -116,7 +116,7 @@ namespace tntdb
     else
     {
       log_debug("statement for query \"" << key << "\" fetched from cache");
-      return Statement(it->second);
+      return Statement(it->second.getPointer());
     }
   }
 
