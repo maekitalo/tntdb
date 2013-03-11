@@ -49,7 +49,7 @@ namespace tntdb
       BindMapType::iterator it = bindMap.find(col);
       if (it == bindMap.end())
         it = bindMap.insert(BindMapType::value_type(col, new Bind())).first;
-      return it->second;
+      return it->second.getPointer();
     }
 
     Statement::Statement(Connection* conn_, const std::string& query_)

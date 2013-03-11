@@ -70,7 +70,7 @@ namespace tntdb
         v[field_num] = new SingleValue(_mr->getValuesByNumber(field_num), _row);
       }
 
-      return tntdb::Value(v[field_num]);
+      return tntdb::Value(v[field_num].getPointer());
     }
 
     tntdb::Value SingleRow::getValueByName(const std::string& field_name) const

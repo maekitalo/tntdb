@@ -49,7 +49,7 @@ namespace tntdb
         stmt->getHandle(), stmt->getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
       stmt->checkError(ret, "OCIStmtExecute");
 
-      MultiRow::Ptr mr = new MultiRow(stmt, fetchsize);
+      MultiRow::Ptr mr = new MultiRow(stmt.getPointer(), fetchsize);
       srow = new SingleRow(mr, 0);
       row = tntdb::Row(srow);
 
