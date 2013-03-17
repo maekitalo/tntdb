@@ -302,9 +302,9 @@ class TntdbBaseTest : public cxxtools::unit::TestSuite
         CXXTOOLS_UNIT_ASSERT(shortNotNull);
         CXXTOOLS_UNIT_ASSERT(longNotNull);
         CXXTOOLS_UNIT_ASSERT(!ushortNotNull);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(intVal, rowcount + 3);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(shortVal, rowcount + 4);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(longVal, rowcount + 5);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(static_cast<unsigned>(intVal), rowcount + 3);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(static_cast<unsigned>(shortVal), rowcount + 4);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(static_cast<unsigned>(longVal), rowcount + 5);
       }
     }
 
@@ -370,9 +370,9 @@ class TntdbBaseTest : public cxxtools::unit::TestSuite
         CXXTOOLS_UNIT_ASSERT(shortNotNull);
         CXXTOOLS_UNIT_ASSERT(longNotNull);
         CXXTOOLS_UNIT_ASSERT(!ushortNotNull);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(intVal, rowcount + 4);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(shortVal, rowcount + 5);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(longVal, rowcount + 6);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(static_cast<unsigned>(intVal), rowcount + 4);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(static_cast<unsigned>(shortVal), rowcount + 5);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(static_cast<unsigned>(longVal), rowcount + 6);
       }
     }
 

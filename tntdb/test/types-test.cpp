@@ -412,16 +412,16 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
          .set("doublecol", doubleval)
          .execute();
 
-      int intres;
-      long longres;
-      unsigned ures;
-      unsigned long ulongres;
-      int32_t int32res;
-      uint32_t uint32res;
-      int64_t int64res;
-      uint64_t uint64res;
-      float floatres;
-      double doubleres;
+      int intres = 0;
+      long longres = 0;
+      unsigned ures = 0;
+      unsigned long ulongres = 0;
+      int32_t int32res = 0;
+      uint32_t uint32res = 0;
+      int64_t int64res = 0;
+      uint64_t uint64res = 0;
+      float floatres = 0;
+      double doubleres = 0;
 
       tntdb::Statement sel = conn.prepare(
         "select"
