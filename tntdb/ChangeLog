@@ -1,3 +1,16 @@
+2013-03-16 tommi@tntnet.org
+
+ - add chapters about business logic, application class and logging to quick start guide
+ - release candidate 1.3rc2
+
+2013-03-11 tommi@tntnet.org
+
+ - do not use implicit conversion of cxxtools::SmartPtr to raw pointer in oracle driver also
+
+2013-03-03 tommi@tntnet.org
+
+ - release candidate 1.3rc1
+
 2013-01-18 tommi@tntnet.org
 
  - fix table locking in oracle driver

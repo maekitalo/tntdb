@@ -1,4 +1,4 @@
-AC_INIT(tntdb, 1.3rc1, [Tommi Maekitalo <tommi@tntnet.org>])
+AC_INIT(tntdb, 1.3rc2, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 
 abi_current=4
