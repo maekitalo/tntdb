@@ -206,7 +206,7 @@ namespace tntdb
 
     long Connection::lastInsertId(const std::string& name)
     {
-      long ret;
+      long ret = 0;
 
       if (name.empty())
       {

@@ -48,7 +48,7 @@ namespace tntdb
 
       std::string name;
       sql.clear();
-      char end_token;
+      char end_token = '\0';
 
       log_debug("parse sql \"" << sqlIn << "\"");
 

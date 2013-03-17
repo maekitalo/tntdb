@@ -114,7 +114,7 @@ namespace tntdb
 
       std::string key;
       std::string* value;
-      char quote;
+      char quote = '\0';
 
       for (const char* p = conn; *p; ++p)
       {
