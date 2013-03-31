@@ -437,7 +437,7 @@ namespace tntdb
       if (_negative)
         v = -v;
 
-      _exponent = static_cast<short>(log10(v)) + 1;
+      _exponent = static_cast<short>(std::log10(v)) + 1;
 
       if (_exponent > std::numeric_limits<long double>::max_exponent10)
       {

@@ -133,7 +133,7 @@ namespace tntdb
 
     int Statement::getBindIndex(const std::string& col)
     {
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
 
       log_debug("sqlite3_bind_parameter_index(" << stmt << ", :" << col  << ')');
       int idx = ::sqlite3_bind_parameter_index(stmt, (':' + col).c_str());
@@ -163,7 +163,7 @@ namespace tntdb
 
     void Statement::clear()
     {
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
       int count = ::sqlite3_bind_parameter_count(stmt);
       for (int i = 0; i < count; ++i)
       {
@@ -176,7 +176,7 @@ namespace tntdb
     void Statement::setNull(const std::string& col)
     {
       int idx = getBindIndex(col);
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
       if (idx != 0)
       {
         reset();
@@ -202,7 +202,7 @@ namespace tntdb
     void Statement::setInt(const std::string& col, int data)
     {
       int idx = getBindIndex(col);
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
       if (idx != 0)
       {
         reset();
@@ -218,7 +218,7 @@ namespace tntdb
     void Statement::setLong(const std::string& col, long data)
     {
       int idx = getBindIndex(col);
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
       if (idx != 0)
       {
         reset();
@@ -280,7 +280,7 @@ namespace tntdb
     void Statement::setInt64(const std::string& col, int64_t data)
     {
       int idx = getBindIndex(col);
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
       if (idx != 0)
       {
         reset();
@@ -321,7 +321,7 @@ namespace tntdb
     void Statement::setDouble(const std::string& col, double data)
     {
       int idx = getBindIndex(col);
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
       if (idx != 0)
       {
         reset();
@@ -337,7 +337,7 @@ namespace tntdb
     void Statement::setChar(const std::string& col, char data)
     {
       int idx = getBindIndex(col);
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
       if (idx != 0)
       {
         reset();
@@ -354,7 +354,7 @@ namespace tntdb
     void Statement::setString(const std::string& col, const std::string& data)
     {
       int idx = getBindIndex(col);
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
       if (idx != 0)
       {
         reset();
@@ -371,7 +371,7 @@ namespace tntdb
     void Statement::setBlob(const std::string& col, const Blob& data)
     {
       int idx = getBindIndex(col);
-      sqlite3_stmt* stmt = getBindStmt();
+      getBindStmt();
       if (idx != 0)
       {
         reset();

@@ -35,6 +35,7 @@
 #include <tntdb/error.h>
 #include <cxxtools/log.h>
 #include <sstream>
+#include <string.h>
 
 log_define("tntdb.replicate.statement")
 
