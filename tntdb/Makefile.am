@@ -13,5 +13,4 @@ SUBDIRS = \
     doc
 
 EXTRA_DIST = \
-    COPYING \
-    m4/acx_pthread.m4
+    COPYING
