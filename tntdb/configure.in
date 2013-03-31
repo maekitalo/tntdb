@@ -17,7 +17,6 @@ AC_CONFIG_SRCDIR([src/connect.cpp])
 
 AC_PROG_CXX
 AC_LANG(C++)
-ACX_PTHREAD
 
 AX_COMPILER_VENDOR
 AS_IF([test "$ax_cv_cxx_compiler_vendor" = "ibm"],

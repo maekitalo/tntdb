@@ -26,5 +26,5 @@ libtntdb_la_SOURCES = \
 	transaction.cpp \
 	valueimpl.cpp
 
-libtntdb_la_LDFLAGS = -version-info @sonumber@ $(PTHREAD_LIBS) @SHARED_LIB_FLAG@
-libtntdb_la_CXXFLAGS = -DDRIVERDIR=\"@driverdir@\" -DABI_CURRENT=\"@abi_current@\" $(PTHREAD_CFLAGS)
+libtntdb_la_LDFLAGS = -version-info @sonumber@ @SHARED_LIB_FLAG@
+libtntdb_la_CXXFLAGS = -DDRIVERDIR=\"@driverdir@\" -DABI_CURRENT=\"@abi_current@\"
