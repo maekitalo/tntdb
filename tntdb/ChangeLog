@@ -1,3 +1,19 @@
+2013-04-08 tommi@tntnet.org
+
+ - release candidate 1.3rc3
+
+2013-03-31 tommi@tntnet.org
+
+ - remove removed m4/acx_pthread.m4 from Makefile.am also
+ - fix compiler warnings
+ - remove pthread checks from tntdb since it is not needed
+
+2013-03-17 tommi@tntnet.org
+
+ - fix some compiler warnings
+ - set preprocesor flags in CPPFLAGS instead of CXXFLAGS
+ - update version number to 1.3rc2; update ChangeLog
+
 2013-03-16 tommi@tntnet.org
 
  - add chapters about business logic, application class and logging to quick start guide
