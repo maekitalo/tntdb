@@ -33,6 +33,7 @@
 #include <tntdb/statement.h>
 #include <oci.h>
 #include <map>
+#include <unistd.h>
 
 namespace tntdb
 {
@@ -47,6 +48,7 @@ namespace tntdb
         OCISvcCtx*  svchp;   /* the service handle */
         typedef std::map<std::string, tntdb::Statement> SeqStmtType;
         SeqStmtType seqStmt;
+        pid_t       pid;
 
         void logon(const std::string& dblink, const std::string& user, const std::string& password);
 

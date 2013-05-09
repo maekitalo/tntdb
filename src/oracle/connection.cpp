@@ -118,6 +118,8 @@ namespace tntdb
       // workaround for OCI problem: OCI redirects SIGINT, which causes Ctrl-C to fail
       SighandlerSaver sighandlerSaver(SIGINT);
 
+      pid = ::getpid();
+
       sword ret;
 
       log_debug("create oracle environment");
@@ -315,6 +317,23 @@ namespace tntdb
     {
       try
       {
+        if (pid != getpid())
+        {
+          // database connection is not valid any more after a fork
+          log_warn("pid has changed; current pid=" << getpid() << " connection pid=" << pid << ", release environment handle");
+
+          clearStatementCache();
+          seqStmt.clear();
+
+          sword ret = OCIHandleFree(envhp, OCI_HTYPE_ENV);
+          if (ret != OCI_SUCCESS)
+            log_error("OCIHandleFree(" << envhp << " OCI_HTYPE_ENV) failed");
+
+          envhp = 0;
+
+          return false;
+        }
+
         // OCIPing crashed on oracle 10.2.0.4.0
 #if OCI_MAJOR_VERSION >= 11
         checkError(OCIPing(svchp, errhp, OCI_DEFAULT), "OCIPing");
