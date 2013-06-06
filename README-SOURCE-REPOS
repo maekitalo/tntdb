@@ -1,0 +1,13 @@
+Installation from source repository
+===================================
+
+In the subversion-repository there is no configure-script, but configure.in,
+which is the source for configure. You need autoconf and automake to
+create configure.  There is a shellscript autogen.sh included, which
+calls the desired programs.
+
+For disable SQLite-Support do
+./configure --with-sqlite=no
+
+For disable MySQL-Support do
+./configure --with-mysql=no
