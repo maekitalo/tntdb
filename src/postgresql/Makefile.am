@@ -2,7 +2,7 @@ INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
 
 sources = connection.cpp connectionmanager.cpp cursor.cpp error.cpp result.cpp resultrow.cpp resultvalue.cpp statement.cpp
 
-AM_CPPFLAGS = @PG_CXXFLAGS@
+AM_CPPFLAGS = @PG_CPPFLAGS@
 
 if MAKE_POSTGRESQL
 

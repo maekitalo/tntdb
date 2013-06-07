@@ -1,7 +1,7 @@
 Tntdb
 =====
 
-Author: Tommi Mäkitalo
+Author: Tommi MÃ¤kitalo
 
 
 Introduction
