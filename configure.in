@@ -128,15 +128,15 @@ then
     AC_MSG_ERROR([postgresql configuration script pg_config was not found])
   fi
 
-  PG_CXXFLAGS=-I`$PG_CONFIG --includedir`
+  PG_CPPFLAGS=-I`$PG_CONFIG --includedir`
   PG_LDFLAGS="-L`$PG_CONFIG --libdir` -lpq"
   AC_SUBST(PG_CONFIG)
-  AC_SUBST(PG_CXXFLAGS)
+  AC_SUBST(PG_CPPFLAGS)
   AC_SUBST(PG_LDFLAGS)
 
   AC_MSG_CHECKING([for PQprepare in libpq-fe.h])
-  save_CXXFLAGS=$CXXFLAGS
-  CXXFLAGS="$CXXFLAGS $PG_CXXFLAGS"
+  save_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS="$CPPFLAGS $PG_CPPFLAGS"
   AC_COMPILE_IFELSE(
     [AC_LANG_SOURCE([#include <libpq-fe.h>
       void t() { PQprepare(0, 0, 0, 0, 0); }])],
@@ -144,7 +144,7 @@ then
      AC_MSG_RESULT(yes)
     ],
      AC_MSG_RESULT(no))
-  CXXFLAGS=$save_CXXFLAGS
+  CPPFLAGS=$save_CPPFLAGS
 fi
 
 AM_CONDITIONAL(MAKE_POSTGRESQL, test "$with_postgresql" = yes)
