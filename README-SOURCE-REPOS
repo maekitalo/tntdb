@@ -6,8 +6,17 @@ which is the source for configure. You need autoconf and automake to
 create configure.  There is a shellscript autogen.sh included, which
 calls the desired programs.
 
-For disable SQLite-Support do
+To disable SQLite support (enabled by default) do
 ./configure --with-sqlite=no
 
-For disable MySQL-Support do
+To disable MySQL support (enabled by default) do
 ./configure --with-mysql=no
+
+To disable Postgresql support (enabled by default) do
+./configure --with-postgresql=no
+
+To disable replication driver (enabled by default) do
+./configure --with-replication=no
+
+To enable Oracle-support (disabled by default) do
+./configure --with-oracle
