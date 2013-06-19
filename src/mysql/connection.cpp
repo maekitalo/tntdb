@@ -89,7 +89,8 @@ namespace tntdb
     }
 
     Connection::Connection(const char* conn)
-      : initialized(false)
+      : initialized(false),
+        transactionActive(0)
     {
       log_debug("Connection::Connection(\"" << conn << "\")");
       std::string app;
