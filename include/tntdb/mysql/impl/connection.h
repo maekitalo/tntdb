@@ -34,8 +34,35 @@
 
 namespace tntdb
 {
+  /**
+
+   This namespace contains the implementation of the Mysql driver for tntdb.
+
+   The driver makes it possible to access a Mysql database using tntdb.
+
+   To get a connection to a Mysql database, the dburl to the tntdb::connect function
+   must start with "mysql:".
+
+   The remaining is a list of name value pairs separated by semicolon. The names and
+   values are separated by '='. The value may be quoted by single or double quotes.
+   Quote characters inside quoted values may be escaped using a backspace. If the value
+   contains itself a backspace character, it must be doubled. Indeed each character
+   prefixed with backspace is kept as is into the value.
+
+   A typical connection with a Mysql driver looks like that:
+
+   @code
+     tntdb::Connection conn = tntdb::connect("mysql:db=DS2;user=web;passwd='foo\\'bar");
+   @endcode
+
+   Here the username is "web" and the password is "foo'bar". Note that the backslash
+   itself must be doubled in C++ code since the compiler processes the backspace first.
+
+   */
+
   namespace mysql
   {
+    /// Implements a connection to a Mysql database.
     class Connection : public IStmtCacheConnection
     {
         MYSQL mysql;

@@ -37,6 +37,29 @@
 
 namespace tntdb
 {
+  /**
+
+   This namespace contains the implementation of the Oracle driver for tntdb.
+   Note that the oracle driver is not compiled by default when tntdb is built.
+   It must be enabled using the configure switch --with-oracle.
+
+   The driver makes it possible to access a Oracle database using tntdb.
+
+   To get a connection to a Oracle database, the dburl to the tntdb::connect function
+   must start with "oracle:". The remaining string specifies the connection parameters
+   to the oracle database.
+
+   The attributes user and passwd are extracted and the rest is passed to the
+   `OCIServerAttach` function of OCI.
+
+   A typical connection with a Oracle driver looks like that:
+
+   @code
+     tntdb::Connection conn = tntdb::connect("oracle:XE;user=hr;passwd=hr");
+   @endcode
+
+   */
+
   namespace oracle
   {
     class Connection : public IStmtCacheConnection

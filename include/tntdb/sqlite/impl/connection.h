@@ -34,8 +34,29 @@
 
 namespace tntdb
 {
+  /**
+
+   This namespace contains the implementation of the Sqlite driver for tntdb.
+
+   The driver makes it possible to access a Sqlite3 database using tntdb.
+
+   Note that only sqlite api version 3 is supported.
+
+   To get a connection to a Sqlite3 file, the dburl to the tntdb::connect
+   function must start with "sqlite:". The remaining string is passed to the
+   `sqlite3_open` function of sqlite.
+
+   A typical connection with a Sqlite3 driver looks like that:
+
+   @code
+     tntdb::Connection conn = tntdb::connect("sqlite:mydatabase.db");
+   @endcode
+
+   */
+
   namespace sqlite
   {
+    /// Implements a connection to a Sqlite3 database file.
     class Connection : public IStmtCacheConnection
     {
         sqlite3* db;

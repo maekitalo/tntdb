@@ -36,8 +36,27 @@
 
 namespace tntdb
 {
+  /**
+
+   This namespace contains the implementation of the PostgreSQL driver for tntdb.
+
+   The driver makes it possible to access a PostgreSQL database using tntdb.
+
+   To get a connection to a PostgreSQL database, the dburl to the tntdb::connect
+   function must start with "postgresql:". The remaining string is passed to the
+   `PQconnectdb` function of libpq.
+
+   A typical connection with a PostgreSQL driver looks like that:
+
+   @code
+     tntdb::Connection conn = tntdb::connect("postgresql:host=localhost port=5432 dbname=mydb user=foo password=bar");
+   @endcode
+
+   */
+
   namespace postgresql
   {
+    /// Implements a connection to a PostgreSQL database.
     class Connection : public IStmtCacheConnection
     {
         PGconn* conn;
@@ -70,6 +89,7 @@ namespace tntdb
         void deallocateStatements();
     };
 
+    /// @cond internal
     inline bool isError(const PGresult* res)
     {
       ExecStatusType status = PQresultStatus(res);
@@ -78,6 +98,7 @@ namespace tntdb
           && status != PGRES_COPY_OUT
           && status != PGRES_COPY_IN;
     }
+    /// @endcond internal
 
   }
 }
