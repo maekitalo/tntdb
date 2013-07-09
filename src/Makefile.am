@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
 
 lib_LTLIBRARIES = libtntdb.la
 

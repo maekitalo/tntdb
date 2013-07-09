@@ -8,7 +8,5 @@ prodbench_SOURCES = prodbench.cpp
 pooldemo_SOURCES = pooldemo.cpp
 serial_SOURCES = serial.cpp
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
-AM_CXXFLAGS = $(PTHREAD_CFLAGS)
-AM_LDFLAGS = $(PTHREAD_LIBS)
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
 LDADD = $(top_builddir)/src/libtntdb.la
