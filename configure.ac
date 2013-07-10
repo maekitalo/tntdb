@@ -1,5 +1,6 @@
 AC_INIT(tntdb, 1.3rc3, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
+LT_INIT([disable-static])
 
 abi_current=4
 abi_revision=0
@@ -7,8 +8,6 @@ abi_age=0
 sonumber=${abi_current}:${abi_revision}:${abi_age}
 AC_SUBST(sonumber)
 AC_SUBST(abi_current)
-
-unset CDPATH
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([src/config.h])
@@ -35,31 +34,27 @@ AC_COMPILE_IFELSE(
   has_sighandler_t=yes,has_sighandler_t=no)
 
 AC_MSG_RESULT($has_sighandler_t)
-if test "$has_sighandler_t" = "yes" ; then
-    AC_DEFINE( HAVE_SIGHANDLER_T, 1, [Define if sighandler_t available] )
-fi
+AS_IF([test "$has_sighandler_t" = "yes"],
+    [AC_DEFINE( HAVE_SIGHANDLER_T, 1, [Define if sighandler_t available] )])
 
 #
 # check standard integer types
 #
 AC_TYPE_LONG_LONG_INT
 AC_TYPE_UNSIGNED_LONG_LONG_INT
-if test "$ac_cv_type_long_long_int" = yes; then
-    HAVE_LONG_LONG=HAVE_LONG_LONG
-else
-    HAVE_LONG_LONG=NO_LONG_LONG
-fi
+AS_IF(
+    [test "$ac_cv_type_long_long_int" = yes],
+    [HAVE_LONG_LONG=HAVE_LONG_LONG],
+    [HAVE_LONG_LONG=NO_LONG_LONG])
 
 AC_SUBST(HAVE_LONG_LONG, "$HAVE_LONG_LONG")
 
-if test "$ac_cv_type_unsigned_long_long_int" = yes; then
-    HAVE_UNSIGNED_LONG_LONG=HAVE_UNSIGNED_LONG_LONG
-else
-    AC_MSG_WARN([unsigned long long not found ($ac_cv_type_unsigned_long_long_int)]);
-    HAVE_UNSIGNED_LONG_LONG=NO_UNSIGNED_LONG_LONG
-fi
-AC_SUBST(HAVE_UNSIGNED_LONG_LONG, "$HAVE_UNSIGNED_LONG_LONG")
+AS_IF([test "$ac_cv_type_unsigned_long_long_int" = yes],
+    [HAVE_UNSIGNED_LONG_LONG=HAVE_UNSIGNED_LONG_LONG]
+    [AC_MSG_WARN([unsigned long long not found ($ac_cv_type_unsigned_long_long_int)]);
+     HAVE_UNSIGNED_LONG_LONG=NO_UNSIGNED_LONG_LONG])
 
+AC_SUBST(HAVE_UNSIGNED_LONG_LONG, "$HAVE_UNSIGNED_LONG_LONG")
 
 AC_COMPILE_IFELSE(
   [AC_LANG_SOURCE([
@@ -117,12 +112,12 @@ LDFLAGS="$LDFLAGS -lcxxtools"
 AC_ARG_WITH(
   [postgresql],
   AS_HELP_STRING([--with-postgresql],
-                 [build postgresql-driver (default: yes)]),
+                 [build postgresql driver (default: yes)]),
   [with_postgresql=$withval],
   [with_postgresql=yes])
 
-if test "$with_postgresql" = yes
-then
+AS_IF([test "$with_postgresql" = yes],
+[
   AC_PATH_PROGS(PG_CONFIG, pg_config)
   if ! test -x "$PG_CONFIG"; then
     AC_MSG_ERROR([postgresql configuration script pg_config was not found])
@@ -145,21 +140,9 @@ then
     ],
      AC_MSG_RESULT(no))
   CPPFLAGS=$save_CPPFLAGS
-fi
+])
 
 AM_CONDITIONAL(MAKE_POSTGRESQL, test "$with_postgresql" = yes)
-
-#
-# Replicate
-#
-AC_ARG_WITH(
-  [replicate],
-  AS_HELP_STRING([--with-replicate],
-                 [build replicate-driver (default: yes)]),
-  [with_replicate=$withval],
-  [with_replicate=yes])
-
-AM_CONDITIONAL(MAKE_REPLICATE, test "$with_replicate" = yes)
 
 #
 # mysql
@@ -167,12 +150,12 @@ AM_CONDITIONAL(MAKE_REPLICATE, test "$with_replicate" = yes)
 AC_ARG_WITH(
   [mysql],
   AS_HELP_STRING([--with-mysql],
-                 [build mysql-driver (default: yes)]),
+                 [build mysql driver (default: yes)]),
   [ with_mysql=$withval ],
   [ with_mysql=yes ])
 
-if test "$with_mysql" = yes
-then
+AS_IF([test "$with_mysql" = yes],
+[
   AC_PATH_PROGS(MYSQL_CONFIG, mysql_config)
   if ! test -x "$MYSQL_CONFIG"; then
     AC_MSG_ERROR([mysql configuration script was not found])
@@ -184,7 +167,7 @@ then
   AC_SUBST(MYSQL_CONFIG)
   AC_SUBST(MYSQL_CFLAGS)
   AC_SUBST(MYSQL_LDFLAGS)
-fi
+])
 
 AM_CONDITIONAL(MAKE_MYSQL, test "$with_mysql" = yes)
 
@@ -194,12 +177,12 @@ AM_CONDITIONAL(MAKE_MYSQL, test "$with_mysql" = yes)
 AC_ARG_WITH(
   [sqlite],
   AS_HELP_STRING([--with-sqlite],
-                 [build sqlite-driver (default: yes)]),
+                 [build sqlite driver (default: yes)]),
   [with_sqlite=$withval],
   [with_sqlite=yes])
 
-if test "$with_sqlite" = yes
-then
+AS_IF([test "$with_sqlite" = yes],
+[
   AC_CHECK_HEADER([sqlite3.h], , AC_MSG_ERROR([header for sqlite3 not found]))
 
   # check for sqlite3_transfer_bindings
@@ -208,27 +191,27 @@ then
       void t() { sqlite3_transfer_bindings(0, 0); }])],
     [AC_MSG_RESULT(yes)],
     [AC_MSG_ERROR([sqlite3_transfer_bindings is missing])])
-
-fi
+])
 
 AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes)
 
 #
 # Oracle
 #
+AX_LIB_ORACLE_OCI([8])
+AM_CONDITIONAL(MAKE_ORACLE, test "$HAVE_ORACLE_OCI" == "yes")
+
+#
+# Replicate
+#
 AC_ARG_WITH(
-  [oracle],
-  AS_HELP_STRING([--with-oracle],
-                 [build oracle-driver (default: no)]),
-  [with_oracle=$withval],
-  [with_oracle=no])
+  [replicate],
+  AS_HELP_STRING([--with-replicate],
+                 [build replicate driver (default: yes)]),
+  [with_replicate=$withval],
+  [with_replicate=yes])
 
-if test "$with_oracle" = yes
-then
-  AC_CHECK_HEADER([oci.h], , AC_MSG_ERROR([header for oracle not found]))
-fi
-
-AM_CONDITIONAL(MAKE_ORACLE, test "$with_oracle" = yes)
+AM_CONDITIONAL(MAKE_REPLICATE, test "$with_replicate" = yes)
 
 #
 # Doxygen-documentation
@@ -241,15 +224,15 @@ AC_ARG_WITH(
   [doxygenFlag=$withval],
   [doxygenFlag=no])
 
-if test "$doxygenFlag" != "no"
-  then
+AS_IF([test "$doxygenFlag" != "no"],
+[
     AC_CHECK_PROG(DOXYGEN, doxygen, doxygen)
     if test "$DOXYGEN" == ""
       then
         AC_MSG_ERROR([doxygen not found])
       fi
     AC_DEFINE(WITH_DOXYGEN, 1, [build doxygen documentation])
-  fi
+])
 
 AM_CONDITIONAL(MAKE_DOXYGEN, test "$doxygenFlag" != "no")
 AC_SUBST(DOXYGEN)
@@ -263,10 +246,8 @@ AC_ARG_WITH(
   [driverdir=$libdir/tntdb])
 AC_SUBST(driverdir)
 
-if test "$driverdir" == "yes"
-  then
-    driverdir=$libdir/tntdb
-  fi
+AS_IF([test "$driverdir" == "yes"],
+    [driverdir=$libdir/tntdb])
 
 # additional shared library checks
 case "${host_cpu}-${host_os}" in
