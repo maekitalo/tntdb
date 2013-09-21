@@ -42,6 +42,7 @@
 #include <sstream>
 #include <limits>
 #include <cxxtools/log.h>
+#include "config.h"
 
 log_define("tntdb.sqlite.statement")
 
@@ -82,12 +83,21 @@ namespace tntdb
 
         // prepare statement
         const char* tzTail;
+#ifdef HAVE_SQLITE3_PREPARE_V2
+        log_debug("sqlite3_prepare_v2(" << conn->getSqlite3() << ", \"" << query
+          << "\", " << &stmt << ", " << &tzTail << ')');
+        int ret = ::sqlite3_prepare_v2(conn->getSqlite3(), query.data(), query.size(), &stmt, &tzTail);
+
+        if (ret != SQLITE_OK)
+          throw Execerror("sqlite3_prepare_v2", conn->getSqlite3(), ret);
+#else
         log_debug("sqlite3_prepare(" << conn->getSqlite3() << ", \"" << query
           << "\", " << &stmt << ", " << &tzTail << ')');
         int ret = ::sqlite3_prepare(conn->getSqlite3(), query.data(), query.size(), &stmt, &tzTail);
 
         if (ret != SQLITE_OK)
           throw Execerror("sqlite3_prepare", conn->getSqlite3(), ret);
+#endif
 
         log_debug("sqlite3_stmt = " << stmt);
 
@@ -408,13 +418,10 @@ namespace tntdb
       log_debug("sqlite3_step(" << stmt << ')');
       int ret = sqlite3_step(stmt);
 
-      if (ret == SQLITE_ERROR)
-        throw Execerror("sqlite3_step", stmt, ret);
-      else if (ret != SQLITE_DONE)
+      if (ret != SQLITE_DONE && ret != SQLITE_ROW)
       {
-        std::ostringstream msg;
-        msg << "unexpected returncode " << ret << " from sqlite3_step";
-        throw SqliteError("sqlite3_step", msg.str());
+        log_debug("sqlite3_step failed with return code " << ret);
+        throw Execerror("sqlite3_step", stmt, ret);
       }
 
       int n = ::sqlite3_changes(::sqlite3_db_handle(stmt));
@@ -437,9 +444,7 @@ namespace tntdb
         log_debug("sqlite3_step(" << stmt << ')');
         ret = sqlite3_step(stmt);
 
-        if (ret == SQLITE_ERROR)
-          throw Execerror("sqlite3_step", stmt, ret);
-        else if (ret == SQLITE_ROW)
+        if (ret == SQLITE_ROW)
         {
           log_debug("sqlite3_column_count(" << stmt << ')');
           int count = ::sqlite3_column_count(stmt);
@@ -473,9 +478,8 @@ namespace tntdb
         }
         else if (ret != SQLITE_DONE)
         {
-          std::ostringstream msg;
-          msg << "unexpected returncode " << ret;
-          throw SqliteError("sqlite3_step", msg.str());
+          log_debug("sqlite3_step failed with return code " << ret);
+          throw Execerror("sqlite3_step", stmt, ret);
         }
 
       } while (ret == SQLITE_ROW);
@@ -491,9 +495,7 @@ namespace tntdb
       log_debug("sqlite3_step(" << stmt << ')');
       int ret = sqlite3_step(stmt);
 
-      if (ret == SQLITE_ERROR)
-        throw Execerror("sqlite3_step", stmt, ret);
-      else if (ret == SQLITE_DONE)
+      if (ret == SQLITE_DONE)
         throw NotFound();
       else if (ret == SQLITE_ROW)
       {
@@ -530,9 +532,8 @@ namespace tntdb
       }
       else
       {
-        std::ostringstream msg;
-        msg << "unexpected returncode " << ret;
-        throw SqliteError("sqlite3_step", msg.str());
+        log_debug("sqlite3_step failed with return code " << ret);
+        throw Execerror("sqlite3_step", stmt, ret);
       }
     }
 
@@ -544,12 +545,7 @@ namespace tntdb
       log_debug("sqlite3_step(" << stmt << ')');
       int ret = sqlite3_step(stmt);
 
-      if (ret == SQLITE_ERROR)
-      {
-        log_debug("sqlite3_step returned SQLITE_ERROR");
-        throw Execerror("sqlite3_step", stmt, ret);
-      }
-      else if (ret == SQLITE_DONE)
+      if (ret == SQLITE_DONE)
       {
         log_debug("sqlite3_step returned SQLITE_DONE => NotFound");
         throw NotFound();
@@ -580,9 +576,8 @@ namespace tntdb
       }
       else
       {
-        std::ostringstream msg;
-        msg << "unexpected returncode " << ret;
-        throw SqliteError("sqlite3_step", msg.str());
+        log_debug("sqlite3_step failed with return code " << ret);
+        throw Execerror("sqlite3_step", stmt, ret);
       }
     }
 
