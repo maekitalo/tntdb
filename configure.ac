@@ -193,6 +193,15 @@ AS_IF([test "$with_sqlite" = yes],
       void t() { sqlite3_transfer_bindings(0, 0); }])],
     [AC_MSG_RESULT(yes)],
     [AC_MSG_ERROR([sqlite3_transfer_bindings is missing])])
+
+  # check for sqlite3_prepare_v2
+  AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([#include <sqlite3.h>
+      void t() { sqlite3_prepare_v2(0, 0, 0, 0, 0); }])],
+    [AC_DEFINE(HAVE_SQLITE3_PREPARE_V2, 1, [Defined if sqlite have sqlite3_prepare_v2])
+     AC_MSG_RESULT(yes)
+    ],
+     AC_MSG_RESULT(no))
 ])
 
 AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes)
