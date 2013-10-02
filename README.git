@@ -5,7 +5,7 @@ In the subversion-repository there is no configure-script, but configure.ac,
 which is the source for configure. You need autoconf and automake to
 create configure.
 
-Run `autoscan -i` to generate the configure script.
+Run `autoreconf -i` to generate the configure script.
 
 To disable SQLite support (enabled by default) do
 ./configure --with-sqlite=no
