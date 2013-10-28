@@ -1,7 +1,7 @@
 Installation from source repository
 ===================================
 
-In the subversion-repository there is no configure-script, but configure.ac,
+In the git repository there is no configure-script, but configure.ac,
 which is the source for configure. You need autoconf and automake to
 create configure.
 
