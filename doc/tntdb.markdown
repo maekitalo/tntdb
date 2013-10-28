@@ -39,7 +39,7 @@ consists of the driver name and a database dependent part divided by a colon.
 
     #include <tntdb/connection.h>
     #include <tntdb/connect.h>
-    int main(int argc, char* argv)
+    int main(int argc, char** argv)
     {
       tntdb::Connection conn = tntdb::connect("sqlite:mydb.db");
     }
@@ -54,7 +54,7 @@ so we add exceptionhandling in the second example:
 
     #include <tntdb/connection.h>
     #include <tntdb/connect.h>
-    int main(int argc, char* argv)
+    int main(int argc, char** argv)
     {
       try
       {
@@ -168,7 +168,7 @@ number of affected rows.
     #include <tntdb/connection.h>
     #include <tntdb/connect.h>
 
-    int main(int argc, char* argv)
+    int main(int argc, char** argv)
     {
       try
       {
