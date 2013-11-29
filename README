@@ -42,3 +42,18 @@ To install tntdb, you need cxxtools (http://www.tntnet.org/).
 This version needs at least cxxtools version 1.4
 
 You can find generic installation instructions in the file INSTALL.
+
+To disable SQLite support (enabled by default) do
+./configure --with-sqlite=no
+
+To disable MySQL support (enabled by default) do
+./configure --with-mysql=no
+
+To disable Postgresql support (enabled by default) do
+./configure --with-postgresql=no
+
+To disable replication driver (enabled by default) do
+./configure --with-replication=no
+
+To enable Oracle-support (disabled by default) do
+./configure --with-oracle
