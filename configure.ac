@@ -41,7 +41,6 @@ AS_IF([test "$has_sighandler_t" = "yes"],
 # check standard integer types
 #
 AC_TYPE_LONG_LONG_INT
-AC_TYPE_UNSIGNED_LONG_LONG_INT
 AS_IF(
     [test "$ac_cv_type_long_long_int" = yes],
     [HAVE_LONG_LONG=HAVE_LONG_LONG],
@@ -49,10 +48,11 @@ AS_IF(
 
 AC_SUBST(HAVE_LONG_LONG, "$HAVE_LONG_LONG")
 
-AS_IF([test "$ac_cv_type_unsigned_long_long_int" = yes],
-    [HAVE_UNSIGNED_LONG_LONG=HAVE_UNSIGNED_LONG_LONG]
-    [AC_MSG_WARN([unsigned long long not found ($ac_cv_type_unsigned_long_long_int)]);
-     HAVE_UNSIGNED_LONG_LONG=NO_UNSIGNED_LONG_LONG])
+AC_TYPE_UNSIGNED_LONG_LONG_INT
+AS_IF(
+    [test "$ac_cv_type_unsigned_long_long_int" = yes],
+    [HAVE_UNSIGNED_LONG_LONG=HAVE_UNSIGNED_LONG_LONG],
+    [HAVE_UNSIGNED_LONG_LONG=NO_UNSIGNED_LONG_LONG])
 
 AC_SUBST(HAVE_UNSIGNED_LONG_LONG, "$HAVE_UNSIGNED_LONG_LONG")
 
@@ -188,6 +188,7 @@ AS_IF([test "$with_sqlite" = yes],
   AC_CHECK_HEADER([sqlite3.h], , AC_MSG_ERROR([header for sqlite3 not found]))
 
   # check for sqlite3_transfer_bindings
+  AC_MSG_CHECKING([for sqlite3_transfer_bindings])
   AC_COMPILE_IFELSE(
     [AC_LANG_SOURCE([#include <sqlite3.h>
       void t() { sqlite3_transfer_bindings(0, 0); }])],
@@ -195,6 +196,7 @@ AS_IF([test "$with_sqlite" = yes],
     [AC_MSG_ERROR([sqlite3_transfer_bindings is missing])])
 
   # check for sqlite3_prepare_v2
+  AC_MSG_CHECKING([for sqlite3_prepare_v2])
   AC_COMPILE_IFELSE(
     [AC_LANG_SOURCE([#include <sqlite3.h>
       void t() { sqlite3_prepare_v2(0, 0, 0, 0, 0); }])],
