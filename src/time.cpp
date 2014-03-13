@@ -65,16 +65,16 @@ namespace tntdb
     // format hh:mm:ss.sss
     //        0....+....1....+
     char ret[14];
-    ret[0] = '0' + hour / 10;
-    ret[1] = '0' + hour % 10;
+    ret[0] = '0' + _hour / 10;
+    ret[1] = '0' + _hour % 10;
     ret[2] = ':';
-    ret[3] = '0' + minute / 10;
-    ret[4] = '0' + minute % 10;
+    ret[3] = '0' + _minute / 10;
+    ret[4] = '0' + _minute % 10;
     ret[5] = ':';
-    ret[6] = '0' + second / 10;
-    ret[7] = '0' + second % 10;
+    ret[6] = '0' + _second / 10;
+    ret[7] = '0' + _second % 10;
     ret[8] = '.';
-    unsigned short n = millis;
+    unsigned short n = _millis;
     ret[11] = '0' + n % 10;
     n /= 10;
     ret[10] = '0' + n % 10;
@@ -89,6 +89,7 @@ namespace tntdb
     if (!std::isdigit(s[0])
       || !std::isdigit(s[1]))
       throw TypeError();
+
     return (s[0] - '0') * 10
          + (s[1] - '0');
   }
@@ -99,6 +100,7 @@ namespace tntdb
       || !std::isdigit(s[1])
       || !std::isdigit(s[2]))
       throw TypeError();
+
     return (s[0] - '0') * 100
          + (s[1] - '0') * 10
          + (s[2] - '0');
@@ -134,5 +136,5 @@ namespace tntdb
 
     return ret;
   }
-
 }
+

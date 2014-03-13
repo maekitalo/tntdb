@@ -63,9 +63,9 @@ namespace tntdb
   {
     struct tm tm;
     memset(&tm, 0, sizeof(struct tm));
-    tm.tm_mday = day;
-    tm.tm_mon = month - 1;
-    tm.tm_year = year - 1900;
+    tm.tm_mday = _day;
+    tm.tm_mon = _month - 1;
+    tm.tm_year = _year - 1900;
 
     time_t t = mktime(&tm);
     localtime_r(&t, &tm);
@@ -79,7 +79,7 @@ namespace tntdb
     // format YYYY-MM-DD
     //        0....+....1
     char ret[10];
-    unsigned short n = year;
+    unsigned short n = _year;
     ret[3] = '0' + n % 10;
     n /= 10;
     ret[2] = '0' + n % 10;
@@ -88,11 +88,11 @@ namespace tntdb
     n /= 10;
     ret[0] = '0' + n % 10;
     ret[4] = '-';
-    ret[5] = '0' + month / 10;
-    ret[6] = '0' + month % 10;
+    ret[5] = '0' + _month / 10;
+    ret[6] = '0' + _month % 10;
     ret[7] = '-';
-    ret[8] = '0' + day / 10;
-    ret[9] = '0' + day % 10;
+    ret[8] = '0' + _day / 10;
+    ret[9] = '0' + _day % 10;
 
     return std::string(ret, 10);
   }

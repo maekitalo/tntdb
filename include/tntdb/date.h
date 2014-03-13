@@ -33,76 +33,82 @@
 
 namespace tntdb
 {
-  /**
-   * This class holds a date.
-   */
+  /// This class holds a date.
   class Date
   {
-      unsigned short year;
-      unsigned short month;
-      unsigned short day;
+    private:
+      unsigned short _year;
+      unsigned short _month;
+      unsigned short _day;
 
     public:
-      /// Initializes the Date-object with empty values.
+      /// Create a Date object with empty values
       Date()
-        : year(0), month(0), day(0)
+        : _year(0), _month(0), _day(0)
         { }
 
-      /// Initializes the date-object with the given values.
-      /// No range-checks are done.
-      Date(unsigned short year_,
-           unsigned short month_,
-           unsigned short day_)
-        : year(year_),
-          month(month_),
-          day(day_)
+      /** Create a date object with the given values
+
+          No range checks are done.
+       */
+      Date(unsigned short year,
+           unsigned short month,
+           unsigned short day)
+        : _year(year),
+          _month(month),
+          _day(day)
           { }
 
       static Date localtime();
       static Date gmtime();
 
-      /// Returns the year-part of the Date.
-      unsigned short getYear() const     { return year; }
-      /// Returns the month-part of the Date.
-      unsigned short getMonth() const    { return month; }
-      /// Returns the day-part of the Date.
-      unsigned short getDay() const      { return day; }
-      /// Returns the day of week of the Date (0=sunday to 6=saturday).
+      /// Get the year part of the Date
+      unsigned short getYear() const  { return _year; }
+      /// Get the month part of the Date
+      unsigned short getMonth() const { return _month; }
+      /// Get the day part of the Date
+      unsigned short getDay() const   { return _day; }
+      /// Get the day of week of the Date (from 0 = sunday to 6 = saturday)
       unsigned short getWDay() const;
 
-      bool isNull() const  { return month == 0; }
+      bool isNull() const  { return _month == 0; }
 
-      /// sets the date.
-      void set(unsigned short year_,
-               unsigned short month_,
-               unsigned short day_)
+      /// Set the date
+      void set(unsigned short year,
+               unsigned short month,
+               unsigned short day)
       {
-        year = year_;
-        month = month_;
-        day = day_;
+        _year = year;
+        _month = month;
+        _day = day;
       }
 
-      /// returns the date in ISO-format (yyyy-mm-dd)
+      /// Get the date in ISO format (yyyy-mm-dd)
       std::string getIso() const;
-      /// interprets the passed string as a date-string in ISO-format (yyyy-mm-dd) and returns a Date-object.
-      /// When the string is not in ISO-format, a exception of type tntdb::TypeError is thrown.
+
+      /** Construct a Date object from the given ISO date string
+
+          If the string is not in ISO format, an exception of type tntdb::TypeError is thrown.
+       */
       static Date fromIso(const std::string& s);
 
       bool operator== (const Date& dt) const
-      { return year == dt.year
-            && month == dt.month
-            && day == dt.day; }
+      {
+        return _year == dt._year
+          && _month  == dt._month
+          && _day    == dt._day;
+      }
 
       bool operator!= (const Date& dt) const
         { return !operator==(dt); }
 
       bool operator< (const Date& dt) const
       {
-        return year   < dt.year   ? true
-             : year   > dt.year   ? false
-             : month  < dt.month  ? true
-             : month  > dt.month  ? false
-             : day    < dt.day;
+        return _year < dt._year  ? true
+          : _year    > dt._year  ? false
+          : _month   < dt._month ? true
+          : _month   > dt._month ? false
+          : _day     < dt._day;
       }
 
       bool operator> (const Date& dt) const

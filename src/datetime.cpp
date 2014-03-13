@@ -67,7 +67,7 @@ namespace tntdb
     // format YYYY-MM-DD hh:mm:ss.sss
     //        0....+....1....+....2....+
     char ret[25];
-    unsigned short n = year;
+    unsigned short n = _year;
     ret[3] = '0' + n % 10;
     n /= 10;
     ret[2] = '0' + n % 10;
@@ -76,22 +76,22 @@ namespace tntdb
     n /= 10;
     ret[0] = '0' + n % 10;
     ret[4] = '-';
-    ret[5] = '0' + month / 10;
-    ret[6] = '0' + month % 10;
+    ret[5] = '0' + _month / 10;
+    ret[6] = '0' + _month % 10;
     ret[7] = '-';
-    ret[8] = '0' + day / 10;
-    ret[9] = '0' + day % 10;
+    ret[8] = '0' + _day / 10;
+    ret[9] = '0' + _day % 10;
     ret[10] = ' ';
-    ret[11] = '0' + hour / 10;
-    ret[12] = '0' + hour % 10;
+    ret[11] = '0' + _hour / 10;
+    ret[12] = '0' + _hour % 10;
     ret[13] = ':';
-    ret[14] = '0' + minute / 10;
-    ret[15] = '0' + minute % 10;
+    ret[14] = '0' + _minute / 10;
+    ret[15] = '0' + _minute % 10;
     ret[16] = ':';
-    ret[17] = '0' + second / 10;
-    ret[18] = '0' + second % 10;
+    ret[17] = '0' + _second / 10;
+    ret[18] = '0' + _second % 10;
     ret[19] = '.';
-    n = millis;
+    n = _millis;
     ret[22] = '0' + n % 10;
     n /= 10;
     ret[21] = '0' + n % 10;
@@ -172,5 +172,5 @@ namespace tntdb
 
     return ret;
   }
-
 }
+
