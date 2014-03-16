@@ -137,7 +137,7 @@ namespace tntdb
       return ptr.getPointer();
     }
 
-    Statement::Statement(const tntdb::Connection& conn_, MYSQL* mysql_,
+    Statement::Statement(Connection* conn_, MYSQL* mysql_,
       const std::string& query_)
       : conn(conn_),
         mysql(mysql_),
@@ -517,7 +517,7 @@ namespace tntdb
       log_debug("execute statement " << stmt);
       if (hostvarMap.empty())
       {
-        return conn.execute(query);
+        return conn->execute(query);
       }
       else
       {
@@ -533,7 +533,7 @@ namespace tntdb
       log_debug("select");
 
       if (hostvarMap.empty())
-        return conn.select(query);
+        return conn->select(query);
 
       if (fields)
         getRow();
@@ -559,7 +559,7 @@ namespace tntdb
       log_debug("selectRow");
 
       if (hostvarMap.empty())
-        return conn.selectRow(query);
+        return conn->selectRow(query);
 
       if (fields)
         getRow();

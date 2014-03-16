@@ -129,11 +129,13 @@ AS_IF([test "$with_postgresql" = yes],
   AC_SUBST(PG_CPPFLAGS)
   AC_SUBST(PG_LDFLAGS)
 
+  save_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS="$CPPFLAGS $PG_CPPFLAGS"
+
   AC_CHECK_HEADER([libpq-fe.h], , AC_MSG_ERROR([postgresql headers not found]))
 
   AC_MSG_CHECKING([for PQprepare in libpq-fe.h])
-  save_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS="$CPPFLAGS $PG_CPPFLAGS"
+
   AC_COMPILE_IFELSE(
     [AC_LANG_SOURCE([#include <libpq-fe.h>
       void t() { PQprepare(0, 0, 0, 0, 0); }])],

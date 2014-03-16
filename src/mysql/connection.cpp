@@ -355,7 +355,7 @@ namespace tntdb
 
     tntdb::Statement Connection::prepare(const std::string& query)
     {
-      return tntdb::Statement(new Statement(tntdb::Connection(this), &mysql, query));
+      return tntdb::Statement(new Statement(this, &mysql, query));
     }
 
     bool Connection::ping()
