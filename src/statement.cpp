@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
 #include <tntdb/statement.h>
 #include <tntdb/result.h>
 #include <tntdb/row.h>
@@ -40,36 +41,36 @@ namespace tntdb
   Statement::size_type Statement::execute()
   {
     log_trace("Statement::execute()");
-    return stmt->execute();
+    return _stmt->execute();
   }
 
   Result Statement::select()
   {
     log_trace("Statement::select()");
-    return stmt->select();
+    return _stmt->select();
   }
 
   Row Statement::selectRow()
   {
     log_trace("Statement::selectRow()");
-    return stmt->selectRow();
+    return _stmt->selectRow();
   }
 
   Value Statement::selectValue()
   {
     log_trace("Statement::selectValue()");
-    return stmt->selectValue();
+    return _stmt->selectValue();
   }
 
   Statement::const_iterator Statement::begin(unsigned fetchsize) const
   {
     log_trace("Statement::begin(" << fetchsize << ')');
-    return const_iterator(stmt->createCursor(fetchsize));
+    return const_iterator(_stmt->createCursor(fetchsize));
   }
 
   void IStatement::setUString(const std::string& col, const cxxtools::String& data)
   {
     setString(col, cxxtools::Utf8Codec::encode(data));
   }
-
 }
+

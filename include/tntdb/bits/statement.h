@@ -52,14 +52,13 @@ namespace tntdb
   class Time;
   class Datetime;
 
-  /**
-   * This class represents a sql-statement. A statement can have parameters,
-   * which are referenced by name, called hostvariables. They are prefixed with
-   * a colon followed by a name. A name starts with a letter followed by
-   * alphanumeric characters or underscore. Hostvariables are not searched in
-   * strings (between apostrophes, quotation marks or backticks). The backslash
-   * prevents the interpretation of a special meaning of the following
-   * character.
+  /** This class represents an SQL statement
+
+      A statement can have parameters, which are referenced by name, called host variables.
+      They are prefixed with a colon followed by a name. A name starts with a letter
+      followed by alphanumeric characters or underscores. Host variables are not searched
+      in strings (between apostrophes, quotation marks or backticks). A backslash prevents
+      the interpretation of a special meaning of the following character.
    */
   class Statement
   {
@@ -68,181 +67,149 @@ namespace tntdb
       typedef IStatement::size_type size_type;
 
     private:
-      cxxtools::SmartPtr<IStatement> stmt;
+      cxxtools::SmartPtr<IStatement> _stmt;
 
     public:
-      Statement(IStatement* stmt_ = 0)
-        : stmt(stmt_)
+      Statement(IStatement* stmt = 0)
+        : _stmt(stmt)
         { }
 
-      /**
-       * Sets all hostvariables to NULL.
-       */
+      /// Set all host variables to NULL
       Statement& clear()
-        { stmt->clear(); return *this; }
-      /**
-       * Sets the hostvariable with the given name to NULL.
-       */
-      Statement& setNull(const std::string& col)
-        { stmt->setNull(col); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a boolean value.
-       */
-      Statement& setBool(const std::string& col, bool data)
-        { stmt->setBool(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a short value.
-       */
-      Statement& setShort(const std::string& col, short data)
-        { stmt->setShort(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a int value.
-       */
-      Statement& setInt(const std::string& col, int data)
-        { stmt->setInt(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a int value.
-       */
-      Statement& setLong(const std::string& col, long data)
-        { stmt->setLong(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a unsigned short value.
-       */
-      Statement& setUnsignedShort(const std::string& col, unsigned short data)
-        { stmt->setUnsignedShort(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a unsigned value.
-       */
-      Statement& setUnsigned(const std::string& col, unsigned data)
-        { stmt->setUnsigned(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a unsigned long value.
-       */
-      Statement& setUnsignedLong(const std::string& col, unsigned long data)
-        { stmt->setUnsignedLong(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a int32_t value.
-       */
-      Statement& setInt32(const std::string& col, int32_t data)
-        { stmt->setInt32(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a uint32_t value.
-       */
-      Statement& setUnsigned32(const std::string& col, uint32_t data)
-        { stmt->setUnsigned32(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a int64_t value.
-       */
-      Statement& setInt64(const std::string& col, int64_t data)
-        { stmt->setInt64(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a uint64_t value.
-       */
-      Statement& setUnsigned64(const std::string& col, uint64_t data)
-        { stmt->setUnsigned64(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a Decimal.
-       */
-      Statement& setDecimal(const std::string& col, const Decimal& data)
-        { stmt->setDecimal(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a float value.
-       */
-      Statement& setFloat(const std::string& col, float data)
-        { stmt->setFloat(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a double value.
-       */
-      Statement& setDouble(const std::string& col, double data)
-        { stmt->setDouble(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a char value.
-       */
-      Statement& setChar(const std::string& col, char data)
-        { stmt->setChar(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a string value.
-       */
-      Statement& setString(const std::string& col, const std::string& data)
-        { stmt->setString(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a string value or null,
-       * if passing null-pointer.
-       */
-      Statement& setString(const std::string& col, const char* data)
-        { data == 0 ? stmt->setNull(col)
-                    : stmt->setString(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a unicode string value.
-       */
-      Statement& setUString(const std::string& col, const cxxtools::String& data)
-        { stmt->setUString(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a blob value.
-       */
-      Statement& setBlob(const std::string& col, const Blob& data)
-        { stmt->setBlob(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a date value.
-       */
-      Statement& setDate(const std::string& col, const Date& data)
-        { data.isNull() ? stmt->setNull(col)
-                        : stmt->setDate(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a time value.
-       */
-      Statement& setTime(const std::string& col, const Time& data)
-        { data.isNull() ? stmt->setNull(col)
-                        : stmt->setTime(col, data); return *this; }
-      /**
-       * Sets the hostvariable with the given name to a datetime value.
-       */
-      Statement& setDatetime(const std::string& col, const Datetime& data)
-        { data.isNull() ? stmt->setNull(col)
-                        : stmt->setDatetime(col, data); return *this; }
+        { _stmt->clear(); return *this; }
 
-      //@{
-      /**
-       * Set the hostvariable with the given name to the passed value.
-       *
-       * The method uses the operator<< with a l-value of tntdb::Hostvar&
-       * and r-value of a const reference to the actual type to read the
-       * value. The operator is defined for standard types and may be defined
-       * for user defined types.
+      /// Set the host variable with the given name to NULL
+      Statement& setNull(const std::string& col)
+        { _stmt->setNull(col); return *this; }
+
+      /// Set the host variable with the given name to a boolean value
+      Statement& setBool(const std::string& col, bool data)
+        { _stmt->setBool(col, data); return *this; }
+
+      /// Set the host variable with the given name to a short value
+      Statement& setShort(const std::string& col, short data)
+        { _stmt->setShort(col, data); return *this; }
+
+      /// Set the host variable with the given name to an int value
+      Statement& setInt(const std::string& col, int data)
+        { _stmt->setInt(col, data); return *this; }
+
+      /// Set the host variable with the given name to a long value
+      Statement& setLong(const std::string& col, long data)
+        { _stmt->setLong(col, data); return *this; }
+
+      /// Set the host variable with the given name to an unsigned short value
+      Statement& setUnsignedShort(const std::string& col, unsigned short data)
+        { _stmt->setUnsignedShort(col, data); return *this; }
+
+      /// Set the host variable with the given name to an unsigned value
+      Statement& setUnsigned(const std::string& col, unsigned data)
+        { _stmt->setUnsigned(col, data); return *this; }
+
+      /// Set the host variable with the given name to an unsigned long value
+      Statement& setUnsignedLong(const std::string& col, unsigned long data)
+        { _stmt->setUnsignedLong(col, data); return *this; }
+
+      /// Set the host variable with the given name to a int32_t value
+      Statement& setInt32(const std::string& col, int32_t data)
+        { _stmt->setInt32(col, data); return *this; }
+
+      /// Set the host variable with the given name to a uint32_t value
+      Statement& setUnsigned32(const std::string& col, uint32_t data)
+        { _stmt->setUnsigned32(col, data); return *this; }
+
+      /// Set the host variable with the given name to a int64_t value
+      Statement& setInt64(const std::string& col, int64_t data)
+        { _stmt->setInt64(col, data); return *this; }
+
+      /// Set the host variable with the given name to a uint64_t value
+      Statement& setUnsigned64(const std::string& col, uint64_t data)
+        { _stmt->setUnsigned64(col, data); return *this; }
+
+      /// Set the host variable with the given name to a Decimal
+      Statement& setDecimal(const std::string& col, const Decimal& data)
+        { _stmt->setDecimal(col, data); return *this; }
+
+      /// Set the host variable with the given name to a float value
+      Statement& setFloat(const std::string& col, float data)
+        { _stmt->setFloat(col, data); return *this; }
+
+      /// Set the host variable with the given name to a double value
+      Statement& setDouble(const std::string& col, double data)
+        { _stmt->setDouble(col, data); return *this; }
+
+      /// Set the host variable with the given name to a char value
+      Statement& setChar(const std::string& col, char data)
+        { _stmt->setChar(col, data); return *this; }
+
+      /// Set the host variable with the given name to a string value
+      Statement& setString(const std::string& col, const std::string& data)
+        { _stmt->setString(col, data); return *this; }
+
+      /// Set the host variable with the given name to a string value or null
+      Statement& setString(const std::string& col, const char* data)
+        { data == 0 ? _stmt->setNull(col)
+                    : _stmt->setString(col, data); return *this; }
+
+      /// Set the host variable with the given name to a unicode string value
+      Statement& setUString(const std::string& col, const cxxtools::String& data)
+        { _stmt->setUString(col, data); return *this; }
+
+      /// Set the host variable with the given name to a blob value
+      Statement& setBlob(const std::string& col, const Blob& data)
+        { _stmt->setBlob(col, data); return *this; }
+
+      /// Set the host variable with the given name to a date value
+      Statement& setDate(const std::string& col, const Date& data)
+        { data.isNull() ? _stmt->setNull(col)
+                        : _stmt->setDate(col, data); return *this; }
+
+      /// Set the host variable with the given name to a time value
+      Statement& setTime(const std::string& col, const Time& data)
+        { data.isNull() ? _stmt->setNull(col)
+                        : _stmt->setTime(col, data); return *this; }
+
+      /// Set the host variable with the given name to a datetime value
+      Statement& setDatetime(const std::string& col, const Datetime& data)
+        { data.isNull() ? _stmt->setNull(col)
+                        : _stmt->setDatetime(col, data); return *this; }
+
+      /** Set the host variable with the given name to the passed value
+
+          The method uses the operator<< with a l-value of the type Hostvar& and r-value
+          of a const reference to the actual type to read the value. The operator
+          is defined for standard types and may be defined for user defined types.
        */
       template <typename T>
       Statement& set(const std::string& col, const T& data);
-      //@}
 
-      /*
-       * Sets multiple numbered parameters to the values specified by the iterator range.
-       *
-       * The method expects, that the statement has columns with the specified column name
-       * appended by a number range starting from 0. This list can be generated for example
-       * with tntdb::SqlBuilder.
-       *
-       * Example:
-       *
-       * \code
-       *   std::vector<int> values;
-       *   values.push_back(5);
-       *   values.push_back(12);
-       *   tntdb::Statement stmt = conn.prepare("select a, b, c from tab1 where v in (" + tntdb::Statement::paramlist("v", values.size()) + ")");
-       *   stmt.set("v", values.begin(), values.end());
-       *   // or short version:
-       *   stmt.set("v", values);
-       *
-       *   // now stmt is ready for iteration
-       * \endcode
+      /** Set multiple numbered parameters to the values specified by the iterator range
+
+          The method expects, that the statement has columns with the specified column name
+          appended by a number range starting from 0. This list can be generated for example
+          with tntdb::SqlBuilder.
+
+          Example:
+
+          @code
+            std::vector<int> values;
+            values.push_back(5);
+            values.push_back(12);
+            tntdb::Statement stmt = conn.prepare("select a, b, c from tab1 where v in (" + tntdb::Statement::paramlist("v", values.size()) + ")");
+            stmt.set("v", values.begin(), values.end());
+            // or short version:
+            stmt.set("v", values);
+
+            // now stmt is ready for iteration
+          @endcode
        */
       template <typename Iterator>
       Statement& set(const std::string& col, Iterator it1, Iterator it2);
 
-      /**
-       * Set the hostvariable with the given name to the passed value or null.
-       *
-       * The method sets the hostvariable to the given value if the 2nd
-       * argument is true. Otherwise the hostvariable is set to null.
+      /** Set the host variable with the given name to the passed value or null
+
+          The method sets the host variable to the given value if the 2nd
+          argument is true. Otherwise the host variable is set to null.
        */
       template <typename T>
       Statement& setIf(const std::string& col, bool notNull, const T& data)
@@ -254,250 +221,215 @@ namespace tntdb
         return *this;
       }
 
-      /// statement-execution-methods
-      /**
-       * Executes a query with the current parameters. The query should not
-       * return results. This method is normally used with INSERT-, UPDATE- or
-       * DELETE-statements.
+      /// Statement execution methods
+      /// @{
+      /** Execute the query without returning the result
+
+          The query should not return results. This method is normally used with
+          INSERT, UPDATE or DELETE statements.
        */
       size_type execute();
-      /**
-       * Executes a query, which returns a resultset, with the current
-       * parameters. The query is normally a SELECT-statement.
+
+      /** Execute the query and return the result
+
+          The query normally is a SELECT statement.
        */
       Result select();
-      /**
-       * Executes a query, which returns a row, with the current
-       * parameters. If the query return no rows, a exception of type
-       * tntdb::NotFound is thrown. When the query returns more than one row,
-       * additional rows are discarded.
+
+      /** Execute the query and return the first row of the result
+
+          If the result is empty, a NotFound exception is thrown. Additional rows are ignored.
        */
       Row selectRow();
-      /**
-       * Executes a query, which returns a single value, with the current
-       * parameters. If the query return no rows, a exception of type
-       * tntdb::NotFound is thrown. Only the first value of the first row is
-       * returned.
+      /** Execute the query and return the first value from the first row of the result
+
+          If the result is empty, a NotFound exception is thrown. Additional values are ignored.
        */
       Value selectValue();
+      /// @}
 
-      /**
-       * This methods creates a cursor and fetches the first row.
-       */
+      /// Create a database cursor and fetch the first row of the query result
       const_iterator begin(unsigned fetchsize = 100) const;
-      /**
-       * A empty iterator is returned. Every const_iterator, which reaches the
-       * end is equal with this.
+
+      /** Get an end iterator
+
+          This iterator works like the iterator got from the %end() method of STL containers
+          like std::vector and std::list. It doesn't reference the last element in a list but
+          an imaginary element after the last one, and should be used as follows:
+
+          @code
+            for(tntdb::Statement::const_iterator it = stmtObj.begin(); it != stmtObj.end(); ++it)
+            {
+              // Loop body accessing individual result rows through *it
+            }
+          @endcode
        */
       const_iterator end() const;
 
-      /**
-       * Returns true, if this class is not connected to a actual statement.
-       */
-      bool operator!() const             { return !stmt; }
-      /**
-       * Returns the actual implementation-class.
-       */
-      const IStatement* getImpl() const  { return &*stmt; }
-      IStatement* getImpl()              { return &*stmt; }
+      /// Check whether this object is associated with a real statement (<b>true if not</b>)
+      bool operator!() const            { return !_stmt; }
+
+      /// @{
+      /// Get the actual implementation object
+      const IStatement* getImpl() const { return &*_stmt; }
+      IStatement* getImpl()             { return &*_stmt; }
+      /// @}
   };
 
-  /**
-   * Helper class to hold a tntdb::Statement and a column name.
-   */
+  /// Helper class to hold a Statement and a column name
   class Hostvar
   {
-      Statement& stmt;
-      const std::string& name;
+    private:
+      Statement& _stmt;
+      const std::string& _name;
 
     public:
-      Hostvar(Statement& stmt_, const std::string& name_)
-        : stmt(stmt_),
-          name(name_)
+      Hostvar(Statement& stmt, const std::string& name)
+        : _stmt(stmt),
+          _name(name)
           { }
-      Statement& getStatement()   { return stmt; }
-      const std::string& getName() { return name; }
+      Statement& getStatement()    { return _stmt; }
+      const std::string& getName() { return _name; }
 
       void setNull()
-        { stmt.setNull(name); }
+        { _stmt.setNull(_name); }
       void setBool(bool data)
-        { stmt.setBool(name, data); }
+        { _stmt.setBool(_name, data); }
       void setInt(int data)
-        { stmt.setInt(name, data); }
+        { _stmt.setInt(_name, data); }
       void setLong(long data)
-        { stmt.setLong(name, data); }
+        { _stmt.setLong(_name, data); }
       void setUnsigned(unsigned data)
-        { stmt.setUnsigned(name, data); }
+        { _stmt.setUnsigned(_name, data); }
       void setUnsignedLong(unsigned long data)
-        { stmt.setUnsignedLong(name, data); }
+        { _stmt.setUnsignedLong(_name, data); }
       void setInt32(int32_t data)
-        { stmt.setInt32(name, data); }
+        { _stmt.setInt32(_name, data); }
       void setUnsigned32(uint32_t data)
-        { stmt.setUnsigned32(name, data); }
+        { _stmt.setUnsigned32(_name, data); }
       void setInt64(int64_t data)
-        { stmt.setInt64(name, data); }
+        { _stmt.setInt64(_name, data); }
       void setUnsigned64(uint64_t data)
-        { stmt.setUnsigned64(name, data); }
+        { _stmt.setUnsigned64(_name, data); }
       void setDecimal(const Decimal& data)
-        { stmt.setDecimal(name, data); }
+        { _stmt.setDecimal(_name, data); }
       void setFloat(float data)
-        { stmt.setFloat(name, data); }
+        { _stmt.setFloat(_name, data); }
       void setDouble(double data)
-        { stmt.setDouble(name, data); }
+        { _stmt.setDouble(_name, data); }
       void setChar(char data)
-        { stmt.setChar(name, data); }
+        { _stmt.setChar(_name, data); }
       void setString(const std::string& data)
-        { stmt.setString(name, data); }
+        { _stmt.setString(_name, data); }
       void setString(const char* data)
-        { data == 0 ? stmt.setNull(name)
-                    : stmt.setString(name, data); }
+        { data == 0 ? _stmt.setNull(_name)
+                    : _stmt.setString(_name, data); }
       void setUString(const cxxtools::String& data)
-        { stmt.setUString(name, data); }
+        { _stmt.setUString(_name, data); }
       void setBlob(const Blob& data)
-        { stmt.setBlob(name, data); }
+        { _stmt.setBlob(_name, data); }
       void setDate(const Date& data)
-        { data.isNull() ? stmt.setNull(name)
-                        : stmt.setDate(name, data); }
+        { data.isNull() ? _stmt.setNull(_name)
+                        : _stmt.setDate(_name, data); }
       void setTime(const Time& data)
-        { data.isNull() ? stmt.setNull(name)
-                        : stmt.setTime(name, data); }
+        { data.isNull() ? _stmt.setNull(_name)
+                        : _stmt.setTime(_name, data); }
       void setDatetime(const Datetime& data)
-        { data.isNull() ? stmt.setNull(name)
-                        : stmt.setDatetime(name, data); }
+        { data.isNull() ? _stmt.setNull(_name)
+                        : _stmt.setDatetime(_name, data); }
 
       template <typename T>
       void set(const T& data);
   };
 
-  //@{
-  /**
-   * Set operators for host variables.
-   */
+  /// Set operators for host variables
+  /// @{
+
   inline void operator<< (Hostvar& hostvar, bool data)
-  {
-    hostvar.setBool(data);
-  }
+    { hostvar.setBool(data); }
 
   inline void operator<< (Hostvar& hostvar, int data)
-  {
-    hostvar.setInt(data);
-  }
+    { hostvar.setInt(data); }
 
   inline void operator<< (Hostvar& hostvar, long data)
-  {
-    hostvar.setLong(data);
-  }
+    { hostvar.setLong(data); }
 
   inline void operator<< (Hostvar& hostvar, unsigned data)
-  {
-    hostvar.setUnsigned(data);
-  }
+    { hostvar.setUnsigned(data); }
 
   inline void operator<< (Hostvar& hostvar, unsigned long data)
-  {
-    hostvar.setUnsignedLong(data);
-  }
+    { hostvar.setUnsignedLong(data); }
 
 #if INT_INT32_T_CONFLICT != 1
   inline void operator<< (Hostvar& hostvar, int32_t data)
-  {
-    hostvar.setInt32(data);
-  }
+    { hostvar.setInt32(data); }
 #endif
 
 #if UNSIGNED_UINT32_T_CONFLICT != 1
   inline void operator<< (Hostvar& hostvar, uint32_t data)
-  {
-    hostvar.setUnsigned32(data);
-  }
+    { hostvar.setUnsigned32(data); }
 #endif
 
 #if INT_INT64_T_CONFLICT != 1
   inline void operator<< (Hostvar& hostvar, int64_t data)
-  {
-    hostvar.setInt64(data);
-  }
+    { hostvar.setInt64(data); }
 #endif
 
 #if UNSIGNED_UINT64_T_CONFLICT != 1
   inline void operator<< (Hostvar& hostvar, uint64_t data)
-  {
-    hostvar.setUnsigned64(data);
-  }
+    { hostvar.setUnsigned64(data); }
 #endif
 
   inline void operator<< (Hostvar& hostvar, const Decimal& data)
-  {
-    hostvar.setDecimal(data);
-  }
+    { hostvar.setDecimal(data); }
 
   inline void operator<< (Hostvar& hostvar, float data)
-  {
-    hostvar.setFloat(data);
-  }
+    { hostvar.setFloat(data); }
 
   inline void operator<< (Hostvar& hostvar, double data)
-  {
-    hostvar.setDouble(data);
-  }
+    { hostvar.setDouble(data); }
 
   inline void operator<< (Hostvar& hostvar, char data)
-  {
-    hostvar.setChar(data);
-  }
+    { hostvar.setChar(data); }
 
   inline void operator<< (Hostvar& hostvar, const std::string& data)
-  {
-    hostvar.setString(data);
-  }
+    { hostvar.setString(data); }
 
   inline void operator<< (Hostvar& hostvar, const char* data)
-  {
-    hostvar.setString(data);
-  }
+    { hostvar.setString(data); }
 
   inline void operator<< (Hostvar& hostvar, const cxxtools::String& data)
-  {
-    hostvar.setUString(data);
-  }
+    { hostvar.setUString(data); }
 
   inline void operator<< (Hostvar& hostvar, const Blob& data)
-  {
-    hostvar.setBlob(data);
-  }
+    { hostvar.setBlob(data); }
 
   inline void operator<< (Hostvar& hostvar, const Date& data)
-  {
-    hostvar.setDate(data);
-  }
+    { hostvar.setDate(data); }
 
   inline void operator<< (Hostvar& hostvar, const Time& data)
-  {
-    hostvar.setTime(data);
-  }
+    { hostvar.setTime(data); }
 
   inline void operator<< (Hostvar& hostvar, const Datetime& data)
-  {
-    hostvar.setDatetime(data);
-  }
+    { hostvar.setDatetime(data); }
 
   template <typename T>
   void operator<< (Hostvar& hostvar, const std::vector<T>& data)
-  { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+    { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
 
   template <typename T>
   void operator<< (Hostvar& hostvar, const std::list<T>& data)
-  { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+    { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
 
   template <typename T>
   void operator<< (Hostvar& hostvar, const std::deque<T>& data)
-  { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+    { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
 
   template <typename T>
   void operator<< (Hostvar& hostvar, const std::set<T>& data)
-  { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+    { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
 
-  //@}
+  /// @}
 
   template <typename T>
   Statement& Statement::set(const std::string& name, const T& data)
@@ -519,10 +451,7 @@ namespace tntdb
 
   template <typename T>
   void Hostvar::set(const T& data)
-  {
-    *this << data;
-  }
-
+    { *this << data; }
 }
 
 #endif // TNTDB_BITS_STATEMENT_H
