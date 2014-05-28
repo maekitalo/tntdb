@@ -1,7 +1,5 @@
 EXTRA_DIST = @PACKAGE@.doxygen.in \
-	main.page \
-	tntdb.odt \
-	tntdb.pdf
+	main.page
 
 if MAKE_DOXYGEN
 
