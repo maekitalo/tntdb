@@ -213,7 +213,7 @@ AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes)
 #
 # Oracle
 #
-AX_LIB_ORACLE_OCI([8])
+AX_LIB_ORACLE_OCI([8.0])
 AM_CONDITIONAL(MAKE_ORACLE, test "$HAVE_ORACLE_OCI" == "yes")
 
 #
