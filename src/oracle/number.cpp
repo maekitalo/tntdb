@@ -29,6 +29,7 @@
 #include <tntdb/oracle/number.h>
 #include <tntdb/oracle/error.h>
 #include <cxxtools/log.h>
+#include <cstring>
 
 log_define("tntdb.oracle.number")
 
@@ -38,7 +39,7 @@ namespace tntdb
   {
     Number::Number()
     {
-      memset(ociNumber.OCINumberPart, 0, OCI_NUMBER_SIZE);
+      std::memset(ociNumber.OCINumberPart, 0, OCI_NUMBER_SIZE);
     }
 
     void Number::setLong(long data, OCIError* errhp)
@@ -116,5 +117,5 @@ namespace tntdb
 
       return Decimal(std::string(buffer));
     }
-  };
-};
+  }
+}

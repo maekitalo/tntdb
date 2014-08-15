@@ -44,4 +44,4 @@ namespace tntdb
   }
 }
 
-TNTDB_CONNECTIONMANAGER_DEFINE(oracle);
+TNTDB_CONNECTIONMANAGER_DEFINE(oracle)

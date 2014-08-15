@@ -41,7 +41,7 @@ namespace tntdb
 {
   namespace oracle
   {
-    class Blob : private cxxtools::NonCopyable
+    class Blob
     {
         cxxtools::SmartPtr<Connection> conn;
         OCILobLocator* lob;
@@ -50,6 +50,9 @@ namespace tntdb
         // low-level wrappers
         void ociDescriptorAlloc();
         void ociDescriptorFree();
+
+        Blob(const Blob&) { }
+        Blob& operator=(const Blob&) { return *this; }
 
       public:
         Blob() : lob(0), release(false) { }

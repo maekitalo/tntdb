@@ -60,7 +60,7 @@ namespace tntdb
 
       unsigned char* getHandle() { return ociNumber.OCINumberPart; }
     };
-  };
-};
+  }
+}
 
 #endif
