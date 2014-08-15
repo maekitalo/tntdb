@@ -29,7 +29,6 @@
 #ifndef TNTDB_IFACE_ICONNECTIONMANAGER_H
 #define TNTDB_IFACE_ICONNECTIONMANAGER_H
 
-#include <cxxtools/noncopyable.h>
 #include <string>
 
 #define TNTDB_DRIVER_PRAEFIX connectionManager1_
@@ -44,9 +43,13 @@ namespace tntdb
 {
   class Connection;
 
-  class IConnectionManager : private cxxtools::NonCopyable
+  class IConnectionManager
   {
+      IConnectionManager(const IConnectionManager&) { }
+      IConnectionManager& operator=(const IConnectionManager&) { return *this; }
+
     public:
+      IConnectionManager() { }
       virtual ~IConnectionManager() { }
       virtual Connection connect(const std::string& url) = 0;
   };

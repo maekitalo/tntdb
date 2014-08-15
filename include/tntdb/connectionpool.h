@@ -29,7 +29,6 @@
 #ifndef TNTDB_CONNECTIONPOOL_H
 #define TNTDB_CONNECTIONPOOL_H
 
-#include <cxxtools/noncopyable.h>
 #include <cxxtools/pool.h>
 #include <map>
 #include <string>
@@ -76,8 +75,11 @@ namespace tntdb
       unsigned getCurrentSize() const  { return pool.getCurrentSize(); }
   };
 
-  class ConnectionPools : private cxxtools::NonCopyable
+  class ConnectionPools
   {
+      ConnectionPools(const ConnectionPools&) { }
+      ConnectionPools& operator=(const ConnectionPools&) { return *this; }
+
     public:
       typedef ConnectionPool PoolType;
       typedef std::map<std::string, PoolType*> PoolsType;
