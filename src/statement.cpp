@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005 Tommi Maekitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,16 +15,17 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 
 #include <tntdb/statement.h>
 #include <tntdb/result.h>
@@ -40,36 +41,36 @@ namespace tntdb
   Statement::size_type Statement::execute()
   {
     log_trace("Statement::execute()");
-    return stmt->execute();
+    return _stmt->execute();
   }
 
   Result Statement::select()
   {
     log_trace("Statement::select()");
-    return stmt->select();
+    return _stmt->select();
   }
 
   Row Statement::selectRow()
   {
     log_trace("Statement::selectRow()");
-    return stmt->selectRow();
+    return _stmt->selectRow();
   }
 
   Value Statement::selectValue()
   {
     log_trace("Statement::selectValue()");
-    return stmt->selectValue();
+    return _stmt->selectValue();
   }
 
   Statement::const_iterator Statement::begin(unsigned fetchsize) const
   {
     log_trace("Statement::begin(" << fetchsize << ')');
-    return const_iterator(stmt->createCursor(fetchsize));
+    return const_iterator(_stmt->createCursor(fetchsize));
   }
 
   void IStatement::setUString(const std::string& col, const cxxtools::String& data)
   {
     setString(col, cxxtools::Utf8Codec::encode(data));
   }
-
 }
+

@@ -269,7 +269,7 @@ case "${host_cpu}-${host_os}" in
 *-aix*)
     SHARED_LIB_FLAG=-qmkshrobj
     ;;
-*)  
+*)
     SHARED_LIB_FLAG=
     ;;
 esac

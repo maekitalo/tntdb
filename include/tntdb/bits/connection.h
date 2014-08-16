@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005 Tommi Maekitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -41,27 +41,27 @@ namespace tntdb
   class Value;
   class Statement;
 
-  /**
-   * This class holds a connection to a database.
-   *
-   * Normally you will create a connection with tntdb::connect(url). The actual
-   * connection is referencecounted. You can copy this class as you need. When
-   * the last copy of it is destroyed, the connection is closed.
-   *
-   * Example:
-   * \code
-   *   try
-   *   {
-   *     tntdb::Connection conn = tntdb::connect("postgresql:dbname=mydatabase");
-   *     tntdb::Result res = conn.select("select col1, col2 from mytable");
-   *     for (tntdb::Result::const_iterator it = res.begin(); it != res.end(); ++it)
-   *       std::cout << "col1=" << it->getString() << " col2=" << it->getInt() << std::endl;
-   *   }
-   *   catch (const std::exception& e)
-   *   {
-   *     std::cerr << e.what() << std::endl;
-   *   }
-   * \endcode
+  /** This class holds a connection to a database
+
+      Normally you would create a connection with tntdb::connect(url). The actual
+      connection is reference counted. You can copy this class as you need. When
+      the last copy of it is destroyed, the connection is closed.
+
+      Example:
+      @code
+        try
+        {
+          tntdb::Connection conn = tntdb::connect("postgresql:dbname=mydatabase");
+          tntdb::Statement st = conn.prepare("SELECT col1, col2 FROM mytable");
+
+          for (tntdb::Statement::const_iterator it = res.begin(); it != res.end(); ++it)
+            std::cout << "col1 = " << it->getString() << ", col2 = " << it->getInt() << std::endl;
+        }
+        catch (const std::exception& e)
+        {
+          std::cerr << e.what() << std::endl;
+        }
+      @endcode
    */
   class Connection
   {
@@ -69,124 +69,108 @@ namespace tntdb
       typedef unsigned size_type;
 
     private:
-      cxxtools::SmartPtr<IConnection> conn;
+      cxxtools::SmartPtr<IConnection> _conn;
 
     public:
-      /**
-       * Instantiate a empty connection-object.
-       */
+      /// Create an empty %Connection object
       Connection() { }
-      /**
-       * Initialize this class with a connection.
-       */
-      Connection(IConnection* conn_)
-        : conn(conn_)
+
+      /// Create a %Connection object from conn
+      Connection(IConnection* conn)
+        : _conn(conn)
         { }
 
-      /**
-       * Remove the reference to the connected database. If this was the last
-       * reference, the connection is actually closed.
+      /** Remove the reference to the connected database. If this was
+          the last reference, the connection is actually closed.
        */
-      void close()
-        { conn = 0; }
+      void close() { _conn = 0; }
 
-      /**
-       * Starts a transaction. Normally this is not needed. It is better to use
-       * the class tntdb::Transaction instead.
+      /** Start a transaction
+
+          Normally this is not needed. It is better to use the class Transaction instead.
        */
       void beginTransaction();
-      /**
-       * Commits the current transaction.
-       */
+
+      /// Commit the current transaction
       void commitTransaction();
-      /**
-       * Rolls back the current transaction.
-       */
+
+      /// Roll back the current transaction
       void rollbackTransaction();
 
-      /**
-       * Executes a static query, without returning results. The query is
-       * normally a INSERT-, UPDATE- or DELETE-statement. As with the other
-       * query-execution-methods this should be used only for static queries.
-       * When you need to pass parameters it is always better to use
-       * tntdb::Statement.
+      /** Execute a static query without returning results
+
+          The query normally is an INSERT, UPDATE or DELETE statement. As with the
+          other query execution methods this should be used only for static queries.
+          If you need to pass parameters it is always better to use the Statement class.
        */
       size_type execute(const std::string& query);
-      /**
-       * Executes a static query, which returns a result. The query is normally
-       * a SELECT-statement.
+
+      /** Execute a static query which returns a result
+
+          The query normally is a SELECT statement.
        */
       Result select(const std::string& query);
-      /**
-       * Executes a static query, which returns a result. The first row is
-       * returned. If the query does not return rows, the exception
-       * tntdb::NotFound is thrown.
+
+      /** Execute a static query which returns a result
+
+          The first row is returned. If the query returns an empty
+          result, a NotFound exception is thrown.
        */
       Row selectRow(const std::string& query);
-      /**
-       * Executes a static query, which returns a result. The first value of
-       * the first row is returned. If the query does not return rows, the
-       * exception tntdb::NotFound is thrown.
+
+      /** Execute a static query which returns a result
+
+          The first value of the first row is returned. If the query
+          returns an empty result, a NotFound exception is thrown.
        */
       Value selectValue(const std::string& query);
-      /**
-       * Creates a new Statement-object, with the given query.
-       */
+
+      /// Create a new Statement object with the given query
       Statement prepare(const std::string& query);
 
-      /**
-       * Like prepareCached but use the passed string as a cache key.
-       * Since queries are normally quite lengthy, they are not that fast
-       * as a lookup key. For better performance of the cache it is feasible
-       * to give a shorter key for the query. But it is the user, who is in
-       * charge to use unique keys.
+      /** Create a new Statement object with the given query and store it in a cache
+
+          When called again with the same query, the cached object is returned
+       */
+      Statement prepareCached(const std::string& query)
+        { return prepareCached(query, query); }
+
+      /** Create a new Statement object with the given query and caching key
+
+          Per default, prepareCached() uses the query as key which identifies
+          a Statement object in the cache. With this method you can provide
+          your own key (because shorter keys mean faster lookup in the cache).
+          Be aware though that when using this, you have to ensure the same
+          key won't be used twice.
        */
       Statement prepareCached(const std::string& query, const std::string& key);
 
-      /**
-       * Creates a new Statement-object, with the given query
-       * and stores the statement in a cache. When called again
-       * with the same query, the cached result is returned.
-       */
-      Statement prepareCached(const std::string& query)
-      { return prepareCached(query, query); }
+      /// Clear the Statement cache used from prepareCached()
+      void clearStatementCache()
+        { _conn->clearStatementCache(); }
 
-      /**
-       * Clears the cache, built with prepareCache.
-       */
-      void clearStatementCache()         { conn->clearStatementCache(); }
+      /** Remove a query from the statement cache
 
-      /**
-       * Remove a query from the statement cache.
-       * The return value indicates, if the query was found in the cache.
-       * When the query was found, true is returned.
+          The return value is true if the given key was found in the cache, false otherwise.
        */
-      bool clearStatementCache(const std::string& key)   { return conn->clearStatementCache(key); }
+      bool clearStatementCache(const std::string& key)
+        { return _conn->clearStatementCache(key); }
 
-      /**
-       * returns true, if connection is alive.
-       */
-      bool ping()                        { return conn->ping(); }
+      /// Check whether the connection is alive
+      bool ping()                        { return _conn->ping(); }
 
-      /**
-       * returns the last inserted insert id.
-       */
+      /// Get the last inserted insert id
       long lastInsertId(const std::string& name = std::string())
-      { return conn->lastInsertId(name); }
+        { return _conn->lastInsertId(name); }
 
-      /**
-       * Returns true, when there is no connection established.
-       */
-      bool operator!() const             { return !conn; }
-      /**
-       * Returns the actual implementation-class.
-       */
-      const IConnection* getImpl() const { return &*conn; }
+      /// Check if a connection is established (<b>true if not</b>)
+      bool operator!() const             { return !_conn; }
 
-      /**
-       * Returns the actual implementation-class.
-       */
-      IConnection* getImpl()             { return &*conn; }
+      /// @{
+      /// Get the actual implementation object
+      const IConnection* getImpl() const { return &*_conn; }
+      IConnection* getImpl()             { return &*_conn; }
+      /// @}
   };
 }
 

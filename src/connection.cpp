@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005 Tommi Maekitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -41,63 +41,63 @@ namespace tntdb
   {
     log_trace("Connection::beginTransaction()");
 
-    conn->beginTransaction();
+    _conn->beginTransaction();
   }
 
   void Connection::commitTransaction()
   {
     log_trace("Connection::commitTransaction");
 
-    conn->commitTransaction();
+    _conn->commitTransaction();
   }
 
   void Connection::rollbackTransaction()
   {
     log_trace("Connection::rollbackTransaction");
 
-    conn->rollbackTransaction();
+    _conn->rollbackTransaction();
   }
 
   Connection::size_type Connection::execute(const std::string& query)
   {
     log_trace("Connection::execute(\"" << query << "\")");
 
-    return conn->execute(query);
+    return _conn->execute(query);
   }
 
   Result Connection::select(const std::string& query)
   {
     log_trace("Connection::select(\"" << query << "\")");
 
-    return conn->select(query);
+    return _conn->select(query);
   }
 
   Row Connection::selectRow(const std::string& query)
   {
     log_trace("Connection::selectRow(\"" << query << "\")");
 
-    return conn->selectRow(query);
+    return _conn->selectRow(query);
   }
 
   Value Connection::selectValue(const std::string& query)
   {
     log_trace("Connection::selectValue(\"" << query << "\")");
 
-    return conn->selectValue(query);
+    return _conn->selectValue(query);
   }
 
   Statement Connection::prepare(const std::string& query)
   {
     log_trace("Connection::prepare(\"" << query << "\")");
 
-    return conn->prepare(query);
+    return _conn->prepare(query);
   }
 
   Statement Connection::prepareCached(const std::string& query, const std::string& key)
   {
     log_trace("Connection::prepareCached(\"" << query << "\")");
 
-    return conn->prepareCached(query, key);
+    return _conn->prepareCached(query, key);
   }
 
   Statement IStmtCacheConnection::prepareCached(const std::string& query, const std::string& key)
@@ -139,5 +139,5 @@ namespace tntdb
     stmtCache.erase(it);
     return true;
   }
-
 }
+
