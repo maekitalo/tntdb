@@ -4,7 +4,7 @@ Tntdb
 Tntdb is a c++-class-library for easy access to databases. The interface is
 database-independent. Driverclasses are loaded dynamically.
 
-The goal of it is to have easy access to databases. You don't have to worry
+The goal is to have easy access to databases. You don't have to worry
 about resourceleakage, because all objects you use directly are allocated on
 the stack and deleted automatically, when going out of scope. The
 interfaceobjects are wrappers to referencecounted instances, so you can copy
@@ -12,13 +12,13 @@ them around at your own will. Resources are freed, when the last object goes
 out of scope.
 
 Errorhandling is done exclusively with exceptionhandling. Just wrap your code
-with a single try-catch and you have full errorhandling. Exceptions are all
+with a single try-catch and you have full errorhandling. All exceptions are 
 derived from std::exception.
 
 STL is used where possible and also STL-like and -compatible interfaces are
 offered, where suitable.
 
-Tntdb is targeted for applicationprogramming. It is not suitable for generic
+Tntdb is targeted for application programming. It is not suitable for generic
 databasetools. It does not offer e.g. schemaquery. You have to know, how your
 tables look like. Thats true for normal applications.
 
