@@ -107,17 +107,33 @@ example:
 
 ### The oracle driver
 
-The oracle driver is not compiled by default when tntdb is compiled, since the
-oracle client libraries are not free. You have to explicitly enable it
+Download the following libraries from Oracle (you will have to register but 
+they are free of charge):
+    oracle-instantclientVERS-basic-VERS.x86_64.rpm
+    oracle-instantclientVERS-devel-VERS.x86_64.rpm
+
+    where VERS stand for the version number e.g. 11.2
+
+Install them using 'rpm -i'.    
+ 
+The Oracle driver is not compiled by default when tntdb is compiled, since the
+Oracle client libraries are not free. You have to explicitly enable it
 with the switch to configure --with-oracle.
 
-From the string after the prefix "oracle:" the username and password is
-exctracted. They must be passed semicolon separated "user=username" and
-"passwd=password". The rest of the string is passed to the OCI function
-`OCIServerAttach`. Here is an example:
+The connection string has to start with the prefix "oracle:". The username 
+and password are exctracted afterwards. They must be passed semicolon separated 
+"user=username" and "passwd=password". The rest of the string is passed to the 
+OCI function `OCIServerAttach`. Here is an example for the Oracle Express Edition:
 
     tntdb::Connection conn =
       tntdb::connect("oracle:XE;user=hr;passwd=hr");
+
+If your Oracle dbms runs on the machine with ip 192.168.0.100 on port 1521 and 
+the service id is MYDB then the connection is created using:
+
+    tntdb::Connection conn =
+      tntdb::connect("oracle:192.168.0.100:1521/MYDB;user=hr;passwd=hr");
+
 
 ### The replication driver
 
@@ -202,6 +218,9 @@ types. Tntdb does not tell, which type the column is. Value just does its best
 to convert the data to the requested type. The User has to know, which data the
 column holds.
 
+Fields in a row can be read using the number of occurence but also by using
+their name.
+
 Often there are statements, which return exactly one row or only a single
 value. For convenience `tntdb::Connection` offers the methods `selectRow` and
 `selectValue`. The former returns the first row of a query and the latter the
@@ -230,9 +249,9 @@ was null, the method returns false and do not modify the passed variable.
         std::string b;
         long c;
         bool cIsNotNull;
-        row[0].get(a);  // read column 0 into variable a
-        row[1].get(b);  // read column 1 into variable b
-        cIsNotNull = row[2].get(c);
+        row[0].get(a);              // read column 0 into variable a
+        b = row.getString("col2");  // read column with name "col2" into variable b
+        cIsNotNull = row[2].get(c); // read column 2 into variable c
         std::cout << "col1=" << a << "\tcol2=" << b;
         if (cIsNotNull)
           std::cout << "\tcol3=" << c;
@@ -257,13 +276,13 @@ Most of the time the user needs to parameterize the queries.
 Because the query has the type `std::string` they can just be stringed together
 e.g. with `std::ostringstream`. But this is not recommended. The disadvantage
 is, that the user has to deal with special characters to avoid
-misinterpretation of data and especially avoid sql injection .
+misinterpretation of data and especially avoid sql injection.
 
 Prepared statements solve this by parsing the statement and getting the
 parameters separately. This also offers sometimes significant
 performance-advantages, because the user can execute the same statement
-multiple times with different parameters. The parsing can be done either at the
-client-side or at the serve-side. Tntdb let the driver decide, if the database
+multiple times with different parameters. Parsing can be done either at the
+client-side or at the serve-side. Tntdb lets the driver decide, if the database
 can parse the query and which placeholders the database needs.
 
 To create a prepared statement `tntdb::Connection` has a method prepare, which
