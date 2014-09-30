@@ -135,6 +135,14 @@ namespace tntdb
   inline RowReader Row::reader(Row::size_type n) const
   { return RowReader(*this, n); }
 
+  template <typename T>
+  RowReader Row::get(T& ret)
+  { return RowReader(*this).get(ret); }
+
+  template <typename T>
+  RowReader Row::get(T& ret, bool& nullInd)
+  { return RowReader(*this).get(ret, nullInd); }
+
 }
 
 #endif // TNTDB_ROWREADER_H

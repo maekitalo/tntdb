@@ -196,6 +196,15 @@ namespace tntdb
 
       /// Instantiates a tntdb::RowReader with the passed initial column counter.
       RowReader reader(size_type n = 0) const;
+
+      /// Instantiates a tntdb::RowReader and fetches the value of the first column.
+      template <typename T>
+      RowReader get(T& ret);
+
+      /// Instantiates a tntdb::RowReader and fetches the value of the first column and sets the null indicator.
+      template <typename T>
+      RowReader get(T& ret, bool& nullInd);
+
   };
 }
 

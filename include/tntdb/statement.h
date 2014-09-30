@@ -31,11 +31,21 @@
 
 #include <tntdb/bits/statement.h>
 #include <tntdb/bits/statement_iterator.h>
+#include <tntdb/bits/rowreader.h>
 
 namespace tntdb
 {
   inline Statement::const_iterator Statement::end() const
     { return const_iterator(); }
+
+  template <typename T>
+  RowReader Statement::const_iterator::get(T& ret)
+  { return RowReader(current).get(ret); }
+
+  template <typename T>
+  RowReader Statement::const_iterator::get(T& ret, bool& nullInd)
+  { return RowReader(current).get(ret, nullInd); }
+
 }
 
 #endif // TNTDB_SQL_STATEMENT_H

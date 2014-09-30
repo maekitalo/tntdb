@@ -36,6 +36,8 @@
 
 namespace tntdb
 {
+  class RowReader;
+
   /**
    * This class represents a database-cursor.
    */
@@ -77,11 +79,23 @@ namespace tntdb
        */
       const Row* operator-> () const  { return &current; }
 
+      /// Instantiates a tntdb::RowReader and fetches the value of the first column.
+      template <typename T>
+      RowReader get(T& ret);
+
+      /// Instantiates a tntdb::RowReader and fetches the value of the first column and sets the null indicator.
+      template <typename T>
+      RowReader get(T& ret, bool& nullInd);
+
       /**
        * Returns the actual implementation-class.
        */
       const ICursor* getImpl() const  { return &*cursor; }
   };
+
+  /// Alternative name for the statement iterator.
+  /// It may be easier to write and read.
+  typedef Statement::const_iterator Cursor;
 }
 
 #endif // TNTDB_BITS_STATEMENT_ITERATOR_H

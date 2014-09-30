@@ -452,6 +452,23 @@ The same works also with a cursor. Lets look at the cursor example using the
 It is just a matter of taste, which method you prefer or which method fits best
 in the current situation. Tntdb tries to make it just as easy as possible.
 
+Starting with tntdb 1.3 we can omit the call to `reader()`. The `tntdb::Row`
+and `tntdb::Statement::const_iterator` has now methods to construct a reader
+and returning the first value. So we can write:
+
+        ...
+        row.get(a)
+           .get(b)
+           .get(c, cIsNotNull);
+        ...
+
+Or with cursor:
+
+        ...
+        cur.get(col1)
+           .get(col2);
+        ...
+
 Transactions
 ------------
 
