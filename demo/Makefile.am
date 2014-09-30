@@ -1,12 +1,9 @@
-noinst_HEADERS = util.h
-noinst_PROGRAMS = sqlcmd categories person prodbench pooldemo serial
+noinst_PROGRAMS = select modify serial sqlcmd
 
-sqlcmd_SOURCES = sqlcmd.cpp
-categories_SOURCES = categories.cpp
-person_SOURCES = person.cpp
-prodbench_SOURCES = prodbench.cpp
-pooldemo_SOURCES = pooldemo.cpp
+select_SOURCES = select.cpp
+modify_SOURCES = modify.cpp
 serial_SOURCES = serial.cpp
+sqlcmd_SOURCES = sqlcmd.cpp
 
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
 LDADD = $(top_builddir)/src/libtntdb.la
