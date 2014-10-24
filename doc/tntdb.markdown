@@ -103,7 +103,7 @@ Ok - this is the definition. It is much easier to understand, if you see an
 example:
 
     tntdb::Connection conn =
-      tntdb::connect("mysql:db=DS2;user=web;passwd=web");
+      tntdb::connect("mysql:dbname=DS2;user=web;passwd=web");
 
 ### The oracle driver
 
@@ -368,8 +368,7 @@ The `begin` method of `tntdb::Statement` starts a new iteration of a cursor.
         std::string col2;
         row[0].get(col1);
         row[1].get(col2);
-        std::cout << "col1=" << col1 << " col2=
-                  << col2 << std::endl;
+        std::cout << "col1=" << col1 << " col2=" << col2 << std::endl;
       }
     }
 
@@ -443,8 +442,7 @@ The same works also with a cursor. Lets look at the cursor example using the
         std::string col2;
         cur->reader().get(col1)
                      .get(col2);
-        std::cout << "col1=" << col1 << " col2=
-                  << col2 << std::endl;
+        std::cout << "col1=" << col1 << " col2=" << col2 << std::endl;
       }
     }
 
