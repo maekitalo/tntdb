@@ -199,11 +199,11 @@ namespace tntdb
 
       /// Instantiates a tntdb::RowReader and fetches the value of the first column.
       template <typename T>
-      RowReader get(T& ret);
+      RowReader get(T& ret) const;
 
       /// Instantiates a tntdb::RowReader and fetches the value of the first column and sets the null indicator.
       template <typename T>
-      RowReader get(T& ret, bool& nullInd);
+      RowReader get(T& ret, bool& nullInd) const;
 
   };
 }

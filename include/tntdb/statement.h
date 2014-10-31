@@ -39,11 +39,11 @@ namespace tntdb
     { return const_iterator(); }
 
   template <typename T>
-  RowReader Statement::const_iterator::get(T& ret)
+  RowReader Statement::const_iterator::get(T& ret) const
   { return RowReader(current).get(ret); }
 
   template <typename T>
-  RowReader Statement::const_iterator::get(T& ret, bool& nullInd)
+  RowReader Statement::const_iterator::get(T& ret, bool& nullInd) const
   { return RowReader(current).get(ret, nullInd); }
 
 }

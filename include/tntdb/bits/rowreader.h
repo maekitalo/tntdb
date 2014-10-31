@@ -136,11 +136,11 @@ namespace tntdb
   { return RowReader(*this, n); }
 
   template <typename T>
-  RowReader Row::get(T& ret)
+  RowReader Row::get(T& ret) const
   { return RowReader(*this).get(ret); }
 
   template <typename T>
-  RowReader Row::get(T& ret, bool& nullInd)
+  RowReader Row::get(T& ret, bool& nullInd) const
   { return RowReader(*this).get(ret, nullInd); }
 
 }
