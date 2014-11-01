@@ -1,3 +1,101 @@
+2014-10-14 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - use c++ 11 mode of compiler if supported for better optimization
+
+2014-09-30 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - replace some demos with better ones
+ - add helper methods to tntdb::Row and tntdb::Statement::const_iterator to make working with RowReader easier
+
+2014-08-31 Andreas Welchlin <Andreas.Welchlin@comyno.com>
+
+ - refine documentation
+
+2014-04-15 Jonas Platte <mail@jonasplatte.de>
+
+ - Documentation and style revision for Blob, Connection, Statemnt
+
+2014-04-14 Jonas Platte <mail@jonasplatte.de>
+
+ - Removed all trailing whitespace from source files,
+   documentation + indentation update for the toplevel include directory
+
+2014-03-13 Jonas Platte <jonasplatte@myopera.com>
+
+ - Documentation + code style revision: Date, Time, Datetime
+
+2014-08-15 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - remove cxxtools::NonCopyable class
+ - fix build for oracle driver
+ - pass required oci (oracle) version number correctly
+
+2014-02-22 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - buildfix: check for postgresql header after setting CPPFLAGS properly
+
+2014-01-22 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - fix freeing pooled mysql connection when prepareCached is used
+
+2013-11-29 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - update installation hints
+
+2013-10-03 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - autoscan.sh is obsolete - use "autoreconf -i" instead
+
+2013-10-01 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - fix check for unsigned long long
+
+2013-09-21 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - improve error handling in sqlite driver
+
+2013-07-29 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - add check for postgresql header availability to configure
+
+2013-07-10 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - build improvements:
+   * disable static build by default
+   * autodetect oci (oracle call interface)
+
+ - update build:
+   * autoconf wants configure.ac instead of configure.in
+   * INCLUDE in Makefile.am is obsolete; AM_CPPFLAGS should be used
+
+2013-07-06 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - add api documentation about the drivers
+
+2013-06-19 Richard Kojedzinszky <krichy@tvnetwork.hu>
+
+ - Initialize transactionActive in constructor
+
+2013-06-07 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - add more build instructions into README-SOURCE-REPOS
+
+2013-06-07 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - set CPPFLAGS instead of CXXFLAGS to set include directory
+
+2013-06-06 Olaf Radicke <briefkasten@olaf-radicke.de>
+
+ - Add doku about installation from source repository.
+
+2013-05-10 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - make oracle connection pool fork safe (don't reuse connections in child process)
+
+2013-05-09 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - convert documentation to markdown and update it
+
 2013-04-08 tommi@tntnet.org
 
  - release candidate 1.3rc3
