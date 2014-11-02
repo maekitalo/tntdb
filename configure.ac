@@ -280,6 +280,7 @@ AC_CONFIG_FILES([
   doc/tntdb.doxygen
   demo/Makefile
   include/Makefile
+  pkgconfig/tntdb.pc
   src/Makefile
   src/mysql/Makefile
   src/postgresql/Makefile
