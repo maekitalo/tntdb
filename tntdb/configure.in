@@ -281,6 +281,7 @@ AC_SUBST(SHARED_LIB_FLAG)
 
 AC_CONFIG_FILES([
   Makefile
+  pkgconfig/tntdb.pc
   src/Makefile
   src/mysql/Makefile
   src/postgresql/Makefile
