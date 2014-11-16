@@ -25,6 +25,8 @@ AS_IF([test "$ax_cv_cxx_compiler_vendor" = "ibm"],
       AX_CHECK_COMPILE_FLAG([-Wall], [CPPFLAGS="$CPPFLAGS -Wall"])
       AX_CHECK_COMPILE_FLAG([-pedantic], [CPPFLAGS="$CPPFLAGS -pedantic"]))
 
+AC_PROG_LIBTOOL
+
 AC_MSG_CHECKING([for sighandler_t])
 AC_COMPILE_IFELSE(
   [AC_LANG_SOURCE([
