@@ -14,3 +14,7 @@ SUBDIRS = \
 
 EXTRA_DIST = \
     COPYING
+
+pkgconfigdir = $(libdir)/pkgconfig/
+
+pkgconfig_DATA = pkgconfig/tntdb.pc

@@ -25,8 +25,6 @@ AS_IF([test "$ax_cv_cxx_compiler_vendor" = "ibm"],
       AX_CHECK_COMPILE_FLAG([-Wall], [CPPFLAGS="$CPPFLAGS -Wall"])
       AX_CHECK_COMPILE_FLAG([-pedantic], [CPPFLAGS="$CPPFLAGS -pedantic"]))
 
-AC_PROG_LIBTOOL
-
 AC_MSG_CHECKING([for sighandler_t])
 AC_COMPILE_IFELSE(
   [AC_LANG_SOURCE([
@@ -278,17 +276,18 @@ AC_SUBST(SHARED_LIB_FLAG)
 
 AC_CONFIG_FILES([
   Makefile
+  doc/Makefile
+  doc/tntdb.doxygen
+  demo/Makefile
+  include/Makefile
+  pkgconfig/tntdb.pc
   src/Makefile
   src/mysql/Makefile
   src/postgresql/Makefile
   src/replicate/Makefile
   src/sqlite/Makefile
   src/oracle/Makefile
-  include/Makefile
-  demo/Makefile
   test/Makefile
-  doc/Makefile
-  doc/tntdb.doxygen
   ])
 
 AC_OUTPUT

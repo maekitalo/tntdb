@@ -32,17 +32,18 @@ stamp-h1
 
 # Files generated or compiled in the build process
 
-/demo/select
-/demo/modify
-/demo/serial
-/demo/sqlcmd
-/doc/tntdb.doxygen
-/include/tntdb/config.h
-/src/config.h
-/test/tntdb-test
+**/demo/select
+**/demo/modify
+**/demo/serial
+**/demo/sqlcmd
+**/doc/tntdb.doxygen
+**/include/tntdb/config.h
+**/src/config.h
+**/test/tntdb-test
 
 *.l[ao]
 *.o
+*.pc
 *.swp
 
 # Other
