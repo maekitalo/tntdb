@@ -140,6 +140,8 @@ namespace tntdb
 
       bool getBool(const std::string& field_name) const
         { return getValue(field_name).getBool(); }
+      short getShort(const std::string& field_name) const
+        { return getValue(field_name).getShort(); }
       int getInt(const std::string& field_name) const
         { return getValue(field_name).getInt(); }
       long getLong(const std::string& field_name) const
