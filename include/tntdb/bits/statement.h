@@ -42,6 +42,15 @@
 #include <deque>
 #include <set>
 
+#if __cplusplus >= 201103L
+
+#include <forward_list>
+#include <unordered_set>
+#include <unordered_map>
+
+#endif
+
+
 namespace tntdb
 {
   class Connection;
@@ -428,6 +437,26 @@ namespace tntdb
   template <typename T>
   void operator<< (Hostvar& hostvar, const std::set<T>& data)
     { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+
+  template <typename T>
+  void operator<< (Hostvar& hostvar, const std::multiset<T>& data)
+    { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+
+#if __cplusplus >= 201103L
+
+  template <typename T>
+  void operator<< (Hostvar& hostvar, const std::forward_list<T>& data)
+    { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+
+  template <typename T>
+  void operator<< (Hostvar& hostvar, const std::unordered_set<T>& data)
+    { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+
+  template <typename T>
+  void operator<< (Hostvar& hostvar, const std::unordered_multiset<T>& data)
+    { hostvar.getStatement().set(hostvar.getName(), data.begin(), data.end()); }
+
+#endif
 
   /// @}
 
