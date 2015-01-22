@@ -45,6 +45,7 @@ namespace tntdb
   namespace oracle
   {
     class Connection;
+    class Cursor;
 
     class Statement : public IStatement
     {
