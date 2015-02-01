@@ -1,5 +1,8 @@
 noinst_PROGRAMS = select modify serial sqlcmd
 
+include_HEADERS = \
+	util.h
+
 select_SOURCES = select.cpp
 modify_SOURCES = modify.cpp
 serial_SOURCES = serial.cpp
