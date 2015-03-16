@@ -47,7 +47,7 @@ namespace tntdb
         : connectionManager(0)
         { }
       LibraryManager(const std::string& libname);
-      Connection connect(const std::string url)
+      Connection connect(const std::string& url)
         { return connectionManager->connect(url); }
   };
 }
