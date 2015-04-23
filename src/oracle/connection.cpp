@@ -319,28 +319,28 @@ namespace tntdb
         else
         {
           // no limit, just offset
-          std::string q = "select * from (";
+          q = "select * from (select a.*, rownum tntdbrownum from(";
           q += query;
-          q += ") t where rownum > :";
+          q += ")a) where tntdbrownum > :";
           q += offset;
         }
       }
       else if (offset.empty())
       {
         // just limit, no offset
-        std::string q = "select * from (";
+        q = "select * from (select a.*, rownum tntdbrownum from(";
         q += query;
-        q += ") t where rownum <= :"
+        q += ")a) where tntdbrownum <= :";
         q += limit;
       }
       else
       {
         // limit and offset set
-        std::string q = "select * from (";
+        q = "select * from (select a.*, rownum tntdbrownum from(";
         q += query;
-        q += ") t where rownum > :";
+        q += ")a) where tntdbrownum > :";
         q += offset;
-        q += " and rownum <= :";
+        q += " and tntdbrownum <= :";
         q += offset;
         q += " + :";
         q += limit;

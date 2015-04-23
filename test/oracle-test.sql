@@ -6,8 +6,10 @@ create table tntdbtest
 (
   id integer not null primary key,
   boolcol number(1),
+  shortcol integer,
   intcol number(10),
   longcol number(24),
+  unsignedshortcol integer,
   unsignedcol number(10),
   unsignedlongcol number(24),
   int32col number(10),

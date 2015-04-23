@@ -107,22 +107,29 @@ example:
 
 ### The oracle driver
 
-Download the following libraries from Oracle (you will have to register but 
-they are free of charge):
+
+To install the oracle driver on linux download the following libraries from
+Oracle (you will have to register but they are free of charge):
+
     oracle-instantclientVERS-basic-VERS.x86_64.rpm
     oracle-instantclientVERS-devel-VERS.x86_64.rpm
 
-    where VERS stand for the version number e.g. 11.2
+where VERS stand for the version number e.g. 11.2
 
 Install them using 'rpm -i'.    
  
 The Oracle driver is not compiled by default when tntdb is compiled, since the
 Oracle client libraries are not free. You have to explicitly enable it
-with the switch to configure --with-oracle.
+with the switch to configure --with-oci-include and --with-oci-lib e.g.:
+
+    ./configure --with-oci-include=/usr/include/oracle/12.1/client64 \
+        --with-oci-lib=/usr/lib/oracle/12.1/client64/lib
+
+Check in the configure output, whether the oracle support is now enabled.
 
 The connection string has to start with the prefix "oracle:". The username 
-and password are exctracted afterwards. They must be passed semicolon separated 
-"user=username" and "passwd=password". The rest of the string is passed to the 
+and password are extracted afterwards. They must be passed semicolon separated
+"user=username" and "passwd=password". The rest of the string is passed to the
 OCI function `OCIServerAttach`. Here is an example for the Oracle Express Edition:
 
     tntdb::Connection conn =
