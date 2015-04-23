@@ -159,6 +159,25 @@ namespace tntdb
       return tntdb::Statement(new Statement(this, query));
     }
 
+    tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+    {
+      std::string q = query;
+
+      if (!limit.empty())
+      {
+        q += " limit :";
+        q += limit;
+      }
+
+      if (!offset.empty())
+      {
+        q += " offset :";
+        q += offset;
+      }
+
+      return prepare(q);
+    }
+
     bool Connection::ping()
     {
       log_debug("ping()");

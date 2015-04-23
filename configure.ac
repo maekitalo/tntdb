@@ -2,7 +2,7 @@ AC_INIT(tntdb, 1.3rc3, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 LT_INIT([disable-static])
 
-abi_current=4
+abi_current=5
 abi_revision=0
 abi_age=0
 sonumber=${abi_current}:${abi_revision}:${abi_age}

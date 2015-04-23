@@ -43,7 +43,7 @@ namespace tntdb
 {
   namespace replicate
   {
-    Statement::Statement(Connection* conn_, const std::string& query)
+    Statement::Statement(Connection* conn_, const std::string& query, const std::string& limit, const std::string& offset)
       : conn(conn_)
     {
       // check if it a select statement
@@ -57,7 +57,10 @@ namespace tntdb
       if (strncasecmp(p, "select", 6) == 0)
       {
         log_debug("select statement detected - prepare on first connection only");
-        statements.push_back(conn->connections.begin()->prepare(query));
+        if (limit.empty() && offset.empty())
+          statements.push_back(conn->connections.begin()->prepare(query));
+        else
+          statements.push_back(conn->connections.begin()->prepareWithLimit(query, limit, offset));
       }
       else
       {

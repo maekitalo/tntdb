@@ -128,6 +128,13 @@ namespace tntdb
       /// Create a new Statement object with the given query
       Statement prepare(const std::string& query);
 
+      /** Create a new Statement object with the given query added by a range limitation.
+
+          The `limit` and `offset` parameters are the names of the host variables, which receive the limits.
+          The offset is optional. When an empty string is passed to offset, just the limit is used.
+       */
+      Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string());
+
       /** Create a new Statement object with the given query and store it in a cache
 
           When called again with the same query, the cached object is returned
@@ -144,6 +151,21 @@ namespace tntdb
           key won't be used twice.
        */
       Statement prepareCached(const std::string& query, const std::string& key);
+
+      /** Create a new Statement object with the given query added by a range limitation.
+
+          This is like `prepareWithLimit` but the prepared statement cache is used.
+       */
+      Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string())
+        { return prepareCachedWithLimit(query, limit, offset, query); }
+
+      /** Create a new Statement object with the given query added by a range limitation.
+
+          This is like `prepareWithLimit` but the prepared statement cache is
+          used. Like in `prepareCached` an optional key can be used.
+       */
+      Statement prepareCachedWithLimit(const std::string& query, const
+      std::string& limit, const std::string& offset, const std::string& key);
 
       /// Clear the Statement cache used from prepareCached()
       void clearStatementCache()

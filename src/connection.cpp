@@ -93,6 +93,13 @@ namespace tntdb
     return _conn->prepare(query);
   }
 
+  Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+  {
+    log_trace("Connection::prepareWithLimit(\"" << query << ", " << limit << "\", \"" << offset << "\")");
+
+    return _conn->prepareWithLimit(query, limit, offset);
+  }
+
   Statement Connection::prepareCached(const std::string& query, const std::string& key)
   {
     log_trace("Connection::prepareCached(\"" << query << "\")");
@@ -100,9 +107,16 @@ namespace tntdb
     return _conn->prepareCached(query, key);
   }
 
+  Statement Connection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
+  {
+    log_trace("Connection::prepareCachedWithLimit(\"" << query << ", " << limit << "\", \"" << offset << "\", \"" << key << "\")");
+
+    return _conn->prepareCachedWithLimit(query, limit, offset, key);
+  }
+
   Statement IStmtCacheConnection::prepareCached(const std::string& query, const std::string& key)
   {
-    log_trace("IStmtCacheConnection::prepare(\"" << query << ", " << key << "\")");
+    log_trace("IStmtCacheConnection::prepareCached(\"" << query << ", " << key << "\")");
 
     stmtCacheType::iterator it = stmtCache.find(key);
     if (it == stmtCache.end())
@@ -116,6 +130,27 @@ namespace tntdb
     else
     {
       log_debug("statement for query \"" << key << "\" fetched from cache");
+      return Statement(it->second.getPointer());
+    }
+  }
+
+  Statement IStmtCacheConnection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
+  {
+    log_trace("IStmtCacheConnection::prepareCachedWithLimit(\"" << query << ", " << limit << "\", \"" << offset << "\", \"" << key << "\")");
+
+    std::string lkey = key + ':' + limit + ':' + offset;
+    stmtCacheType::iterator it = stmtCache.find(lkey);
+    if (it == stmtCache.end())
+    {
+      log_debug("statement for query \"" << lkey << "\" not found in cache");
+      Statement stmt = prepareWithLimit(query, limit, offset);
+      IStatement* istmt = const_cast<IStatement*>(stmt.getImpl());
+      stmtCache.insert(stmtCacheType::value_type(lkey, istmt));
+      return stmt;
+    }
+    else
+    {
+      log_debug("statement for query \"" << lkey << "\" fetched from cache");
       return Statement(it->second.getPointer());
     }
   }

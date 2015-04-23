@@ -61,6 +61,8 @@ class TntdbBaseTest : public cxxtools::unit::TestSuite
       registerMethod("testSelectMultiplePlaceholder", *this, &TntdbBaseTest::testSelectMultiplePlaceholder);
       registerMethod("testSelectCursorPlaceholder", *this, &TntdbBaseTest::testSelectCursorPlaceholder);
       registerMethod("testTransaction", *this, &TntdbBaseTest::testTransaction);
+      registerMethod("testLimit", *this, &TntdbBaseTest::testLimit);
+      registerMethod("testLimitOffset", *this, &TntdbBaseTest::testLimitOffset);
     }
 
     void setUp()
@@ -406,6 +408,71 @@ class TntdbBaseTest : public cxxtools::unit::TestSuite
 
       conn.selectValue("select count(*) from tntdbtest").get(count);
       CXXTOOLS_UNIT_ASSERT_EQUALS(count, 3);
+
+    }
+
+    void testLimit()
+    {
+      conn.execute("insert into tntdbtest(intcol) values(4)");
+      conn.execute("insert into tntdbtest(intcol) values(5)");
+      conn.execute("insert into tntdbtest(intcol) values(3)");
+      conn.execute("insert into tntdbtest(intcol) values(9)");
+
+      tntdb::Statement stmt = conn.prepareWithLimit("select intcol from tntdbtest order by 1", "l");
+      stmt.set("l", 2);
+
+      int intVal = 0;
+      bool notNull;
+
+      tntdb::Statement::const_iterator cur = stmt.begin();
+      CXXTOOLS_UNIT_ASSERT(cur != stmt.end());
+
+      notNull = (*cur)[0].get(intVal);
+      CXXTOOLS_UNIT_ASSERT(notNull);
+      CXXTOOLS_UNIT_ASSERT_EQUALS(intVal, 3);
+
+      ++cur;
+      CXXTOOLS_UNIT_ASSERT(cur != stmt.end());
+
+      notNull = (*cur)[0].get(intVal);
+      CXXTOOLS_UNIT_ASSERT(notNull);
+      CXXTOOLS_UNIT_ASSERT_EQUALS(intVal, 4);
+
+      ++cur;
+      CXXTOOLS_UNIT_ASSERT(cur == stmt.end());
+
+    }
+
+    void testLimitOffset()
+    {
+      conn.execute("insert into tntdbtest(intcol) values(4)");
+      conn.execute("insert into tntdbtest(intcol) values(5)");
+      conn.execute("insert into tntdbtest(intcol) values(3)");
+      conn.execute("insert into tntdbtest(intcol) values(9)");
+
+      tntdb::Statement stmt = conn.prepareWithLimit("select intcol from tntdbtest order by 1", "l", "o");
+      stmt.set("l", 2)
+          .set("o", 1);
+
+      int intVal = 0;
+      bool notNull;
+
+      tntdb::Statement::const_iterator cur = stmt.begin();
+      CXXTOOLS_UNIT_ASSERT(cur != stmt.end());
+
+      notNull = (*cur)[0].get(intVal);
+      CXXTOOLS_UNIT_ASSERT(notNull);
+      CXXTOOLS_UNIT_ASSERT_EQUALS(intVal, 4);
+
+      ++cur;
+      CXXTOOLS_UNIT_ASSERT(cur != stmt.end());
+
+      notNull = (*cur)[0].get(intVal);
+      CXXTOOLS_UNIT_ASSERT(notNull);
+      CXXTOOLS_UNIT_ASSERT_EQUALS(intVal, 5);
+
+      ++cur;
+      CXXTOOLS_UNIT_ASSERT(cur == stmt.end());
 
     }
 

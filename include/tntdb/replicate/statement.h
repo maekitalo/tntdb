@@ -46,7 +46,7 @@ namespace tntdb
         Statements statements;
 
       public:
-        Statement(Connection* conn, const std::string& query);
+        Statement(Connection* conn, const std::string& query, const std::string& limit = std::string(), const std::string& offset = std::string());
 
         // methods of IStatement
 

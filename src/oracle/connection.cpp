@@ -307,6 +307,48 @@ namespace tntdb
       return tntdb::Statement(new Statement(this, query));
     }
 
+    tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+    {
+      std::string q;
+      if (limit.empty())
+      {
+        if (offset.empty())
+        {
+          q = query;
+        }
+        else
+        {
+          // no limit, just offset
+          std::string q = "select * from (";
+          q += query;
+          q += ") t where rownum > :";
+          q += offset;
+        }
+      }
+      else if (offset.empty())
+      {
+        // just limit, no offset
+        std::string q = "select * from (";
+        q += query;
+        q += ") t where rownum <= :"
+        q += limit;
+      }
+      else
+      {
+        // limit and offset set
+        std::string q = "select * from (";
+        q += query;
+        q += ") t where rownum > :";
+        q += offset;
+        q += " and rownum <= :";
+        q += offset;
+        q += " + :";
+        q += limit;
+      }
+
+      return prepare(q);
+    }
+
     void Connection::clearStatementCache()
     {
       IStmtCacheConnection::clearStatementCache();

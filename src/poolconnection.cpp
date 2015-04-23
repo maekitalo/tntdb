@@ -96,6 +96,11 @@ namespace tntdb
     return connection->selectValue(query);
   }
 
+  Statement PoolConnection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+  {
+    return connection->prepareWithLimit(query, limit, offset);
+  }
+
   Statement PoolConnection::prepare(const std::string& query)
   {
     return connection->prepare(query);
@@ -104,6 +109,11 @@ namespace tntdb
   Statement PoolConnection::prepareCached(const std::string& query, const std::string& key)
   {
     return connection->prepareCached(query, key);
+  }
+
+  Statement PoolConnection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
+  {
+    return connection->prepareCachedWithLimit(query, limit, offset, key);
   }
 
   void PoolConnection::clearStatementCache()

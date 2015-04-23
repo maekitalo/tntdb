@@ -92,6 +92,7 @@ namespace tntdb
         tntdb::Row selectRow(const std::string& query);
         tntdb::Value selectValue(const std::string& query);
         tntdb::Statement prepare(const std::string& query);
+        tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
         void clearStatementCache();
         bool ping();
         long lastInsertId(const std::string& name);

@@ -56,7 +56,9 @@ namespace tntdb
       virtual Row selectRow(const std::string& query) = 0;
       virtual Value selectValue(const std::string& query) = 0;
       virtual Statement prepare(const std::string& query) = 0;
+      virtual Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset) = 0;
       virtual Statement prepareCached(const std::string& query, const std::string& key) = 0;
+      virtual Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key) = 0;
       virtual void clearStatementCache() = 0;
       virtual bool clearStatementCache(const std::string& key) = 0;
       virtual bool ping() = 0;
@@ -71,6 +73,7 @@ namespace tntdb
 
     public:
       virtual Statement prepareCached(const std::string& query, const std::string& key);
+      virtual Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key);
       virtual void clearStatementCache();
       virtual bool clearStatementCache(const std::string& key);
   };
