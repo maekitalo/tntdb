@@ -32,5 +32,17 @@
 #include <tntdb/bits/result.h>
 #include <tntdb/bits/result_iterator.h>
 
+namespace tntdb
+{
+  /// C++11 style _begin_ function for tntdb::Result.
+  inline Result::const_iterator begin(const Result& stmt)
+  { return stmt.begin(); }
+
+  /// C++11 style _end_ function for tntdb::Result.
+  inline Result::const_iterator end(const Result& stmt)
+  { return stmt.end(); }
+
+}
+
 #endif // TNTDB_RESULT_H
 

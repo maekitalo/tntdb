@@ -34,5 +34,17 @@
 #include <tntdb/bits/rowreader.h>
 #include <tntdb/bits/row_iterator.h>
 
+namespace tntdb
+{
+  /// C++11 style _begin_ function for tntdb::Row.
+  inline Row::const_iterator begin(const Row& stmt)
+  { return stmt.begin(); }
+
+  /// C++11 style _end_ function for tntdb::Row.
+  inline Row::const_iterator end(const Row& stmt)
+  { return stmt.end(); }
+
+}
+
 #endif // TNTDB_ROW_H
 
