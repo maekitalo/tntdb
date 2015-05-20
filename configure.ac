@@ -119,7 +119,7 @@ AS_IF([test "$with_postgresql" = yes],
 [
   AC_PATH_PROGS(PG_CONFIG, pg_config)
   if ! test -x "$PG_CONFIG"; then
-    AC_MSG_ERROR([postgresql configuration script pg_config was not found])
+    AC_MSG_ERROR([postgresql configuration script pg_config was not found; install postgresql developent package or use --without-postgresql])
   fi
 
   PG_CPPFLAGS=-I`$PG_CONFIG --includedir`
@@ -161,7 +161,7 @@ AS_IF([test "$with_mysql" = yes],
 [
   AC_PATH_PROGS(MYSQL_CONFIG, mysql_config)
   if ! test -x "$MYSQL_CONFIG"; then
-    AC_MSG_ERROR([mysql configuration script was not found])
+    AC_MSG_ERROR([mysql configuration script was not found; install mysql developent package or use --without-mysql])
   fi
 
   MYSQL_CFLAGS=`$MYSQL_CONFIG --cflags`
@@ -186,7 +186,7 @@ AC_ARG_WITH(
 
 AS_IF([test "$with_sqlite" = yes],
 [
-  AC_CHECK_HEADER([sqlite3.h], , AC_MSG_ERROR([header for sqlite3 not found]))
+  AC_CHECK_HEADER([sqlite3.h], , AC_MSG_ERROR([header for sqlite3 not found; install sqlite developent package or use --without-sqlite]))
 
   # check for sqlite3_transfer_bindings
   AC_MSG_CHECKING([for sqlite3_transfer_bindings])
