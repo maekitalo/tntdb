@@ -96,12 +96,13 @@ namespace tntdb
     void BindValues::initOutBuffer(unsigned n, MYSQL_FIELD& f)
     {
       log_debug("initOutBuffer name=" << f.name << " n=" << n << " length=" << f.length << " type=" << f.type
-        << " max_length=" << f.max_length);
+        << " max_length=" << f.max_length << " flags=" << f.flags << " unsigned=" << bool(f.flags & UNSIGNED_FLAG));
 
       reserve(values[n], std::max(f.length, f.max_length));
       if (f.type == 0)
         log_debug("no type in metadata for field " << n << "; using MYSQL_TYPE_VAR_STRING");
       values[n].buffer_type = f.type ? f.type : MYSQL_TYPE_VAR_STRING;
+      values[n].is_unsigned = bool(f.flags & UNSIGNED_FLAG);
       if (f.name)
         bindAttributes[n].name = f.name;
       else
