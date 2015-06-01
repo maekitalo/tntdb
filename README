@@ -53,7 +53,7 @@ To disable Postgresql support (enabled by default) do
 ./configure --with-postgresql=no
 
 To disable replication driver (enabled by default) do
-./configure --with-replication=no
+./configure --with-replicate=no
 
 To enable Oracle-support (disabled by default) do
 ./configure --with-oracle
