@@ -285,14 +285,9 @@ namespace tntdb
       std::string query = "LOCK TABLE ";
       query += tablename;
       query += exclusive ? " IN ACCESS EXCLUSIVE MODE" : " IN SHARE MODE";
-      log_debug("execute(\"" << query << "\")");
 
-      PGresult* result = PQexec(conn, query.c_str());
-      if (isError(result))
-      {
-        log_error(PQresultErrorMessage(result));
-        throw PgSqlError(query, "PQexec", result, true);
-      }
+      tntdb::Statement lockStmt = prepare(query);
+      lockStmt.execute();
     }
   }
 }
