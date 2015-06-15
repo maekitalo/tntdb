@@ -65,6 +65,7 @@ namespace tntdb
       {
         clearStatementCache();
         currvalStmt = tntdb::Statement();
+        lastvalStmt = tntdb::Statement();
 
         log_debug("PQfinish(" << conn << ")");
         PQfinish(conn);
