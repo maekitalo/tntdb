@@ -60,7 +60,7 @@ namespace tntdb
 
     Result::size_type Result::size() const
     {
-      log_debug("PQntuples(" << result << ')');
+      log_finest("PQntuples(" << result << ')');
       return ::PQntuples(result);
     }
 

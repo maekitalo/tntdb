@@ -38,19 +38,19 @@ namespace tntdb
   {
     if (cursor_)
     {
-      log_debug("initial fetch");
+      log_finer("initial fetch");
       current = cursor_->fetch();
       if (!current)
       {
         cursor = 0;
-        log_debug("no row fetched");
+        log_finer("no row fetched");
       }
     }
   }
 
   Statement::const_iterator& Statement::const_iterator::operator++()
   {
-    log_debug("fetch next row");
+    log_finest("fetch next row");
     current = cursor->fetch();
     if (!current)
     {
