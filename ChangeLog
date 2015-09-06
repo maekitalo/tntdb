@@ -1,3 +1,98 @@
+2015-07-20 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - build library whith multithreading support
+
+2015-07-13 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - update version number
+
+2015-06-18 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - reduce log level of some log output
+ - do not install header from demo
+
+2015-06-15 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - fix leak of statement handles in postgresql driver when using tntdb::Transaction::lockTable
+ - fix crash in postgresql driver when using lastInsertId without sequence name
+   Merge: 7747174 2196fae
+
+2015-06-01 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - Merge pull request #8 from aggsol/patch-1
+   Update README
+ - Update README
+   The actual configure option is `--with-replicate`
+
+2015-05-27 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - fix handling unsigned values in mysql driver
+
+2015-05-20 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - improve error message in configure when the headers of a database driver could not be found
+
+2015-05-18 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - add C++11 style begin and end functions to Statement, Result and Row classes
+
+2015-04-23 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - fix limit and offset handling in oracle driver
+ - add support for limit and offset in sql statements
+
+2015-03-16 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - minor performance fix: pass std::string by reference (uncovered by cppcheck)
+
+2015-02-01 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - add include file to dist package
+   Merge: ee56f89 e4c8161
+
+2015-01-23 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - Merge pull request #7 from ghinadr/master
+   Forward declare class Cursor
+
+2015-01-22 ghinadr <adig33@yahoo.com>
+
+ - Forward declare class Cursor
+   Class Cursor is referentiated in the Statement class, with the
+   declarator friend. Without the forward declaration of class Cursor,
+   tntdb won't compile on AIX 6.1
+
+2015-01-05 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - add documentation to tntdb::SqlBuilder
+
+2015-01-04 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - add support for std::multiset, std::forward_list, std::unordered_set and std::unordered_multimap
+   Merge: 9c0b34f 69bbbb2
+
+2014-12-04 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - update autoconf macro to check for C++-11 (makes C++-11 flag optional)
+
+2014-11-02 Jonas Platte <mail@jonasplatte.de>
+
+ - Updated .gitignore
+ - Added pkg-config support
+ - Cleaned up configure.ac a bit
+
+2014-10-31 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - make get methods, which create RowReaders const in Row and Statement::const_iterator
+
+2014-10-28 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - discard previous http reply on execute if not fully read in http client
+
+2014-10-24 Tommi Mäkitalo <tommi@tntnet.org>
+
+ - fix typos in tntdb howto
+
 2014-10-14 Tommi Mäkitalo <tommi@tntnet.org>
 
  - use c++ 11 mode of compiler if supported for better optimization
