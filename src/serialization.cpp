@@ -64,6 +64,7 @@ namespace tntdb
     void operator<<= (cxxtools::SerializationInfo& si, const tntdb::Result& res)
     {
         si.setTypeName("dbResult");
+        si.setCategory(cxxtools::SerializationInfo::Array);
 
         for (auto cur: res)
             si.addMember() <<= cur;
@@ -72,8 +73,64 @@ namespace tntdb
     void operator<<= (cxxtools::SerializationInfo& si, const tntdb::Statement& res)
     {
         si.setTypeName("dbResult");
+        si.setCategory(cxxtools::SerializationInfo::Array);
 
         for (auto cur: res)
             si.addMember() <<= cur;
     }
+
+    void operator>>= (const cxxtools::SerializationInfo& si, Statement& stmt)
+    {
+        for (cxxtools::SerializationInfo::const_iterator it = si.begin();
+                it != si.end(); ++it)
+        {
+            if (it->isNull())
+            {
+                stmt.setNull(it->name());
+            }
+            else if (it->isString8())
+            {
+                std::string value;
+                it->getValue(value);
+                stmt.set(it->name(), value);
+            }
+            else if (it->isChar())
+            {
+                char value;
+                it->getValue(value);
+                stmt.set(it->name(), value);
+            }
+            else if (it->isBool())
+            {
+                bool value;
+                it->getValue(value);
+                stmt.set(it->name(), value);
+            }
+            else if (it->isInt())
+            {
+                long value;
+                it->getValue(value);
+                stmt.set(it->name(), value);
+            }
+            else if (it->isUInt())
+            {
+                unsigned long value;
+                it->getValue(value);
+                stmt.set(it->name(), value);
+            }
+            else if (it->isFloat())
+            {
+                double value;
+                it->getValue(value);
+                stmt.set(it->name(), value);
+            }
+            else
+            {
+                cxxtools::String value;
+                it->getValue(value);
+                stmt.set(it->name(), value);
+            }
+        }
+    }
+
 }
