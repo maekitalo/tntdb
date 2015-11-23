@@ -125,8 +125,8 @@ AC_ARG_WITH(
 
 AS_IF([test "$with_postgresql" = yes],
 [
-  AC_PATH_PROGS(PG_CONFIG, pg_config)
-  if ! test -x "$PG_CONFIG"; then
+  AC_CHECK_PROG(PG_CONFIG, [pg_config], [pg_config])
+  if test -z "$PG_CONFIG"; then
     AC_MSG_ERROR([postgresql configuration script pg_config was not found; install postgresql developent package or use --without-postgresql])
   fi
 
@@ -167,8 +167,8 @@ AC_ARG_WITH(
 
 AS_IF([test "$with_mysql" = yes],
 [
-  AC_PATH_PROGS(MYSQL_CONFIG, mysql_config)
-  if ! test -x "$MYSQL_CONFIG"; then
+  AC_CHECK_PROG(MYSQL_CONFIG, mysql_config, mysql_config)
+  if ! test -z "$MYSQL_CONFIG"; then
     AC_MSG_ERROR([mysql configuration script was not found; install mysql developent package or use --without-mysql])
   fi
 
