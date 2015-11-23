@@ -168,7 +168,7 @@ AC_ARG_WITH(
 AS_IF([test "$with_mysql" = yes],
 [
   AC_CHECK_PROG(MYSQL_CONFIG, mysql_config, mysql_config)
-  if ! test -z "$MYSQL_CONFIG"; then
+  if test -z "$MYSQL_CONFIG"; then
     AC_MSG_ERROR([mysql configuration script was not found; install mysql developent package or use --without-mysql])
   fi
 
