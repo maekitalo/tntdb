@@ -27,6 +27,7 @@
  */
 
 #include <tntdb/librarymanager.h>
+#include <tntdb/error.h>
 #include <cxxtools/log.h>
 #include <cxxtools/systemerror.h>
 #include <cxxtools/directory.h>
@@ -60,11 +61,21 @@ namespace tntdb
       log_debug("opening library \"" << libraryPrefix << driverName << "\" failed: " << e.what());
     }
 
-    if (!lib)
+    try
     {
-      std::string d = DRIVERDIR + cxxtools::Directory::sep() + libraryPrefix + driverName;
-      log_debug("loading library \"" << d << '"');
-      lib = cxxtools::Library(d);
+      if (!lib)
+      {
+        std::string d = DRIVERDIR + cxxtools::Directory::sep() + libraryPrefix + driverName;
+        log_debug("loading library \"" << d << '"');
+        lib = cxxtools::Library(d);
+      }
+    }
+    catch (const std::exception& e)
+    {
+      std::ostringstream msg;
+      msg << "failed to load driver \"" << libraryPrefix << driverName << '"';
+      log_warn(msg.str() << ": " << e.what());
+      throw Error(msg.str());
     }
 
     std::string symbolName = TNTDB_TOSTRING(TNTDB_DRIVER_PRAEFIX) + driverName;
