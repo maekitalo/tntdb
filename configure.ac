@@ -220,8 +220,21 @@ AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes)
 #
 # Oracle
 #
-AX_LIB_ORACLE_OCI([8.0])
-AM_CONDITIONAL(MAKE_ORACLE, test "$HAVE_ORACLE_OCI" == "yes")
+AC_ARG_WITH(
+  [oracle],
+  AS_HELP_STRING([--with-oracle],
+                 [build oracle-driver (default: no)]),
+  [with_oracle=$withval],
+  [with_oracle=no])
+
+if test "$with_oracle" = yes
+then
+  AC_CHECK_HEADER([oci.h], , AC_MSG_ERROR([header for oracle not found]))
+  ORACLE_OCI_LDFLAGS=-lclntsh
+  AC_SUBST(ORACLE_OCI_LDFLAGS)
+fi
+
+AM_CONDITIONAL(MAKE_ORACLE, test "$with_oracle" = yes)
 
 #
 # Replicate
