@@ -18,6 +18,7 @@ libtntdb_la_SOURCES = \
 	resultimpl.cpp \
 	row.cpp \
 	rowimpl.cpp \
+	serialization.cpp \
 	sqlbuilder.cpp \
 	statement.cpp \
 	statement_iterator.cpp \

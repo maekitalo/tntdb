@@ -33,6 +33,7 @@ nobase_include_HEADERS = \
 	tntdb/librarymanager.h \
 	tntdb/result.h \
 	tntdb/row.h \
+	tntdb/serialization.h \
 	tntdb/sqlbuilder.h \
 	tntdb/statement.h \
 	tntdb/time.h \

@@ -1,0 +1,56 @@
+Serialization with tntdb
+========================
+
+Tntdb supports the serialization framework of cxxtools. This makes it easy to
+write objects into the database and read them back.
+
+Typically applications has business objects, which describes the entities of the
+application. When writing serialization and deserialization operators in
+cxxtools the objects can be easily converted to various formats and back to
+objects, e.g. json or xml. Also they can be easily transfered via rpc to another
+process wich may be on a different host.
+
+With the serialization support of tntdb the very same serialization
+operators are used to store the objects in the database or read back.
+
+See the demos `serialize.cpp`, `deserialize.cpp` and `csvoutput.cpp` to
+see how.
+
+To try the demos, create a database using demodb.sql. The easies way is to use
+sqlite:
+
+    sqlite3 test.db <demodb.sql
+
+This creates a table `myobjects`. Running `serialize` creates a record in
+the table. You need to specify the dburl as parameter to the demo:
+
+    ./serialize sqlite:test.db
+
+You can verify is using the command:
+
+    sqlite3 test.db 'select * from myobjects'
+
+The `deserialize` demo shows, how to extract the data back to the application.
+It reads all objects from the myobjects table and outputs the content:
+
+    ./deserialize sqlite:test.db
+
+This outputs the data of the object to the terminal.
+
+The `csvoutput` demo is a little more generic. It executes a sql statement
+passed as the second parameter (the first is again the dburl) and converts the
+result to csv, json or xml. Run:
+
+    ./csvoutput sqlite:test.db 'select * from myobjects'
+
+You see again the content of the myobjects table as a csv file.
+
+Using the switch -j enables json output. Try:
+
+    ./csvoutput -j sqlite:test.db 'select * from myobjects'
+
+The content is now printed as json.
+
+With the switch -x you can select xml output:
+
+    ./csvoutput -x sqlite:test.db 'select * from myobjects'

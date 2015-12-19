@@ -107,7 +107,6 @@ example:
 
 ### The oracle driver
 
-
 To install the oracle driver on linux download the following libraries from
 Oracle (you will have to register but they are free of charge):
 
@@ -116,21 +115,23 @@ Oracle (you will have to register but they are free of charge):
 
 where VERS stand for the version number e.g. 11.2
 
-Install them using 'rpm -i'.    
+Install them with your package manager.
  
 The Oracle driver is not compiled by default when tntdb is compiled, since the
-Oracle client libraries are not free. You have to explicitly enable it
-with the switch to configure --with-oci-include and --with-oci-lib e.g.:
+Oracle client libraries are not free. You have to explicitly enable it using the
+configure switch --with-oracle. Since the includes and libs of oracle are
+normally not installed to standard paths, you need to tell the compiler where to
+find the includes and the linker where to find the libraries. This is done by
+setting the CPPFLAGS and LDFLAGS.
 
-    ./configure --with-oci-include=/usr/include/oracle/12.1/client64 \
-        --with-oci-lib=/usr/lib/oracle/12.1/client64/lib
+The call to configure may look like this:
 
-Check in the configure output, whether the oracle support is now enabled.
+    ./configure --with-oracle --without-mysql CPPFLAGS=-I/usr/include/oracle/11.2/client64 LDFLAGS=-L/usr/lib/oracle/11.2/client64/lib
 
-The connection string has to start with the prefix "oracle:". The username 
-and password are extracted afterwards. They must be passed semicolon separated
-"user=username" and "passwd=password". The rest of the string is passed to the
-OCI function `OCIServerAttach`. Here is an example for the Oracle Express Edition:
+The connection string has to start with the prefix "oracle:". The username and
+password are extracted. They must be passed semicolon separated "user=username"
+and "passwd=password". The rest of the string is passed to the OCI function
+`OCIServerAttach`. Here is an example for the Oracle Express Edition:
 
     tntdb::Connection conn =
       tntdb::connect("oracle:XE;user=hr;passwd=hr");

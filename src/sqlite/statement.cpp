@@ -528,10 +528,13 @@ namespace tntdb
 
           r->add(name, v);
         }
+
+        reset();
         return row;
       }
       else
       {
+        reset();
         log_debug("sqlite3_step failed with return code " << ret);
         throw Execerror("sqlite3_step", stmt, ret);
       }
@@ -572,10 +575,13 @@ namespace tntdb
         if (txt)
           v = Value(new ValueImpl(
             std::string(static_cast<const char*>(txt), n)));
+
+        reset();
         return v;
       }
       else
       {
+        reset();
         log_debug("sqlite3_step failed with return code " << ret);
         throw Execerror("sqlite3_step", stmt, ret);
       }
