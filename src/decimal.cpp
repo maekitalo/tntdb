@@ -331,6 +331,12 @@ namespace tntdb
     _value->_exponent += _eoff;
 
     stripZeros(_value->_mantissa);
+
+    if (_value->_mantissa.empty())
+    {
+      _value->_mantissa = "0";
+      _value->_exponent = 0;
+    }
   }
 
   Decimal::Decimal()
