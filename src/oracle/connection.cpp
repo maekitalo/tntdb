@@ -123,7 +123,7 @@ namespace tntdb
       sword ret;
 
       log_debug("create oracle environment");
-      ret = OCIEnvCreate(&envhp, OCI_OBJECT, 0, 0, 0, 0, 0, 0);
+      ret = OCIEnvCreate(&envhp, OCI_OBJECT|OCI_THREADED|OCI_NO_MUTEX, 0, 0, 0, 0, 0, 0);
       if (ret != OCI_SUCCESS)
         throw Error("cannot create environment handle");
       log_debug("environment handle => " << envhp);

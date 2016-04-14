@@ -247,7 +247,7 @@ namespace tntdb
             _data = new char[_n * sizeof(OCILobLocator*)];
 
             OCIDateTime** p = reinterpret_cast<OCIDateTime**>(_data);
-            log_debug("OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP) (" << _n << " times)");
+            log_debug("OCIDescriptorAlloc(OCI_DTYPE_LOB) (" << _n << " times)");
             for (unsigned n = 0; n < _n; ++n)
             {
               ret = OCIDescriptorAlloc(stmt->getConnection()->getEnvHandle(),
@@ -259,6 +259,14 @@ namespace tntdb
               stmt->getErrorHandle(), pos + 1, _data,
               sizeof(OCILobLocator*), SQLT_BLOB, _nullind, _len, 0, OCI_DEFAULT);
           }
+          break;
+
+        case SQLT_BIN:
+          log_debug("OCIDefineByPos(SQLT_BIN)");
+          _data = new char[(_collen + 16) * _n];
+          ret = OCIDefineByPos(stmt->getHandle(), &_defp,
+            stmt->getErrorHandle(), pos + 1, _data,
+            (_collen + 16), SQLT_BIN, _nullind, _len, 0, OCI_DEFAULT);
           break;
 
         default:
