@@ -15,6 +15,7 @@ tntdb_test_SOURCES = \
 	decimal-test.cpp \
 	sqlbuilder-test.cpp \
 	test-main.cpp \
+	timespan-test.cpp \
 	types-test.cpp
 
 AM_LDFLAGS = -lcxxtools-unit
