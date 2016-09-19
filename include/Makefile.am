@@ -13,6 +13,7 @@ nobase_include_HEADERS = \
 	tntdb/cxxtools/date.h \
 	tntdb/cxxtools/time.h \
 	tntdb/cxxtools/datetime.h \
+	tntdb/cxxtools/timespan.h \
 	tntdb/blob.h \
 	tntdb/connect.h \
 	tntdb/connection.h \
