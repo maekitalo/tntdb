@@ -26,6 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef TNTDB_BITS_BLOBSTREAM_H
+#define TNTDB_BITS_BLOBSTREAM_H
+
 #include <iostream>
 
 namespace tntdb
@@ -62,3 +65,5 @@ namespace tntdb
   };
 
 }
+
+#endif
