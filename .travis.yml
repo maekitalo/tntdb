@@ -1,0 +1,23 @@
+# Initially snatched and adapted from libsodium .travis.yml
+
+sudo: false
+
+language: c
+
+os:
+ - linux
+
+compiler:
+ - clang
+ - gcc
+ - g++
+
+before_script:
+ - ( cd tntdb && ./autogen.sh )
+
+script:
+ - ( cd tntdb && ./configure --disable-dependency-tracking )
+ - ( cd tntdb && make distcheck )
+ - ( cd tntdb && make distclean > /dev/null )
+ - ( cd tntdb && ./configure --disable-dependency-tracking --enable-minimal )
+ - ( cd tntdb && make distcheck )
