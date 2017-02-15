@@ -14,6 +14,11 @@ compiler:
  - gcc
  - g++
 
+addons:
+  apt:
+    packages:
+    - cxxtools
+
 before_script:
  - ( cd tntdb && ./autogen.sh )
 
