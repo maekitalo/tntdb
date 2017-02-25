@@ -1,717 +1,3083 @@
-2015-07-20 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2016-10-25  Tommi Mäkitalo <tommi@tntnet.org>
 
- - build library whith multithreading support
+	* include/tntdb/bits/blobstream.h: add missing include guards
 
-2015-07-13 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2016-09-19  Tommi Mäkitalo <tommi@tntnet.org>
 
- - update version number
+	* include/Makefile.am: add header tntdb/cxxtools/timespan.h to dist
+	package
 
-2015-06-18 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2016-09-16  Tommi Mäkitalo <tommi@tntnet.org>
 
- - reduce log level of some log output
- - do not install header from demo
+	* include/tntdb/cxxtools/timespan.h, test/Makefile.am,
+	test/timespan-test.cpp: add support for cxxtools::Timespan
 
-2015-06-15 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2016-04-14  Tommi Mäkitalo <tommi@tntnet.org>
 
- - fix leak of statement handles in postgresql driver when using tntdb::Transaction::lockTable
- - fix crash in postgresql driver when using lastInsertId without sequence name
-   Merge: 7747174 2196fae
+	* : commit 503e291197a660a88363d9ad9efe5e0551f05a4b Author: Tommi
+	MÃ¤kitalo <tommi@tntnet.org> Date:   Mon Apr 4 14:16:55 2016 +0200
 
-2015-06-01 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2016-04-04  Tommi Mäkitalo <tommi@tntnet.org>
 
- - Merge pull request #8 from aggsol/patch-1
-   Update README
- - Update README
-   The actual configure option is `--with-replicate`
+	* src/oracle/connection.cpp: add flag OCI_THREADED to oracle driver;
+	it is needed in multithreaded applications
 
-2015-05-27 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2016-01-13  Tommi Mäkitalo <tommi@tntnet.org>
 
- - fix handling unsigned values in mysql driver
+	* src/decimal.cpp: minor fix for parsing decimals 0.00 was parsed to
+	empty mantissa and exponent -2. Now it is set to zero, which means
+	mantissa is "0" and exponent 0.
 
-2015-05-20 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-12-22  Tommi Mäkitalo <tommi@tntnet.org>
 
- - improve error message in configure when the headers of a database driver could not be found
+	* src/oracle/multivalue.cpp: Fix reading raw columns from oracle The oracle driver previously read raw columns as text. OCI converts
+	raw data to hex notation which may result in a up to twice as long
+	output data than the column length paramter specifies.  Fetching
+	such data results in the error code ORA-01406. Now the oracle driver
+	reads raw coluns as binary, so that it always fits in the output
+	buffer.
 
-2015-05-18 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-12-19  Tommi Mäkitalo <tommi@tntnet.org>
 
- - add C++11 style begin and end functions to Statement, Result and Row classes
+	* : commit 8e76b958d96f28827fd4d391ddf8de542718aa06 Author: Tommi
+	MÃ¤kitalo <tommi@tntnet.org> Date:   Wed Dec 2 12:01:59 2015 +0100
 
-2015-04-23 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-11-26  Tommi Mäkitalo <tommi@tntnet.org>
 
- - fix limit and offset handling in oracle driver
- - add support for limit and offset in sql statements
+	* src/librarymanager.cpp: better error message when loading driver
+	library fails
 
-2015-03-16 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-11-24  Tommi Mäkitalo <tommi@tntnet.org>
 
- - minor performance fix: pass std::string by reference (uncovered by cppcheck)
+	* src/sqlite/statement.cpp: release statement earlier in sqlite
+	driver for shorter locking
 
-2015-02-01 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-11-23  Tommi Mäkitalo <tommi@tntnet.org>
 
- - add include file to dist package
-   Merge: ee56f89 e4c8161
+	* configure.ac: fix detection if mysql (stupid typo in last commit)
 
-2015-01-23 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-11-23  Tommi Mäkitalo <tommi@tntnet.org>
 
- - Merge pull request #7 from ghinadr/master
-   Forward declare class Cursor
+	* configure.ac: replace autoconf macro AC_PATH_PROGS with
+	AC_CHECK_PROG - seems to work better
 
-2015-01-22 ghinadr <adig33@yahoo.com>
+2015-11-15  Tommi Mäkitalo <tommi@tntnet.org>
 
- - Forward declare class Cursor
-   Class Cursor is referentiated in the Statement class, with the
-   declarator friend. Without the forward declaration of class Cursor,
-   tntdb won't compile on AIX 6.1
+	* demo/Makefile.am, demo/README-serialization, demo/demodb.sql,
+	demo/deserialize.cpp, demo/serialize.cpp,
+	include/tntdb/serialization.h, src/serialization.cpp: imporove
+	cxxtools serialization support and add README about that
 
-2015-01-05 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-11-12  Tommi Mäkitalo <tommi@tntnet.org>
 
- - add documentation to tntdb::SqlBuilder
+	* demo/Makefile.am, demo/csvoutput.cpp, include/Makefile.am,
+	include/tntdb/serialization.h, src/Makefile.am,
+	src/serialization.cpp: implement cxxtools serialization operators
+	for tntdb result objects
 
-2015-01-04 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-09-06  Tommi Mäkitalo <tommi@tntnet.org>
 
- - add support for std::multiset, std::forward_list, std::unordered_set and std::unordered_multimap
-   Merge: 9c0b34f 69bbbb2
+	* ChangeLog: update ChangeLog
 
-2014-12-04 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-07-20  Tommi Mäkitalo <tommi@tntnet.org>
 
- - update autoconf macro to check for C++-11 (makes C++-11 flag optional)
+	* .gitignore, configure.ac, m4/acx_pthread.m4: build library whith
+	multithreading support
 
-2014-11-02 Jonas Platte <mail@jonasplatte.de>
+2015-07-13  Tommi Mäkitalo <tommi@tntnet.org>
 
- - Updated .gitignore
- - Added pkg-config support
- - Cleaned up configure.ac a bit
+	* configure.ac: update version number
 
-2014-10-31 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-06-18  Tommi Mäkitalo <tommi@tntnet.org>
 
- - make get methods, which create RowReaders const in Row and Statement::const_iterator
+	* src/postgresql/result.cpp, src/statement_iterator.cpp: reduce log
+	level of some log output
 
-2014-10-28 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-06-18  Tommi Mäkitalo <tommi@tntnet.org>
 
- - discard previous http reply on execute if not fully read in http client
+	* demo/Makefile.am: do not install header from demo
 
-2014-10-24 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-06-15  Tommi Mäkitalo <tommi@tntnet.org>
 
- - fix typos in tntdb howto
+	* src/postgresql/connection.cpp: fix leak of statement handles in
+	postgresql driver when using tntdb::Transaction::lockTable
 
-2014-10-14 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-06-15  Tommi Mäkitalo <tommi@tntnet.org>
 
- - use c++ 11 mode of compiler if supported for better optimization
+	* src/postgresql/connection.cpp: fix crash in postgresql driver when
+	using lastInsertId without sequence name
 
-2014-09-30 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-06-01  Tommi Mäkitalo <tommi@tntnet.org>
 
- - replace some demos with better ones
- - add helper methods to tntdb::Row and tntdb::Statement::const_iterator to make working with RowReader easier
+	* : Merge pull request #8 from aggsol/patch-1 Update README
 
-2014-08-31 Andreas Welchlin <Andreas.Welchlin@comyno.com>
+2015-05-27  Tommi Mäkitalo <tommi@tntnet.org>
 
- - refine documentation
+	* src/mysql/bindvalues.cpp: fix handling unsigned values in mysql
+	driver
 
-2014-04-15 Jonas Platte <mail@jonasplatte.de>
+2015-05-20  Tommi Mäkitalo <tommi@tntnet.org>
 
- - Documentation and style revision for Blob, Connection, Statemnt
+	* configure.ac: improve error message in configure when the headers
+	of a database driver could not be found
 
-2014-04-14 Jonas Platte <mail@jonasplatte.de>
+2015-05-18  Tommi Mäkitalo <tommi@tntnet.org>
 
- - Removed all trailing whitespace from source files,
-   documentation + indentation update for the toplevel include directory
+	* include/tntdb/result.h, include/tntdb/row.h,
+	include/tntdb/statement.h: add C++11 style begin and end functions
+	to Statement, Result and Row classes
 
-2014-03-13 Jonas Platte <jonasplatte@myopera.com>
+2015-04-23  Tommi Mäkitalo <tommi@tntnet.org>
 
- - Documentation + code style revision: Date, Time, Datetime
+	* doc/tntdb.markdown, src/oracle/connection.cpp,
+	test/oracle-test.sql: fix limit and offset handling in oracle driver
 
-2014-08-15 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-04-23  Tommi Mäkitalo <tommi@tntnet.org>
 
- - remove cxxtools::NonCopyable class
- - fix build for oracle driver
- - pass required oci (oracle) version number correctly
+	* configure.ac, include/tntdb/bits/connection.h,
+	include/tntdb/iface/iconnection.h,
+	include/tntdb/impl/poolconnection.h,
+	include/tntdb/mysql/impl/connection.h,
+	include/tntdb/oracle/connection.h,
+	include/tntdb/postgresql/impl/connection.h,
+	include/tntdb/replicate/connection.h,
+	include/tntdb/replicate/statement.h,
+	include/tntdb/sqlite/impl/connection.h, src/connection.cpp,
+	src/mysql/connection.cpp, src/oracle/connection.cpp,
+	src/poolconnection.cpp, src/postgresql/connection.cpp,
+	src/replicate/connection.cpp, src/replicate/statement.cpp,
+	src/sqlite/connection.cpp, test/base-test.cpp: add support for limit
+	and offset in sql statements
 
-2014-02-22 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-03-16  Tommi Mäkitalo <tommi@tntnet.org>
 
- - buildfix: check for postgresql header after setting CPPFLAGS properly
+	* include/tntdb/librarymanager.h: minor performance fix: pass
+	std::string by reference (uncovered by cppcheck)
 
-2014-01-22 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-02-01  Tommi Mäkitalo <tommi@tntnet.org>
 
- - fix freeing pooled mysql connection when prepareCached is used
+	* demo/Makefile.am: add include file to dist package
 
-2013-11-29 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-01-23  Tommi Mäkitalo <tommi@tntnet.org>
 
- - update installation hints
+	* : Merge pull request #7 from ghinadr/master Forward declare class Cursor
 
-2013-10-03 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-01-05  Tommi Mäkitalo <tommi@tntnet.org>
 
- - autoscan.sh is obsolete - use "autoreconf -i" instead
+	* include/tntdb/sqlbuilder.h: add documentation to tntdb::SqlBuilder
 
-2013-10-01 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2015-01-04  Tommi Mäkitalo <tommi@tntnet.org>
 
- - fix check for unsigned long long
+	* include/tntdb/bits/statement.h: add support for std::multiset,
+	std::forward_list, std::unordered_set and std::unordered_multimap
 
-2013-09-21 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2014-12-11  Tommi Mäkitalo <tommi@tntnet.org>
 
- - improve error handling in sqlite driver
+	* : Merge pull request #6 from jouven/patch-1 Update row.h
 
-2013-07-29 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2014-12-04  Tommi Mäkitalo <tommi@tntnet.org>
 
- - add check for postgresql header availability to configure
+	* m4/ax_cxx_compile_stdcxx_11.m4: update autoconf macro to check for
+	C++-11 (makes C++-11 flag optional)
 
-2013-07-10 Tommi MÃ¤kitalo <tommi@tntnet.org>
+2014-11-18  Tommi Mäkitalo <tommi@tntnet.org>
 
- - build improvements:
-   * disable static build by default
-   * autodetect oci (oracle call interface)
+	* configure.ac: Jonas is right, AC_PROG_LIBTOOL is obsolete and
+	replaced by LT_INIT
 
- - update build:
-   * autoconf wants configure.ac instead of configure.in
-   * INCLUDE in Makefile.am is obsolete; AM_CPPFLAGS should be used
+2014-11-16  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-07-06 Tommi MÃ¤kitalo <tommi@tntnet.org>
+	* configure.ac: put check for libtool back to configure.ac (was
+	removed by Jonas)
 
- - add api documentation about the drivers
+2014-11-16  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-06-19 Richard Kojedzinszky <krichy@tvnetwork.hu>
+	* : Merge pull request #5 from jplatte/master Add pkg-config support
 
- - Initialize transactionActive in constructor
+2014-11-02  Jonas Platte <mail@jonasplatte.de>
 
-2013-06-07 Tommi MÃ¤kitalo <tommi@tntnet.org>
+	* Makefile.am, configure.ac, pkgconfig/tntdb.pc.in: Added pkg-config
+	support
 
- - add more build instructions into README-SOURCE-REPOS
+2014-11-02  Jonas Platte <mail@jonasplatte.de>
 
-2013-06-07 Tommi MÃ¤kitalo <tommi@tntnet.org>
+	* configure.ac: Cleaned up configure.ac a bit
 
- - set CPPFLAGS instead of CXXFLAGS to set include directory
+2014-11-01  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-06-06 Olaf Radicke <briefkasten@olaf-radicke.de>
+	* ChangeLog: update ChangeLog
 
- - Add doku about installation from source repository.
+2014-10-31  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-05-10 Tommi MÃ¤kitalo <tommi@tntnet.org>
+	* include/tntdb/bits/row.h, include/tntdb/bits/rowreader.h,
+	include/tntdb/bits/statement_iterator.h, include/tntdb/statement.h: 
+	make get methods, which create RowReaders const in Row and
+	Statement::const_iterator
 
- - make oracle connection pool fork safe (don't reuse connections in child process)
+2014-10-28  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-05-09 Tommi MÃ¤kitalo <tommi@tntnet.org>
+	* .gitignore, m4/ax_cxx_compile_stdcxx_11.m4: discard previous http
+	reply on execute if not fully read in http client
 
- - convert documentation to markdown and update it
+2014-10-24  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-04-08 tommi@tntnet.org
+	* doc/tntdb.markdown: fix typos in tntdb howto
 
- - release candidate 1.3rc3
+2014-10-14  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-03-31 tommi@tntnet.org
+	* configure.ac: use c++ 11 mode of compiler if supported for better
+	optimization
 
- - remove removed m4/acx_pthread.m4 from Makefile.am also
- - fix compiler warnings
- - remove pthread checks from tntdb since it is not needed
+2014-09-30  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-03-17 tommi@tntnet.org
+	* demo/Makefile.am, demo/categories.cpp, demo/modify.cpp,
+	demo/mysqlcmd.cpp, demo/person.cpp, demo/pooldemo.cpp,
+	demo/prodbench.cpp, demo/select.cpp, demo/sqlitecmd.cpp: replace
+	some demos with better ones
 
- - fix some compiler warnings
- - set preprocesor flags in CPPFLAGS instead of CXXFLAGS
- - update version number to 1.3rc2; update ChangeLog
+2014-09-30  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-03-16 tommi@tntnet.org
+	* .gitignore, doc/tntdb.markdown, include/tntdb/bits/row.h,
+	include/tntdb/bits/rowreader.h,
+	include/tntdb/bits/statement_iterator.h, include/tntdb/statement.h: 
+	add helper methods to tntdb::Row and
+	tntdb::Statement::const_iterator to make working with RowReader
+	easier
+
+2014-08-31  Tommi Mäkitalo <tommi@tntnet.org>
+
+	* doc/tntdb.markdown: convert tntdb guide from dos to unix format
+
+2014-08-31  Tommi Mäkitalo <tommi@tntnet.org>
+
+	* : commit 8292cbdad456ae951bf10b67a6f692b84313b683 Author: Andreas
+	Welchlin <Andreas.Welchlin@comyno.com> Date:   Sun Aug 31 13:26:21
+	2014 +0200
+
+2014-08-16  Tommi Mäkitalo <tommi@tntnet.org>
+
+	* : commit f076d991bc23923d32e6e988cf1517bdf1bfcc69 Author: Jonas
+	Platte <mail@jonasplatte.de> Date:   Tue Apr 15 01:00:33 2014 +0200
+
+2014-04-14  Jonas Platte <mail@jonasplatte.de>
+
+	* README, configure.ac, demo/categories.cpp, demo/multiparam.cpp,
+	demo/mysqlcmd.cpp, demo/person.cpp, demo/pooldemo.cpp,
+	demo/prodbench.cpp, demo/serial.cpp, demo/sqlcmd.cpp,
+	demo/sqlitecmd.cpp, demo/util.h, include/tntdb.h,
+	include/tntdb/bits/blob.h, include/tntdb/bits/blobstream.h,
+	include/tntdb/bits/connection.h, include/tntdb/bits/result.h,
+	include/tntdb/bits/result_iterator.h, include/tntdb/bits/row.h,
+	include/tntdb/bits/row_iterator.h, include/tntdb/bits/rowreader.h,
+	include/tntdb/bits/statement.h,
+	include/tntdb/bits/statement_iterator.h,
+	include/tntdb/bits/value.h, include/tntdb/blob.h,
+	include/tntdb/connect.h, include/tntdb/connection.h,
+	include/tntdb/connectionpool.h, include/tntdb/cxxtools/date.h,
+	include/tntdb/cxxtools/datetime.h, include/tntdb/cxxtools/time.h,
+	include/tntdb/date.h, include/tntdb/datetime.h,
+	include/tntdb/decimal.h, include/tntdb/error.h,
+	include/tntdb/iface/iblob.h, include/tntdb/iface/iconnection.h,
+	include/tntdb/iface/iconnectionmanager.h,
+	include/tntdb/iface/icursor.h, include/tntdb/iface/iresult.h,
+	include/tntdb/iface/irow.h, include/tntdb/iface/istatement.h,
+	include/tntdb/iface/ivalue.h, include/tntdb/impl/blob.h,
+	include/tntdb/impl/poolconnection.h, include/tntdb/impl/result.h,
+	include/tntdb/impl/row.h, include/tntdb/impl/value.h,
+	include/tntdb/librarymanager.h, include/tntdb/mysql/bindutils.h,
+	include/tntdb/mysql/bindvalues.h, include/tntdb/mysql/cursor.h,
+	include/tntdb/mysql/error.h, include/tntdb/mysql/impl/boundrow.h,
+	include/tntdb/mysql/impl/boundvalue.h,
+	include/tntdb/mysql/impl/connection.h,
+	include/tntdb/mysql/impl/connectionmanager.h,
+	include/tntdb/mysql/impl/cursor.h,
+	include/tntdb/mysql/impl/result.h,
+	include/tntdb/mysql/impl/resultrow.h,
+	include/tntdb/mysql/impl/rowcontainer.h,
+	include/tntdb/mysql/impl/rowvalue.h,
+	include/tntdb/mysql/impl/statement.h, include/tntdb/oracle/blob.h,
+	include/tntdb/oracle/connection.h,
+	include/tntdb/oracle/connectionmanager.h,
+	include/tntdb/oracle/cursor.h, include/tntdb/oracle/datetime.h,
+	include/tntdb/oracle/error.h, include/tntdb/oracle/multirow.h,
+	include/tntdb/oracle/multivalue.h, include/tntdb/oracle/number.h,
+	include/tntdb/oracle/result.h, include/tntdb/oracle/row.h,
+	include/tntdb/oracle/singlerow.h,
+	include/tntdb/oracle/singlevalue.h,
+	include/tntdb/oracle/statement.h, include/tntdb/oracle/value.h,
+	include/tntdb/postgresql/error.h,
+	include/tntdb/postgresql/impl/connection.h,
+	include/tntdb/postgresql/impl/connectionmanager.h,
+	include/tntdb/postgresql/impl/cursor.h,
+	include/tntdb/postgresql/impl/result.h,
+	include/tntdb/postgresql/impl/resultrow.h,
+	include/tntdb/postgresql/impl/resultvalue.h,
+	include/tntdb/postgresql/impl/statement.h,
+	include/tntdb/replicate/connection.h,
+	include/tntdb/replicate/connectionmanager.h,
+	include/tntdb/replicate/statement.h, include/tntdb/result.h,
+	include/tntdb/row.h, include/tntdb/sqlbuilder.h,
+	include/tntdb/sqlite/error.h,
+	include/tntdb/sqlite/impl/connection.h,
+	include/tntdb/sqlite/impl/connectionmanager.h,
+	include/tntdb/sqlite/impl/cursor.h,
+	include/tntdb/sqlite/impl/statement.h,
+	include/tntdb/sqlite/impl/stmtrow.h,
+	include/tntdb/sqlite/impl/stmtvalue.h, include/tntdb/statement.h,
+	include/tntdb/stmtparser.h, include/tntdb/time.h,
+	include/tntdb/transaction.h, include/tntdb/value.h, src/blob.cpp,
+	src/blobstream.cpp, src/connect.cpp, src/connection.cpp,
+	src/connectionpool.cpp, src/date.cpp, src/datetime.cpp,
+	src/decimal.cpp, src/error.cpp, src/librarymanager.cpp,
+	src/mysql/bindutils.cpp, src/mysql/bindvalues.cpp,
+	src/mysql/boundrow.cpp, src/mysql/boundvalue.cpp,
+	src/mysql/connection.cpp, src/mysql/connectionmanager.cpp,
+	src/mysql/cursor.cpp, src/mysql/cursor_iterator.cpp,
+	src/mysql/error.cpp, src/mysql/result.cpp, src/mysql/resultrow.cpp,
+	src/mysql/row.cpp, src/mysql/rowcontainer.cpp,
+	src/mysql/rowvalue.cpp, src/mysql/statement.cpp,
+	src/oracle/blob.cpp, src/oracle/connection.cpp,
+	src/oracle/connectionmanager.cpp, src/oracle/cursor.cpp,
+	src/oracle/datetime.cpp, src/oracle/error.cpp,
+	src/oracle/multirow.cpp, src/oracle/multivalue.cpp,
+	src/oracle/number.cpp, src/oracle/result.cpp, src/oracle/row.cpp,
+	src/oracle/singlerow.cpp, src/oracle/singlevalue.cpp,
+	src/oracle/value.cpp, src/poolconnection.cpp,
+	src/postgresql/connection.cpp,
+	src/postgresql/connectionmanager.cpp, src/postgresql/cursor.cpp,
+	src/postgresql/error.cpp, src/postgresql/result.cpp,
+	src/postgresql/resultrow.cpp, src/postgresql/resultvalue.cpp,
+	src/postgresql/statement.cpp, src/replicate/connection.cpp,
+	src/replicate/connectionmanager.cpp, src/replicate/statement.cpp,
+	src/result.cpp, src/resultimpl.cpp, src/row.cpp, src/rowimpl.cpp,
+	src/sqlbuilder.cpp, src/sqlite/connection.cpp,
+	src/sqlite/connectionmanager.cpp, src/sqlite/cursor.cpp,
+	src/sqlite/nvstatement.cpp, src/sqlite/statement.cpp,
+	src/sqlite/stmtrow.cpp, src/sqlite/stmtvalue.cpp,
+	src/statement.cpp, src/statement_iterator.cpp, src/stmtparser.cpp,
+	src/time.cpp, src/transaction.cpp, src/valueimpl.cpp,
+	test/base-test.cpp, test/colname-test.cpp, test/decimal-test.cpp,
+	test/sqlbuilder-test.cpp, test/test-main.cpp, test/test.cpp,
+	test/tntdb-locktest.cpp, test/types-test.cpp: Removed all trailing
+	whitespace from source files, documentation + indentation update for
+	the toplevel include directory
 
- - add chapters about business logic, application class and logging to quick start guide
- - release candidate 1.3rc2
+2014-04-14  Jonas Platte <mail@jonasplatte.de>
 
-2013-03-11 tommi@tntnet.org
+	* .gitignore: Updated .gitignore
 
- - do not use implicit conversion of cxxtools::SmartPtr to raw pointer in oracle driver also
+2014-03-13  Jonas Platte <jonasplatte@myopera.com>
 
-2013-03-03 tommi@tntnet.org
+	* include/tntdb/date.h, include/tntdb/datetime.h,
+	include/tntdb/time.h, src/date.cpp, src/datetime.cpp, src/time.cpp: 
+	Documentation + code style revision: Date, Time, Datetime
 
- - release candidate 1.3rc1
+2014-08-15  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-01-18 tommi@tntnet.org
+	* include/tntdb/connectionpool.h,
+	include/tntdb/iface/iconnectionmanager.h,
+	include/tntdb/transaction.h: remove cxxtools::NonCopyable class
 
- - fix table locking in oracle driver
+2014-08-15  Tommi Mäkitalo <tommi@tntnet.org>
 
-2013-01-17 tommi@tntnet.org
+	* .gitignore, include/tntdb/oracle/blob.h,
+	include/tntdb/oracle/connectionmanager.h,
+	include/tntdb/oracle/number.h, m4/ax_lib_oracle_oci.m4,
+	src/oracle/Makefile.am, src/oracle/connectionmanager.cpp,
+	src/oracle/number.cpp: fix build for oracle driver
 
- - extend locktest program with facility to create read locks
- - implement lockTable method in tntdb::Transaction
- - compile with -Wall and -pedantic if compiler supports it
+2014-08-15  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-08-15 tommi@tntnet.org
+	* configure.ac: pass required oci (oracle) version number correctly
 
- - delay deallocation of statements in postgresql during transactions since failed transactions causes deallocation to fail
+2014-05-28  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-08-04 tommi@tntnet.org
+	* doc/Makefile.am: remove deleted file from build of dist package
 
- - remove unused variable
- - pass param format array to PQexecParams correctly when opening cursor in postgresql driver
+2014-02-22  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-05-28 tommi@tntnet.org
+	* configure.ac: chech for postgresql header after setting CPPFLAGS
+	properly
 
- - remove deprecated header cxxtools/loginit.h
- - add test reading with cursor into unit test
+2014-01-22  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-05-26 tommi@tntnet.org
+	* include/tntdb/mysql/impl/statement.h, src/mysql/connection.cpp,
+	src/mysql/statement.cpp: fix freeing pooled mysql connection when
+	prepareCached is used
 
- - add support for cxxtools::String (unicode string class)
+2013-11-29  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-04-16 tommi@tntnet.org
+	* README, README.git: update installation hints
 
- - fix fetching blob fields in oracle driver and extend unit test for type for using tntdb::Result
- - fix fetching datetime and blob fields in oracle driver
+2013-10-28  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-04-12 tommi@tntnet.org
+	* : commit 7a07fd0e9886ae32bef3fc7f56d5f640b71056d4 Author: Tommi
+	MÃ¤kitalo <tommi@tntnet.org> Date:   Mon Oct 28 12:52:58 2013 +0100
 
- - use OCI number conversion functions where feasible in oracle driver
- - optimize oracle driver by fetching multiple values at once (reading larger amounts of data is dramatically faster now)
+2013-10-28  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-04-02 tommi@tntnet.org
+	* README.git: fix README.git
 
- - update version number to 1.2
- - remove old debian directory
+2013-10-03  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-03-31 tommi@tntnet.org
+	* README-SOURCE-REPOS => README.git, autogen.sh: autoscan.sh is
+	obsolete - use "autoreconf -i" instead
 
- - update ChangeLog and version number
- - fix tntdb::Decimal for freebsd
- - fix a special case in conjunction with quotes when parsing sql statements
+2013-10-01  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-03-26 tommi@tntnet.org
+	* configure.ac: fix check for unsigned long long
 
- - some fixes concerning new tntdb::Decimal class and optimization in oralce driver (rebind only when needed)
+2013-09-21  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-03-25 tommi@tntnet.org
+	* configure.ac, src/sqlite/statement.cpp: improve error handling in
+	sqlite driver
 
- - fix mysql driver: mysql_stmt_execute accesses bound data even when it is deleted
- - add unit tests for basic tntdb functionality
- - fix setting char, date, time and datetime in mysql
+2013-07-29  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-03-15 tommi@tntnet.org
+	* configure.ac: add check for postgresql header availability to
+	configure
 
- - improve support for integer type in Decimal class
+2013-07-10  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-03-13 tommi@tntnet.org
+	* configure.ac, m4/ax_lib_oracle_oci.m4: build improvements:  * disable static build by default  * autodetect oci (oracle call interface)
 
- - new method getInteger in tntdb::Decimal
- - update oracle driver to new decimal class
+2013-07-10  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-03-12 tommi@tntnet.org
+	* README-SOURCE-REPOS, configure.in => configure.ac,
+	demo/Makefile.am, src/Makefile.am, src/mysql/Makefile.am,
+	src/oracle/Makefile.am, src/postgresql/Makefile.am,
+	src/replicate/Makefile.am, src/sqlite/Makefile.am, test/Makefile.am: 
+	update build:  * autoconf wants configure.ac instead of configure.in  * INCLUDE in Makefile.am is obsolete; AM_CPPFLAGS should be used
 
- - fix parsing some decimal numbers and allow leading and trailing white space
- - avoid possible wrong overflow in decimal class
- - fixes for decimal parser
+2013-07-06  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-03-08 tommi@tntnet.org
+	* include/tntdb/mysql/impl/connection.h,
+	include/tntdb/oracle/connection.h,
+	include/tntdb/postgresql/impl/connection.h,
+	include/tntdb/sqlite/impl/connection.h: add api documentation about
+	the drivers
 
- - remove some constructors from Decimal to reduce abiguity
+2013-06-19  Richard Kojedzinszky <krichy@tvnetwork.hu>
 
-2012-03-05 tommi@tntnet.org
+	* src/mysql/connection.cpp: Initialize transactionActive in
+	constructor
 
- - simplify tntdb::Decimal and make its use more efficient
+2013-06-07  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-02-26 tommi@tntnet.org
+	* README-SOURCE-REPOS: add more build instructions into
+	README-SOURCE-REPOS
 
- - fix compiler warnings in decimal class and add some unit tests for decimal class
+2013-06-07  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-02-25 tommi@tntnet.org
+	* : commit 8a44edb0d502dcee21d6ab4a52f5b55176dc0758 Author: Tommi
+	MÃ¤kitalo <tommi@tntnet.org> Date:   Fri Jun 7 22:27:56 2013 +0200
 
- - set compile flags for ibm xlc and fix some warnings
+2013-06-07  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-02-11 tommi@tntnet.org
+	* doc/tntdb.markdown: fix german umlaut in my name in tntdb
+	documentation
 
- - set abi version to 3
- - add sql scripts for creating test tables into dist package
+2013-06-06  Olaf Radicke <briefkasten@olaf-radicke.de>
 
-2012-02-09 tommi@tntnet.org
+	* README-SOURCE-REPOS: Add doku about installation from source
+	repository.
 
- - implement method tntdb::Row::getColumnName(size_type)
+2013-05-18  Olaf Radicke <briefkasten@olaf-radicke.de>
 
-2012-02-09 tommi@tntnet.org
+	* : Merge https://github.com/maekitalo/tntdb
 
- - fix resetting rowreader
- - fix some compiler warnings in Decimal class
+2013-05-09  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-02-08 tommi@tntnet.org
+	* doc/tntdb.markdown: convert documentation to markdown and update
+	it
 
- - remove search path from tntdb since people should use LD_LIBRARY_PATH if really needed and prefer that over configured driver directory
- - better cleanup in tntdb unit test
- - fix reading floating point number from decimal column in mysql driver
+2013-05-08  Tommi Mäkitalo <tommi@tntnet.org>
 
-2012-02-05 tommi@tntnet.org
+	* .gitignore: add gitignore files
 
- - initialize tests correctly - null test did not work as it should have
+2013-05-08  Olaf Radicke <briefkasten@olaf-radicke.de>
 
-2012-02-01 tommi@tntnet.org
+	* : Merge pull request #1 from maekitalo/master pull request an mich selbst
 
- - sort connections in replicate driver to reduce risk of dead locks but still use first connection as primary connection for selects
+2013-04-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-11-25 tommi@tntnet.org
+	* tntdb/configure.in: update revision number to 1.3rc3 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@340
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - remove now obsolete method tntdb::Statement::paramlist (replaced by tntdb::SqlBuilder)
- - add missing return statement into tntdb::SqlBuilder::replaceIf
- - add else value into tntdb::SqlBuilder::replaceIf
- - when replication fails in replication driver add the number of the connection, which fails to the exception message
- - add unit test for tntdb::SqlBuilder
- - fix replication driver - after last fix statements were executed twice on the first connection
+2013-04-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-11-24 tommi@tntnet.org
+	* tntdb/ChangeLog: update ChangeLog git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@338
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - add default constructor and setter for sql builder
+2013-03-31  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-11-23 tommi@tntnet.org
+	* tntdb/Makefile.am: remove removed m4/acx_pthread.m4 from
+	Makefile.am also git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@337
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - add class tntdb::SqlBuilder as a helper for dynamically built sql statements
+2013-03-31  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-11-22 tommi@tntnet.org
+	* tntdb/src/decimal.cpp, tntdb/src/replicate/statement.cpp,
+	tntdb/src/sqlite/statement.cpp: fix compiler warnings git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@336
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - add support for parameter lists in Statement
+2013-03-31  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-11-17 tommi@tntnet.org
+	* tntdb/configure.in, tntdb/m4/acx_pthread.m4,
+	tntdb/src/Makefile.am, tntdb/src/mysql/Makefile.am,
+	tntdb/src/oracle/Makefile.am, tntdb/src/postgresql/Makefile.am,
+	tntdb/src/replicate/Makefile.am, tntdb/src/sqlite/Makefile.am: 
+	remove pthread checks from tntdb since it is not needed git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@335
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - Datetime must not have a zero year, month or day in oracle
+2013-03-17  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-11-11 tommi@tntnet.org
+	* tntdb/src/mysql/connection.cpp,
+	tntdb/src/postgresql/connection.cpp, tntdb/src/stmtparser.cpp: fix
+	some compiler warnings git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@334
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - fix ping in replicate driver
- - prevent endless retry to create new connections in connectionpool
+2013-03-17  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-11-10 tommi@tntnet.org
+	* tntdb/configure.in: set preprocesor flags in CPPFLAGS instead of
+	CXXFLAGS git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@333
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - OCIPing did not work on our oracle server 10.2.0.4.0; replace with OCIServerVersion on oracle before 11
+2013-03-17  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-11-04 tommi@tntnet.org
+	* tntdb/test/base-test.cpp, tntdb/test/types-test.cpp: fix some
+	compiler warnings git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@332
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - fix out of tree build
+2013-03-17  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-09-25 tommi@tntnet.org
+	* tntdb/ChangeLog, tntdb/configure.in: update version number to
+	1.3rc2; update ChangeLog git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@331
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - fix wrong data type in tntdb::Decimal::getUnsignedShort()
- - fix build for autoconf 2.68
+2013-03-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-09-20 tommi@tntnet.org
+	* tntdb/src/oracle/cursor.cpp, tntdb/src/oracle/singlerow.cpp,
+	tntdb/src/oracle/statement.cpp: do not use implicit conversion of
+	cxxtools::SmartPtr to raw pointer in oracle driver also git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@330
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - add missing return statements in replicate driver
+2013-03-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-09-01 tommi@tntnet.org
+	* tntdb/src/connection.cpp, tntdb/src/mysql/statement.cpp: do not
+	use implicit conversion of cxxtools::SmartPtr to raw pointer git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@329
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - add get method for tntdb::Value to RowReader
- - add rowreader.h to Makefile.am
+2013-03-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-08-27 tommi@tntnet.org
+	* tntdb/ChangeLog, tntdb/configure.in: update ChangeLog and version
+	numbers git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@328
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - add documentation for tntdb::RowReader
+2013-01-18  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-08-26 tommi@tntnet.org
+	* tntdb/src/oracle/connection.cpp: fix table locking in oracle
+	driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@327
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - implement new helper class tntdb::RowReader, which makes it easier to read all values from a row
+2013-01-17  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-06-03 tommi@tntnet.org
+	* tntdb/test/tntdb-locktest.cpp: extend locktest program with
+	facility to create read locks git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@326
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - add support for short and unsigned short
+2013-01-17  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-05-06 tommi@tntnet.org
+	* tntdb/include/tntdb/bits/connection.h,
+	tntdb/include/tntdb/iface/iconnection.h,
+	tntdb/include/tntdb/impl/poolconnection.h,
+	tntdb/include/tntdb/mysql/impl/connection.h,
+	tntdb/include/tntdb/oracle/connection.h,
+	tntdb/include/tntdb/postgresql/impl/connection.h,
+	tntdb/include/tntdb/replicate/connection.h,
+	tntdb/include/tntdb/sqlite/impl/connection.h,
+	tntdb/include/tntdb/transaction.h, tntdb/src/connection.cpp,
+	tntdb/src/mysql/connection.cpp, tntdb/src/oracle/connection.cpp,
+	tntdb/src/poolconnection.cpp, tntdb/src/postgresql/connection.cpp,
+	tntdb/src/replicate/connection.cpp,
+	tntdb/src/sqlite/connection.cpp, tntdb/src/transaction.cpp,
+	tntdb/test/tntdb-locktest.cpp: implement lockTable method in
+	tntdb::Transaction git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@325
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - fix reading time with second fractional part >0.9999, which resulted in a invalid time in postgresql driver
+2013-01-17  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-04-25 tommi@tntnet.org
+	* tntdb/configure.in: compile with -Wall and -pedantic if compiler
+	supports it git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@324
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - add operators for cxxtools::Date, Time and DateTime classes
+2012-08-15  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-04-02 tommi@tntnet.org
+	* tntdb/include/tntdb/postgresql/impl/connection.h,
+	tntdb/src/postgresql/connection.cpp,
+	tntdb/src/postgresql/statement.cpp: delay deallocation of statements
+	in postgresql during transactions since failed transactions causes
+	deallocation to fail git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@323
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - fix compile problem on BSD (timeval.tv_sec is not of type time_t)
+2012-08-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-03-24 tommi@tntnet.org
+	* tntdb/src/datetime.cpp: remove unused variable git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@322
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - use transacions to make sure replication works also on error on the second db in replication driver
+2012-08-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-03-22 tommi@tntnet.org
+	* tntdb/src/postgresql/cursor.cpp: pass param format array to
+	PQexecParams correctly when opening cursor git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@321
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - use OCIPing to check if oracle connection is still alive
+2012-05-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-03-22 tommi@tntnet.org
+	* tntdb/demo/categories.cpp, tntdb/demo/person.cpp,
+	tntdb/demo/pooldemo.cpp, tntdb/demo/sqlcmd.cpp: remove deprecated
+	header cxxtools/loginit.h git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@320
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - default to empty string of serial name when retrieving last insert id, which means: get the last inserted id regardless of name
+2012-05-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-02-27 tommi@tntnet.org
+	* tntdb/test/types-test.cpp: add test reading with cursor into unit
+	test git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@319
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - update tntdb to latest cxxtools (svn release 1203 or cxxtools 2.1)
+2012-05-26  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-02-21 tommi@tntnet.org
+	* tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/value.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h, tntdb/src/statement.cpp,
+	tntdb/src/valueimpl.cpp: add support for cxxtools::String (unicode
+	string class) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@318
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - support for nan and inf in postgresql driver
+2012-04-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-02-21 tommi@tntnet.org
+	* tntdb/include/tntdb/oracle/blob.h,
+	tntdb/include/tntdb/oracle/multivalue.h, tntdb/test/types-test.cpp: 
+	fix fetching blob fields in oracle driver and extend unit test for
+	type for using tntdb::Result git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@315
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - deliver last incremented serial if passed empty string to lastInsertId method in postgresql driver
+2012-04-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-02-21 tommi@tntnet.org
+	* tntdb/src/oracle/multivalue.cpp: fix fetching blob fields in
+	oracle driver and extend unit test for type for using tntdb::Result git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@314
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - add replicating driver to tntdb
+2012-04-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-01-30 tommi@tntnet.org
+	* tntdb/src/oracle/multivalue.cpp: fix fetching datetime and blob
+	fields in oracle driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@312
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - fix: long was casted to int when set in statement
+2012-04-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-01-10 tommi@tntnet.org
+	* tntdb/src/oracle/multivalue.cpp: use OCI number conversion
+	functions where feasible in oracle driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@309
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
- - implement getLong and getUnsignedLong in tntdb::row
+2012-04-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2011-01-05 tommi@tntnet.org
- - add tntdb::BlobIStream: a std::istream interface to tntdb::Blob
+	* tntdb/include/Makefile.am, tntdb/include/tntdb/oracle/cursor.h,
+	tntdb/include/tntdb/oracle/multirow.h,
+	tntdb/include/tntdb/oracle/multivalue.h,
+	tntdb/include/tntdb/oracle/number.h,
+	tntdb/include/tntdb/oracle/result.h,
+	tntdb/include/tntdb/oracle/singlerow.h,
+	tntdb/include/tntdb/oracle/singlevalue.h,
+	tntdb/src/oracle/Makefile.am, tntdb/src/oracle/cursor.cpp,
+	tntdb/src/oracle/multirow.cpp, tntdb/src/oracle/multivalue.cpp,
+	tntdb/src/oracle/number.cpp, tntdb/src/oracle/result.cpp,
+	tntdb/src/oracle/singlerow.cpp, tntdb/src/oracle/singlevalue.cpp,
+	tntdb/src/oracle/statement.cpp, tntdb/src/oracle/value.cpp: optimize
+	oracle driver by fetching multiple values at once (reading larger
+	amounts of data is dramatically faster now) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@306
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2010-11-14 tommi@tntnet.org
- - do not generate doxygen documentation by default
+2012-04-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2010-11-13 tommi@tntnet.org
- - use async calls when testing connection with ping in postgresql driver to monitor timeout
+	* tntdb/configure.in: update version number to 1.2 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@304
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2010-10-29 tommi@tntnet.org
- - fix warning in postgresql driver about failed deallocation of statement on close connection when lastInserId was used
+2012-04-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2010-10-23 tommi@tntnet.org
- - statement parser fixes: do not convert type of cast expressions like
-   a::integer into host variable and parse 2 consecutive hostvars
-   correctly
+	* tntdb/debian/changelog, tntdb/debian/compat,
+	tntdb/debian/control, tntdb/debian/copyright, tntdb/debian/dirs,
+	tntdb/debian/docs, tntdb/debian/libtntdb-dev.dirs,
+	tntdb/debian/libtntdb-dev.install,
+	tntdb/debian/libtntdb1-mysql.dirs,
+	tntdb/debian/libtntdb1-mysql.install,
+	tntdb/debian/libtntdb1-postgresql.dirs,
+	tntdb/debian/libtntdb1-postgresql.install,
+	tntdb/debian/libtntdb1-sqlite.dirs,
+	tntdb/debian/libtntdb1-sqlite.install, tntdb/debian/libtntdb1.dirs,
+	tntdb/debian/libtntdb1.install, tntdb/debian/rules,
+	tntdb/debian/shlibs.local: remove old debian directory git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@303
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2010-10-06 tommi@tntnet.org
- - make tntdb::Blob thread safe - the empty instance may be shared between connections in different threads
+2012-03-31  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2010-09-29 tommi@tntnet.org
- - remove obsolete code for statically bind drivers to tntdb
- - build driver name from abi_current from configure.in
+	* tntdb/ChangeLog, tntdb/configure.in: update ChangeLog and version
+	number git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@302
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2010-09-28 tommi@tntnet.org
- - make tntdb::connect thread safe
+2012-03-31  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2010-09-27 tommi@tntnet.org
- - bugfix: tntdb::Value::getUnsignedLong should return an unsigned long instead of an unsigned
+	* tntdb/src/decimal.cpp: fix tntdb::Decimal for freebsd git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@301
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2010-09-16 tommi@tntnet.org
- - add logging to transaction class and do not inline it
+2012-03-31  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2010-09-08 tommi@tntnet.org
- - add convenience method tntdb::Statement::setIf to set to a value or null depending on a bool
+	* tntdb/src/stmtparser.cpp, tntdb/test/sqlbuilder-test.cpp: fix a
+	special case in conjunction with quotes when parsing sql statements git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@300
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2010-08-11 tommi@tntnet.org
- - unify handling of nested transactions (ignore nested transactions like oracle driver did it already)
+2012-03-26  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2010-08-01 tommi@tntnet.org
- - release 1.1
+	* tntdb/include/tntdb/oracle/statement.h,
+	tntdb/src/oracle/statement.cpp, tntdb/src/oracle/value.cpp: some
+	fixes concerning new tntdb::Decimal class and optimization in oralce
+	driver (rebind only when needed) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@299
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2010-03-25 adi
- - error for decimal number < 1 fixed
+2012-03-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2010-02-16 tommi@tntnet.org
- - tntdb::Statement::setLong and setUnsignedLong
- - add unittest
- - add relational operators to tntdb::Decimal
+	* tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/bindvalues.h, tntdb/src/date.cpp,
+	tntdb/src/datetime.cpp, tntdb/src/mysql/bindutils.cpp,
+	tntdb/src/mysql/bindvalues.cpp, tntdb/src/mysql/statement.cpp,
+	tntdb/src/time.cpp, tntdb/test/mysql-test.sql,
+	tntdb/test/types-test.cpp: fix setting char, date, time and datetime
+	in mysql git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@298
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2010-02-13 tommi@tntnet.org
- - add support for auto-incremented values with new method
-   tntdb::Connection::lastInsertId(std::string)
- - new methods getLong and getUnsignedLong in tntdb::Value
+2012-03-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2010-02-11 tommi@tntnet.org
- - add template method tntdb::Value::get(T&)
+	* tntdb/test/Makefile.am, tntdb/test/base-test.cpp: add unit tests
+	for basic tntdb functionality git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@297
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2010-02-09 tommi@tntnet.org
- - remove automatic conversion operators from tntdb::Value
- - add an extendable system for retrieving and setting values by overriding 2
-   operators
+2012-03-24  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2010-02-06 tommi@tntnet.org
- - let the user specify a short key for statement cache in prepareCached
- - add getValue-methods to tntdb::Row, which returns the data to variables,
-   passed by reference
+	* tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/src/mysql/cursor.cpp, tntdb/src/mysql/statement.cpp: fix mysql
+	driver: mysql_stmt_execute accesses bound data even when it is
+	deleted git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@296
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2009-12-31 tommi@tntnet.org
- - replace obsolete cxxtools::Dynbuffer with std::vector
+2012-03-15  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2009-12-14 tommi@tntnet.org
- - add method tntdb::Value::getValue
+	* tntdb/include/tntdb/decimal.h, tntdb/src/decimal.cpp,
+	tntdb/src/mysql/bindutils.cpp, tntdb/src/oracle/value.cpp: improve
+	support for integer type in Decimal class git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@295
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2009-12-12 tommi@tntnet.org
- - check if int and int32_t and others are distinct types
+2012-03-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2009-09-09 tommi@tntnet.org
- - extend syntax of connection string in mysql driver:
- - allow values to be enclosed in single or double quotes
- - escape special characters in values with backslash
- - allow whitespace as delimiter
- - check for duplicate keys in connection string
- - add key "app" with a default "tntdb" and use my.cnf with this section
+	* tntdb/include/tntdb/oracle/number.h,
+	tntdb/include/tntdb/oracle/value.h, tntdb/src/decimal.cpp,
+	tntdb/src/oracle/number.cpp, tntdb/src/oracle/value.cpp: update
+	oracle driver to new decimal class git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@294
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2009-06-29 tommi@tntnet.org
- - clean up of oracle connection in proper order
+2012-03-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2009-06-29 tommi@tntnet.org
- - close oracle connection correctly
+	* tntdb/configure.in, tntdb/include/tntdb/config.h.in,
+	tntdb/include/tntdb/decimal.h, tntdb/src/decimal.cpp,
+	tntdb/test/decimal-test.cpp: new method getInteger in tntdb::Decimal git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@293
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2009-06-16 tommi@tntnet.org
- - fix sporadic error in string to number conversion in oracle driver
+2012-03-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2009-05-15 tommi@tntnet.org
- - clear statement cache at transaction end with sqlite since statement handles are invalidated
+	* tntdb/src/decimal.cpp, tntdb/test/decimal-test.cpp: fixes for
+	decimal parser git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@292
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-12-18 tommi@tntnet.org
- - fix error in oracle driver when shutting down the connection after ping
+2012-03-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-12-05 tommi@tntnet.org
- - bump so number
- - simplify cxxtools configuration
+	* tntdb/src/decimal.cpp: avoid possible wrong overflow in decimal
+	class git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@291
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-12-05 tommi@tntnet.org
- - fix crash in sqlite driver in Connection::execute
+2012-03-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-12-05 tommi@tntnet.org
- - fix driver loading (was broken after cxxtools update)
+	* tntdb/src/decimal.cpp, tntdb/test/decimal-test.cpp: fix parsing
+	some decimal numbers and allow leading and trailing white space git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@290
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-11-28 tommi@tntnet.org
- - wrong exception was caught for not found driver libraries
+2012-03-08  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-11-28 tommi@tntnet.org
- - cache ping statement handle in oracle driver
+	* tntdb/include/tntdb/decimal.h, tntdb/src/decimal.cpp: remove some
+	constructors from Decimal to reduce abiguity git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@289
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-11-21 tommi@tntnet.org
- - throw NullValue-excpetion, when a null-column is read in a postgresql result set
+2012-03-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-11-15 tommi@tntnet.org
- - use fetchsize hint of statement in mysql driver
+	* tntdb/include/tntdb/decimal.h, tntdb/src/decimal.cpp,
+	tntdb/src/mysql/bindutils.cpp,
+	tntdb/src/postgresql/resultvalue.cpp, tntdb/test/decimal-test.cpp: 
+	simplify tntdb::Decimal and make its use more efficient git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@288
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-11-15 tommi@tntnet.org
- - fix getWDay of date class
+2012-02-26  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-07-04 tommi@tntnet.org
- - remove aix specific handling
+	* tntdb/include/tntdb/decimal.h, tntdb/src/decimal.cpp,
+	tntdb/test/decimal-test.cpp, tntdb/test/types-test.cpp: fix compiler
+	warnings in decimal class and add som unit tests for decimal class git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@287
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-07-01 tommi@tntnet.org
- - fix linkflags for aix 6
+2012-02-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-07-01 tommi@tntnet.org
- - support for aix version > 5
+	* tntdb/configure.in, tntdb/m4/ax_check_compile_flag.m4,
+	tntdb/m4/ax_compiler_vendor.m4, tntdb/src/blob.cpp,
+	tntdb/src/mysql/bindutils.cpp,
+	tntdb/src/mysql/connectionmanager.cpp: set compile flags for ibm xlc
+	and fix some warnings git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@286
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-07-01 tommi@tntnet.org
- - don't use ORACLE_HOME to find oracle includes and libraries, since we cannot know, which library the user needs to link (lib or lib32 or whatever)
+2012-02-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-06-30 tommi@tntnet.org
- - slightly improved date and time classes
+	* tntdb/test/Makefile.am: add sql scripts for creating test tables
+	into dist package git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@285
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-06-07 tommi@tntnet.org
- - fix Statement::setBool in postgresql driver
+2012-02-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-06-03 tommi@tntnet.org
-  - release version 1.0.1
+	* tntdb/configure.in, tntdb/src/Makefile.am,
+	tntdb/src/librarymanager.cpp: set abi version to 3 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@284
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-06-02 tommi@tntnet.org
- - fix crash when creating 2 cursors for one statement and destroying in different order
+2012-02-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-05-30 tommi@tntnet.org
- - fix string handling in sqlite-driver
+	* tntdb/test/colname-test.cpp: add missing file git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@283
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2008-02-16 tommi@tntnet.org
- - version 1.0.0
+2012-02-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2008-02-13 tommi@tntnet.org
- - Blob class (Marc)
+	* tntdb/include/tntdb/bits/row.h, tntdb/include/tntdb/iface/irow.h,
+	tntdb/include/tntdb/impl/row.h,
+	tntdb/include/tntdb/mysql/impl/boundrow.h,
+	tntdb/include/tntdb/mysql/impl/resultrow.h,
+	tntdb/include/tntdb/oracle/row.h,
+	tntdb/include/tntdb/postgresql/impl/resultrow.h,
+	tntdb/include/tntdb/sqlite/impl/stmtrow.h,
+	tntdb/src/mysql/boundrow.cpp, tntdb/src/mysql/resultrow.cpp,
+	tntdb/src/oracle/row.cpp, tntdb/src/postgresql/resultrow.cpp,
+	tntdb/src/rowimpl.cpp, tntdb/src/sqlite/stmtrow.cpp,
+	tntdb/test/Makefile.am: implement method
+	tntdb::Row::getColumnName(size_type) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@282
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2007-11-14 tommi@tntnet.org
- - get values by column name
+2012-02-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2007-10-07 tommi@tntnet.org
- - replace tntdb::SmartPtr with cxxtools::SmartPtr
+	* tntdb/include/tntdb/decimal.h: fix some compiler warnings in
+	Decimal class git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@281
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2007-09-27 tommi@tntnet.org
- - build improvements for AIX
+2012-02-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2007-09-21 tommi@tntnet.org
- - support for decimals and 32/64-bit integers (from Mark Wright)
+	* tntdb/include/tntdb/bits/rowreader.h: fix resetting of rowreader git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@280
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2007-06-08 tommi@tntnet.org
- - bugfix: tntdb crashed, when iterating over a statement which returns no rows
+2012-02-08  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2007-05-23 tommi@tntnet.org
- - driver for oracle
- - support for MEDIUMINT in mysql-driver
+	* tntdb/src/mysql/bindutils.cpp: fix reading floating point number
+	from decimal column in mysql driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@279
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2007-05-11 tommi@tntnet.org
- - fix connectionpool
+2012-02-08  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
-2007-03-27 tommi@tntnet.org
- - tntdb::Connection::ping to check, if the connection is alive
- - use that ping in connectionpool before returning connection
- - tntdb::setMaxPoolSize(unsingned) and tntdb::getMaxPoolSize()
+	* tntdb/test/types-test.cpp: better cleanup in tntdb unit test git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@278
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2007-02-20 tommi@tntnet.org
+2012-02-08  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - fix leak: the statement-cursor is not freed, when the first fetch was not
-   successful
+	* tntdb/include/tntdb/librarymanager.h,
+	tntdb/src/librarymanager.cpp: remove search path from tntdb since
+	people should use LD_LIBRARY_PATH if really needed and prefer that
+	over configured driver directory git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@277
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-10-21 tommi@tntnet.org
+2012-02-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - add fetchsize-parameter (with default 100) to tntdb::Statement::begin to
-   pass a hint to the implementing cursor
+	* tntdb/test/types-test.cpp: initialize tests correctly - null test
+	did not work as it should have git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@276
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-10-12 tommi@tntnet.org
+2012-02-01  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - don't inline constructors of error-classes to help compiler matching the
-   right type in catch-block (a problem with gcc 4.1 at least)
+	* tntdb/include/tntdb/replicate/connection.h,
+	tntdb/src/replicate/connection.cpp: sort connections in replicate
+	driver to reduce risk of dead locks but still use first connection
+	as primary connection for selects git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@275
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-10-07 tommi@tntnet.org
+2011-12-15  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - add getDate-, getTime- and getDatetime-methods to tntdb::Row
+	* tntdb/configure.in, tntdb/src/Makefile.am,
+	tntdb/src/mysql/Makefile.am, tntdb/src/oracle/Makefile.am,
+	tntdb/src/postgresql/Makefile.am, tntdb/src/replicate/Makefile.am,
+	tntdb/src/sqlite/Makefile.am: flag -qmkshrobj is still needed on AIX git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@274
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-09-20 tommi@tntnet.org
+2011-12-15  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - fix cached prepared statements in sqlite: reset before reuse
+	* tntdb/configure.in, tntdb/src/Makefile.am,
+	tntdb/src/mysql/Makefile.am, tntdb/src/oracle/Makefile.am,
+	tntdb/src/postgresql/Makefile.am, tntdb/src/replicate/Makefile.am,
+	tntdb/src/sqlite/Makefile.am: shared lib flag -qmkshrobj for AIX is
+	not needed any more git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@273
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-09-11 tommi@tntnet.org
+2011-12-10  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - fix handling of binary data in sqlite3-driver
- - move drivers to separate directory specified in configure with "--with-driverdir=..."
+	* tntdb/test/Makefile.am, tntdb/test/sqlbuilder-test.cpp: add unit
+	test for sql builder git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@272
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-08-25 tommi@tntnet.org
+2011-12-08  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - fix smartpointer to support self-assignment
+	* tntdb/test/Makefile.am: remove sqlbuilder-test.cpp for now, since
+	the source is not yet checked in and don't have access to it now git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@271
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-08-24 tommi@tntnet.org
+2011-11-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - change license to LGPL
+	* tntdb/test/Makefile.am, tntdb/test/decimal-test.cpp,
+	tntdb/test/types-test.cpp: add unit test for tntdb::SqlBuilder git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@270
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-07-21 tommi@tntnet.org
+2011-11-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - extend license to allow linking with openssl due to postgresql
+	* tntdb/src/replicate/statement.cpp: fix replication driver - after
+	last fix statements were executed twice on the first connection git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@269
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-04-12 tommi@tntnet.org
+2011-11-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - fix mysql-driver-bug: crashed when fetching some datatypes, because the api
-    seems to return too small length-values (or I misunderstand the api;-) )
+	* tntdb/src/replicate/connection.cpp,
+	tntdb/src/replicate/statement.cpp: when replication fails in
+	replication driver add the number of the connection, which fails to
+	the exception message git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@268
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-03-27 tommi@tntnet.org
+2011-11-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - allow date-, datetime- and time-classes to be null, when passed to statements
+	* tntdb/include/tntdb/sqlbuilder.h: add else value into
+	tntdb::SqlBuilder::replaceIf git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@267
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-03-01 tommi@tntnet.org
+2011-11-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - declare cursor in postgresql with hold to enable cursor outside transactions
+	* tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/sqlbuilder.h: remove now obsolete method
+	tntdb::Statement::paramlist (replaced by tntdb::SqlBuilder) add
+	missing return statement into tntdb::SqlBuilder::replaceIf git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@266
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-02-13 tommi@tntnet.org
+2011-11-24  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - new method Statement::clear()
+	* tntdb/include/tntdb/sqlbuilder.h: add default constructor and
+	setter for sql builder git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@265
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-01-21 tommi@tntnet.org
+2011-11-24  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - connectionpool
+	* tntdb/demo/multiparam.cpp, tntdb/include/tntdb/sqlbuilder.h,
+	tntdb/src/sqlbuilder.cpp: update license headers git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@264
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2006-01-13 tommi@tntnet.org
+2011-11-23  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - add missing include/tntdb/sqlite/impl/connectionmanager.h
+	* tntdb/demo/multiparam.cpp, tntdb/include/Makefile.am,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/sqlbuilder.h, tntdb/include/tntdb/stmtparser.h,
+	tntdb/src/Makefile.am, tntdb/src/sqlbuilder.cpp,
+	tntdb/src/stmtparser.cpp: add class tntdb::SqlBuilder as a helper
+	for dynamically built sql statements git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@263
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2005-12-26 tommi@tntnet.org
+2011-11-22  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - new Sqlite-driver
+	* tntdb/demo/multiparam.cpp, tntdb/include/tntdb/bits/statement.h: 
+	add support for parameter lists in Statement git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@262
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2005-11-12 tommi@tntnet.org
+2011-11-17  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - use PQexec with PREPARE when PQprepare is not found (postgresql prior 8.0)
+	* tntdb/src/oracle/datetime.cpp: Datetime must not have a zero year,
+	month or day in oracle git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@261
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2005-11-11 tommi@tntnet.org
+2011-11-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - make drivers for mysql and postgresql optional in configure
+	* tntdb/src/connectionpool.cpp: prevent endless retry to create new
+	connections in connectionpool git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@260
+	8aebba32-5d12-0410-a889-bbfed4e15866
 
-2005-10-26 tommi@tntnet.org
+2011-11-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
 
- - fixed handling of MYSQL_TYPE_LONGLONG
+	* tntdb/src/replicate/connection.cpp: fix ping in replicate driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@259
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-11-10  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/connection.cpp: OCIPing did not work on our
+	oracle server 10.2.0.4.0; replace with OCIServerVersion on oracle
+	before 11 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@258
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-11-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/demo/Makefile.am, tntdb/src/Makefile.am,
+	tntdb/src/mysql/Makefile.am, tntdb/src/oracle/Makefile.am,
+	tntdb/src/postgresql/Makefile.am, tntdb/src/replicate/Makefile.am,
+	tntdb/src/sqlite/Makefile.am, tntdb/test/Makefile.am: fix out of
+	tree build git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@257
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-09-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: fix build for autoconf 2.68 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@256
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-09-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h: fix wrong data type in
+	tntdb::Decimal::getUnsignedShort() git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@255
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-09-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/replicate/connection.cpp,
+	tntdb/src/replicate/statement.cpp: add missing return statements in
+	replicate driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@254
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-09-03  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: update ChangeLog git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@253
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-09-01  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/Makefile.am: add rowreader.h to Makefile.am git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@252
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-09-01  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/rowreader.h: add get method for
+	tntdb::Value to RowReader git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@251
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-08-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/rowreader.h: add documentation for
+	tntdb::RowReader git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@250
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-08-26  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/rowreader.h, tntdb/include/tntdb/row.h: 
+	implement new helper class tntdb::RowReader, which makes it easier
+	to read all values from a row git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@249
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-06-03  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/value.h, tntdb/include/tntdb/decimal.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/impl/value.h,
+	tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/bindvalues.h,
+	tntdb/include/tntdb/mysql/impl/boundvalue.h,
+	tntdb/include/tntdb/mysql/impl/rowvalue.h,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/include/tntdb/oracle/statement.h,
+	tntdb/include/tntdb/oracle/value.h,
+	tntdb/include/tntdb/postgresql/impl/resultvalue.h,
+	tntdb/include/tntdb/postgresql/impl/statement.h,
+	tntdb/include/tntdb/replicate/statement.h,
+	tntdb/include/tntdb/sqlite/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h,
+	tntdb/src/mysql/bindutils.cpp, tntdb/src/mysql/boundvalue.cpp,
+	tntdb/src/mysql/rowvalue.cpp, tntdb/src/mysql/statement.cpp,
+	tntdb/src/oracle/statement.cpp, tntdb/src/oracle/value.cpp,
+	tntdb/src/postgresql/resultvalue.cpp,
+	tntdb/src/postgresql/statement.cpp,
+	tntdb/src/replicate/statement.cpp, tntdb/src/sqlite/statement.cpp,
+	tntdb/src/sqlite/stmtvalue.cpp, tntdb/src/valueimpl.cpp,
+	tntdb/test/mysql-test.sql, tntdb/test/pg-test.sql,
+	tntdb/test/sqlite-test.sql, tntdb/test/types-test.cpp: add support
+	for short and unsigned short git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@248
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-06-03  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/test/types-test.cpp: activate all unit tests again git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@247
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-05-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/resultvalue.cpp: fix reading time with second
+	fractional part >0.9999, which resulted in a invalid time in
+	postgresql driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@246
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-04-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/Makefile.am, tntdb/include/tntdb/cxxtools/date.h,
+	tntdb/include/tntdb/cxxtools/datetime.h,
+	tntdb/include/tntdb/cxxtools/time.h: add operators for
+	cxxtools::Date, Time and DateTime classes git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@245
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-04-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/datetime.cpp, tntdb/src/time.cpp: fix compile problem on
+	BSD continued (timeval.tv_sec is not of type time_t) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@244
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-04-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/date.cpp: fix compile problem on BSD (timeval.tv_sec is
+	not of type time_t) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@243
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-03-24  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/replicate/statement.h,
+	tntdb/src/replicate/connection.cpp,
+	tntdb/src/replicate/statement.cpp: use transacions to make sure
+	replication works also on error on the second db in replication
+	driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@242
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-03-22  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/connection.h,
+	tntdb/src/oracle/connection.cpp: use OCIPing to check if oracle
+	connection is still alive git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@241
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-03-22  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/connection.h: default to empty string of
+	serial name when retrieving last insert id, which means: get the
+	last inserted id regardless of name git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@240
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: add check for cxxtools version git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@239
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/connectionpool.h,
+	tntdb/src/poolconnection.cpp: update tntdb to latest cxxtools (svn
+	release 1203) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@238
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-26  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/demo/serial.cpp, tntdb/demo/sqlitecmd.cpp,
+	tntdb/include/tntdb/replicate/connection.h,
+	tntdb/include/tntdb/replicate/connectionmanager.h,
+	tntdb/include/tntdb/replicate/statement.h,
+	tntdb/src/replicate/connection.cpp,
+	tntdb/src/replicate/connectionmanager.cpp,
+	tntdb/src/replicate/statement.cpp, tntdb/test/decimal-test.cpp,
+	tntdb/test/test-main.cpp, tntdb/test/types-test.cpp: update
+	copyright header git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@237
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/replicate/statement.cpp: prepare select statements on
+	the first connection only in replication driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@236
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-22  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/replicate/connection.h,
+	tntdb/src/replicate/connection.cpp: fix closing replicate connection
+	(clear statement cache before releasing connection) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@235
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/Makefile.am, tntdb/configure.in, tntdb/include/Makefile.am,
+	tntdb/include/tntdb/bits/statement.h: build replicating driver also git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@234
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/statement.cpp: support for nan and inf in
+	postgresql driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@233
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/connect.cpp: fix for deadlock in replication driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@232
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/postgresql/impl/connection.h,
+	tntdb/src/postgresql/connection.cpp: deliver last incremented serial
+	if passed empty string to lastInsertId method in postgresql driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@231
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-02-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/replicate/connection.h,
+	tntdb/include/tntdb/replicate/connectionmanager.h,
+	tntdb/include/tntdb/replicate/statement.h,
+	tntdb/src/replicate/Makefile.am,
+	tntdb/src/replicate/connection.cpp,
+	tntdb/src/replicate/connectionmanager.cpp,
+	tntdb/src/replicate/statement.cpp: add replicating driver to tntdb git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@230
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-01-30  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/statement.h,
+	tntdb/src/postgresql/resultvalue.cpp, tntdb/src/valueimpl.cpp,
+	tntdb/test/types-test.cpp: fix: long was castes to int when set in
+	statement support for nan and inf at least in postgresql driver
+	including unittest git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@229
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-01-10  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/row.h: implement getLong and
+	getUnsignedLong in tntdb::row git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@228
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-01-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: update ChangeLog git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@227
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-01-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/Makefile.am, tntdb/include/tntdb/bits/blobstream.h,
+	tntdb/include/tntdb/blob.h, tntdb/src/Makefile.am,
+	tntdb/src/blobstream.cpp: add tntdb::BlobIStream: a std::istream
+	interface to tntdb::Blob git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@226
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2011-01-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: do not generate doxygen documentation by
+	default git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@225
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-11-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/connection.cpp: add debug log for backend pid
+	in postgresql driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@224
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-11-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/connection.cpp: use async calls when testing
+	connection with ping in postgresql driver to monitor timeout git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@223
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-10-29  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/connection.cpp: fix warning in postgresql
+	driver about failed deallocation of statement on close connection
+	when lastInserId was used git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@222
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-10-22  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/stmtparser.cpp: statement parser fixes: do not convert
+	type of cast expressions like a::integer into host variable and
+	parse 2 consecutive hostvars correctly git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@221
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-10-14  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/connect.cpp: delay obtaining mutex for connect until
+	really needed git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@220
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-10-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/iface/iblob.h: make tntdb::Blob thread safe -
+	the empty instance may be shared between connections in different
+	threads git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@219
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-09-29  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/Makefile.am, tntdb/configure.in, tntdb/src/connect.cpp,
+	tntdb/src/mysql/Makefile.am, tntdb/src/oracle/Makefile.am,
+	tntdb/src/postgresql/Makefile.am, tntdb/src/sqlite/Makefile.am: 
+	build fixes:     remove obsolete code for statically bind drivers to tntdb     build driver name from abi_current from configure.in git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@218
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-09-28  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/connect.cpp: make tntdb::connect thread safe git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@217
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-09-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/librarymanager.cpp: do not warn if driver library is not
+	found in the first place git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@216
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-09-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/mysql/impl/connectionmanager.h: remove extra ; git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@215
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-09-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/value.h: tntdb::Value::getUnsignedLong
+	should return an unsigned long instead of an unsigned git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@214
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-09-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/transaction.h, tntdb/src/Makefile.am,
+	tntdb/src/transaction.cpp: add logging to transaction class and do
+	not inline it git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@213
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-09-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/statement.h: add missing return statement
+	to new setIf method in tntdb::Statement git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@212
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-09-08  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/statement.h: add convenience method
+	tntdb::Statement::setIf to set to a value or null depending on a
+	bool git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@211
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-08-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/include/tntdb/mysql/impl/connection.h,
+	tntdb/include/tntdb/postgresql/impl/connection.h,
+	tntdb/include/tntdb/sqlite/impl/connection.h,
+	tntdb/src/mysql/connection.cpp,
+	tntdb/src/postgresql/connection.cpp,
+	tntdb/src/sqlite/connection.cpp: unify handling of nested
+	transactions (ignore nested transactions like oracle driver did it
+	already) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@210
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-08-01  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/configure.in: update version number to 1.1 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@208
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-08-01  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: update ChangeLog git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@207
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-07-07  adig33 <adig33@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/number.cpp: problem by formatting parameters for
+	decimal (negative/positive) solved git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@206
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-06-24  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/src/oracle/connection.cpp: add autoconf
+	check for sighandler_t (AIX does not have it) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@205
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-06-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* : fix connection string for postgresql in documentation example git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@204
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-06-19  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: update changelog git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@203
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-05-31  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/connection.h,
+	tntdb/src/oracle/connection.cpp: fix error when dropping cached
+	oracle statements after using lastInsertId git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@202
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-05-22  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/decimal.cpp: add missing include fix formatting git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@201
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-05-21  adig33 <adig33@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/decimal.cpp: operator < problem fixed git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@200
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-05-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/connection.cpp: save and restore SIGINT handler
+	when connecting to oracle (workaround for a OCI problem: OCI
+	redirects SIGINT, which causes Ctrl-C to fail) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@199
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-05-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* : update documentation git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@198
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-05-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/connection.cpp: fix function name in
+	connection exception of postgresql driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@197
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-04-30  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/connection.cpp: change log of OCI_NO_DATA from
+	log_warn to log_debug, since it is no normal git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@196
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-04-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/statement.cpp: insert boolean value as 0 or 1
+	in postgresql driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@195
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-03-25  adig33 <adig33@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/number.cpp: error for decimal numbers < 1 fixed git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@194
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-03-23  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/test/decimal-test.cpp: add test for setting long value in
+	tntdb::Decimal git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@193
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-03-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h: getLong should return a long
+	instead of int git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@192
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-03-12  adig33 <adig33@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/error.h,
+	tntdb/include/tntdb/oracle/number.h,
+	tntdb/src/oracle/connection.cpp, tntdb/src/oracle/number.cpp,
+	tntdb/src/oracle/statement.cpp: long, unsigned long, int64_t and
+	uint64_t use the OCINumber in statement git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@191
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-03-03  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/datetime.cpp: fix handling of fractional seconds
+	in oracle driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@190
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-19  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/statement.cpp, tntdb/test/oracle-test.sql: fix
+	setting date to null in oracle driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@189
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-18  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/value.cpp: workaround for parsing floating point
+	numbers with decimal comma instead of point in oracle driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@188
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-18  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/test/oracle-test.sql, tntdb/test/types-test.cpp: - remove combined test for all types - change some oracle types in testtable git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@187
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h,
+	tntdb/include/tntdb/oracle/statement.h,
+	tntdb/src/oracle/statement.cpp, tntdb/test/oracle-test.sql: add
+	tntdb::Statement::setLong and setUnsignedLong to oracle driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@186
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/test/decimal-test.cpp: add missing file git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@185
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/Makefile.am, tntdb/configure.in,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/decimal.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/bindvalues.h,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/include/tntdb/postgresql/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/statement.h, tntdb/src/decimal.cpp,
+	tntdb/src/mysql/bindutils.cpp, tntdb/src/mysql/statement.cpp,
+	tntdb/src/postgresql/resultvalue.cpp,
+	tntdb/src/postgresql/statement.cpp, tntdb/src/sqlite/statement.cpp,
+	tntdb/test/Makefile, tntdb/test/Makefile.am,
+	tntdb/test/mysql-test.sql, tntdb/test/pg-test.sql,
+	tntdb/test/sqlite-test.sql, tntdb/test/test-main.cpp,
+	tntdb/test/types-test.cpp: - tntdb::Statement::setLong and setUnsignedLong - add unittest - add relational operators to tntdb::Decimal git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@184
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/statement.cpp: fix Statement::setNull in oracle
+	driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@183
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-14  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* : update table of contents in documentation git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@182
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* : update documentation git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@181
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/test/oracle_seq_test.sql: implement
+	tntdb::Connection::lastInsertId for oracle git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@180
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/connection.h,
+	tntdb/src/oracle/connection.cpp: implement
+	tntdb::Connection::lastInsertId for oracle git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@179
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/connection.h: last insert id is long, not
+	int. Fix that in tntdb::Connection git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@178
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/demo/Makefile.am,
+	tntdb/demo/serial.cpp, tntdb/demo/sqlcmd.cpp,
+	tntdb/include/tntdb/bits/connection.h,
+	tntdb/include/tntdb/bits/value.h, tntdb/include/tntdb/date.h,
+	tntdb/include/tntdb/datetime.h, tntdb/include/tntdb/decimal.h,
+	tntdb/include/tntdb/iface/iconnection.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/impl/poolconnection.h,
+	tntdb/include/tntdb/impl/value.h,
+	tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/impl/boundvalue.h,
+	tntdb/include/tntdb/mysql/impl/connection.h,
+	tntdb/include/tntdb/mysql/impl/rowvalue.h,
+	tntdb/include/tntdb/oracle/value.h,
+	tntdb/include/tntdb/postgresql/impl/connection.h,
+	tntdb/include/tntdb/postgresql/impl/resultvalue.h,
+	tntdb/include/tntdb/sqlite/impl/connection.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h,
+	tntdb/include/tntdb/time.h, tntdb/src/mysql/bindutils.cpp,
+	tntdb/src/mysql/boundrow.cpp, tntdb/src/mysql/boundvalue.cpp,
+	tntdb/src/mysql/connection.cpp,
+	tntdb/src/mysql/connectionmanager.cpp,
+	tntdb/src/mysql/rowcontainer.cpp, tntdb/src/mysql/rowvalue.cpp,
+	tntdb/src/oracle/value.cpp, tntdb/src/poolconnection.cpp,
+	tntdb/src/postgresql/connection.cpp,
+	tntdb/src/postgresql/connectionmanager.cpp,
+	tntdb/src/postgresql/resultrow.cpp,
+	tntdb/src/postgresql/resultvalue.cpp, tntdb/src/resultimpl.cpp,
+	tntdb/src/rowimpl.cpp, tntdb/src/sqlite/connection.cpp,
+	tntdb/src/sqlite/connectionmanager.cpp,
+	tntdb/src/sqlite/stmtrow.cpp, tntdb/src/sqlite/stmtvalue.cpp,
+	tntdb/src/sqlite/value.cpp, tntdb/src/valueimpl.cpp,
+	tntdb/test/mysql_seq_test.sql, tntdb/test/pg_seq_test.sql,
+	tntdb/test/sqlite_seq_test.sql: - add support for auto-incremented values with new method
+	tntdb::Connection::lastInsertId(std::string) - remove some compiler warnings - new methods getLong and getUnsignedLong in tntdb::Value git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@177
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/value.h: update documentation add template
+	method tntdb::Value::get(T&) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@176
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/value.h: fix typo in comment git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@175
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/statement.h: initialize tntdb::Hostvar
+	correctly git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@174
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-10  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/statement.cpp: use OCI_COMMIT_ON_SUCCESS when on
+	autocommit mode git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@173
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/value.h: remove default conversion
+	operators of tntdb::Value and add a extendable system for retrieving
+	and setting values also for custom types git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@172
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/connection.h,
+	tntdb/include/tntdb/iface/iconnection.h,
+	tntdb/include/tntdb/impl/poolconnection.h,
+	tntdb/src/connection.cpp, tntdb/src/poolconnection.cpp: add optional
+	key for statement cache git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@171
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/row.h: add getValue-methods with
+	reference to result object to tntdb::Row git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@170
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-02-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: insert changelog entry for last stable release
+	1.0.1 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@169
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-01-26  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/statement.h,
+	tntdb/include/tntdb/oracle/value.h, tntdb/src/oracle/statement.cpp,
+	tntdb/src/oracle/value.cpp: replace use of obsolete class
+	cxxtools::Dynbuffer with std::vector from oracle driver as already
+	done in other drivers git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@168
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2010-01-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: update ChangeLog git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@167
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-12-31  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/postgresql/impl/statement.h,
+	tntdb/src/postgresql/statement.cpp: replace obsolete
+	cxxtools::Dynbuffer with std::vector git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@166
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-12-14  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/value.h: add method
+	tntdb::Value::getValue git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@165
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-12-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/include/Makefile.am,
+	tntdb/include/tntdb/bits/value.h, tntdb/include/tntdb/config.h.in: 
+	check if int and int32_t and others are distinct types git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@164
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-10-30  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/statement.h: add missing namespace
+	specifier git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@163
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-09-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/mysql/impl/connection.h,
+	tntdb/src/mysql/connection.cpp: extend syntax of connection string
+	    in mysql driver: - allow values to be enclosed in single or double quotes     - escape special characters in values with backslash     - allow whitespace as delimiter     - check for duplicate keys in connection string     - add key "app" with a default "tntdb" and use my.cnf with this
+	    section git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@162
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-06-29  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/connection.cpp: clean up of oracle connection in
+	proper order git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@161
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-06-29  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/connection.cpp: close oracle connection correctly git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@160
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-06-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/src/date.cpp, tntdb/src/datetime.cpp,
+	tntdb/src/decimal.cpp, tntdb/src/mysql/connection.cpp,
+	tntdb/src/oracle/Makefile.am, tntdb/src/oracle/value.cpp,
+	tntdb/src/time.cpp: use std::isdigit instead of isdigit and add some
+	missing includes git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@159
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-06-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/value.cpp: fix sporadic error in string to number
+	conversion in oracle driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@158
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-05-15  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/sqlite/connection.cpp: clear statement cache at
+	transaction end with sqlite since statement handles are invalidated git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@156
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-04-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/connect.cpp: better error message git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@155
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2009-01-25  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/statement.h, tntdb/src/connection.cpp,
+	tntdb/src/statement.cpp: add some trace-output in tntdb::Statement git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@154
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-12-18  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/connection.cpp: fix error in oracle driver when
+	shutting down the connection after ping git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@153
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-12-10  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/demo/categories.cpp, tntdb/demo/mysqlcmd.cpp,
+	tntdb/demo/person.cpp, tntdb/demo/pooldemo.cpp,
+	tntdb/demo/prodbench.cpp, tntdb/demo/sqlcmd.cpp,
+	tntdb/demo/sqlitecmd.cpp, tntdb/demo/util.h, tntdb/include/tntdb.h,
+	tntdb/include/tntdb/bits/blob.h,
+	tntdb/include/tntdb/bits/connection.h,
+	tntdb/include/tntdb/bits/result.h,
+	tntdb/include/tntdb/bits/result_iterator.h,
+	tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/row_iterator.h,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/statement_iterator.h,
+	tntdb/include/tntdb/bits/value.h, tntdb/include/tntdb/blob.h,
+	tntdb/include/tntdb/connect.h, tntdb/include/tntdb/connection.h,
+	tntdb/include/tntdb/connectionpool.h, tntdb/include/tntdb/date.h,
+	tntdb/include/tntdb/datetime.h, tntdb/include/tntdb/decimal.h,
+	tntdb/include/tntdb/error.h, tntdb/include/tntdb/iface/iblob.h,
+	tntdb/include/tntdb/iface/iconnection.h,
+	tntdb/include/tntdb/iface/iconnectionmanager.h,
+	tntdb/include/tntdb/iface/icursor.h,
+	tntdb/include/tntdb/iface/iresult.h,
+	tntdb/include/tntdb/iface/irow.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/impl/blob.h,
+	tntdb/include/tntdb/impl/poolconnection.h,
+	tntdb/include/tntdb/impl/result.h, tntdb/include/tntdb/impl/row.h,
+	tntdb/include/tntdb/impl/value.h,
+	tntdb/include/tntdb/librarymanager.h,
+	tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/bindvalues.h,
+	tntdb/include/tntdb/mysql/cursor.h,
+	tntdb/include/tntdb/mysql/error.h,
+	tntdb/include/tntdb/mysql/impl/boundrow.h,
+	tntdb/include/tntdb/mysql/impl/boundvalue.h,
+	tntdb/include/tntdb/mysql/impl/connection.h,
+	tntdb/include/tntdb/mysql/impl/connectionmanager.h,
+	tntdb/include/tntdb/mysql/impl/cursor.h,
+	tntdb/include/tntdb/mysql/impl/result.h,
+	tntdb/include/tntdb/mysql/impl/resultrow.h,
+	tntdb/include/tntdb/mysql/impl/rowcontainer.h,
+	tntdb/include/tntdb/mysql/impl/rowvalue.h,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/include/tntdb/oracle/blob.h,
+	tntdb/include/tntdb/oracle/connection.h,
+	tntdb/include/tntdb/oracle/connectionmanager.h,
+	tntdb/include/tntdb/oracle/cursor.h,
+	tntdb/include/tntdb/oracle/datetime.h,
+	tntdb/include/tntdb/oracle/error.h,
+	tntdb/include/tntdb/oracle/number.h,
+	tntdb/include/tntdb/oracle/result.h,
+	tntdb/include/tntdb/oracle/row.h,
+	tntdb/include/tntdb/oracle/statement.h,
+	tntdb/include/tntdb/oracle/value.h,
+	tntdb/include/tntdb/postgresql/error.h,
+	tntdb/include/tntdb/postgresql/impl/connection.h,
+	tntdb/include/tntdb/postgresql/impl/connectionmanager.h,
+	tntdb/include/tntdb/postgresql/impl/cursor.h,
+	tntdb/include/tntdb/postgresql/impl/result.h,
+	tntdb/include/tntdb/postgresql/impl/resultrow.h,
+	tntdb/include/tntdb/postgresql/impl/resultvalue.h,
+	tntdb/include/tntdb/postgresql/impl/statement.h,
+	tntdb/include/tntdb/result.h, tntdb/include/tntdb/row.h,
+	tntdb/include/tntdb/sqlite/error.h,
+	tntdb/include/tntdb/sqlite/impl/connection.h,
+	tntdb/include/tntdb/sqlite/impl/connectionmanager.h,
+	tntdb/include/tntdb/sqlite/impl/cursor.h,
+	tntdb/include/tntdb/sqlite/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/stmtrow.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h,
+	tntdb/include/tntdb/statement.h, tntdb/include/tntdb/stmtparser.h,
+	tntdb/include/tntdb/time.h, tntdb/include/tntdb/transaction.h,
+	tntdb/include/tntdb/value.h, tntdb/src/blob.cpp,
+	tntdb/src/connect.cpp, tntdb/src/connection.cpp,
+	tntdb/src/connectionpool.cpp, tntdb/src/date.cpp,
+	tntdb/src/datetime.cpp, tntdb/src/decimal.cpp, tntdb/src/error.cpp,
+	tntdb/src/librarymanager.cpp, tntdb/src/mysql/bindutils.cpp,
+	tntdb/src/mysql/bindvalues.cpp, tntdb/src/mysql/boundrow.cpp,
+	tntdb/src/mysql/boundvalue.cpp, tntdb/src/mysql/connection.cpp,
+	tntdb/src/mysql/connectionmanager.cpp, tntdb/src/mysql/cursor.cpp,
+	tntdb/src/mysql/cursor_iterator.cpp, tntdb/src/mysql/error.cpp,
+	tntdb/src/mysql/result.cpp, tntdb/src/mysql/resultrow.cpp,
+	tntdb/src/mysql/row.cpp, tntdb/src/mysql/rowcontainer.cpp,
+	tntdb/src/mysql/rowvalue.cpp, tntdb/src/mysql/statement.cpp,
+	tntdb/src/oracle/blob.cpp, tntdb/src/oracle/connection.cpp,
+	tntdb/src/oracle/connectionmanager.cpp,
+	tntdb/src/oracle/cursor.cpp, tntdb/src/oracle/datetime.cpp,
+	tntdb/src/oracle/error.cpp, tntdb/src/oracle/number.cpp,
+	tntdb/src/oracle/result.cpp, tntdb/src/oracle/row.cpp,
+	tntdb/src/oracle/statement.cpp, tntdb/src/oracle/value.cpp,
+	tntdb/src/poolconnection.cpp, tntdb/src/postgresql/connection.cpp,
+	tntdb/src/postgresql/connectionmanager.cpp,
+	tntdb/src/postgresql/cursor.cpp, tntdb/src/postgresql/error.cpp,
+	tntdb/src/postgresql/result.cpp,
+	tntdb/src/postgresql/resultrow.cpp,
+	tntdb/src/postgresql/resultvalue.cpp,
+	tntdb/src/postgresql/statement.cpp, tntdb/src/result.cpp,
+	tntdb/src/resultimpl.cpp, tntdb/src/row.cpp, tntdb/src/rowimpl.cpp,
+	tntdb/src/sqlite/connection.cpp,
+	tntdb/src/sqlite/connectionmanager.cpp,
+	tntdb/src/sqlite/cursor.cpp, tntdb/src/sqlite/error.cpp,
+	tntdb/src/sqlite/nvstatement.cpp, tntdb/src/sqlite/statement.cpp,
+	tntdb/src/sqlite/stmtrow.cpp, tntdb/src/sqlite/stmtvalue.cpp,
+	tntdb/src/sqlite/value.cpp, tntdb/src/statement.cpp,
+	tntdb/src/statement_iterator.cpp, tntdb/src/stmtparser.cpp,
+	tntdb/src/time.cpp, tntdb/src/valueimpl.cpp, tntdb/test/test.cpp: 
+	update license header git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@152
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-12-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/demo/prodbench.cpp: update for new cxxtools git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@151
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-12-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/src/librarymanager.cpp,
+	tntdb/src/mysql/Makefile.am, tntdb/src/oracle/Makefile.am,
+	tntdb/src/postgresql/Makefile.am, tntdb/src/sqlite/Makefile.am: bump
+	so number simplify cxxtools configuration git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@150
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-12-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/sqlite/error.cpp: fix crash in sqlite driver in
+	Connection::execute git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@149
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-12-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/librarymanager.cpp: fix driver loading (was broken after
+	cxxtools update) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@148
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-12-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/connection.h: add include (was not
+	compilable) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@147
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-12-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/connectionpool.h,
+	tntdb/include/tntdb/iface/iconnectionmanager.h,
+	tntdb/include/tntdb/transaction.h: replace tnt::NonCopyable with
+	cxxtools::NonCopyable (the header was deleted already in tntdb) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@146
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-12-03  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/Makefile.am, tntdb/include/tntdb/noncopyable.h: 
+	remove obsolete helper class "NonCopyable" git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@145
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-29  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/blob.h: fix for new cxxtools git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@144
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-28  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/librarymanager.cpp: wrong exception was caught for not
+	found driver libraries git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@143
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-28  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/librarymanager.h,
+	tntdb/src/librarymanager.cpp: justifications for new Library-class
+	in cxxtools git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@142
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-28  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/connection.h,
+	tntdb/src/oracle/connection.cpp: cache ping statement handle in
+	oracle driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@141
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/resultvalue.cpp: throw NullValue-excpetion,
+	when a null-column is read in a postgresql result set git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@140
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/cursor.cpp: add debug message git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@139
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/date.cpp: add missing include git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@138
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-15  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/mysql/impl/cursor.h,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/src/mysql/cursor.cpp, tntdb/src/mysql/statement.cpp,
+	tntdb/test/Makefile: use fetchsize hint of statement in mysql driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@137
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-15  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h: add missing includes git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@136
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-15  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/mysql/bindutils.h: add missing includes git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@135
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-11-15  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/date.cpp: fix getWDay of date class git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@134
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-07-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/src/mysql/Makefile.am,
+	tntdb/src/oracle/Makefile.am, tntdb/src/postgresql/Makefile.am,
+	tntdb/src/sqlite/Makefile.am: remove aix specific handling git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@133
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-07-01  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/src/mysql/Makefile.am,
+	tntdb/src/oracle/Makefile.am, tntdb/src/postgresql/Makefile.am,
+	tntdb/src/sqlite/Makefile.am: fix linkflags for aix 6 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@132
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-07-01  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: support for aix version > 5 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@131
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-07-01  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: don't use ORACLE_HOME to find oracle includes
+	and libraries, since we cannot know, which library the user needs to
+	link (lib or lib32 or whatever) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@130
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-06-30  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/include/tntdb/date.h,
+	tntdb/include/tntdb/datetime.h, tntdb/include/tntdb/time.h,
+	tntdb/src/date.cpp, tntdb/src/datetime.cpp, tntdb/src/time.cpp: 
+	slightly improved date and time classes git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@129
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-06-07  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/postgresql/statement.cpp: fix Statement::setBool in
+	postgresql driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@128
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-06-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/sqlite/statement.cpp: fix crash when creating 2 cursors
+	for one statement and destroying in different order git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@126
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-06-01  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/src/sqlite/statement.cpp: fix string
+	handling in sqlite-driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@125
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-24  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/configure.in: version 1.0.0 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@124
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/blob.h,
+	tntdb/include/tntdb/iface/iblob.h, tntdb/include/tntdb/impl/blob.h,
+	tntdb/src/blob.cpp, tntdb/src/oracle/blob.cpp: add missing includes
+	for Sun Solaris/Sun Studio 12 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@123
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-18  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/blob.cpp: add missing return git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@122
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/blob.cpp: blob in oracle driver is finally
+	working git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@121
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/value.cpp: fix varchar handling git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@120
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/statement.cpp: fix for oracle 9 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@119
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/blob.h: fix for ibm xlC-compiler git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@118
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/blob.h: add another missing file from
+	last check in git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@117
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/blob.cpp: add missing file from last check in git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@116
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/Makefile.am, tntdb/include/tntdb/bits/blob.h,
+	tntdb/include/tntdb/iface/iblob.h, tntdb/include/tntdb/impl/blob.h,
+	tntdb/include/tntdb/oracle/statement.h,
+	tntdb/include/tntdb/oracle/value.h, tntdb/src/blob.cpp,
+	tntdb/src/oracle/Makefile.am, tntdb/src/oracle/connection.cpp,
+	tntdb/src/oracle/statement.cpp, tntdb/src/oracle/value.cpp: fixes in
+	datetime in oracle, Blob-support for oracle (does not work yet) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@115
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-02-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/datetime.h,
+	tntdb/src/oracle/statement.cpp: fix date and time handling in oracle
+	driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@114
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-01-29  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/value.cpp: fix debug output git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@113
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-01-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/Makefile.am,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/src/mysql/statement.cpp: bugfix: mysql-driver was not able to
+	fetch medium and large blobs due to wrong buffer allocation git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@112
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-01-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/AUTHORS: add Mark and Marc git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@111
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-01-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/row_iterator.h: Row::const_iterator does
+	not need to own the Row it iterates git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@110
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-01-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/value.h: remove unused typedef git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@109
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-01-18  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/connectionpool.h: fix formatting git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@108
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-01-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/Makefile.am, tntdb/include/tntdb.h,
+	tntdb/include/tntdb/bits/blob.h,
+	tntdb/include/tntdb/bits/statement.h, tntdb/include/tntdb/blob.h,
+	tntdb/include/tntdb/iface/iblob.h, tntdb/include/tntdb/impl/blob.h,
+	tntdb/src/Makefile.am, tntdb/src/blob.cpp: divide blob into multiple
+	files git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@107
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-01-16  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/iface/iconnectionmanager.h,
+	tntdb/src/librarymanager.cpp, tntdb/src/mysql/Makefile.am,
+	tntdb/src/oracle/Makefile.am, tntdb/src/postgresql/Makefile.am,
+	tntdb/src/sqlite/Makefile.am: rename public symbol and driver name
+	for versioning git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@106
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2008-01-07  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: increase so-number git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@105
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-29  d-marc <d-marc@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/blob.h: corrected copyright git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@104
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-28  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/blob.h: fix typo in comment git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@103
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/configure.in,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/value.h, tntdb/include/tntdb/blob.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/impl/value.h,
+	tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/bindvalues.h,
+	tntdb/include/tntdb/mysql/impl/boundvalue.h,
+	tntdb/include/tntdb/mysql/impl/rowvalue.h,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/include/tntdb/oracle/statement.h,
+	tntdb/include/tntdb/oracle/value.h,
+	tntdb/include/tntdb/postgresql/impl/resultvalue.h,
+	tntdb/include/tntdb/postgresql/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h,
+	tntdb/src/mysql/bindutils.cpp, tntdb/src/mysql/boundvalue.cpp,
+	tntdb/src/mysql/rowvalue.cpp, tntdb/src/mysql/statement.cpp,
+	tntdb/src/oracle/statement.cpp, tntdb/src/oracle/value.cpp,
+	tntdb/src/postgresql/resultvalue.cpp,
+	tntdb/src/postgresql/statement.cpp, tntdb/src/sqlite/statement.cpp,
+	tntdb/src/sqlite/stmtvalue.cpp, tntdb/src/valueimpl.cpp,
+	tntdb/test/test.cpp: improved support for blobs (binary large
+	objects) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@102
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-16  d-marc <d-marc@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/blob.h: added Blob with IBlob git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@101
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-16  d-marc <d-marc@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/blob.h: Blob uses IBlob now git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@100
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-14  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: add DOXYGEN-variable to help-page of configure
+	version 0.9.5 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@98
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/value.cpp, tntdb/test/test.cpp: fix reading blobs
+	in oracle driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@97
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/blob.h: add missing return git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@96
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/test/test.cpp: test blob git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@95
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/include/Makefile.am,
+	tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/value.h, tntdb/include/tntdb/blob.h: 
+	support for Blobs git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@94
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-12-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/connectionpool.h, tntdb/src/connect.cpp,
+	tntdb/src/connectionpool.cpp: connectionpool redesigned git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@93
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-11-14  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/sqlite/statement.cpp, tntdb/src/sqlite/stmtvalue.cpp: 
+	fix handling of empty blobs in sqlite git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@92
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-11-14  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: add new log entry git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@91
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-11-14  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/include/tntdb/oracle/row.h,
+	tntdb/include/tntdb/oracle/value.h, tntdb/src/oracle/row.cpp,
+	tntdb/src/oracle/value.cpp: derive oracle include and lib paths from
+	ORACLE_HOME implement getValueByName in oracle driver (oracle driver
+	is working again) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@90
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-11-14  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/autogen.sh, tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/value.h, tntdb/include/tntdb/error.h,
+	tntdb/include/tntdb/iface/irow.h, tntdb/include/tntdb/impl/row.h,
+	tntdb/include/tntdb/mysql/bindvalues.h,
+	tntdb/include/tntdb/mysql/impl/boundrow.h,
+	tntdb/include/tntdb/mysql/impl/resultrow.h,
+	tntdb/include/tntdb/postgresql/impl/connectionmanager.h,
+	tntdb/include/tntdb/postgresql/impl/resultrow.h,
+	tntdb/include/tntdb/sqlite/impl/connectionmanager.h,
+	tntdb/include/tntdb/sqlite/impl/stmtrow.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h, tntdb/src/error.cpp,
+	tntdb/src/mysql/bindvalues.cpp, tntdb/src/mysql/boundrow.cpp,
+	tntdb/src/mysql/resultrow.cpp,
+	tntdb/src/postgresql/connectionmanager.cpp,
+	tntdb/src/postgresql/resultrow.cpp, tntdb/src/rowimpl.cpp,
+	tntdb/src/sqlite/connectionmanager.cpp,
+	tntdb/src/sqlite/statement.cpp, tntdb/src/sqlite/stmtrow.cpp,
+	tntdb/src/sqlite/stmtvalue.cpp: new methods for fetching values by
+	  column name This implies a change in the driver interface.    The drivers for sqlite, postgresql and mysql are fixed   The driver for oracle does not compile yet git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@89
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-11-14  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/test/Makefile, tntdb/test/test.cpp: simple test program git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@88
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-11-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h, tntdb/src/decimal.cpp: remove
+	compiler warnings by using the right types git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@87
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-08  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/doc/Makefile.am: add missing doc/main.page to dist package git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@86
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-07  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/include/Makefile.am,
+	tntdb/include/tntdb/bits/connection.h,
+	tntdb/include/tntdb/bits/result.h, tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/statement_iterator.h,
+	tntdb/include/tntdb/bits/value.h,
+	tntdb/include/tntdb/iface/iconnection.h,
+	tntdb/include/tntdb/iface/icursor.h,
+	tntdb/include/tntdb/iface/iresult.h,
+	tntdb/include/tntdb/iface/irow.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/mysql/impl/boundvalue.h,
+	tntdb/include/tntdb/mysql/impl/cursor.h,
+	tntdb/include/tntdb/mysql/impl/rowcontainer.h,
+	tntdb/include/tntdb/oracle/cursor.h,
+	tntdb/include/tntdb/oracle/datetime.h,
+	tntdb/include/tntdb/oracle/statement.h,
+	tntdb/include/tntdb/refcounted.h, tntdb/include/tntdb/smartptr.h,
+	tntdb/include/tntdb/sqlite/impl/cursor.h,
+	tntdb/include/tntdb/sqlite/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/stmtrow.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h,
+	tntdb/src/mysql/statement.cpp: replace tntdb::SmartPtr with
+	cxxtools::SmartPtr git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@84
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-07  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/AUTHORS, tntdb/configure.in: updated version number, add
+	Mark Write into list of authors git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@82
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/doc/main.page, tntdb/doc/tntdb.doxygen.in,
+	tntdb/include/tntdb/connect.h: documentation update git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@80
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h: remove template specialization
+	getInteger<bool> (a bool is not a integer) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@79
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-05  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h: fix for doxygen documentation git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@78
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-04  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h, tntdb/src/decimal.cpp,
+	tntdb/src/oracle/number.cpp, tntdb/src/oracle/value.cpp: another
+	patch for decimal - looks like it works finally! git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@77
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-03  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h, tntdb/src/decimal.cpp,
+	tntdb/src/oracle/number.cpp: still fixed to decimal-handling in
+	oracle git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@76
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-03  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/statement.cpp: add debug-log for host variable
+	binds git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@75
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-03  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/statement.h: add set-method for Decimal git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@74
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h,
+	tntdb/include/tntdb/oracle/number.h, tntdb/src/decimal.cpp,
+	tntdb/src/mysql/bindutils.cpp, tntdb/src/oracle/number.cpp,
+	tntdb/src/oracle/value.cpp, tntdb/src/postgresql/resultvalue.cpp,
+	tntdb/src/postgresql/statement.cpp, tntdb/src/sqlite/value.cpp: 
+	fixes for decimal-handling (Mark) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@73
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/doc/tntdb.doxygen.in: deactivate undocumented warnings git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@72
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/Makefile.am, tntdb/include/tntdb.h: add all
+	including header tntdb.h git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@71
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: build-fix for aix git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@70
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-10-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/doc/tntdb.doxygen.in: fix version number in documentation
+	add documentation about tntdb::connect et al git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@69
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-09-30  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/number.cpp, tntdb/src/oracle/value.cpp: fix
+	fetching decimals in oracle-driver (Mark) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@68
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-09-29  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/oracle/value.cpp: remove getBool from tntdb::Value also
+	in oracle-driver git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@67
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-09-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/decimal.cpp: fix compile error git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@66
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-09-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/decimal.h, tntdb/src/decimal.cpp: remove
+	tntdb::Decimal::getBool some cosmetic changes git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@65
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-09-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/number.h: add missing include git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@64
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-09-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/configure.in, tntdb/demo/Makefile.am,
+	tntdb/include/Makefile.am, tntdb/include/tntdb/bits/result.h,
+	tntdb/include/tntdb/bits/result_iterator.h,
+	tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/value.h,
+	tntdb/include/tntdb/connectionpool.h,
+	tntdb/include/tntdb/decimal.h, tntdb/include/tntdb/error.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/impl/value.h,
+	tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/bindvalues.h,
+	tntdb/include/tntdb/mysql/impl/boundvalue.h,
+	tntdb/include/tntdb/mysql/impl/rowvalue.h,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/include/tntdb/oracle/statement.h,
+	tntdb/include/tntdb/oracle/value.h,
+	tntdb/include/tntdb/postgresql/impl/resultvalue.h,
+	tntdb/include/tntdb/postgresql/impl/statement.h,
+	tntdb/include/tntdb/sqlite/error.h,
+	tntdb/include/tntdb/sqlite/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h, tntdb/src/Makefile.am,
+	tntdb/src/connect.cpp, tntdb/src/decimal.cpp,
+	tntdb/src/mysql/Makefile.am, tntdb/src/mysql/bindutils.cpp,
+	tntdb/src/mysql/bindvalues.cpp, tntdb/src/mysql/boundvalue.cpp,
+	tntdb/src/mysql/connection.cpp, tntdb/src/mysql/rowvalue.cpp,
+	tntdb/src/mysql/statement.cpp, tntdb/src/oracle/Makefile.am,
+	tntdb/src/oracle/number.cpp, tntdb/src/oracle/statement.cpp,
+	tntdb/src/oracle/value.cpp, tntdb/src/postgresql/Makefile.am,
+	tntdb/src/postgresql/resultvalue.cpp,
+	tntdb/src/postgresql/statement.cpp, tntdb/src/sqlite/Makefile.am,
+	tntdb/src/sqlite/error.cpp, tntdb/src/sqlite/statement.cpp,
+	tntdb/src/sqlite/stmtvalue.cpp, tntdb/src/sqlite/value.cpp,
+	tntdb/src/valueimpl.cpp: support for decimals and 32/64-bit
+	intergers (Mark Wright) build improvements for AIX formatting fixes git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@63
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-09-13  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/include/tntdb/bits/value.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/impl/value.h,
+	tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/bindvalues.h,
+	tntdb/include/tntdb/mysql/impl/boundvalue.h,
+	tntdb/include/tntdb/mysql/impl/rowvalue.h,
+	tntdb/include/tntdb/oracle/value.h,
+	tntdb/include/tntdb/postgresql/impl/resultvalue.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h, tntdb/src/Makefile.am,
+	tntdb/src/mysql/Makefile.am, tntdb/src/mysql/bindutils.cpp,
+	tntdb/src/mysql/boundvalue.cpp, tntdb/src/mysql/rowvalue.cpp,
+	tntdb/src/oracle/Makefile.am, tntdb/src/oracle/value.cpp,
+	tntdb/src/postgresql/Makefile.am,
+	tntdb/src/postgresql/resultvalue.cpp, tntdb/src/sqlite/Makefile.am,
+	tntdb/src/sqlite/stmtvalue.cpp, tntdb/src/valueimpl.cpp: 
+	optimization, better support for AIX git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@62
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-07-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/oracle/row.h,
+	tntdb/include/tntdb/oracle/value.h, tntdb/src/oracle/Makefile.am,
+	tntdb/src/oracle/value.cpp: fix some compile-errors git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@61
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-07-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/Makefile.am: header of oracle-driver where not
+	included in dist-archive git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@60
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-07-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: spelling fix git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@59
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-07-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: bump version number git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@58
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-06-08  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/Makefile.am, tntdb/configure.in, tntdb/include/Makefile.am,
+	tntdb/include/tntdb/oracle/connection.h,
+	tntdb/include/tntdb/oracle/connectionmanager.h,
+	tntdb/include/tntdb/oracle/cursor.h,
+	tntdb/include/tntdb/oracle/datetime.h,
+	tntdb/include/tntdb/oracle/error.h,
+	tntdb/include/tntdb/oracle/result.h,
+	tntdb/include/tntdb/oracle/row.h,
+	tntdb/include/tntdb/oracle/statement.h,
+	tntdb/include/tntdb/oracle/value.h, tntdb/src/Makefile.am,
+	tntdb/src/mysql/Makefile.am, tntdb/src/oracle/Makefile.am,
+	tntdb/src/oracle/connection.cpp,
+	tntdb/src/oracle/connectionmanager.cpp,
+	tntdb/src/oracle/cursor.cpp, tntdb/src/oracle/datetime.cpp,
+	tntdb/src/oracle/error.cpp, tntdb/src/oracle/result.cpp,
+	tntdb/src/oracle/row.cpp, tntdb/src/oracle/statement.cpp,
+	tntdb/src/oracle/value.cpp, tntdb/src/postgresql/Makefile.am,
+	tntdb/src/sqlite/Makefile.am: add driver for oracle remove support
+	for linking default driver (called static, which was misleading
+	anyway) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@57
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-06-08  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/src/statement_iterator.cpp: bugfix: tntdb
+	crashed, when iterating over a statement which returns in no rows git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@56
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-23  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/mysql/bindutils.cpp: support for MEDIUMINT (24-bit
+	integer) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@55
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-18  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/demo/categories.cpp, tntdb/demo/mysqlcmd.cpp,
+	tntdb/demo/pooldemo.cpp, tntdb/demo/sqlcmd.cpp,
+	tntdb/demo/sqlitecmd.cpp, tntdb/src/connect.cpp,
+	tntdb/src/connection.cpp, tntdb/src/connectionpool.cpp,
+	tntdb/src/error.cpp, tntdb/src/librarymanager.cpp,
+	tntdb/src/mysql/bindvalues.cpp, tntdb/src/mysql/boundvalue.cpp,
+	tntdb/src/mysql/connection.cpp,
+	tntdb/src/mysql/connectionmanager.cpp,
+	tntdb/src/mysql/cursor_iterator.cpp, tntdb/src/mysql/resultrow.cpp,
+	tntdb/src/mysql/row.cpp, tntdb/src/mysql/rowvalue.cpp,
+	tntdb/src/mysql/statement.cpp, tntdb/src/poolconnection.cpp,
+	tntdb/src/postgresql/connection.cpp,
+	tntdb/src/postgresql/connectionmanager.cpp,
+	tntdb/src/postgresql/cursor.cpp, tntdb/src/postgresql/error.cpp,
+	tntdb/src/postgresql/resultrow.cpp,
+	tntdb/src/postgresql/resultvalue.cpp,
+	tntdb/src/postgresql/statement.cpp, tntdb/src/rowimpl.cpp,
+	tntdb/src/sqlite/connection.cpp,
+	tntdb/src/sqlite/connectionmanager.cpp,
+	tntdb/src/sqlite/cursor.cpp, tntdb/src/sqlite/statement.cpp,
+	tntdb/src/sqlite/stmtrow.cpp, tntdb/src/sqlite/stmtvalue.cpp,
+	tntdb/src/valueimpl.cpp: remove ';' at the end of log_define git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@54
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/Makefile.am: include custom m4-macros in dist-package git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@52
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: updated git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@51
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: update version number git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@50
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-12  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/statement_iterator.h,
+	tntdb/src/statement_iterator.cpp: don't return a reference to a
+	temporary git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@49
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/Makefile.am, tntdb/configure.in, tntdb/doc/Makefile.am,
+	tntdb/m4/acx_pthread.m4: build-improvements git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@48
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/impl/poolconnection.h,
+	tntdb/src/connectionpool.cpp, tntdb/src/poolconnection.cpp: test and
+	fix connectionpool git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@47
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-10  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/m4/acx_pthread.m4: fix probe-order for pthread-flags for
+	linux git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@46
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-10  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: fix configure option --with-doxygen git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@45
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-10  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/stmtparser.cpp: add missing include git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@44
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-05-09  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/autogen.sh, tntdb/configure.in, tntdb/demo/Makefile.am,
+	tntdb/include/tntdb/bits/statement_iterator.h,
+	tntdb/m4/acx_pthread.m4, tntdb/src/Makefile.am,
+	tntdb/src/mysql/Makefile.am, tntdb/src/postgresql/Makefile.am,
+	tntdb/src/sqlite/Makefile.am, tntdb/src/statement_iterator.cpp: use
+	ACX_PTHREAD-macro from autoconf-archive to detect
+	pthread-build-flags implement post-increment for
+	tntdb::Statement::const_iterator git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@43
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-04-07  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/demo/util.h, tntdb/src/sqlite/error.cpp: add missing
+	includes git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@42
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-03-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/demo/pooldemo.cpp,
+	tntdb/include/tntdb/bits/connection.h,
+	tntdb/include/tntdb/connect.h,
+	tntdb/include/tntdb/connectionpool.h,
+	tntdb/include/tntdb/iface/iconnection.h,
+	tntdb/include/tntdb/impl/poolconnection.h,
+	tntdb/include/tntdb/mysql/impl/connection.h,
+	tntdb/include/tntdb/postgresql/impl/connection.h,
+	tntdb/include/tntdb/sqlite/impl/connection.h,
+	tntdb/src/connect.cpp, tntdb/src/connectionpool.cpp,
+	tntdb/src/mysql/connection.cpp, tntdb/src/poolconnection.cpp,
+	tntdb/src/postgresql/connection.cpp,
+	tntdb/src/sqlite/connection.cpp: - tntdb::Connection::ping to check, if the connection is alive - use that ping in connectionpool before returning connection - tntdb::setMaxPoolSize(unsingned) and tntdb::getMaxPoolSize() git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@41
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-02-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/iface/iconnection.h,
+	tntdb/include/tntdb/iface/icursor.h,
+	tntdb/include/tntdb/iface/iresult.h,
+	tntdb/include/tntdb/iface/irow.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/refcounted.h: make refcounted non-copyable git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@39
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2007-02-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/src/statement_iterator.cpp: fix leak: the
+	statement-cursor is not freed, when the first fetch was not
+	successful git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@38
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-12-02  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/error.h: fix comment git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@37
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-11-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: fix typo git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@36
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-11-27  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/doc/Makefile.am: htmldir is already defined in automake
+	1.9.6 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@35
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-10-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* : document fetchsize-parameter of tntdb::Statement::begin git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@34
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-10-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/include/tntdb/postgresql/impl/cursor.h,
+	tntdb/include/tntdb/postgresql/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/statement.h,
+	tntdb/src/mysql/statement.cpp, tntdb/src/postgresql/cursor.cpp,
+	tntdb/src/postgresql/statement.cpp, tntdb/src/sqlite/statement.cpp,
+	tntdb/src/statement.cpp: add fetchsize-parameter to
+	tntdb::Statement::begin and pass it to the implementing cursor git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@33
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-10-19  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/error.h, tntdb/src/error.cpp: don't inline
+	constructors of exceptions to help compiler matching types in
+	exceptions (a bug at least in gcc 4.1) git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@32
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-10-19  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* : fix some typos git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@31
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-10-19  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/sqlite/statement.cpp: add some debug-statements git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@30
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-10-19  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in: check if doxygen-program is available git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@29
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-10-19  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/bits/row.h: add missing methods getDate,
+	getTime and getDatetime git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@28
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-10-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/doc/{Doxyfile => Doxyfile.in}: Doxyfile is generated with
+	automake git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@27
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-10-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/doc/Makefile.am, tntdb/doc/tntdb.doxygen.in: added missing
+	files git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@26
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-23  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/configure.in: version 0.9.1 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@25
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/sqlite/statement.cpp: reset statement when reused in a
+	cursor git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@24
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/connectionpool.cpp: add debug-statement git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@23
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/sqlite/impl/statement.h: don't keep the
+	connection in statement to prevent circular references in cached
+	statements git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@22
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-20  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/sqlite/connection.cpp: remove now unused select-callback
+	function git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@21
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog: updated git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@20
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/src/Makefile.am,
+	tntdb/src/librarymanager.cpp, tntdb/src/mysql/Makefile.am,
+	tntdb/src/postgresql/Makefile.am, tntdb/src/sqlite/Makefile.am: move
+	drivers to separate directory specified in configure with
+	"--with-driverdir=..." git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@19
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-11  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/sqlite/connection.cpp, tntdb/src/sqlite/statement.cpp,
+	tntdb/src/sqlite/stmtvalue.cpp: fix handling of blobs git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@18
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/configure.in, tntdb/include/tntdb/librarymanager.h,
+	tntdb/src/Makefile.am, tntdb/src/librarymanager.cpp,
+	tntdb/src/mysql/Makefile.am, tntdb/src/postgresql/Makefile.am,
+	tntdb/src/sqlite/Makefile.am: add driver-search-path into
+	librarymanager and move driver-files into pkglibdir and make it
+	configurable git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@17
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/Makefile.am, tntdb/configure.in: build doxygen-documentation git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@16
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/valueimpl.cpp: add missing return-statement git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@15
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-09-06  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/datetime.cpp, tntdb/src/time.cpp: remove unused digits
+	from ISO-format git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@14
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-08-28  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/COPYING, tntdb/COPYING.GPL, tntdb/ChangeLog,
+	tntdb/LICENSE.OpenSSL, tntdb/Makefile.am, tntdb/README,
+	tntdb/configure.in, tntdb/demo/person.cpp, tntdb/demo/pooldemo.cpp,
+	tntdb/demo/sqlcmd.cpp, tntdb/doc/Doxyfile,
+	tntdb/include/tntdb/bits/connection.h,
+	tntdb/include/tntdb/bits/result.h,
+	tntdb/include/tntdb/bits/result_iterator.h,
+	tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/row_iterator.h,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/statement_iterator.h,
+	tntdb/include/tntdb/bits/value.h, tntdb/include/tntdb/connect.h,
+	tntdb/include/tntdb/connection.h,
+	tntdb/include/tntdb/connectionpool.h, tntdb/include/tntdb/date.h,
+	tntdb/include/tntdb/datetime.h, tntdb/include/tntdb/error.h,
+	tntdb/include/tntdb/iface/iconnection.h,
+	tntdb/include/tntdb/iface/iconnectionmanager.h,
+	tntdb/include/tntdb/iface/icursor.h,
+	tntdb/include/tntdb/iface/iresult.h,
+	tntdb/include/tntdb/iface/irow.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/impl/poolconnection.h,
+	tntdb/include/tntdb/impl/result.h, tntdb/include/tntdb/impl/row.h,
+	tntdb/include/tntdb/impl/value.h,
+	tntdb/include/tntdb/librarymanager.h,
+	tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/bindvalues.h,
+	tntdb/include/tntdb/mysql/cursor.h,
+	tntdb/include/tntdb/mysql/error.h,
+	tntdb/include/tntdb/mysql/impl/boundrow.h,
+	tntdb/include/tntdb/mysql/impl/boundvalue.h,
+	tntdb/include/tntdb/mysql/impl/connection.h,
+	tntdb/include/tntdb/mysql/impl/connectionmanager.h,
+	tntdb/include/tntdb/mysql/impl/cursor.h,
+	tntdb/include/tntdb/mysql/impl/result.h,
+	tntdb/include/tntdb/mysql/impl/resultrow.h,
+	tntdb/include/tntdb/mysql/impl/rowcontainer.h,
+	tntdb/include/tntdb/mysql/impl/rowvalue.h,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/include/tntdb/noncopyable.h,
+	tntdb/include/tntdb/postgresql/error.h,
+	tntdb/include/tntdb/postgresql/impl/connection.h,
+	tntdb/include/tntdb/postgresql/impl/connectionmanager.h,
+	tntdb/include/tntdb/postgresql/impl/cursor.h,
+	tntdb/include/tntdb/postgresql/impl/result.h,
+	tntdb/include/tntdb/postgresql/impl/resultrow.h,
+	tntdb/include/tntdb/postgresql/impl/resultvalue.h,
+	tntdb/include/tntdb/postgresql/impl/statement.h,
+	tntdb/include/tntdb/refcounted.h, tntdb/include/tntdb/result.h,
+	tntdb/include/tntdb/row.h, tntdb/include/tntdb/smartptr.h,
+	tntdb/include/tntdb/sqlite/error.h,
+	tntdb/include/tntdb/sqlite/impl/connection.h,
+	tntdb/include/tntdb/sqlite/impl/connectionmanager.h,
+	tntdb/include/tntdb/sqlite/impl/cursor.h,
+	tntdb/include/tntdb/sqlite/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/stmtrow.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h,
+	tntdb/include/tntdb/statement.h, tntdb/include/tntdb/stmtparser.h,
+	tntdb/include/tntdb/time.h, tntdb/include/tntdb/transaction.h,
+	tntdb/include/tntdb/value.h, tntdb/src/connect.cpp,
+	tntdb/src/connection.cpp, tntdb/src/connectionpool.cpp,
+	tntdb/src/date.cpp, tntdb/src/datetime.cpp, tntdb/src/error.cpp,
+	tntdb/src/librarymanager.cpp, tntdb/src/mysql/bindutils.cpp,
+	tntdb/src/mysql/bindvalues.cpp, tntdb/src/mysql/boundrow.cpp,
+	tntdb/src/mysql/boundvalue.cpp, tntdb/src/mysql/connection.cpp,
+	tntdb/src/mysql/connectionmanager.cpp, tntdb/src/mysql/cursor.cpp,
+	tntdb/src/mysql/cursor_iterator.cpp, tntdb/src/mysql/error.cpp,
+	tntdb/src/mysql/result.cpp, tntdb/src/mysql/resultrow.cpp,
+	tntdb/src/mysql/row.cpp, tntdb/src/mysql/rowcontainer.cpp,
+	tntdb/src/mysql/rowvalue.cpp, tntdb/src/mysql/statement.cpp,
+	tntdb/src/poolconnection.cpp, tntdb/src/postgresql/connection.cpp,
+	tntdb/src/postgresql/connectionmanager.cpp,
+	tntdb/src/postgresql/cursor.cpp, tntdb/src/postgresql/error.cpp,
+	tntdb/src/postgresql/result.cpp,
+	tntdb/src/postgresql/resultrow.cpp,
+	tntdb/src/postgresql/resultvalue.cpp,
+	tntdb/src/postgresql/statement.cpp, tntdb/src/result.cpp,
+	tntdb/src/resultimpl.cpp, tntdb/src/row.cpp, tntdb/src/rowimpl.cpp,
+	tntdb/src/sqlite/connection.cpp,
+	tntdb/src/sqlite/connectionmanager.cpp,
+	tntdb/src/sqlite/cursor.cpp, tntdb/src/sqlite/error.cpp,
+	tntdb/src/sqlite/statement.cpp, tntdb/src/sqlite/stmtrow.cpp,
+	tntdb/src/sqlite/stmtvalue.cpp, tntdb/src/statement.cpp,
+	tntdb/src/statement_iterator.cpp, tntdb/src/stmtparser.cpp,
+	tntdb/src/time.cpp, tntdb/src/valueimpl.cpp: change license to LGPL
+	integrate doxygen into build git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@13
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-08-24  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/COPYING.GPL: add missing file git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@10
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-08-24  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/ChangeLog, tntdb/LICENSE.OpenSSL, tntdb/Makefile.am,
+	tntdb/configure.in, tntdb/demo/person.cpp, tntdb/demo/pooldemo.cpp,
+	tntdb/demo/sqlcmd.cpp, tntdb/include/tntdb/bits/connection.h,
+	tntdb/include/tntdb/bits/result.h,
+	tntdb/include/tntdb/bits/result_iterator.h,
+	tntdb/include/tntdb/bits/row.h,
+	tntdb/include/tntdb/bits/row_iterator.h,
+	tntdb/include/tntdb/bits/statement.h,
+	tntdb/include/tntdb/bits/statement_iterator.h,
+	tntdb/include/tntdb/bits/value.h, tntdb/include/tntdb/connect.h,
+	tntdb/include/tntdb/connection.h,
+	tntdb/include/tntdb/connectionpool.h, tntdb/include/tntdb/date.h,
+	tntdb/include/tntdb/datetime.h, tntdb/include/tntdb/error.h,
+	tntdb/include/tntdb/iface/iconnection.h,
+	tntdb/include/tntdb/iface/iconnectionmanager.h,
+	tntdb/include/tntdb/iface/icursor.h,
+	tntdb/include/tntdb/iface/iresult.h,
+	tntdb/include/tntdb/iface/irow.h,
+	tntdb/include/tntdb/iface/istatement.h,
+	tntdb/include/tntdb/iface/ivalue.h,
+	tntdb/include/tntdb/impl/poolconnection.h,
+	tntdb/include/tntdb/impl/result.h, tntdb/include/tntdb/impl/row.h,
+	tntdb/include/tntdb/impl/value.h,
+	tntdb/include/tntdb/librarymanager.h,
+	tntdb/include/tntdb/mysql/bindutils.h,
+	tntdb/include/tntdb/mysql/bindvalues.h,
+	tntdb/include/tntdb/mysql/cursor.h,
+	tntdb/include/tntdb/mysql/error.h,
+	tntdb/include/tntdb/mysql/impl/boundrow.h,
+	tntdb/include/tntdb/mysql/impl/boundvalue.h,
+	tntdb/include/tntdb/mysql/impl/connection.h,
+	tntdb/include/tntdb/mysql/impl/connectionmanager.h,
+	tntdb/include/tntdb/mysql/impl/cursor.h,
+	tntdb/include/tntdb/mysql/impl/result.h,
+	tntdb/include/tntdb/mysql/impl/resultrow.h,
+	tntdb/include/tntdb/mysql/impl/rowcontainer.h,
+	tntdb/include/tntdb/mysql/impl/rowvalue.h,
+	tntdb/include/tntdb/mysql/impl/statement.h,
+	tntdb/include/tntdb/noncopyable.h,
+	tntdb/include/tntdb/postgresql/error.h,
+	tntdb/include/tntdb/postgresql/impl/connection.h,
+	tntdb/include/tntdb/postgresql/impl/connectionmanager.h,
+	tntdb/include/tntdb/postgresql/impl/cursor.h,
+	tntdb/include/tntdb/postgresql/impl/result.h,
+	tntdb/include/tntdb/postgresql/impl/resultrow.h,
+	tntdb/include/tntdb/postgresql/impl/resultvalue.h,
+	tntdb/include/tntdb/postgresql/impl/statement.h,
+	tntdb/include/tntdb/refcounted.h, tntdb/include/tntdb/result.h,
+	tntdb/include/tntdb/row.h, tntdb/include/tntdb/smartptr.h,
+	tntdb/include/tntdb/sqlite/error.h,
+	tntdb/include/tntdb/sqlite/impl/connection.h,
+	tntdb/include/tntdb/sqlite/impl/connectionmanager.h,
+	tntdb/include/tntdb/sqlite/impl/cursor.h,
+	tntdb/include/tntdb/sqlite/impl/statement.h,
+	tntdb/include/tntdb/sqlite/impl/stmtrow.h,
+	tntdb/include/tntdb/sqlite/impl/stmtvalue.h,
+	tntdb/include/tntdb/statement.h, tntdb/include/tntdb/stmtparser.h,
+	tntdb/include/tntdb/time.h, tntdb/include/tntdb/transaction.h,
+	tntdb/include/tntdb/value.h, tntdb/src/connect.cpp,
+	tntdb/src/connection.cpp, tntdb/src/connectionpool.cpp,
+	tntdb/src/date.cpp, tntdb/src/datetime.cpp, tntdb/src/error.cpp,
+	tntdb/src/librarymanager.cpp, tntdb/src/mysql/bindutils.cpp,
+	tntdb/src/mysql/bindvalues.cpp, tntdb/src/mysql/boundrow.cpp,
+	tntdb/src/mysql/boundvalue.cpp, tntdb/src/mysql/connection.cpp,
+	tntdb/src/mysql/connectionmanager.cpp, tntdb/src/mysql/cursor.cpp,
+	tntdb/src/mysql/cursor_iterator.cpp, tntdb/src/mysql/error.cpp,
+	tntdb/src/mysql/result.cpp, tntdb/src/mysql/resultrow.cpp,
+	tntdb/src/mysql/row.cpp, tntdb/src/mysql/rowcontainer.cpp,
+	tntdb/src/mysql/rowvalue.cpp, tntdb/src/mysql/statement.cpp,
+	tntdb/src/poolconnection.cpp, tntdb/src/postgresql/connection.cpp,
+	tntdb/src/postgresql/connectionmanager.cpp,
+	tntdb/src/postgresql/cursor.cpp, tntdb/src/postgresql/error.cpp,
+	tntdb/src/postgresql/result.cpp,
+	tntdb/src/postgresql/resultrow.cpp,
+	tntdb/src/postgresql/resultvalue.cpp,
+	tntdb/src/postgresql/statement.cpp, tntdb/src/result.cpp,
+	tntdb/src/resultimpl.cpp, tntdb/src/row.cpp, tntdb/src/rowimpl.cpp,
+	tntdb/src/sqlite/connection.cpp,
+	tntdb/src/sqlite/connectionmanager.cpp,
+	tntdb/src/sqlite/cursor.cpp, tntdb/src/sqlite/error.cpp,
+	tntdb/src/sqlite/statement.cpp, tntdb/src/sqlite/stmtrow.cpp,
+	tntdb/src/sqlite/stmtvalue.cpp, tntdb/src/statement.cpp,
+	tntdb/src/statement_iterator.cpp, tntdb/src/stmtparser.cpp,
+	tntdb/src/time.cpp, tntdb/src/valueimpl.cpp: expand license to link
+	with OpenSSL-license git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@9
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-07-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/Makefile.am, tntdb/configure.in: remove debian-directory
+	from dist-package git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@8
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-07-21  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/src/sqlite/connection.cpp, tntdb/src/sqlite/statement.cpp: 
+	reset statement after exec fixed log-statements git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@7
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-06-18  maekitalo <maekitalo@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/include/tntdb/smartptr.h: fix ansi-c++-violation detected by
+	gcc 4.1 git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@6
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-04-27  emeusel <emeusel@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/debian/rules: corrected lintian warnings git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@4
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-04-27  emeusel <emeusel@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* tntdb/debian/libtntdb-dev.dirs,
+	tntdb/debian/libtntdb-dev.install, tntdb/debian/{tntdb-dev.dirs =>
+	libtntdb1-mysql.dirs}, tntdb/debian/libtntdb1-mysql.install,
+	tntdb/debian/{tntdb-dev.install => libtntdb1-postgresql.dirs},
+	tntdb/debian/libtntdb1-postgresql.install,
+	tntdb/debian/{tntdb1-pg.dirs => libtntdb1-sqlite.dirs},
+	tntdb/debian/libtntdb1-sqlite.install,
+	tntdb/debian/{tntdb1-pg.install => libtntdb1.dirs},
+	tntdb/debian/libtntdb1.install, tntdb/debian/rules,
+	tntdb/debian/tntdb1-sqlite.dirs,
+	tntdb/debian/tntdb1-sqlite.install, tntdb/debian/tntdb1.dirs,
+	tntdb/debian/tntdb1.install: creates the packages correctly, now git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@2
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
+2006-04-26  erik <erik@8aebba32-5d12-0410-a889-bbfed4e15866>
+
+	* new import git-svn-id: svn://svn.code.sf.net/p/tntdb/code/trunk@1
+	8aebba32-5d12-0410-a889-bbfed4e15866
+
