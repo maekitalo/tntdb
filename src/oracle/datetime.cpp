@@ -147,7 +147,6 @@ namespace tntdb
           ociDescriptorAlloc();
         }
 
-        log_debug("do assing");
         ociAssign(src.datetime);
       }
       else if (datetime)
@@ -162,7 +161,6 @@ namespace tntdb
         datetime = 0;
       }
 
-      log_debug("assign end");
       return *this;
     }
 
