@@ -33,7 +33,7 @@
 #include <tntdb/iface/irow.h>
 #include <tntdb/mysql/bindvalues.h>
 #include <tntdb/mysql/impl/boundrow.h>
-#include <tntdb/connection.h>
+#include <tntdb/mysql/impl/connection.h>
 #include <map>
 
 namespace tntdb
@@ -44,7 +44,7 @@ namespace tntdb
     {
         typedef std::multimap<std::string, unsigned> hostvarMapType;
 
-        tntdb::Connection conn;
+        Connection* conn;
         std::string query;
         BindValues inVars;
         hostvarMapType hostvarMap;
@@ -58,7 +58,7 @@ namespace tntdb
         cxxtools::SmartPtr<IRow> fetchRow();
 
       public:
-        Statement(const tntdb::Connection& conn, MYSQL* mysql,
+        Statement(Connection* conn, MYSQL* mysql,
           const std::string& query);
         ~Statement();
 

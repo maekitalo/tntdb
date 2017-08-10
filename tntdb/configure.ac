@@ -1,4 +1,7 @@
-AC_INIT(tntdb, 1.3rc3, [Tommi Maekitalo <tommi@tntnet.org>])
+# This is upstream tntdb-1.3rc3 with tweaks for 42ity project
+# The original version string drove the pkgconfig parser mad
+# (it is not ">= 1.3.0" that we require in configre scripts)
+AC_INIT(tntdb, 1.3.0, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 
 abi_current=4
@@ -281,6 +284,7 @@ AC_SUBST(SHARED_LIB_FLAG)
 
 AC_CONFIG_FILES([
   Makefile
+  pkgconfig/tntdb.pc
   src/Makefile
   src/mysql/Makefile
   src/postgresql/Makefile

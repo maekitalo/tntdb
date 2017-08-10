@@ -71,6 +71,9 @@ namespace tntdb
         throw std::runtime_error("cannot initalize mysql");
       initialized = true;
 
+      unsigned int timeout = 300;
+      mysql_options(&mysql, MYSQL_OPT_READ_TIMEOUT, &timeout);
+
       if (::mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, app && app[0] ? app : "tntdb") != 0)
         throw MysqlError("mysql_options", &mysql);
 
@@ -354,7 +357,7 @@ namespace tntdb
 
     tntdb::Statement Connection::prepare(const std::string& query)
     {
-      return tntdb::Statement(new Statement(tntdb::Connection(this), &mysql, query));
+      return tntdb::Statement(new Statement(this, &mysql, query));
     }
 
     bool Connection::ping()
