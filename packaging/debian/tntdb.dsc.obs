@@ -6,7 +6,7 @@ Version: 1.3-2etn1
 Maintainer: Kari Pahula <kaol@debian.org>
 Homepage: http://www.tntnet.org/tntdb.html
 Standards-Version: 3.9.4
-Build-Depends: cdbs, debhelper (>= 9), libcxxtools-dev (>= 2.2), libsqlite3-dev, libmysqlclient-dev, libpq-dev, libltdl-dev, doxygen, dh-autoreconf, sqlite3
+Build-Depends: cdbs, debhelper (>= 9), libcxxtools-dev (>= 2.2), libsqlite3-dev, libmariadbclient-dev, libpq-dev, libltdl-dev, doxygen, dh-autoreconf, sqlite3
 Build-Conflicts: libtntdb-dev, libtntdb3
 Package-List: 
  libtntdb-dev deb libdevel optional

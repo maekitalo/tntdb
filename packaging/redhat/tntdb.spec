@@ -15,6 +15,8 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
+# Note: for 42ity, maybe this should require (or optionalize) mariadb-devel
+# if defined on target distro at all
 
 Name:           tntdb
 Version:        1.3
