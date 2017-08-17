@@ -1,0 +1,26 @@
+-------------------------------------------------------------------
+Wed Jun 10 12:42:16 UTC 2015 - michal.hrusecky@opensuse.org
+
+- Fix connection leaking bug
+  http://sourceforge.net/p/tntnet/mailman/message/31875108/
+
+-------------------------------------------------------------------
+Mon Sep  8 13:15:03 UTC 2014 - michal.hrusecky@opensuse.org
+
+- better package structure
+
+-------------------------------------------------------------------
+Wed Oct 23 09:09:43 UTC 2013 - mhrusecky@suse.com
+
+- Updated to version 1.3 of the package
+
+-------------------------------------------------------------------
+Sat Feb 23 16:52:05 UTC 2013 - mhrusecky@suse.com
+
+- Updated to version 1.2 of the package
+
+-------------------------------------------------------------------
+Tue Jan 17 11:18:37 CET 2012 - mhrusecky@suse.cz
+
+- Packaged version 1.1 of the package
+
