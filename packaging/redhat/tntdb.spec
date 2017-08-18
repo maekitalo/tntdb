@@ -107,9 +107,10 @@ Replication plugin for tntdb abstraction library.
 
 %prep
 %setup -q -n tntdb-%{version}
+mv -f tntdb/* ./
 %patch0
-%patch1 -p1
-%patch2 -p1
+#%patch1 -p1
+#%patch2 -p1
 
 %build
 autoreconf -vi
