@@ -27,6 +27,7 @@
 /tntdb/test/tntdb-test
 /tntdb/.git
 /tntdb/packaging
+/tntdb/obs
 Makefile.in
 Makefile
 .deps
