@@ -27,8 +27,8 @@ Group:          Development/Libraries/C and C++
 Url:            http://www.tntnet.org/index.html
 Source0:        tntdb-%{version}.tar.gz
 Patch0:         tntdb-1.3-avoid-version.patch
-Patch1:         connection.patch
-Patch2:         0002-add-pkgconfig-support.patch
+#Patch1:         connection.patch
+#Patch2:         0002-add-pkgconfig-support.patch
 BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  findutils
@@ -107,7 +107,7 @@ Replication plugin for tntdb abstraction library.
 
 %prep
 %setup -q -n tntdb-%{version}
-mv -f tntdb/* ./
+if [ "`find tntdb/ | wc -l`" -gt 1 ] ; then mv -f tntdb/* ./ ; fi
 %patch0
 #%patch1 -p1
 #%patch2 -p1

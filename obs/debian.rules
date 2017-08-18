@@ -10,7 +10,7 @@ DEB_CONFIGURE_EXTRA_FLAGS := --with-driverdir=/usr/lib/tntdb --with-doxygen
 DEB_DH_MAKESHLIBS_ARGS := -Xusr/lib/tntdb
 
 pre-build:: debian/compat
-	mv -f tntdb/* ./
+	if [ "`find tntdb/ | wc -l`" -gt 1 ] ; then mv -f tntdb/* ./ ; fi
 
 clean::
 	rm -fr doc/html/ doc/latex/
