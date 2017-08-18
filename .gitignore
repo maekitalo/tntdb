@@ -25,6 +25,8 @@
 /tntdb/doc/tntdb.doxygen
 /tntdb/include/tntdb/config.h
 /tntdb/test/tntdb-test
+/tntdb/.git
+/tntdb/packaging
 Makefile.in
 Makefile
 .deps
