@@ -88,7 +88,11 @@ namespace tntdb
            Data is not preserved when reallocated.
        */
       char* reserve(std::size_t len, bool shrink = false)
-        { return _data->reserve(len, shrink); }
+      {
+        if (_data.getPointer() == BlobImpl::emptyInstance())
+          _data = _data->create();
+        return _data->reserve(len, shrink);
+      }
 
       bool operator==(const Blob& b) const
         { return *_data == *b._data; }
