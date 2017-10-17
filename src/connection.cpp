@@ -167,7 +167,7 @@ namespace tntdb
     log_trace("IStmtCacheConnection::clearStatementCache(\"" << key << "\")");
 
     stmtCacheType::iterator it = stmtCache.find(key);
-    if (it != stmtCache.end())
+    if (it == stmtCache.end())
       return  false;
 
     log_debug("remove statement for query \"" << key << "\" from cache");
