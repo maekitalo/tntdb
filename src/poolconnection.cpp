@@ -73,7 +73,7 @@ namespace tntdb
   void PoolConnection::rollbackTransaction()
   {
     connection->rollbackTransaction();
-    // keep transaction state
+    inTransaction = false;
   }
 
   PoolConnection::size_type PoolConnection::execute(const std::string& query)
