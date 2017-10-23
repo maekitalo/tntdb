@@ -63,13 +63,27 @@ namespace tntdb
    */
   Connection connectCached(const std::string& url);
 
-  /// Release unused connections; keep the given number of connections
-  void dropCached(unsigned keep = 0);
+  /** Returns the number of cached connections.
+      Note that connections, which are in use are not counted.
+   */
+  unsigned cachedConnections();
+
+  /** Returns the number of cached connections for the specified url.
+      Note that connections, which are in use are not counted.
+   */
+  unsigned cachedConnections(const std::string& url);
+
+  /** Release unused connections; keep the given number of connections.
+      Returns the number of connections freed.
+      Note that connections, which are in use are not freed.
+   */
+  unsigned dropCached(unsigned keep = 0);
 
   /** Release unused connections with the given database url; keep the
       given number of connections
+      Note that connections, which are in use are not freed.
    */
-  void dropCached(const std::string& url, unsigned keep = 0);
+  unsigned dropCached(const std::string& url, unsigned keep = 0);
 
   /** Set the maximum pool size for new connection pools
 

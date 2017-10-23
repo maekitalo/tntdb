@@ -69,6 +69,13 @@ namespace tntdb
     return Connection(new PoolConnection(pool.get()));
   }
 
+  unsigned ConnectionPool::drop(unsigned keep)
+  {
+      unsigned size = pool.size();
+      pool.drop(keep);
+      return size - pool.size();
+  }
+
   ////////////////////////////////////////////////////////////////////////
   // ConnectionPools
   //
@@ -102,31 +109,36 @@ namespace tntdb
     return it->second->connect();
   }
 
-  void ConnectionPools::drop(unsigned keep)
+  unsigned ConnectionPools::drop(unsigned keep)
   {
     log_debug("drop(" << keep << ')');
 
     cxxtools::MutexLock lock(mutex);
+    unsigned dropcount = 0;
     for (PoolsType::iterator it = pools.begin(); it != pools.end(); ++it)
     {
       log_debug("pool \"" << it->first << "\"; current size " << it->second->getCurrentSize());
-      it->second->drop();
+      dropcount += it->second->drop();
       log_debug("connections released " << it->second->getCurrentSize() << " kept");
     }
+
+    return dropcount;
   }
 
-  void ConnectionPools::drop(const std::string& url, unsigned keep)
+  unsigned ConnectionPools::drop(const std::string& url, unsigned keep)
   {
     log_debug("drop(\"" << url << "\", " << keep << ')');
 
     cxxtools::MutexLock lock(mutex);
 
+    unsigned dropcount = 0;
+
     PoolsType::iterator it = pools.find(url);
     if (it != pools.end())
     {
       log_debug("pool \"" << url << "\" found; current size " << it->second->getCurrentSize());
-      it->second->drop(keep);
-      log_debug("connections released " << it->second->getCurrentSize() << " kept");
+      dropcount = it->second->drop(keep);
+      log_debug(dropcount << " connections released " << it->second->getCurrentSize() << " kept");
 
       if (it->second->getCurrentSize() == 0)
       {
@@ -137,6 +149,8 @@ namespace tntdb
     }
     else
       log_debug("pool \"" << url << "\" not found");
+
+    return dropcount;
   }
 
   unsigned ConnectionPools::getCurrentSize(const std::string& url) const
@@ -146,6 +160,17 @@ namespace tntdb
     PoolsType::const_iterator it = pools.find(url);
     return it == pools.end() ? 0
                              : it->second->getCurrentSize();
+  }
+
+  unsigned ConnectionPools::getCurrentSize() const
+  {
+    cxxtools::MutexLock lock(mutex);
+
+    unsigned size = 0;
+    for (PoolsType::const_iterator it = pools.begin(); it != pools.end(); ++it)
+        size += it->second->getCurrentSize();
+
+    return size;
   }
 
   void ConnectionPools::setMaximumSize(unsigned m)

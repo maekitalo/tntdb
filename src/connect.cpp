@@ -77,20 +77,30 @@ namespace tntdb
 
   static ConnectionPools connectionPools;
 
+  unsigned cachedConnections()
+  {
+      return connectionPools.getCurrentSize();
+  }
+
+  unsigned cachedConnections(const std::string& url)
+  {
+      return connectionPools.getCurrentSize(url);
+  }
+
   Connection connectCached(const std::string& url)
   {
     log_debug("connectCached(\"" << url << "\")");
     return connectionPools.connect(url);
   }
 
-  void dropCached(unsigned keep)
+  unsigned dropCached(unsigned keep)
   {
-    connectionPools.drop(keep);
+    return connectionPools.drop(keep);
   }
 
-  void dropCached(const std::string& url, unsigned keep)
+  unsigned dropCached(const std::string& url, unsigned keep)
   {
-    connectionPools.drop(url, keep);
+    return connectionPools.drop(url, keep);
   }
 
   void setMaxPoolSize(unsigned max)

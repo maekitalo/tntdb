@@ -65,7 +65,7 @@ namespace tntdb
       Connection connect();
 
       /// Release unused connections; keep the given number of connections
-      void drop(unsigned keep = 0)    { pool.drop(keep); }
+      unsigned drop(unsigned keep = 0);
 
       unsigned getMaximumSize()       { return pool.getMaximumSize(); }
       void setMaximumSize(unsigned m) { pool.setMaximumSize(m); }
@@ -95,18 +95,19 @@ namespace tntdb
       Connection connect(const std::string& url);
 
       /// Release unused connections; keep the given number of connections
-      void drop(unsigned keep = 0);
+      unsigned drop(unsigned keep = 0);
 
       /** Release unused connections with the given database url;
           keep the given number of connections
        */
-      void drop(const std::string& url, unsigned keep = 0);
+      unsigned drop(const std::string& url, unsigned keep = 0);
 
       unsigned getMaximumSize()
         { return maxcount; }
 
       void setMaximumSize(unsigned m);
       unsigned getCurrentSize(const std::string& url) const;
+      unsigned getCurrentSize() const;
   };
 }
 
