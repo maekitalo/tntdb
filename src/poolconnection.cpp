@@ -74,6 +74,11 @@ namespace tntdb
   {
     connection->rollbackTransaction();
     inTransaction = false;
+
+    // When a rollback has been done, this may be a indication, that something
+    // weird has happened, so we do not reuse that connection.
+
+    drop = true;
   }
 
   PoolConnection::size_type PoolConnection::execute(const std::string& query)
