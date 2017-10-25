@@ -64,6 +64,10 @@ namespace tntdb
         Datetime(const Datetime& src);
         Datetime& operator= (const Datetime& src);
 
+        void assign(Connection* conn, const tntdb::Datetime& s);
+        void assign(Connection* conn, const tntdb::Date& s);
+        void assign(Connection* conn, const tntdb::Time& s);
+
         OCIDateTime*& getReference(Connection* conn);
 
         ~Datetime()

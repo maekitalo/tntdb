@@ -496,7 +496,7 @@ namespace tntdb
     void Statement::setDate(const std::string& col, const Date& data)
     {
       Bind &b = getBind(col);
-      b.datetime = Datetime(conn, data);
+      b.datetime.assign(conn, data);
 
       if (b.boundPtr != &b.data[0] || b.boundType != SQLT_TIMESTAMP)
       {
@@ -520,7 +520,7 @@ namespace tntdb
     void Statement::setTime(const std::string& col, const Time& data)
     {
       Bind &b = getBind(col);
-      b.datetime = Datetime(conn, data);
+      b.datetime.assign(conn, data);
 
       if (b.boundPtr != &b.data[0] || b.boundType != SQLT_TIMESTAMP)
       {
@@ -544,7 +544,7 @@ namespace tntdb
     void Statement::setDatetime(const std::string& col, const tntdb::Datetime& data)
     {
       Bind &b = getBind(col);
-      b.datetime = Datetime(conn, data);
+      b.datetime.assign(conn, data);
 
       if (b.boundPtr != &b.data[0] || b.boundType != SQLT_TIMESTAMP)
       {

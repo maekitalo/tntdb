@@ -145,6 +145,7 @@ namespace tntdb
           // we have no handle or don't own it - create new one
           log_debug("allocate new descriptor");
           ociDescriptorAlloc();
+          release = true;
         }
 
         ociAssign(src.datetime);
@@ -162,6 +163,59 @@ namespace tntdb
       }
 
       return *this;
+    }
+
+    void Datetime::assign(Connection* conn_, const tntdb::Datetime& s)
+    {
+      log_debug("assign tntdb::Datetime");
+
+      conn = conn_;
+
+      if (datetime == 0 || !release)
+      {
+        // we have no handle or don't own it - create new one
+        log_debug("allocate new descriptor");
+        ociDescriptorAlloc();
+        release = true;
+      }
+
+      ociConstruct(s.getYear(), s.getMonth(), s.getDay(),
+        s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
+    }
+
+    void Datetime::assign(Connection* conn_, const tntdb::Date& s)
+    {
+      log_debug("assign tntdb::Date");
+
+      conn = conn_;
+
+      if (datetime == 0 || !release)
+      {
+        // we have no handle or don't own it - create new one
+        log_debug("allocate new descriptor");
+        ociDescriptorAlloc();
+        release = true;
+      }
+
+      ociConstruct(s.getYear(), s.getMonth(), s.getDay(), 0, 0, 0, 0);
+    }
+
+    void Datetime::assign(Connection* conn_, const tntdb::Time& s)
+    {
+      log_debug("assign tntdb::Time");
+
+      conn = conn_;
+
+      if (datetime == 0 || !release)
+      {
+        // we have no handle or don't own it - create new one
+        log_debug("allocate new descriptor");
+        ociDescriptorAlloc();
+        release = true;
+      }
+
+      ociConstruct(1, 1, 1,
+        s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
     }
 
     // getters
