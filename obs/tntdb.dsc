@@ -1,6 +1,6 @@
 Format: 1.0
 Source: tntdb
-Binary: libtntdb4, tntdb-mysql4, tntdb-postgresql4, tntdb-sqlite4, libtntdb-dev, tntdb-dbg
+Binary: libtntdb4, tntdb-mysql4, tntdb-postgresql4, tntdb-sqlite4, libtntdb-dev, libtntdb-dbg
 Architecture: any
 Version: 1.3-2etn2
 Maintainer: Kari Pahula <kaol@debian.org>
@@ -14,5 +14,5 @@ Package-List:
  tntdb-mysql4 deb libs optional
  tntdb-postgresql4 deb libs optional
  tntdb-sqlite4 deb libs optional
- tntdb-dbg deb debug extra
+ libtntdb-dbg deb debug extra
 DEBTRANSFORM-TAR: tntdb-1.3.tar.gz

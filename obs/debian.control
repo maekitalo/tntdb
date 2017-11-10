@@ -75,9 +75,9 @@ Description: Development headers for tntdb
  .
  Currently has support for MySQL, PostgreSQL and SQLite.
 
-Package: tntdb-dbg
+Package: libtntdb-dbg
 Architecture: any
 Section: debug
 Priority: optional
-Depends: tntdb (= ${binary:Version}), ${misc:Depends}
+Depends: libtntdb (= ${binary:Version}), ${misc:Depends}
 Description: tntdb debugging symbols

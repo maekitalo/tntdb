@@ -26,4 +26,4 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 endif
 
 override_dh_strip:
-	dh_strip --dbg-package=tntdb-dbg
+	dh_strip --dbg-package=libtntdb-dbg
