@@ -24,3 +24,6 @@ binary-post-install/libtntdb-dev::
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	cd test; sqlite3 test.db < sqlite-test.sql; ./tntdb-test || /bin/true
 endif
+
+override_dh_strip:
+	dh_strip --dbg-package=tntdb-dbg

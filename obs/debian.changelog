@@ -1,3 +1,9 @@
+tntdb (1.3-2etn2) unstable; urgency=high
+
+  * Enable debug symbol debian packages
+
+ -- Jim Klimov <EvgenyKlimov@eaton.com>  Thu, 9 Nov 2017 15:09:45 +0200
+
 tntdb (1.3-2etn1) unstable; urgency=low
 
   * Fix connections leakage in MySQL driver

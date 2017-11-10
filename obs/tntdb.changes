@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Nov 10 13:09:45 UTC 2017 - EvgenyKlimov@eaton.com
+
+- enable debug-symbol debian packages
+
+-------------------------------------------------------------------
 Wed Jun 10 12:42:16 UTC 2015 - michal.hrusecky@opensuse.org
 
 - Fix connection leaking bug
