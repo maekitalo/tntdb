@@ -79,5 +79,5 @@ Package: libtntdb-dbg
 Architecture: any
 Section: debug
 Priority: optional
-Depends: libtntdb (= ${binary:Version}), ${misc:Depends}
+Depends: libtntdb4 (= ${binary:Version}), ${misc:Depends}
 Description: tntdb debugging symbols
