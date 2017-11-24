@@ -72,5 +72,19 @@ namespace tntdb
   {
     setString(col, cxxtools::Utf8Codec::encode(data));
   }
+
+  void IStatement::maxNumDelay(unsigned /*n*/)
+  {
+  }
+
+  unsigned IStatement::numDelayed()
+  {
+      return 0;
+  }
+
+  void IStatement::flush()
+  {
+  }
+
 }
 

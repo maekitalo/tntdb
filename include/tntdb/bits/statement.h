@@ -278,6 +278,20 @@ namespace tntdb
       /// Check whether this object is associated with a real statement (<b>true if not</b>)
       bool operator!() const            { return !_stmt; }
 
+      /** Sets a buffer for delayed execution of statements.
+
+          When the number if greater than 0 and the connection is in a
+          transaction, the execute method may delay the actual execution until
+          the buffer is full or flush is called.
+
+          The default is 0.
+       */
+      void maxNumDelay(unsigned n);
+      /// Returns the number of the currently pending statements.
+      unsigned numDelayed();
+      /// Executes all currently pending statements.
+      void flush();
+
       /// @{
       /// Get the actual implementation object
       const IStatement* getImpl() const { return &*_stmt; }
