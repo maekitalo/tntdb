@@ -57,9 +57,13 @@ pipeline {
                         sh 'cd tntdb && ./autogen.sh'
                     }
         }
+        stage ('configure') {
+                    steps {
+                        sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && ./configure --with-driverdir=/usr/lib/tntdb --with-doxygen=no --without-postgresql --without-sqlite --with-mysql'
+                    }
+        }
         stage ('compile') {
                     steps {
-                        sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && ./configure'
                         sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && ( make -k -j4 || make )'
                         sh 'echo "Are GitIgnores good after make? (should have no output below)"; git status -s || true'
                         script {
