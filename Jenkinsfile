@@ -59,12 +59,12 @@ pipeline {
         }
         stage ('configure') {
                     steps {
-                        sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && ./configure --with-driverdir=/usr/lib/tntdb --with-doxygen=no --without-postgresql --without-sqlite --with-mysql'
+                        sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --with-driverdir=/usr/lib/tntdb --with-doxygen=no --without-postgresql --without-sqlite --with-mysql )'
                     }
         }
         stage ('compile') {
                     steps {
-                        sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && ( make -k -j4 || make )'
+                        sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make -k -j4 || make )'
                         sh 'echo "Are GitIgnores good after make? (should have no output below)"; git status -s || true'
                         script {
                             if (   (params.DO_TEST_CHECK && params.DO_TEST_MEMCHECK)
@@ -86,13 +86,13 @@ pipeline {
                                 deleteDir()
                                 unstash 'built'
                                 timeout (time: 5, unit: 'MINUTES') {
-                                    sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && make check'
+                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make check )'
                                 }
                                 sh 'echo "Are GitIgnores good after make check? (should have no output below)"; git status -s || true'
                             }
                           } else {
                                 timeout (time: 5, unit: 'MINUTES') {
-                                    sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && make check'
+                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make check )'
                                 }
                                 sh 'echo "Are GitIgnores good after make check? (should have no output below)"; git status -s || true'
                           }
@@ -108,13 +108,13 @@ pipeline {
                                 deleteDir()
                                 unstash 'built'
                                 timeout (time: 5, unit: 'MINUTES') {
-                                    sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && ( make memcheck && exit 0 ; echo "Re-running failed ($?) memcheck with greater verbosity" >&2 ; make VERBOSE=1 memcheck-verbose )'
+                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make memcheck && exit 0 ; echo "Re-running failed ($?) memcheck with greater verbosity" >&2 ; make VERBOSE=1 memcheck-verbose )'
                                 }
                                 sh 'echo "Are GitIgnores good after make memcheck? (should have no output below)"; git status -s || true'
                               }
                           } else {
                                 timeout (time: 5, unit: 'MINUTES') {
-                                    sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && ( make memcheck && exit 0 ; echo "Re-running failed ($?) memcheck with greater verbosity" >&2 ; make VERBOSE=1 memcheck-verbose )'
+                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make memcheck && exit 0 ; echo "Re-running failed ($?) memcheck with greater verbosity" >&2 ; make VERBOSE=1 memcheck-verbose )'
                                 }
                                 sh 'echo "Are GitIgnores good after make memcheck? (should have no output below)"; git status -s || true'
                           }
@@ -130,13 +130,13 @@ pipeline {
                                 deleteDir()
                                 unstash 'built'
                                 timeout (time: 10, unit: 'MINUTES') {
-                                    sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && make distcheck'
+                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make distcheck )'
                                 }
                                 sh 'echo "Are GitIgnores good after make distcheck? (should have no output below)"; git status -s || true'
                               }
                             } else {
                                 timeout (time: 10, unit: 'MINUTES') {
-                                    sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; cd tntdb && make distcheck'
+                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make distcheck )'
                                 }
                                 sh 'echo "Are GitIgnores good after make distcheck? (should have no output below)"; git status -s || true'
                             }
