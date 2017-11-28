@@ -35,7 +35,7 @@ pipeline {
             description: 'Attempt "make distcheck" in this run?',
             name: 'DO_TEST_DISTCHECK')
         booleanParam (
-            defaultValue: true,
+            defaultValue: false,
             description: 'Attempt a "make install" check in this run?',
             name: 'DO_TEST_INSTALL')
         string (
