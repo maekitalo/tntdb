@@ -31,12 +31,12 @@ pipeline {
             description: 'Attempt "make memcheck" in this run?',
             name: 'DO_TEST_MEMCHECK')
         booleanParam (
-            defaultValue: true,
-            description: 'Attempt "make distcheck" in this run?',
+            defaultValue: false,
+            description: 'Attempt "make distcheck" in this run? (note: needs passing of config opts)',
             name: 'DO_TEST_DISTCHECK')
         booleanParam (
             defaultValue: false,
-            description: 'Attempt a "make install" check in this run?',
+            description: 'Attempt a "make install" check in this run? (note: hiccups on libname.so.x.y.zT)',
             name: 'DO_TEST_INSTALL')
         string (
             defaultValue: "`pwd`/tmp/_inst",
