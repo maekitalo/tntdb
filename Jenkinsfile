@@ -169,7 +169,7 @@ pipeline {
                                 deleteDir()
                                 unstash 'built'
                                 timeout (time: 10, unit: 'MINUTES') {
-                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make distcheck )'
+                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make DISTCHECK_CONFIGURE_FLAGS="--with-driverdir=/usr/lib/tntdb --with-doxygen=no --without-postgresql --without-sqlite --with-mysql" distcheck )'
                                 }
                                 sh 'echo "Are GitIgnores good after make distcheck? (should have no output below)"; git status -s || if [ "${params.REQUIRE_GOOD_GITIGNORE}" = false ]; then echo "WARNING GitIgnore tests found newly changed or untracked files" >&2 ; exit 0 ; else echo "FAILED GitIgnore tests" >&2 ; exit 1; fi'
                                 script {
@@ -180,7 +180,7 @@ pipeline {
                               }
                             } else {
                                 timeout (time: 10, unit: 'MINUTES') {
-                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make distcheck )'
+                                    sh 'cd tntdb && ( CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make DISTCHECK_CONFIGURE_FLAGS="--with-driverdir=/usr/lib/tntdb --with-doxygen=no --without-postgresql --without-sqlite --with-mysql" distcheck )'
                                 }
                                 sh 'echo "Are GitIgnores good after make distcheck? (should have no output below)"; git status -s || if [ "${params.REQUIRE_GOOD_GITIGNORE}" = false ]; then echo "WARNING GitIgnore tests found newly changed or untracked files" >&2 ; exit 0 ; else echo "FAILED GitIgnore tests" >&2 ; exit 1; fi'
                             }
