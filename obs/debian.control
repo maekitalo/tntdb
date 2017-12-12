@@ -1,0 +1,83 @@
+Source: tntdb
+Section: libs
+Priority: optional
+Maintainer: Kari Pahula <kaol@debian.org>
+Build-Depends: cdbs, debhelper (>= 9), libcxxtools-dev (>= 2.2), libsqlite3-dev, libmariadbclient-dev, libpq-dev, libltdl-dev, doxygen, dh-autoreconf, sqlite3
+Build-Conflicts: libtntdb-dev, libtntdb3
+Standards-Version: 3.9.4
+Homepage: http://www.tntnet.org/tntdb.html
+
+Package: libtntdb4
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: tntdb-mysql4|tntdb-postgresql4|tntdb-sqlite4
+Suggests: tntdb-mysql4, tntdb-postgresql4, tntdb-sqlite4, libtntdb-dev
+Description: C++ class library for easy database access
+ This library provides a thin, database independent layer over an SQL
+ database.  It lacks complex features like schema queries or wrapper
+ classes like active result sets or data bound controls.  Instead you
+ get to access the database directly with SQL queries.  The library is
+ suited for application programming, not for writing generic database
+ handling tools.
+ .
+ Currently has support for MySQL, PostgreSQL and SQLite.
+
+Package: tntdb-mysql4
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: MySQL backend for tntdb database access library
+ This library provides a thin, database independent layer over an SQL
+ database.  It lacks complex features like schema queries or wrapper
+ classes like active result sets or data bound controls.  Instead you
+ get to access the database directly with SQL queries.  The library is
+ suited for application programming, not for writing generic database
+ handling tools.
+ .
+ This file has the necessary files for MySQL support.
+
+Package: tntdb-postgresql4
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: PostgreSQL backend for tntdb database access library
+ This library provides a thin, database independent layer over an SQL
+ database.  It lacks complex features like schema queries or wrapper
+ classes like active result sets or data bound controls.  Instead you
+ get to access the database directly with SQL queries.  The library is
+ suited for application programming, not for writing generic database
+ handling tools.
+ .
+ This file has the necessary files for PostgreSQL support.
+
+Package: tntdb-sqlite4
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: SQLite backend for tntdb database access library
+ This library provides a thin, database independent layer over an SQL
+ database.  It lacks complex features like schema queries or wrapper
+ classes like active result sets or data bound controls.  Instead you
+ get to access the database directly with SQL queries.  The library is
+ suited for application programming, not for writing generic database
+ handling tools.
+ .
+ This file has the necessary files for SQLite support.
+
+Package: libtntdb-dev
+Architecture: any
+Section: libdevel
+Depends: libtntdb4 (= ${binary:Version}), libcxxtools-dev, ${shlibs:Depends}, ${misc:Depends}, libjs-jquery
+Description: Development headers for tntdb
+ This library provides a thin, database independent layer over an SQL
+ database.  It lacks complex features like schema queries or wrapper
+ classes like active result sets or data bound controls.  Instead you
+ get to access the database directly with SQL queries.  The library is
+ suited for application programming, not for writing generic database
+ handling tools.
+ .
+ Currently has support for MySQL, PostgreSQL and SQLite.
+
+Package: libtntdb-dbg
+Architecture: any
+Section: debug
+Priority: optional
+Depends: libtntdb4 (= ${binary:Version}), ${misc:Depends}
+Description: tntdb debugging symbols

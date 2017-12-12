@@ -1,0 +1,8 @@
+debian/tmp/usr/lib/lib*.so	usr/lib
+debian/tmp/usr/include/		usr
+debian/tmp/usr/lib/pkgconfig/*.pc
+doc/tntdb.odt			usr/share/doc/libtntdb-dev
+doc/tntdb.pdf			usr/share/doc/libtntdb-dev
+doc/html/			usr/share/doc/libtntdb-dev
+demo/*.cpp			usr/share/doc/libtntdb-dev/examples
+demo/*.h			usr/share/doc/libtntdb-dev/examples

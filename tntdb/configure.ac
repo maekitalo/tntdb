@@ -1,7 +1,7 @@
 # This is upstream tntdb-1.3rc3 with tweaks for 42ity project
 # The original version string drove the pkgconfig parser mad
 # (it is not ">= 1.3.0" that we require in configre scripts)
-AC_INIT(tntdb, 1.3.0, [Tommi Maekitalo <tommi@tntnet.org>])
+AC_INIT([tntdb], [1.3.0], [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 
 abi_current=4
