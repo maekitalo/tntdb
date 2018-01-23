@@ -9,13 +9,14 @@ sources = \
 	error.cpp \
 	multirow.cpp \
 	multivalue.cpp \
+	number.cpp \
 	result.cpp \
 	row.cpp \
 	singlerow.cpp \
 	singlevalue.cpp \
 	statement.cpp \
-	value.cpp \
-	number.cpp
+	string.cpp \
+	value.cpp
 
 if MAKE_ORACLE
 

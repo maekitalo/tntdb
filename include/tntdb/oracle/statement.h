@@ -35,6 +35,7 @@
 #include <string>
 #include <string.h>
 #include <map>
+#include <tntdb/oracle/string.h>
 #include <tntdb/oracle/datetime.h>
 #include <tntdb/oracle/blob.h>
 #include <tntdb/oracle/number.h>
@@ -61,6 +62,7 @@ namespace tntdb
             OCIBind* ptr;
             std::vector<char> data;
             sb2 indicator;
+            String string;
             Datetime datetime;
             Blob blob;
             Number number;

@@ -99,6 +99,7 @@ namespace tntdb
       {
         b.boundPtr = 0;
         b.boundType = 0;
+        b.boundLength = 0;
 
         log_debug("OCIBindByName, setNull(\"" << col << "\")");
         sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
@@ -449,9 +450,9 @@ namespace tntdb
       log_debug("OCIStmt(" << getHandle() << ").setChar(\"" << col << "\", '" << data << "')");
 
       Bind &b = getBind(col);
-      b.setData(&data, 1);
+      b.string.assign(conn, data);
 
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_AFC || b.boundLength != 1)
+      if (b.boundType != SQLT_VST)
       {
         b.boundPtr = 0;
         b.boundType = 0;
@@ -460,14 +461,14 @@ namespace tntdb
         log_debug("OCIBindByName, setChar(\"" << col << "\", " << data << ')');
         sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
           reinterpret_cast<const text*>(col.data()), col.size(),
-          &b.data[0], 1,
-          SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
+          &b.string.getHandle(), sizeof(OCIString*),
+          SQLT_VST, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
         checkError(ret, "OCIBindByName");
 
-        b.boundPtr = &b.data[0];
-        b.boundType = SQLT_AFC;
-        b.boundLength = 1;
+        b.boundPtr = 0;
+        b.boundType = SQLT_VST;
+        b.boundLength = sizeof(OCIString*);
       }
     }
 
@@ -476,25 +477,22 @@ namespace tntdb
       log_debug("OCIStmt(" << getHandle() << ").setString(\"" << col << "\", \"" << data << "\")");
 
       Bind &b = getBind(col);
-      b.setData(data);
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_AFC || b.boundLength != data.size())
+      b.string.assign(conn, data);
+      if (b.boundType != SQLT_VST)
       {
-        b.boundPtr = 0;
-        b.boundType = 0;
-        b.boundLength = 0;
+        b.boundType = SQLT_VST;
 
-        log_debug("OCIBindByName, setString(\"" << col << "\", \"" << data << "\")");
+        log_debug("OCIBindByName, setString(\"" << col << "\", \"" << data << "\", ..SQLT_VST)");
         sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
           reinterpret_cast<const text*>(col.data()), col.size(),
-          &b.data[0], data.size(),
-          SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
+          &b.string.getHandle(), sizeof(OCIString*),
+          SQLT_VST, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
         checkError(ret, "OCIBindByName");
 
-        b.boundPtr = &b.data[0];
-        b.boundType = SQLT_AFC;
-        b.boundLength = data.size();
+        b.boundPtr = 0;
+        b.boundType = SQLT_VST;
+        b.boundLength = sizeof(OCIString*);
       }
     }
 
