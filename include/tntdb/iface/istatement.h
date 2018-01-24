@@ -82,9 +82,9 @@ namespace tntdb
       virtual Value selectValue() = 0;
       virtual ICursor* createCursor(unsigned fetchsize) = 0;
 
-      virtual void maxNumDelay(unsigned n);
-      virtual unsigned numDelayed();
-      virtual unsigned flush();
+      virtual void maxNumDelay(size_type n);
+      virtual size_type numDelayed() const;
+      virtual size_type flush();
   };
 }
 

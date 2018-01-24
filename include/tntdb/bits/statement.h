@@ -285,11 +285,12 @@ namespace tntdb
 
           The default is 0.
        */
-      void maxNumDelay(unsigned n);
+      void maxNumDelay(size_type n);
       /// Returns the number of the currently pending statements.
-      unsigned numDelayed();
+      size_type numDelayed() const;
       /// Executes all currently pending statements.
-      unsigned flush();
+      /// Returns number of affected rows.
+      size_type flush();
 
       /// @{
       /// Get the actual implementation object

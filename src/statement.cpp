@@ -73,7 +73,12 @@ namespace tntdb
       _stmt->maxNumDelay(n);
   }
 
-  unsigned Statement::flush()
+  Statement::size_type Statement::numDelayed() const
+  {
+      return _stmt->numDelayed();
+  }
+
+  Statement::size_type Statement::flush()
   {
       return _stmt->flush();
   }
@@ -87,12 +92,12 @@ namespace tntdb
   {
   }
 
-  unsigned IStatement::numDelayed()
+  unsigned IStatement::numDelayed() const
   {
       return 0;
   }
 
-  unsigned IStatement::flush()
+  Statement::size_type IStatement::flush()
   {
       return 0;
   }
