@@ -122,29 +122,29 @@ namespace tntdb
 
       sword ret;
 
-      log_debug("create oracle environment");
+      log_finer("create oracle environment");
       ret = OCIEnvCreate(&envhp, OCI_OBJECT|OCI_THREADED|OCI_NO_MUTEX, 0, 0, 0, 0, 0, 0);
       if (ret != OCI_SUCCESS)
         throw Error("cannot create environment handle");
-      log_debug("environment handle => " << envhp);
+      log_finer("environment handle => " << envhp);
 
-      log_debug("allocate error handle");
+      log_finer("allocate error handle");
       ret = OCIHandleAlloc(envhp, (void**)&errhp, OCI_HTYPE_ERROR, 0, 0);
       if (ret != OCI_SUCCESS)
         throw Error("cannot create error handle");
-      log_debug("error handle => " << errhp);
+      log_finer("error handle => " << errhp);
 
-      log_debug("allocate server handle");
+      log_finer("allocate server handle");
       ret = OCIHandleAlloc(envhp, (void**)&srvhp, OCI_HTYPE_SERVER, 0, 0);
       checkError(ret, "OCIHandleAlloc(OCI_HTYPE_SERVER)");
-      log_debug("server handle => " << srvhp);
+      log_finer("server handle => " << srvhp);
 
-      log_debug("allocate service handle");
+      log_finer("allocate service handle");
       ret = OCIHandleAlloc(envhp, (void**)&svchp, OCI_HTYPE_SVCCTX, 0, 0);
       checkError(ret, "OCIHandleAlloc(OCI_HTYPE_SVCCTX)");
-      log_debug("service handle => " << svchp);
+      log_finer("service handle => " << svchp);
 
-      log_debug("attach to server");
+      log_finer("attach to server");
       ret = OCIServerAttach(srvhp, errhp, reinterpret_cast<const text*>(dblink.data()), dblink.size(), 0);
       checkError(ret, "OCIServerAttach");
 
@@ -152,12 +152,12 @@ namespace tntdb
       ret = OCIAttrSet(svchp, OCI_HTYPE_SVCCTX, srvhp, 0, OCI_ATTR_SERVER, errhp);
       checkError(ret, "OCIAttrSet(OCI_ATTR_SERVER)");
 
-      log_debug("allocate session handle");
+      log_finer("allocate session handle");
       ret = OCIHandleAlloc((dvoid*)envhp, (dvoid**)&usrhp, OCI_HTYPE_SESSION, 0, (dvoid**)0);
       checkError(ret, "OCIHandleAlloc(OCI_HTYPE_SESSION)");
 
       /* set username attribute in user session handle */
-      log_debug("set username attribute in session handle");
+      log_finer("set username attribute in session handle");
       ret = OCIAttrSet(usrhp, OCI_HTYPE_SESSION,
         reinterpret_cast<void*>(const_cast<char*>(user.data())),
         user.size(), OCI_ATTR_USERNAME, errhp);
@@ -170,7 +170,7 @@ namespace tntdb
       checkError(ret, "OCIAttrSet(OCI_ATTR_PASSWORD)");
 
       /* start session */
-      log_debug("start session");
+      log_finer("start session");
       ret = OCISessionBegin(svchp, errhp, usrhp, OCI_CRED_RDBMS, OCI_DEFAULT);
       checkError(ret, "OCISessionBegin");
 
@@ -228,7 +228,7 @@ namespace tntdb
 
         try
         {
-          log_debug("OCISessionEnd");
+          log_finer("OCISessionEnd");
           ret = OCISessionEnd(svchp, errhp, usrhp, OCI_DEFAULT);
           checkError(ret, "OCISessionEnd");
         }
@@ -239,7 +239,7 @@ namespace tntdb
 
         try
         {
-          log_debug("OCIServerDetach");
+          log_finer("OCIServerDetach");
           ret = OCIServerDetach(srvhp, errhp, OCI_DEFAULT);
           checkError(ret, "OCIServerDetach");
         }
@@ -248,10 +248,10 @@ namespace tntdb
           log_error(e.what());
         }
 
-        log_debug("OCIHandleFree(" << envhp << ')');
+        log_finer("OCIHandleFree(" << envhp << ')');
         ret = OCIHandleFree(envhp, OCI_HTYPE_ENV);
         if (ret == OCI_SUCCESS)
-          log_debug("handle released");
+          log_finer("handle released");
         else
           log_error("OCIHandleFree failed");
       }

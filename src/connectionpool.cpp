@@ -51,7 +51,7 @@ namespace tntdb
   {
     log_debug("ConnectionPool::connect()");
 
-    log_debug("current pool-size " << getCurrentSize());
+    log_debug("current pool size " << getCurrentSize() << " max " << getMaximumSize());
 
     unsigned max = getCurrentSize() * 2;
 
@@ -105,7 +105,7 @@ namespace tntdb
         log_debug("pool for url \"" << url << "\" found");
     }
 
-    log_debug("current pool-size " << it->second->getCurrentSize());
+    log_debug("current pool size " << it->second->getCurrentSize());
     return it->second->connect();
   }
 

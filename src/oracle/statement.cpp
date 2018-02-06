@@ -90,6 +90,8 @@ namespace tntdb
 
     void Statement::setNull(const std::string& col)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setNull(\"" << col << "\")");
+
       Bind &b = getBind(col);
       b.setNull();
 
@@ -113,6 +115,7 @@ namespace tntdb
 
     void Statement::setBool(const std::string& col, bool data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setBool(\"" << col << "\", " << data << ')');
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(bool));
 
@@ -138,6 +141,8 @@ namespace tntdb
 
     void Statement::setShort(const std::string& col, short data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setShort(\"" << col << "\", " << data << ')');
+
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(int));
 
@@ -163,6 +168,8 @@ namespace tntdb
 
     void Statement::setInt(const std::string& col, int data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setInt(\"" << col << "\", " << data << ')');
+
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(int));
 
@@ -188,6 +195,8 @@ namespace tntdb
 
     void Statement::setLong(const std::string& col, long data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setLong(\"" << col << "\", " << data << ')');
+
       Bind &b = getBind(col);
       b.number.setLong(data, conn->getErrorHandle());
 
@@ -212,6 +221,8 @@ namespace tntdb
 
     void Statement::setUnsignedShort(const std::string& col, unsigned short data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setUnsignedShort(\"" << col << "\", " << data << ')');
+
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(unsigned short));
 
@@ -237,6 +248,8 @@ namespace tntdb
 
     void Statement::setUnsigned(const std::string& col, unsigned data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setUnsigned(\"" << col << "\", " << data << ')');
+
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(unsigned));
 
@@ -262,6 +275,7 @@ namespace tntdb
 
     void Statement::setUnsignedLong(const std::string& col, unsigned long data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setUnsignedLong(\"" << col << "\", " << data << ')');
 
       Bind &b = getBind(col);
       b.number.setUnsignedLong(data, conn->getErrorHandle());
@@ -287,16 +301,20 @@ namespace tntdb
 
     void Statement::setInt32(const std::string& col, int32_t data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setInt32(\"" << col << "\", " << data << ')');
       return setInt(col, data);
     }
 
     void Statement::setUnsigned32(const std::string& col, uint32_t data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setUnsigned32(\"" << col << "\", " << data << ')');
       return setUnsigned(col, data);
     }
 
     void Statement::setInt64(const std::string& col, int64_t data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setInt64(\"" << col << "\", " << data << ')');
+
       Bind &b = getBind(col);
       b.number.setInt64(data, conn->getErrorHandle());
 
@@ -322,6 +340,8 @@ namespace tntdb
 
     void Statement::setUnsigned64(const std::string& col, uint64_t data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setUnsigned64(\"" << col << "\", " << data << ')');
+
       Bind &b = getBind(col);
       b.number.setUnsigned64(data, conn->getErrorHandle());
 
@@ -346,6 +366,8 @@ namespace tntdb
 
     void Statement::setDecimal(const std::string& col, const Decimal& decimal)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setDecimal(\"" << col << "\", " << decimal << ')');
+
       Bind &b = getBind(col);
       b.number.setDecimal(decimal, conn->getErrorHandle());
 
@@ -370,6 +392,8 @@ namespace tntdb
 
     void Statement::setFloat(const std::string& col, float data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setFloat(\"" << col << "\", " << data << ')');
+
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(float));
 
@@ -395,6 +419,8 @@ namespace tntdb
 
     void Statement::setDouble(const std::string& col, double data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setDouble(\"" << col << "\", " << data << ')');
+
       Bind &b = getBind(col);
       b.setData(reinterpret_cast<char*>(&data), sizeof(double));
 
@@ -420,6 +446,8 @@ namespace tntdb
 
     void Statement::setChar(const std::string& col, char data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setChar(\"" << col << "\", '" << data << "')");
+
       Bind &b = getBind(col);
       b.setData(&data, 1);
 
@@ -445,6 +473,8 @@ namespace tntdb
 
     void Statement::setString(const std::string& col, const std::string& data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setString(\"" << col << "\", \"" << data << "\")");
+
       Bind &b = getBind(col);
       b.setData(data);
 
@@ -470,6 +500,8 @@ namespace tntdb
 
     void Statement::setBlob(const std::string& col, const tntdb::Blob& data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setBlob(\"" << col << "\", data(" << data.size() << "))");
+
       Bind &b = getBind(col);
       b.setData(data.data(), data.size());
 
@@ -495,6 +527,8 @@ namespace tntdb
 
     void Statement::setDate(const std::string& col, const Date& data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setDate(\"" << col << "\", \"" << data.getIso() << "\")");
+
       Bind &b = getBind(col);
       b.datetime.assign(conn, data);
 
@@ -519,6 +553,8 @@ namespace tntdb
 
     void Statement::setTime(const std::string& col, const Time& data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setTime(\"" << col << "\", \"" << data.getIso() << "\")");
+
       Bind &b = getBind(col);
       b.datetime.assign(conn, data);
 
@@ -543,6 +579,8 @@ namespace tntdb
 
     void Statement::setDatetime(const std::string& col, const tntdb::Datetime& data)
     {
+      log_debug("OCIStmt(" << getHandle() << ").setDatetime(\"" << col << "\", \"" << data.getIso() << "\")");
+
       Bind &b = getBind(col);
       b.datetime.assign(conn, data);
 
