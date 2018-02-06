@@ -53,7 +53,6 @@
 
 namespace tntdb
 {
-  class Connection;
   class Result;
   class Row;
   class Value;
@@ -290,7 +289,7 @@ namespace tntdb
       /// Returns the number of the currently pending statements.
       unsigned numDelayed();
       /// Executes all currently pending statements.
-      void flush();
+      unsigned flush();
 
       /// @{
       /// Get the actual implementation object

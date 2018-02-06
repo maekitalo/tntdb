@@ -68,6 +68,16 @@ namespace tntdb
     return const_iterator(_stmt->createCursor(fetchsize));
   }
 
+  void Statement::maxNumDelay(size_type n)
+  {
+      _stmt->maxNumDelay(n);
+  }
+
+  unsigned Statement::flush()
+  {
+      return _stmt->flush();
+  }
+
   void IStatement::setUString(const std::string& col, const cxxtools::String& data)
   {
     setString(col, cxxtools::Utf8Codec::encode(data));
@@ -82,8 +92,9 @@ namespace tntdb
       return 0;
   }
 
-  void IStatement::flush()
+  unsigned IStatement::flush()
   {
+      return 0;
   }
 
 }

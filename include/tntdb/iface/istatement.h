@@ -84,9 +84,8 @@ namespace tntdb
 
       virtual void maxNumDelay(unsigned n);
       virtual unsigned numDelayed();
-      virtual void flush();
+      virtual unsigned flush();
   };
 }
 
 #endif // TNTDB_IFACE_ISTATEMENT_H
-
