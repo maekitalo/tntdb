@@ -43,7 +43,7 @@ namespace tntdb
   {
     class Blob
     {
-        cxxtools::SmartPtr<Connection> conn;
+        Connection* conn;
         OCILobLocator* lob;
         bool release;
 
