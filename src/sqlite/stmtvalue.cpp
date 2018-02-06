@@ -70,7 +70,10 @@ namespace tntdb
 
     bool StmtValue::getBool() const
     {
-      return getInt() != 0;
+      char ch = getChar();
+      return ch == 't' || ch == 'T'
+          || ch == 'y' || ch == 'Y'
+          || ch == '1';
     }
 
     short StmtValue::getShort() const
