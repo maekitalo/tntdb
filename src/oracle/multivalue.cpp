@@ -219,7 +219,7 @@ namespace tntdb
           _data = new char[_n * sizeof(unsigned long)];
           ret = OCIDefineByPos(stmt->getHandle(), &_defp,
             stmt->getErrorHandle(), pos + 1, _data,
-            sizeof(sizeof(unsigned long)), SQLT_UIN, _nullind, _len, 0, OCI_DEFAULT);
+            sizeof(unsigned long), SQLT_UIN, _nullind, _len, 0, OCI_DEFAULT);
           break;
 
         case SQLT_FLT:
