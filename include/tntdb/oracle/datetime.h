@@ -42,7 +42,7 @@ namespace tntdb
   {
     class Datetime
     {
-        cxxtools::SmartPtr<Connection> conn;
+        Connection* conn;
         OCIDateTime* datetime;
         bool release;
 

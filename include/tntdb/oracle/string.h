@@ -39,7 +39,7 @@ namespace tntdb
     {
         class String
         {
-            cxxtools::SmartPtr<Connection> conn;
+            Connection* conn;
             OCIString* handle;
 
         public:
