@@ -38,6 +38,8 @@
 #include <tntdb/error.h>
 #include <cxxtools/log.h>
 
+#include <limits>
+
 log_define("tntdb.oracle.statement")
 
 namespace tntdb
@@ -485,7 +487,7 @@ namespace tntdb
         log_debug("OCIBindByName, setString(\"" << col << "\", \"" << data << "\", ..SQLT_VST)");
         sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
           reinterpret_cast<const text*>(col.data()), col.size(),
-          &b.string.getHandle(), sizeof(OCIString*),
+          &b.string.getHandle(), std::numeric_limits<sb4>::max(),
           SQLT_VST, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
         checkError(ret, "OCIBindByName");
