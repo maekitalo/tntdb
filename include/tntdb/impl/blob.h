@@ -68,7 +68,7 @@ class BlobImpl : public IBlob
 
     protected:
         // ctor, which constructs a instance, with a reference-counter of 1
-        BlobImpl(int)
+        explicit BlobImpl(int)
         { addRef(); }
 };
 

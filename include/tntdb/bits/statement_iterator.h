@@ -48,7 +48,7 @@ namespace tntdb
       cxxtools::SmartPtr<ICursor> cursor;
 
     public:
-      const_iterator(ICursor* cursor_ = 0);
+      explicit const_iterator(ICursor* cursor_ = 0);
 
       /**
        * Returns true, when the cursor points to the same iteration as the
