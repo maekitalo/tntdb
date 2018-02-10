@@ -439,7 +439,7 @@ namespace tntdb
 
     bool getBool(const MYSQL_BIND& bind)
     {
-      char ch == getChar(bind);
+      char ch = getChar(bind);
       return ch == 't' || ch == 'T'
           || ch == 'y' || ch == 'Y'
           || ch == '1';
