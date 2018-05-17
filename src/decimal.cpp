@@ -324,6 +324,10 @@ namespace tntdb
       else
         _eoff = _value->_mantissa.size();
     }
+    else if (_state == state_end && _value->_mantissa.empty())
+    {
+      return;
+    }
 
     if (_eneg)
       _value->_exponent = -_value->_exponent;
