@@ -32,6 +32,7 @@
 #include <string>
 #include <cxxtools/smartptr.h>
 #include <tntdb/iface/istatement.h>
+#include <tntdb/serialization.h>
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/datetime.h>
@@ -214,6 +215,15 @@ namespace tntdb
       template <typename Iterator>
       Statement& set(const std::string& col, Iterator it1, Iterator it2);
 
+      template <typename Object>
+      Statement& set(const Object& obj)
+      {
+        cxxtools::SerializationInfo si;
+        si <<= obj;
+        si >>= *this;
+        return *this;
+      }
+
       /** Set the host variable with the given name to the passed value or null
 
           The method sets the host variable to the given value if the 2nd
@@ -237,6 +247,10 @@ namespace tntdb
           INSERT, UPDATE or DELETE statements.
        */
       size_type execute();
+
+      template <typename Object>
+      size_type execute(const Object& obj)
+        { return set(obj).execute(); }
 
       /** Execute the query and return the result
 

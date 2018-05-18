@@ -28,7 +28,6 @@
 
 #include <tntdb/connect.h>
 #include <tntdb/statement.h>
-#include <tntdb/serialization.h>
 
 #include <cxxtools/serializationinfo.h>
 #include <cxxtools/log.h>
@@ -79,10 +78,8 @@ int main(int argc, char* argv[])
         // operator for MyObject to set the variables in statement with the members
         // of MyObject. The variable names in the statement must match the members
         // in the serialization operator.
-        ins <<= obj;
-
-        // execute the insert statement.
-        ins.execute();
+        ins.set(obj)
+           .execute();
 
     }
     catch (const std::exception& e)
