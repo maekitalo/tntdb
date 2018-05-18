@@ -14,9 +14,11 @@ tntdb_test_SOURCES = \
 	colname-test.cpp \
 	decimal-test.cpp \
 	sqlbuilder-test.cpp \
+	statement-test.cpp \
 	test-main.cpp \
 	timespan-test.cpp \
-	types-test.cpp
+	types-test.cpp \
+	value-test.cpp
 
 AM_LDFLAGS = -lcxxtools-unit
 LDADD = $(top_builddir)/src/libtntdb.la

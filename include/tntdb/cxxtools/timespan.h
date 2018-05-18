@@ -46,10 +46,34 @@ namespace tntdb
       stmt.set("ts", cxxtools::Milliseconds(500));
     @endcode
    */
-  template <int64_t Resolution>
-  void operator<< (Hostvar& hostvar, const cxxtools::WeakTimespan<Resolution>& ts)
+  inline void operator<< (Hostvar& hostvar, const cxxtools::Microseconds& ts)
   {
-    hostvar.set(double(ts));
+    hostvar.set(ts.totalUSecs());
+  }
+
+  inline void operator<< (Hostvar& hostvar, const cxxtools::Milliseconds& ts)
+  {
+    hostvar.set(Decimal(ts.totalUSecs(), -3));
+  }
+
+  inline void operator<< (Hostvar& hostvar, const cxxtools::Seconds& ts)
+  {
+    hostvar.set(Decimal(ts.totalUSecs(), -6));
+  }
+
+  inline void operator<< (Hostvar& hostvar, const cxxtools::Minutes& ts)
+  {
+    hostvar.set(Decimal(ts.totalUSecs() / 60, -6));
+  }
+
+  inline void operator<< (Hostvar& hostvar, const cxxtools::Hours& ts)
+  {
+    hostvar.set(Decimal(ts.totalUSecs() / 60 / 60, -6));
+  }
+
+  inline void operator<< (Hostvar& hostvar, const cxxtools::Days& ts)
+  {
+    hostvar.set(Decimal(ts.totalUSecs() / 60 / 60 / 24, -6));
   }
 
   /**
@@ -72,14 +96,62 @@ namespace tntdb
     @endcode
 
    */
-  template <int64_t Resolution>
-  bool operator>> (const Value& value, cxxtools::WeakTimespan<Resolution>& out)
+  inline bool operator>> (const Value& value, cxxtools::Microseconds& out)
   {
-    double ts;
+    int64_t micros;
+    if (!value.get(micros))
+      return false;
+    out = cxxtools::Timespan(micros);
+    return true;
+  }
+
+  inline bool operator>> (const Value& value, cxxtools::Milliseconds& out)
+  {
+    Decimal ts;
     if (!value.get(ts))
       return false;
+    int64_t micros = ts.getInteger<int64_t>(3);
+    out = cxxtools::Timespan(micros);
+    return true;
+  }
 
-    out = cxxtools::WeakTimespan<Resolution>(ts);
+  inline bool operator>> (const Value& value, cxxtools::Seconds& out)
+  {
+    Decimal ts;
+    if (!value.get(ts))
+      return false;
+    int64_t micros = ts.getInteger<int64_t>(6);
+    out = cxxtools::Timespan(micros);
+    return true;
+  }
+
+  inline bool operator>> (const Value& value, cxxtools::Minutes& out)
+  {
+    Decimal ts;
+    if (!value.get(ts))
+      return false;
+    int64_t v = ts.getInteger<int64_t>(9);
+    out = cxxtools::Timespan(v*60/1000);
+    return true;
+  }
+
+  inline bool operator>> (const Value& value, cxxtools::Hours& out)
+  {
+    Decimal ts;
+    if (!value.get(ts))
+      return false;
+    int64_t v = ts.getInteger<int64_t>(9);
+    out = cxxtools::Timespan(v*60*60/1000);
+    return true;
+  }
+
+  inline bool operator>> (const Value& value, cxxtools::Days& out)
+  {
+    Decimal ts;
+    if (!value.get(ts))
+      return false;
+    int64_t v = ts.getInteger<int64_t>(9);
+    out = cxxtools::Timespan(v*60*60*24/1000);
     return true;
   }
 

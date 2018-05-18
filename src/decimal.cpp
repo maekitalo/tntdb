@@ -350,25 +350,28 @@ namespace tntdb
   {
   }
 
-  Decimal::LongType Decimal::_getInteger(LongType min, LongType max) const
+  Decimal::LongType Decimal::_getInteger(LongType min, LongType max, short exponent) const
   {
     log_debug("getInteger; min=" << min << " max=" << max << " value=" << getDouble());
 
     if (!negative())
-      return static_cast<LongType>(_getUnsigned(static_cast<UnsignedLongType>(max)));
+      return static_cast<LongType>(_getUnsigned(static_cast<UnsignedLongType>(max), exponent));
 
     if (isPositiveInfinity() || isNegativeInfinity() || isNaN())
       throwOverflowError(*this);
 
-    if (_exponent < 0)
+    // TODO check for overflow:
+    short exp = _exponent + exponent;
+
+    if (exp < 0)
       return 0;
 
-    if (_exponent == 0)
+    if (exp == 0)
       return !_mantissa.empty() && _mantissa[0] >= '5' ? -1 : 0;
 
     LongType ret = 0;
     std::string::size_type n;
-    for (n = 0; _exponent - n > 0; ++n)
+    for (n = 0; exp - n > 0; ++n)
     {
       LongType d = n < _mantissa.size() ? (_mantissa[n] - '0') : 0;
 
@@ -388,22 +391,24 @@ namespace tntdb
     return ret;
   }
 
-  Decimal::UnsignedLongType Decimal::_getUnsigned(UnsignedLongType max) const
+  Decimal::UnsignedLongType Decimal::_getUnsigned(UnsignedLongType max, short exponent) const
   {
     log_debug("getUnsigned; max=" << max << " value=" << getDouble());
 
     if (negative() || isPositiveInfinity() || isNegativeInfinity() || isNaN())
       throwOverflowError(*this);
 
-    if (_exponent < 0)
+    short exp = _exponent + exponent;
+
+    if (exp < 0)
       return 0;
 
-    if (_exponent == 0)
+    if (exp == 0)
       return !_mantissa.empty() && _mantissa[0] >= '5' ? 1 : 0;
 
     UnsignedLongType ret = 0;
     std::string::size_type n;
-    for (n = 0; _exponent - n > 0; ++n)
+    for (n = 0; exp - n > 0; ++n)
     {
       UnsignedLongType d = n < _mantissa.size() ? (_mantissa[n] - '0') : 0;
 

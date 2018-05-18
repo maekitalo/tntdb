@@ -52,6 +52,7 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
       registerMethod("testFromString", *this, &TntdbDecimalTest::testFromString);
       registerMethod("testToString", *this, &TntdbDecimalTest::testToString);
       registerMethod("testInt", *this, &TntdbDecimalTest::testInt);
+      registerMethod("testIntExp", *this, &TntdbDecimalTest::testIntExp);
       registerMethod("testCompare", *this, &TntdbDecimalTest::testCompare);
     }
 
@@ -190,6 +191,10 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
       l = d.getInteger<long>();
       CXXTOOLS_UNIT_ASSERT_EQUALS(l, 100l);
 
+      d = tntdb::Decimal(45, 3);
+      l = d.getInteger<long>();
+      CXXTOOLS_UNIT_ASSERT_EQUALS(l, 45000l);
+
       d = tntdb::Decimal(std::numeric_limits<long>::max(), 0);
       l = d.getInteger<long>();
       CXXTOOLS_UNIT_ASSERT_EQUALS(l, std::numeric_limits<long>::max());
@@ -201,6 +206,22 @@ class TntdbDecimalTest : public cxxtools::unit::TestSuite
       d = tntdb::Decimal(-100, 0);
       l = d.getInteger<long>();
       CXXTOOLS_UNIT_ASSERT_EQUALS(l, -100l);
+
+    }
+
+    void testIntExp()
+    {
+      tntdb::Decimal d("453000");
+      long l = d.getInteger<long>(-3);
+      CXXTOOLS_UNIT_ASSERT_EQUALS(l, 453);
+
+      d = tntdb::Decimal("45.6");
+      l = d.getInteger<long>(1);
+      CXXTOOLS_UNIT_ASSERT_EQUALS(l, 456);
+
+      d = tntdb::Decimal("-78.334");
+      l = d.getInteger<long>(4);
+      CXXTOOLS_UNIT_ASSERT_EQUALS(l, -783340);
 
     }
 

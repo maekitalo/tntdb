@@ -66,29 +66,30 @@ namespace tntdb
 
       friend class Parser;
 
-      LongType _getInteger(LongType min, LongType max) const;
-      UnsignedLongType _getUnsigned(UnsignedLongType max) const;
+      LongType _getInteger(LongType min, LongType max, short exponent) const;
+      UnsignedLongType _getUnsigned(UnsignedLongType max, short exponent) const;
 
-      template <typename IntType> IntType _getInteger() const
+      template <typename IntType> IntType _getInteger(short exponent) const
       {
         return _getInteger(std::numeric_limits<IntType>::min(),
-                           std::numeric_limits<IntType>::max());
+                           std::numeric_limits<IntType>::max(),
+                           exponent);
       }
 
-      template <typename UnsignedType> UnsignedType _getUnsigned() const
-        { return _getUnsigned(std::numeric_limits<UnsignedLongType>::max()); }
+      template <typename UnsignedType> UnsignedType _getUnsigned(short exponent) const
+        { return _getUnsigned(std::numeric_limits<UnsignedLongType>::max(), exponent); }
 
-      void _getInteger(short& ret) const              { ret = _getInteger<short>(); }
-      void _getInteger(int& ret) const                { ret = _getInteger<int>(); }
-      void _getInteger(long& ret) const               { ret = _getInteger<long>(); }
+      void _getInteger(short& ret, short exponent) const              { ret = _getInteger<short>(exponent); }
+      void _getInteger(int& ret, short exponent) const                { ret = _getInteger<int>(exponent); }
+      void _getInteger(long& ret, short exponent) const               { ret = _getInteger<long>(exponent); }
 #ifdef HAVE_LONG_LONG
-      void _getInteger(long long& ret) const          { ret = _getInteger<long long>(); }
+      void _getInteger(long long& ret, short exponent) const          { ret = _getInteger<long long>(exponent); }
 #endif
-      void _getInteger(unsigned short& ret) const     { ret = _getUnsigned<unsigned short>(); }
-      void _getInteger(unsigned int& ret) const       { ret = _getUnsigned<unsigned int>(); }
-      void _getInteger(unsigned long& ret) const      { ret = _getUnsigned<unsigned long>(); }
+      void _getInteger(unsigned short& ret, short exponent) const     { ret = _getUnsigned<unsigned short>(exponent); }
+      void _getInteger(unsigned int& ret, short exponent) const       { ret = _getUnsigned<unsigned int>(exponent); }
+      void _getInteger(unsigned long& ret, short exponent) const      { ret = _getUnsigned<unsigned long>(exponent); }
 #ifdef HAVE_UNSIGNED_LONG_LONG
-      void _getInteger(unsigned long long& ret) const { ret = _getUnsigned<unsigned long long>(); }
+      void _getInteger(unsigned long long& ret, short exponent) const { ret = _getUnsigned<unsigned long long>(exponent); }
 #endif
 
       void _setInteger(LongType l, short exponent);
@@ -104,7 +105,7 @@ namespace tntdb
 
       explicit Decimal(const std::string& value);
 
-      explicit Decimal(long mantissa, short exponent)
+      Decimal(long mantissa, short exponent)
         { setInteger(mantissa, exponent); }
 
       static Decimal infinity()
@@ -151,10 +152,10 @@ namespace tntdb
       void setInteger(unsigned long long l, short exponent = 0) { _setUnsigned(l, exponent); }
 
       template <typename IntType>
-      IntType getInteger() const
+      IntType getInteger(short exponent = 0) const
       {
         IntType ret;
-        _getInteger(ret);
+        _getInteger(ret, exponent);
         return ret;
       }
 
