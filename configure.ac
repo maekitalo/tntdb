@@ -218,6 +218,23 @@ AS_IF([test "$with_sqlite" = yes],
 AM_CONDITIONAL(MAKE_SQLITE, test "$with_sqlite" = yes)
 
 #
+# ODBC
+#
+AC_ARG_WITH(
+  [odbc],
+  AS_HELP_STRING([--with-odbc],
+                 [build odbc driver (default: yes)]),
+  [with_odbc=$withval],
+  [with_odbc=yes])
+
+AS_IF([test "$with_odbc" = yes],
+[
+  AC_CHECK_HEADER([sql.h], , AC_MSG_ERROR([odbc headers not found]))
+])
+
+AM_CONDITIONAL(MAKE_ODBC, test "$with_odbc" = yes)
+
+#
 # Oracle
 #
 AC_ARG_WITH(
@@ -307,6 +324,7 @@ AC_CONFIG_FILES([
   src/postgresql/Makefile
   src/replicate/Makefile
   src/sqlite/Makefile
+  src/odbc/Makefile
   src/oracle/Makefile
   test/Makefile
   ])
