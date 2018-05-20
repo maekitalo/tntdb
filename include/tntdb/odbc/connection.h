@@ -35,6 +35,9 @@ namespace tntdb
             bool ping();
             long lastInsertId(const std::string& name);
             void lockTable(const std::string& tablename, bool exclusive);
+
+            SQLHENV envHandle() const    { return hEnv; }
+            SQLHDBC handle() const       { return hDbc; }
         };
 
     }

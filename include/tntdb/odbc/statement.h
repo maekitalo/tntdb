@@ -7,16 +7,23 @@
 #define TNTDB_ODBC_STATEMENT_H
 
 #include <tntdb/iface/istatement.h>
+#include <tntdb/odbc/handle.h>
+#include <sqltypes.h>
 
 namespace tntdb
 {
     namespace odbc
     {
+        class Connection;
+
         class Statement : public IStatement
         {
-            SQLHSTMT hStmt;
+            Connection* _conn;
+            Handle _hStmt;
 
         public:
+            Statement(Connection* conn, const std::string& query);
+            ~Statement();
             void clear();
             void setNull(const std::string& col);
             void setBool(const std::string& col, bool data);

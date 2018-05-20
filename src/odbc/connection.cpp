@@ -4,6 +4,9 @@
  */
 
 #include <tntdb/odbc/connection.h>
+#include <tntdb/odbc/statement.h>
+#include <tntdb/odbc/handle.h>
+
 #include <tntdb/statement.h>
 #include <tntdb/result.h>
 #include <tntdb/value.h>
@@ -82,31 +85,38 @@ void Connection::rollbackTransaction()
 Connection::size_type Connection::execute(const std::string& query)
 {
     // TODO
+    long ret;
+
+    Handle hStmt(SQL_HANDLE_STMT, hDbc);
+
+    ret = SQLExecDirect(hStmt, (SQLCHAR*)query.c_str(), SQL_NTS);
+	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
+        throw tntdb::Error("Unable to execute sql query <" + query + '>');
+
+    //SQLGetDiagRec(SQL_HANDLE_DBC, hDbc, 1, V_OD_stat, &V_OD_err,
+                       //V_OD_msg,100,&V_OD_mlen);
+
     throw Error("execute not implemented yet");
 }
 
 tntdb::Result Connection::select(const std::string& query)
 {
-    // TODO
-    throw Error("select not implemented yet");
+    return prepare(query).select();
 }
 
 tntdb::Row Connection::selectRow(const std::string& query)
 {
-    // TODO
-    throw Error("selectRow not implemented yet");
+    return prepare(query).selectRow();
 }
 
 tntdb::Value Connection::selectValue(const std::string& query)
 {
-    // TODO
-    throw Error("selectValue not implemented yet");
+    return prepare(query).selectValue();
 }
 
 tntdb::Statement Connection::prepare(const std::string& query)
 {
-    // TODO
-    throw Error("prepare not implemented yet");
+    return tntdb::Statement(new Statement(this, query));
 }
 
 tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
@@ -117,11 +127,13 @@ tntdb::Statement Connection::prepareWithLimit(const std::string& query, const st
 
 bool Connection::ping()
 {
+    // TODO
     return true;
 }
 
 long Connection::lastInsertId(const std::string& name)
 {
+    // TODO
     return 0l;
 }
 
@@ -129,9 +141,5 @@ void Connection::lockTable(const std::string& tablename, bool exclusive)
 {
 }
 
-bool ping();
-long lastInsertId(const std::string& name);
-void lockTable(const std::string& tablename, bool exclusive);
 }
-
 }
