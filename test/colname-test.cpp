@@ -63,7 +63,10 @@ class TntdbColnameTest : public cxxtools::unit::TestSuite
         conn = tntdb::connect(dburl);
         del = conn.prepare("delete from tntdbtest");
       }
+    }
 
+    void tearDown()
+    {
       del.execute();
     }
 
