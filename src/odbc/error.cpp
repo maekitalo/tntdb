@@ -26,42 +26,67 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <tntdb/odbc/handle.h>
-
 #include <tntdb/odbc/error.h>
 
 #include <cxxtools/log.h>
 
-#include <sql.h>
+#include <vector>
 
-log_define("tntdb.odbc.handle")
+#include <sql.h>
+#include <sqlext.h>
+#include <sqltypes.h>
+
+log_define("tntdb.odbc.error")
 
 namespace tntdb
 {
 namespace odbc
 {
-Handle::Handle(SQLSMALLINT handleType, SQLSMALLINT inputHandleType, SQLHANDLE inputHandle)
-    : _type(handleType),
-      _handle(0)
-{
-    long retval;
 
-    log_debug("allocate handle of type " << _type);
-    retval = SQLAllocHandle(_type, inputHandle, &_handle);
-	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
-        throw Error("Unable to allocate a handle", retval, inputHandleType, inputHandle);
-    log_debug("handle: " << static_cast<void*>(_handle));
+std::string Error::getErrorMessage(
+    Error& error,
+    SQLSMALLINT handleType, SQLHANDLE handle)
+{
+    SQLRETURN ret;
+    std::vector<SQLCHAR> messageText(20);
+    SQLSMALLINT textLength = 0;
+
+    log_debug("SQLGetDiagRec");
+
+    ret = SQLGetDiagRec(handleType, handle, 1,
+        error._SQLState, &error._nativeError,
+        &messageText[0], messageText.size(), &textLength);
+
+    if (textLength >= static_cast<SQLSMALLINT>(messageText.size()))
+    {
+        log_debug("text length " << textLength << "; SQLGetDiagRec");
+        messageText.resize(textLength + 1);
+
+        ret = SQLGetDiagRec(handleType, handle, 1,
+            error._SQLState, &error._nativeError,
+            &messageText[0], messageText.size(), &textLength);
+    }
+
+    std::string message(messageText.begin(), messageText.begin() + textLength);
+
+    log_debug("diag " << &error._SQLState[0] << " native error: " << error._nativeError
+        << " messageLength: " << textLength << " message: " << message);
+
+    return message;
 }
 
-Handle::~Handle()
+Error::Error(const std::string& message, SQLSMALLINT retval,
+    SQLSMALLINT handleType, SQLHANDLE handle)
+    : tntdb::Error(message + ": " + getErrorMessage(*this, handleType, handle)),
+      _retval(retval)
 {
-    if (_handle)
-    {
-        long retval;
-        log_debug("SQLFreeHandle(" << static_cast<void*>(_handle) << ')');
-        retval = SQLFreeHandle(_type, _handle);
-        log_error_if(retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO, "failed to free handle");
-    }
+}
+
+Error::Error(SQLSMALLINT retval,
+        SQLSMALLINT handleType, SQLHANDLE handle)
+    : tntdb::Error(getErrorMessage(*this, handleType, handle)),
+      _retval(retval)
+{
 }
 
 }

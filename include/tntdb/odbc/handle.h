@@ -45,7 +45,7 @@ class Handle
     void operator=(const Handle&) { }
 
 public:
-    explicit Handle(SQLSMALLINT handleType, SQLHANDLE inputHandle);
+    Handle(SQLSMALLINT handleType, SQLSMALLINT inputHandleType, SQLHANDLE inputHandle);
     ~Handle();
 
     operator SQLHANDLE() const  { return _handle; }

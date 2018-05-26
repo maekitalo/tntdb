@@ -15,8 +15,9 @@ namespace tntdb
     {
         class Connection : public IStmtCacheConnection
         {
-            SQLHENV hEnv;
-            SQLHDBC hDbc;
+            SQLHENV _hEnv;
+            SQLHDBC _hDbc;
+            SQLHSTMT _hStmt;
 
         public:
             explicit Connection(const char* conninfo);
@@ -36,8 +37,8 @@ namespace tntdb
             long lastInsertId(const std::string& name);
             void lockTable(const std::string& tablename, bool exclusive);
 
-            SQLHENV envHandle() const    { return hEnv; }
-            SQLHDBC handle() const       { return hDbc; }
+            SQLHENV envHandle() const    { return _hEnv; }
+            SQLHDBC handle() const       { return _hDbc; }
         };
 
     }

@@ -8,7 +8,10 @@
 
 #include <tntdb/iface/istatement.h>
 #include <tntdb/odbc/handle.h>
+
 #include <sqltypes.h>
+
+#include <map>
 
 namespace tntdb
 {
@@ -16,10 +19,13 @@ namespace tntdb
     {
         class Connection;
 
+        typedef std::multimap<std::string, unsigned> HostvarMapType;
+
         class Statement : public IStatement
         {
             Connection* _conn;
             Handle _hStmt;
+            HostvarMapType _hostvarMap;
 
         public:
             Statement(Connection* conn, const std::string& query);

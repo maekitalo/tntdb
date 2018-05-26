@@ -26,43 +26,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <tntdb/odbc/handle.h>
+#ifndef TNTDB_ODBC_ERROR_H
+#define TNTDB_ODBC_ERROR_H
 
-#include <tntdb/odbc/error.h>
+#include <tntdb/error.h>
 
-#include <cxxtools/log.h>
-
-#include <sql.h>
-
-log_define("tntdb.odbc.handle")
+#include <sqltypes.h>
 
 namespace tntdb
 {
 namespace odbc
 {
-Handle::Handle(SQLSMALLINT handleType, SQLSMALLINT inputHandleType, SQLHANDLE inputHandle)
-    : _type(handleType),
-      _handle(0)
+class Error : public tntdb::Error
 {
-    long retval;
+    SQLRETURN _retval;
+    SQLCHAR _SQLState[6];
+    SQLINTEGER _nativeError;
 
-    log_debug("allocate handle of type " << _type);
-    retval = SQLAllocHandle(_type, inputHandle, &_handle);
-	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
-        throw Error("Unable to allocate a handle", retval, inputHandleType, inputHandle);
-    log_debug("handle: " << static_cast<void*>(_handle));
-}
+    static std::string getErrorMessage(
+        Error& error, SQLSMALLINT handleType, SQLHANDLE handle);
 
-Handle::~Handle()
-{
-    if (_handle)
-    {
-        long retval;
-        log_debug("SQLFreeHandle(" << static_cast<void*>(_handle) << ')');
-        retval = SQLFreeHandle(_type, _handle);
-        log_error_if(retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO, "failed to free handle");
-    }
-}
+public:
+    explicit Error(const std::string& message, SQLSMALLINT retval,
+        SQLSMALLINT handleType, SQLHANDLE handle);
+    explicit Error(SQLSMALLINT retval,
+        SQLSMALLINT handleType, SQLHANDLE handle);
+
+    SQLRETURN retval() const          { return _retval; }
+    SQLINTEGER natvieError() const    { return _nativeError; }
+    const SQLCHAR* sqlState() const   { return &_SQLState[0]; }
+};
 
 }
 }
+#endif

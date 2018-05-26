@@ -1,16 +1,39 @@
 /*
  * Copyright (C) 2018 Tommi Maekitalo
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <tntdb/odbc/connection.h>
 #include <tntdb/odbc/statement.h>
 #include <tntdb/odbc/handle.h>
+#include <tntdb/odbc/error.h>
 
 #include <tntdb/statement.h>
 #include <tntdb/result.h>
 #include <tntdb/value.h>
-#include <tntdb/error.h>
 
 #include <cxxtools/log.h>
 
@@ -26,77 +49,102 @@ namespace odbc
 {
 
 Connection::Connection(const char* conninfo)
+    : _hEnv(0),
+      _hDbc(0),
+      _hStmt(0)
 {
-    long ret;
+    SQLRETURN retval;
 
     log_debug("connect odbc (\"" << conninfo << "\")");
-    ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hEnv);
-	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
-        throw tntdb::Error("Unable to allocate an environment handle");
+    retval = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &_hEnv);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw tntdb::Error("Unable to allocate an odbc environment handle");
  
-	ret = SQLSetEnvAttr(hEnv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, 0);
-	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
-        throw tntdb::Error("Unable to set odbc version");
+	retval = SQLSetEnvAttr(_hEnv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, 0);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("Unable to set odbc version", retval, SQL_HANDLE_ENV, _hEnv);
  
     // Allocate a connection 
-    ret = SQLAllocHandle(SQL_HANDLE_DBC, hEnv, &hDbc); 
-	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
+    retval = SQLAllocHandle(SQL_HANDLE_DBC, _hEnv, &_hDbc); 
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
         throw tntdb::Error("Unable to allocate odbc connection handle");
 
-	ret = SQLConnect(hDbc, (SQLCHAR*) conninfo, SQL_NTS, 0, SQL_NTS, 0, SQL_NTS);
-	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
-        throw tntdb::Error("Unable to connect to database");
+	retval = SQLConnect(_hDbc, (SQLCHAR*) conninfo, SQL_NTS, 0, SQL_NTS, 0, SQL_NTS);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("Unable to connect to database", retval, SQL_HANDLE_ENV, _hEnv);
 
     log_debug("connected succesfully");
 }
 
 Connection::~Connection()
 {
-    long ret;
+    SQLRETURN retval;
 
-    ret = SQLDisconnect(hDbc);
-	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
-        log_error("failed to disconnect from database");
+    retval = SQLDisconnect(_hDbc);
+    log_error_if(retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO,
+        "failed to disconnect from database");
 
-    ret = SQLFreeHandle(SQL_HANDLE_ENV, hDbc);
-	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
-        log_error("failed to free database handle");
+    if (_hStmt)
+    {
+        retval = SQLFreeHandle(SQL_HANDLE_STMT, _hStmt);
+        log_error_if(retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO,
+            "failed to free statement handle");
+    }
 
-    ret = SQLFreeHandle(SQL_HANDLE_DBC, hEnv);
-	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
-        log_error("failed to free environment handle");
+    retval = SQLFreeHandle(SQL_HANDLE_DBC, _hDbc);
+    log_error_if(retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO,
+        "failed to free database handle");
+
+    retval = SQLFreeHandle(SQL_HANDLE_ENV, _hEnv);
+    log_error_if(retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO,
+        "failed to free environment handle");
+
 }
 
 void Connection::beginTransaction()
 {
     // TODO
+    throw std::runtime_error("tntdb::odbc::Connection::beginTransation not implemented yet");
 }
 
 void Connection::commitTransaction()
 {
     // TODO
+    throw std::runtime_error("tntdb::odbc::Connection::commitTransaction not implemented yet");
 }
 
 void Connection::rollbackTransaction()
 {
     // TODO
+    throw std::runtime_error("tntdb::odbc::Connection::rollbackTransaction not implemented yet");
 }
 
 Connection::size_type Connection::execute(const std::string& query)
 {
-    // TODO
-    long ret;
+    SQLRETURN retval;
 
-    Handle hStmt(SQL_HANDLE_STMT, hDbc);
+    //Handle hStmt(SQL_HANDLE_STMT, SQL_HANDLE_DBC, _hDbc);
+    if (!_hStmt)
+    {
+        log_debug("SQLAllocHandle(SQL_HANDLE_STMT)");
+        retval = SQLAllocHandle(SQL_HANDLE_STMT, _hDbc, &_hStmt);
 
-    ret = SQLExecDirect(hStmt, (SQLCHAR*)query.c_str(), SQL_NTS);
-	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
-        throw tntdb::Error("Unable to execute sql query <" + query + '>');
+        if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+            throw Error("Unable to allocate statement handle", retval, SQL_HANDLE_DBC, _hDbc);
+    }
 
-    //SQLGetDiagRec(SQL_HANDLE_DBC, hDbc, 1, V_OD_stat, &V_OD_err,
-                       //V_OD_msg,100,&V_OD_mlen);
+    log_debug("SQLExecDirect <" << query << '>');
+    retval = SQLExecDirect(_hStmt, (SQLCHAR*)query.c_str(), SQL_NTS);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("Unable to execute sql query <" + query + '>', retval, SQL_HANDLE_STMT, _hStmt);
 
-    throw Error("execute not implemented yet");
+    SQLLEN rowCount;
+    retval = SQLRowCount(_hStmt, &rowCount);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("SQLRowCount failed", retval, SQL_HANDLE_STMT, _hStmt);
+
+    log_debug(rowCount << " rows affected");
+    return static_cast<Connection::size_type>(rowCount);
 }
 
 tntdb::Result Connection::select(const std::string& query)
@@ -122,7 +170,7 @@ tntdb::Statement Connection::prepare(const std::string& query)
 tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
 {
     // TODO
-    throw Error("prepareWithLimit not implemented yet");
+    throw std::runtime_error("tntdb::odbc::Connection::prepareWithLimit not implemented yet");
 }
 
 bool Connection::ping()

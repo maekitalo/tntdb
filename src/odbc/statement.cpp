@@ -28,13 +28,17 @@
 
 #include <tntdb/odbc/statement.h>
 #include <tntdb/odbc/connection.h>
+#include <tntdb/odbc/error.h>
 
 #include <tntdb/result.h>
 #include <tntdb/row.h>
 #include <tntdb/value.h>
 #include <tntdb/error.h>
+#include <tntdb/stmtparser.h>
 
 #include <cxxtools/log.h>
+
+#include <vector>
 
 #include <sql.h>
 #include <sqlext.h>
@@ -47,11 +51,54 @@ namespace tntdb
 namespace odbc
 {
 
+namespace
+{
+    class SE : public StmtEvent
+    {
+        HostvarMapType& _hostvarMap;
+        unsigned _idx;
+        static const std::string _hostvarInd;
+
+    public:
+        SE(HostvarMapType& hostvarMap_)
+            : _hostvarMap(hostvarMap_),
+              _idx(0)
+            { }
+        std::string onHostVar(const std::string& name);
+        unsigned getCount() const  { return _idx; }
+    };
+
+    std::string SE::onHostVar(const std::string& name)
+    {
+        log_debug("hostvar :" << name << ", idx=" << _idx);
+        _hostvarMap.insert(HostvarMapType::value_type(name, _idx++));
+        return _hostvarInd;
+    }
+
+    const std::string SE::_hostvarInd = "?";
+}
+
+
 Statement::Statement(Connection* conn, const std::string& query)
     : _conn(conn),
-      _hStmt(SQL_HANDLE_STMT, conn->handle())
+      _hStmt(SQL_HANDLE_STMT, SQL_HANDLE_DBC, conn->handle())
 {
-    // TODO
+    // parse hostvars
+    StmtParser parser;
+    SE se(_hostvarMap);
+    parser.parse(query, se);
+    parser.getSql();
+
+    SQLRETURN retval;
+
+    retval = SQLPrepare(_hStmt,
+        reinterpret_cast<SQLCHAR*>(const_cast<char*>((parser.getSql().data()))),
+        parser.getSql().size());
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("SQLPrepare failed", retval, SQL_HANDLE_STMT, _hStmt);
+
+    log_debug("sql=\"" << parser.getSql() << "\" invars " << se.getCount());
+
 }
 
 Statement::~Statement()
@@ -60,6 +107,9 @@ Statement::~Statement()
 
 void Statement::clear()
 {
+    SQLRETURN retval = SQLFreeStmt(_hStmt, SQL_RESET_PARAMS);
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("SQLFreeStmt(handle, SQL_RESET_PARAMS) failed", retval, SQL_HANDLE_STMT, _hStmt);
 }
 
 void Statement::setNull(const std::string& col)
@@ -148,12 +198,50 @@ void Statement::setDatetime(const std::string& col, const Datetime& data)
 
 Statement::size_type Statement::execute()
 {
-    // TODO
-    return 0;
+    SQLRETURN retval;
+    
+    retval = SQLExecute(_hStmt);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, _hStmt);
+
+    SQLLEN rowCount;
+    retval = SQLRowCount(_hStmt, &rowCount);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("SQLRowCount failed", retval, SQL_HANDLE_STMT, _hStmt);
+
+    return static_cast<Statement::size_type>(rowCount);
 }
 
 tntdb::Result Statement::select()
 {
+    SQLSMALLINT numCols;
+    SQLNumResultCols(_hStmt, &numCols);
+
+    log_debug(numCols << " columns");
+
+    for (SQLSMALLINT c = 0; c < numCols; ++c)
+    {
+        std::vector<SQLCHAR> columnName;
+        SQLSMALLINT nameLength;
+        SQLSMALLINT dataType;
+        SQLULEN columnSize;
+        SQLSMALLINT decimalDigits;
+        SQLSMALLINT nullable;
+
+        SQLDescribeCol(_hStmt, c, &columnName[0], columnName.size(), &nameLength,
+            &dataType, &columnSize, &decimalDigits, &nullable);
+
+        if (nameLength >= static_cast<SQLSMALLINT>(columnName.size()))
+        {
+            columnName.resize(nameLength + 1);
+            SQLDescribeCol(_hStmt, c, &columnName[0], columnName.size(), &nameLength,
+                &dataType, &columnSize, &decimalDigits, &nullable);
+        }
+
+        log_debug("column " << c << " name: \"" << &columnName[0] << "\" dataType: " << dataType
+            << " columnSize: " << columnSize << " decimalDigits: " << decimalDigits
+            << " nullable: " << nullable);
+    }
     // TODO
     return tntdb::Result();
 }
@@ -173,7 +261,7 @@ tntdb::Value Statement::selectValue()
 ICursor* Statement::createCursor(unsigned fetchsize)
 {
     // TODO
-    throw Error("createCursor not implemented yet");
+    throw std::runtime_error("tntdb::odbc::Statement::createCursor not implemented yet");
 }
 
 }
