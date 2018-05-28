@@ -42,10 +42,14 @@ namespace tntdb
       class Connector
       {
           std::string url;
+          std::string username;
+          std::string password;
 
         public:
-          Connector(const std::string& url_)
-            : url(url_)
+          Connector(const std::string& url_, const std::string& username_, const std::string& password_)
+            : url(url_),
+              username(username_),
+              password(password_)
             { }
 
           Connection* operator() ();
@@ -58,8 +62,8 @@ namespace tntdb
       typedef PoolType::Ptr PoolObjectType;
 
     public:
-      explicit ConnectionPool(const std::string& url, unsigned maxcount = 0)
-        : pool(maxcount, Connector(url))
+      explicit ConnectionPool(const std::string& url, const std::string& username, const std::string& password, unsigned maxcount = 0)
+        : pool(maxcount, Connector(url, username, password))
         { }
 
       Connection connect();
@@ -78,8 +82,37 @@ namespace tntdb
       ConnectionPools& operator=(const ConnectionPools&) { return *this; }
 
     public:
+      struct ConnectionParameter
+      {
+        std::string url;
+        std::string username;
+        std::string password;
+
+        ConnectionParameter() { }
+        ConnectionParameter(const std::string& url_, const std::string& username_, const std::string& password_)
+          : url(url_),
+            username(username_),
+            password(password_)
+        { }
+
+        bool operator< (const ConnectionParameter& other) const
+        {
+          int c;
+
+          c = url.compare(other.url);
+          if (c != 0)
+            return c < 0;
+
+          c = username.compare(other.username);
+          if (c != 0)
+            return c < 0;
+
+          return password < other.password;
+        }
+      };
+
       typedef ConnectionPool PoolType;
-      typedef std::map<std::string, PoolType*> PoolsType;
+      typedef std::map<ConnectionParameter, PoolType*> PoolsType;
 
     private:
       PoolsType pools;
@@ -92,7 +125,7 @@ namespace tntdb
         { }
       ~ConnectionPools();
 
-      Connection connect(const std::string& url);
+      Connection connect(const std::string& url, const std::string& username, const std::string& password);
 
       /// Release unused connections; keep the given number of connections
       unsigned drop(unsigned keep = 0);
@@ -100,13 +133,13 @@ namespace tntdb
       /** Release unused connections with the given database url;
           keep the given number of connections
        */
-      unsigned drop(const std::string& url, unsigned keep = 0);
+      unsigned drop(const std::string& url, const std::string& username, const std::string& password, unsigned keep = 0);
 
       unsigned getMaximumSize()
         { return maxcount; }
 
       void setMaximumSize(unsigned m);
-      unsigned getCurrentSize(const std::string& url) const;
+      unsigned getCurrentSize(const std::string& url, const std::string& username, const std::string& password) const;
       unsigned getCurrentSize() const;
   };
 }

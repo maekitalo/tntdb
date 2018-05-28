@@ -40,8 +40,8 @@ namespace tntdb
   //
   Connection* ConnectionPool::Connector::operator() ()
   {
-    log_debug("create new connection for url \"" << url << '"');
-    return new Connection(tntdb::connect(url));
+    log_debug("create new connection for url \"" << url << "\" user \"" << username << '"');
+    return new Connection(tntdb::connect(url, username, password));
   }
 
   ////////////////////////////////////////////////////////////////////////
@@ -86,20 +86,20 @@ namespace tntdb
       delete it->second;
   }
 
-  Connection ConnectionPools::connect(const std::string& url)
+  Connection ConnectionPools::connect(const std::string& url, const std::string& username, const std::string& password)
   {
-    log_debug("ConnectionPools::connect(\"" << url << "\")");
+    log_debug("ConnectionPools::connect(\"" << url << "\", \"" << username << "\", password)");
 
     PoolsType::iterator it;
 
     {
       cxxtools::MutexLock lock(mutex);
-      it = pools.find(url);
+      it = pools.find(ConnectionParameter(url, username, password));
       if (it == pools.end())
       {
-        log_debug("create pool for url \"" << url << "\" with " << maxcount << " connections");
-        PoolType* pool = new PoolType(url, maxcount);
-        it = pools.insert(PoolsType::value_type(url, pool)).first;
+        log_debug("create pool for url \"" << url << "\" user \"" << username << "\" with " << maxcount << " connections");
+        PoolType* pool = new PoolType(url, username, password, maxcount);
+        it = pools.insert(PoolsType::value_type(ConnectionParameter(url, username, password), pool)).first;
       }
       else
         log_debug("pool for url \"" << url << "\" found");
@@ -117,7 +117,7 @@ namespace tntdb
     unsigned dropcount = 0;
     for (PoolsType::iterator it = pools.begin(); it != pools.end(); ++it)
     {
-      log_debug("pool \"" << it->first << "\"; current size " << it->second->getCurrentSize());
+      log_debug("pool url \"" << it->first.url << "\" username \"" << it->first.username << "\"; current size " << it->second->getCurrentSize());
       dropcount += it->second->drop();
       log_debug("connections released " << it->second->getCurrentSize() << " kept");
     }
@@ -125,15 +125,15 @@ namespace tntdb
     return dropcount;
   }
 
-  unsigned ConnectionPools::drop(const std::string& url, unsigned keep)
+  unsigned ConnectionPools::drop(const std::string& url, const std::string& username, const std::string& password, unsigned keep)
   {
-    log_debug("drop(\"" << url << "\", " << keep << ')');
+    log_debug("drop(\"" << url << "\", \"" << username << "\", password, " << keep << ')');
 
     cxxtools::MutexLock lock(mutex);
 
     unsigned dropcount = 0;
 
-    PoolsType::iterator it = pools.find(url);
+    PoolsType::iterator it = pools.find(ConnectionParameter(url, username, password));
     if (it != pools.end())
     {
       log_debug("pool \"" << url << "\" found; current size " << it->second->getCurrentSize());
@@ -142,22 +142,22 @@ namespace tntdb
 
       if (it->second->getCurrentSize() == 0)
       {
-        log_debug("delete connectionpool for \"" << url << "\"");
+        log_debug("delete connectionpool for url \"" << url << "\", username \"" << username << '"');
         delete it->second;
         pools.erase(it);
       }
     }
     else
-      log_debug("pool \"" << url << "\" not found");
+      log_debug("pool for url \"" << url << "\" username \"" << username << "\" not found");
 
     return dropcount;
   }
 
-  unsigned ConnectionPools::getCurrentSize(const std::string& url) const
+  unsigned ConnectionPools::getCurrentSize(const std::string& url, const std::string& username, const std::string& password) const
   {
     cxxtools::MutexLock lock(mutex);
 
-    PoolsType::const_iterator it = pools.find(url);
+    PoolsType::const_iterator it = pools.find(ConnectionParameter(url, username, password));
     return it == pools.end() ? 0
                              : it->second->getCurrentSize();
   }

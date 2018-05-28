@@ -38,7 +38,7 @@ namespace tntdb
     class ConnectionManager : public IConnectionManager
     {
       public:
-        tntdb::Connection connect(const std::string& url);
+        tntdb::Connection connect(const std::string& url, const std::string& username, const std::string& password);
     };
   }
 }

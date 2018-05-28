@@ -88,15 +88,15 @@ namespace tntdb
       open(app, host, user, passwd, db, port, unix_socket, client_flag);
     }
 
-    Connection::Connection(const char* conn)
+    Connection::Connection(const std::string& conn, const std::string& username_, const std::string& password_)
       : initialized(false),
         transactionActive(0)
     {
-      log_debug("Connection::Connection(\"" << conn << "\")");
+      log_debug("Connection::Connection(\"" << conn << "\", \"" << username_ << "\", password)");
       std::string app;
       std::string host;
-      std::string user;
-      std::string passwd;
+      std::string user = username_;
+      std::string passwd = password_;
       std::string db;
       unsigned int port = 3306;
       std::string unix_socket;
@@ -144,7 +144,10 @@ namespace tntdb
                 else if (key == "user")
                   value = &user;
                 else if (key == "passwd" || key == "password")
+                {
+                  log_warn("password set in dburl");
                   value = &passwd;
+                }
                 else if (key == "db" || key == "dbname" || key == "database")
                   value = &db;
                 else if (key == "unix_socket")

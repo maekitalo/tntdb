@@ -114,6 +114,75 @@ namespace tntdb
     return _conn->prepareCachedWithLimit(query, limit, offset, key);
   }
 
+  std::string url(const std::string& url, const std::string& username, const std::string& password)
+  {
+    enum {
+      state_0,
+      state_p,
+      state_e
+    } state = state_0;
+
+    std::string ret;
+    for (std::string::const_iterator it = url.begin(); it != url.end(); ++it)
+    {
+      char ch = *it;
+      switch (state)
+      {
+        case state_0:
+          if (ch == '%')
+            state = state_p;
+          else if (ch == '\\')
+            state = state_e;
+          else
+            ret += ch;
+          break;
+
+        case state_p:
+          if (ch == 'u')
+          {
+            ret += username;
+            state = state_0;
+          }
+          else if (ch == 'p')
+          {
+            ret += password;
+            state = state_0;
+          }
+          else if (ch == '%')
+            ret += '%';
+          else if (ch == '\\')
+          {
+            ret += '%';
+            state = state_e;
+          }
+          else
+          {
+            ret += '%';
+            ret += ch;
+            state = state_0;
+          }
+          break;
+
+        case state_e:
+          ret += ch;
+          state = state_0;
+          break;
+      }
+    }
+
+    switch (state)
+    {
+      case state_0:
+        break;
+      case state_p:
+        ret += '%'; break;
+      case state_e:
+        ret += '\\'; break;
+    }
+
+    return ret;
+  }
+
   Statement IStmtCacheConnection::prepareCached(const std::string& query, const std::string& key)
   {
     log_trace("IStmtCacheConnection::prepareCached(\"" << query << ", " << key << "\")");

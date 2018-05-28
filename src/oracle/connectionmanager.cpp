@@ -37,9 +37,9 @@ namespace tntdb
 {
   namespace oracle
   {
-    tntdb::Connection ConnectionManager::connect(const std::string& url)
+    tntdb::Connection ConnectionManager::connect(const std::string& url, const std::string& username, const std::string& password)
     {
-      return tntdb::Connection(new Connection(url.c_str()));
+      return tntdb::Connection(new Connection(url, username, password));
     }
   }
 }

@@ -80,7 +80,7 @@ namespace tntdb
       public:
         void checkError(sword ret, const char* function = 0) const;
 
-        explicit Connection(const char* conninfo);
+        Connection(const std::string& url, const std::string& username, const std::string& password);
         ~Connection();
 
         void beginTransaction();

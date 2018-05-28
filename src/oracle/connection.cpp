@@ -204,7 +204,7 @@ namespace tntdb
       }
     }
 
-    Connection::Connection(const char* conninfo_)
+    Connection::Connection(const std::string& url, const std::string& username, const std::string& password)
       : envhp(0),
         srvhp(0),
         errhp(0),
@@ -212,10 +212,16 @@ namespace tntdb
         svchp(0),
         transactionActive(0)
     {
-      std::string conninfo(conninfo_);
-      std::string user = extractAttribute(conninfo, "user=");
-      std::string passwd = extractAttribute(conninfo, "passwd=");
-      logon(conninfo, user, passwd);
+      std::string conninfo(url);
+      std::string au = extractAttribute(conninfo, "user=");
+      std::string ap = extractAttribute(conninfo, "passwd=");
+      log_warn_if(!ap.empty(), "password should not be given in dburl");
+      log_warn_if(!au.empty() && !username.empty(), "username given in url and parameter");
+      log_warn_if(!ap.empty() && !password.empty(), "password given in url and parameter");
+      if (au.empty() && ap.empty())
+        logon(conninfo, username, password);
+      else
+        logon(conninfo, au, ap);
     }
 
     Connection::~Connection()

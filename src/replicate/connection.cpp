@@ -44,8 +44,9 @@ namespace tntdb
 {
   namespace replicate
   {
-    Connection::Connection(const char* conninfo)
+    Connection::Connection(const std::string& url, const std::string& username, const std::string& password)
     {
+      const char* conninfo = url.c_str();
       const char* b = conninfo;
       const char* e = conninfo;
       std::vector<std::string> urls;
@@ -68,7 +69,7 @@ namespace tntdb
       for (std::vector<std::string>::const_iterator it = urls.begin(); it != urls.end(); ++it)
       {
         log_debug("connect to " << *it);
-        connections.push_back(connect(*it));
+        connections.push_back(connect(*it, username, password));
         if (!primaryConnection && *it == primaryUrl)
         {
           log_debug("primary connection " << *it);

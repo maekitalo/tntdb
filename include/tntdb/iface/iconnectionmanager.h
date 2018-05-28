@@ -51,7 +51,7 @@ namespace tntdb
     public:
       IConnectionManager() { }
       virtual ~IConnectionManager() { }
-      virtual Connection connect(const std::string& url) = 0;
+      virtual Connection connect(const std::string& url, const std::string& username, const std::string& password) = 0;
   };
 }
 

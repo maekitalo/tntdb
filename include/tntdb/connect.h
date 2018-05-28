@@ -36,18 +36,27 @@ namespace tntdb
 {
   /** Establish a connection to a database
 
-      The url is prefixed with a driver name followed by a colon and a driver-specific part. 
-      If the connection can't be established, an exception derived from tntdb::Error is thrown.
+      The url is prefixed with a driver name followed by a colon and a
+      driver-specific part.  If the connection can't be established, an
+      exception derived from tntdb::Error is thrown.
+
+      In the url the string "%u" is replaced with the username and "%p" is
+      replaced with the password.  The password parameter and the url with the
+      replaced username and password fields is never logged.
+
+      To specify the text "%u" or "%p" in the connection string the '%' can be
+      escaped with backslash like this: "\%u".
 
       Examples:
 
       @code
         tntdb::Connection sqConn = tntdb::connect("sqlite:mydatabase.db");
-        tntdb::Connection pgConn = tntdb::connect("postgresql:dbname=DS2 user=web passwd=web");
-        tntdb::Connection myConn = tntdb::connect("mysql:db=DS2;user=web;passwd=web");
-        tntdb::Connection orConn = tntdb::connect("oracle:XE;user=hr;passwd=hr");
+        tntdb::Connection pgConn = tntdb::connect("postgresql:dbname=DS2 user=%u passwd=%p", "web", "webpw");
+        tntdb::Connection myConn = tntdb::connect("mysql:db=DS2;user=%u;passwd=%p", "web", "webpw");
+        tntdb::Connection orConn = tntdb::connect("oracle:XE;user=%u;passwd=%p", "hr", "hr");
       @endcode
    */
+  Connection connect(const std::string& url, const std::string& username, const std::string& password);
   Connection connect(const std::string& url);
 
   /** Fetch a connection from a pool or create a new one
@@ -61,6 +70,7 @@ namespace tntdb
       When there is no connection with the given url in the pool, a new
       connection is established.
    */
+  Connection connectCached(const std::string& url, const std::string& username, const std::string& password);
   Connection connectCached(const std::string& url);
 
   /** Returns the number of cached connections.
@@ -71,6 +81,7 @@ namespace tntdb
   /** Returns the number of cached connections for the specified url.
       Note that connections, which are in use are not counted.
    */
+  unsigned cachedConnections(const std::string& url, const std::string& username, const std::string& password);
   unsigned cachedConnections(const std::string& url);
 
   /** Release unused connections; keep the given number of connections.
@@ -83,7 +94,10 @@ namespace tntdb
       given number of connections
       Note that connections, which are in use are not freed.
    */
-  unsigned dropCached(const std::string& url, unsigned keep = 0);
+  unsigned dropCached(const std::string& url, const std::string& username = "", const std::string& password = "", unsigned keep = 0);
+
+  inline unsigned dropCached(const std::string& url, unsigned keep)
+    { return dropCached(url, "", "", keep); }
 
   /** Set the maximum pool size for new connection pools
 

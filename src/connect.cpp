@@ -44,9 +44,9 @@ namespace tntdb
   static librariesType libraries;
   static cxxtools::Mutex mutex;
 
-  Connection connect(const std::string& url)
+  Connection connect(const std::string& url, const std::string& username, const std::string& password)
   {
-    log_debug("connect(\"" << url << "\")");
+    log_debug("connect(\"" << url << "\", \"" << username << "\", password)");
 
     std::string::size_type n = url.find(':');
     if (n == std::string::npos)
@@ -72,7 +72,12 @@ namespace tntdb
 
     lock.unlock();
 
-    return libraryManager.connect(libraryUrl);
+    return libraryManager.connect(libraryUrl, username, password);
+  }
+
+  Connection connect(const std::string& url)
+  {
+      return connect(url, std::string(), std::string());
   }
 
   static ConnectionPools connectionPools;
@@ -82,15 +87,25 @@ namespace tntdb
       return connectionPools.getCurrentSize();
   }
 
+  unsigned cachedConnections(const std::string& url, const std::string& username, const std::string& password)
+  {
+      return connectionPools.getCurrentSize(url, username, password);
+  }
+
   unsigned cachedConnections(const std::string& url)
   {
-      return connectionPools.getCurrentSize(url);
+      return connectionPools.getCurrentSize(url, std::string(), std::string());
+  }
+
+  Connection connectCached(const std::string& url, const std::string& username, const std::string& password)
+  {
+    log_debug("connectCached(\"" << url << "\", \"" << username << "\", password)");
+    return connectionPools.connect(url, username, password);
   }
 
   Connection connectCached(const std::string& url)
   {
-    log_debug("connectCached(\"" << url << "\")");
-    return connectionPools.connect(url);
+      return connectCached(url, std::string(), std::string());
   }
 
   unsigned dropCached(unsigned keep)
@@ -98,9 +113,9 @@ namespace tntdb
     return connectionPools.drop(keep);
   }
 
-  unsigned dropCached(const std::string& url, unsigned keep)
+  unsigned dropCached(const std::string& url, const std::string& username, const std::string& password, unsigned keep)
   {
-    return connectionPools.drop(url, keep);
+    return connectionPools.drop(url, username, password, keep);
   }
 
   void setMaxPoolSize(unsigned max)

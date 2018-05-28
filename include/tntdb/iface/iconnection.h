@@ -64,6 +64,9 @@ namespace tntdb
       virtual bool ping() = 0;
       virtual long lastInsertId(const std::string& name) = 0;
       virtual void lockTable(const std::string& tablename, bool exclusive) = 0;
+
+      // helper function, which replaces '%u' with username and '%p' with password in url
+      static std::string url(const std::string& url, const std::string& username, const std::string& password);
   };
 
   class IStmtCacheConnection : public IConnection

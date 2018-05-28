@@ -67,7 +67,7 @@ namespace tntdb
         std::vector<std::string> stmtsToDeallocate;
 
       public:
-        explicit Connection(const char* conninfo);
+        Connection(const std::string& url, const std::string& username, const std::string& password);
         ~Connection();
 
         void beginTransaction();

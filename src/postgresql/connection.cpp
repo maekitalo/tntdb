@@ -43,13 +43,13 @@ namespace tntdb
 {
   namespace postgresql
   {
-    Connection::Connection(const char* conninfo)
+    Connection::Connection(const std::string& url_, const std::string& username, const std::string& password)
       : transactionActive(0),
         stmtCounter(0)
     {
-      log_debug("PQconnectdb(\"" << conninfo << "\")");
+      log_debug("PQconnectdb(\"" << url_ << "\")");
 
-      conn = PQconnectdb(conninfo);
+      conn = PQconnectdb(url(url_, username, password).c_str());
       if (conn == 0)
         throw std::bad_alloc();
 
