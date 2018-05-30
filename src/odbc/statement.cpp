@@ -55,13 +55,13 @@ namespace
 {
     class SE : public StmtEvent
     {
-        HostvarMapType& _hostvarMap;
+        BindMap& _binds;
         unsigned _idx;
         static const std::string _hostvarInd;
 
     public:
-        SE(HostvarMapType& hostvarMap_)
-            : _hostvarMap(hostvarMap_),
+        explicit SE(BindMap& binds)
+            : _binds(binds),
               _idx(0)
             { }
         std::string onHostVar(const std::string& name);
@@ -71,13 +71,32 @@ namespace
     std::string SE::onHostVar(const std::string& name)
     {
         log_debug("hostvar :" << name << ", idx=" << _idx);
-        _hostvarMap.insert(HostvarMapType::value_type(name, _idx++));
+
+        BindMap::iterator it = _binds.find(name);
+        if (it == _binds.end())
+        {
+            it = _binds.insert(BindMap::value_type(name, new Bind())).first;
+        }
+
+        it->second->colnums.push_back(_idx++);
+
         return _hostvarInd;
     }
 
     const std::string SE::_hostvarInd = "?";
 }
 
+Bind* Statement::getBind(const std::string& col) const
+{
+    BindMap::const_iterator it = _binds.find(col);
+    if (it == _binds.end())
+    {
+        log_warn("hostvar \"" << col << "\" not found");
+        return 0;
+    }
+
+    return it->second.getPointer();
+}
 
 Statement::Statement(Connection* conn, const std::string& query)
     : _conn(conn),
@@ -85,7 +104,7 @@ Statement::Statement(Connection* conn, const std::string& query)
 {
     // parse hostvars
     StmtParser parser;
-    SE se(_hostvarMap);
+    SE se(_binds);
     parser.parse(query, se);
     parser.getSql();
 
@@ -114,6 +133,9 @@ void Statement::clear()
 
 void Statement::setNull(const std::string& col)
 {
+    Bind* bind = getBind(col);
+    if (!bind)
+        return;
 }
 
 void Statement::setBool(const std::string& col, bool data)

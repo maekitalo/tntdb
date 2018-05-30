@@ -11,7 +11,10 @@
 
 #include <sqltypes.h>
 
+#include <cxxtools/smartptr.h>
+
 #include <map>
+#include <vector>
 
 namespace tntdb
 {
@@ -19,13 +22,23 @@ namespace tntdb
     {
         class Connection;
 
-        typedef std::multimap<std::string, unsigned> HostvarMapType;
+        struct Bind : public cxxtools::RefCounted
+        {
+            std::vector<unsigned> colnums;
+
+            std::vector<char> data;
+        };
+
+        typedef std::map<std::string, cxxtools::SmartPtr<Bind> > BindMap;
 
         class Statement : public IStatement
         {
             Connection* _conn;
             Handle _hStmt;
-            HostvarMapType _hostvarMap;
+
+            BindMap _binds;
+
+            Bind* getBind(const std::string& col) const;
 
         public:
             Statement(Connection* conn, const std::string& query);
