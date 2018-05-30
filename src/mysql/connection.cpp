@@ -117,7 +117,7 @@ namespace tntdb
       std::string* value;
       char quote = '\0';
 
-      for (const char* p = conn; *p; ++p)
+      for (std::string::const_iterator p = conn.begin(); p != conn.end(); ++p)
       {
         switch (state)
         {
