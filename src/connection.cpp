@@ -114,7 +114,7 @@ namespace tntdb
     return _conn->prepareCachedWithLimit(query, limit, offset, key);
   }
 
-  std::string url(const std::string& url, const std::string& username, const std::string& password)
+  std::string IConnection::url(const std::string& url, const std::string& username, const std::string& password)
   {
     enum {
       state_0,
