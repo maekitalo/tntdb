@@ -57,6 +57,13 @@ nobase_noinst_HEADERS = \
 	tntdb/mysql/impl/rowcontainer.h \
 	tntdb/mysql/impl/rowvalue.h \
 	tntdb/mysql/impl/statement.h \
+	tntdb/odbc/connection.h \
+	tntdb/odbc/connectionmanager.h \
+	tntdb/odbc/error.h \
+	tntdb/odbc/handle.h \
+	tntdb/odbc/row.h \
+	tntdb/odbc/statement.h \
+	tntdb/odbc/value.h \
 	tntdb/postgresql/error.h \
 	tntdb/postgresql/impl/connection.h \
 	tntdb/postgresql/impl/connectionmanager.h \

@@ -29,6 +29,8 @@
 #include <tntdb/odbc/statement.h>
 #include <tntdb/odbc/connection.h>
 #include <tntdb/odbc/error.h>
+#include <tntdb/odbc/value.h>
+#include <tntdb/odbc/row.h>
 
 #include <tntdb/result.h>
 #include <tntdb/row.h>
@@ -221,11 +223,13 @@ void Statement::setDatetime(const std::string& col, const Datetime& data)
 Statement::size_type Statement::execute()
 {
     SQLRETURN retval;
-    
+
+    log_debug("SQLExecute");
     retval = SQLExecute(_hStmt);
-	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
         throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, _hStmt);
 
+    log_debug("SQLRowCount");
     SQLLEN rowCount;
     retval = SQLRowCount(_hStmt, &rowCount);
 	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
@@ -243,20 +247,21 @@ tntdb::Result Statement::select()
 
     for (SQLSMALLINT c = 0; c < numCols; ++c)
     {
-        std::vector<SQLCHAR> columnName;
+        std::vector<SQLCHAR> columnName(16);
         SQLSMALLINT nameLength;
         SQLSMALLINT dataType;
         SQLULEN columnSize;
         SQLSMALLINT decimalDigits;
         SQLSMALLINT nullable;
 
-        SQLDescribeCol(_hStmt, c, &columnName[0], columnName.size(), &nameLength,
+        log_debug("SQLDescribeCol");
+        SQLDescribeCol(_hStmt, c + 1, &columnName[0], columnName.size(), &nameLength,
             &dataType, &columnSize, &decimalDigits, &nullable);
 
         if (nameLength >= static_cast<SQLSMALLINT>(columnName.size()))
         {
             columnName.resize(nameLength + 1);
-            SQLDescribeCol(_hStmt, c, &columnName[0], columnName.size(), &nameLength,
+            SQLDescribeCol(_hStmt, c + 1, &columnName[0], columnName.size(), &nameLength,
                 &dataType, &columnSize, &decimalDigits, &nullable);
         }
 
@@ -265,19 +270,50 @@ tntdb::Result Statement::select()
             << " nullable: " << nullable);
     }
     // TODO
+
+    throw std::runtime_error("tntdb::odbc::Statement::selectResult not implemented yet");
     return tntdb::Result();
 }
 
 tntdb::Row Statement::selectRow()
 {
-    // TODO
-    return tntdb::Row();
+    SQLRETURN retval;
+
+    log_debug("SQLExecute");
+    retval = SQLExecute(_hStmt);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+        throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, _hStmt);
+
+    tntdb::Row ret(new odbc::Row(_hStmt));
+
+    log_debug("SQLFetch");
+    retval = SQLFetch(_hStmt);
+    if (retval == SQL_NO_DATA)
+        throw NotFound();
+
+    return ret;
 }
 
 tntdb::Value Statement::selectValue()
 {
-    // TODO
-    return tntdb::Value();
+    SQLRETURN retval;
+
+    log_debug("SQLExecute");
+    retval = SQLExecute(_hStmt);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+        throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, _hStmt);
+
+    tntdb::Value ret(new odbc::Value(_hStmt, 1));
+
+    log_debug("SQLFetch");
+    retval = SQLFetch(_hStmt);
+    if (retval == SQL_NO_DATA)
+        throw NotFound();
+
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("SQLFetch failed", retval, SQL_HANDLE_STMT, _hStmt);
+
+    return ret;
 }
 
 ICursor* Statement::createCursor(unsigned fetchsize)

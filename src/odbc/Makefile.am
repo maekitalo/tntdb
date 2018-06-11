@@ -5,7 +5,9 @@ sources = \
 	connectionmanager.cpp \
 	error.cpp \
 	handle.cpp \
-	statement.cpp
+	row.cpp \
+	statement.cpp \
+	value.cpp
 
 if MAKE_ODBC
 
