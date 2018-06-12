@@ -43,6 +43,19 @@ namespace tntdb
 {
 namespace odbc
 {
+
+void Value::bind(SQLHSTMT hStmt, SQLUSMALLINT columnNumber,
+    SQLSMALLINT dataType, SQLULEN columnSize,
+    SQLSMALLINT decimalDigits, SQLSMALLINT nullable)
+{
+    SQLRETURN retval;
+    _data.resize(columnSize + 20);
+
+    retval = SQLBindCol(hStmt, columnNumber, SQL_C_CHAR, &_data[0], _data.size(), &_lenOrInd);
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("SQLBindCol failed", retval, SQL_HANDLE_STMT, hStmt);
+}
+
 Value::Value(SQLHSTMT hStmt, SQLUSMALLINT columnNumber)
 {
     SQLRETURN retval;
@@ -70,15 +83,21 @@ Value::Value(SQLHSTMT hStmt, SQLUSMALLINT columnNumber)
             throw Error("SQLDescribeCol failed", retval, SQL_HANDLE_STMT, hStmt);
     }
 
+    _columnName.assign(columnName.begin(), columnName.end());
+
     log_debug("name: \"" << &columnName[0] << "\" dataType: " << dataType
         << " columnSize: " << columnSize << " decimalDigits: " << decimalDigits
         << " nullable: " << nullable);
 
-    _data.resize(columnSize + 20);
+    bind(hStmt, columnNumber, dataType, columnSize, decimalDigits, nullable);
+}
 
-    retval = SQLBindCol(hStmt, columnNumber, SQL_C_CHAR, &_data[0], _data.size(), &_lenOrInd);
-    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
-        throw Error("SQLBindCol failed", retval, SQL_HANDLE_STMT, hStmt);
+Value::Value(SQLHSTMT hStmt, SQLUSMALLINT columnNumber, const std::string& columnName,
+    SQLSMALLINT dataType, SQLULEN columnSize,
+    SQLSMALLINT decimalDigits, SQLSMALLINT nullable)
+    : _columnName(columnName)
+{
+    bind(hStmt, columnNumber, dataType, columnSize, decimalDigits, nullable);
 }
 
 bool Value::isNull() const

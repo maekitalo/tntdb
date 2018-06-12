@@ -26,32 +26,58 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TNTDB_ODBC_ROW_H
-#define TNTDB_ODBC_ROW_H
+#include <tntdb/odbc/result.h>
+#include <tntdb/odbc/row.h>
+#include <tntdb/odbc/error.h>
 
-#include <tntdb/iface/irow.h>
-#include <tntdb/value.h>
+#include <cxxtools/log.h>
 
+#include <sql.h>
+#include <sqlext.h>
 #include <sqltypes.h>
 
-#include <vector>
+log_define("tntdb.odbc.result")
 
 namespace tntdb
 {
-    namespace odbc
+namespace odbc
+{
+Result::Result(SQLHSTMT hStmt)
+{
+    SQLRETURN retval;
+
+    log_debug("SQLExecute");
+    retval = SQLExecute(hStmt);
+	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+        throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, hStmt);
+
+    while (true)
     {
-        class Row : public IRow
-        {
-            std::vector<tntdb::Value> _values;
+        tntdb::Row ret(new odbc::Row(hStmt));
 
-        public:
-            explicit Row(SQLHSTMT hStmt);
+        log_debug("SQLFetch");
+        retval = SQLFetch(hStmt);
+        if (retval == SQL_NO_DATA)
+            break;
 
-            virtual size_type size() const;
-            virtual tntdb::Value getValueByNumber(size_type field_num) const;
-            virtual tntdb::Value getValueByName(const std::string& field_name) const;
-            virtual std::string getColumnName(size_type field_num) const;
-        };
+        _rows.push_back(ret);
     }
 }
-#endif
+
+tntdb::Row Result::getRow(size_type tup_num) const
+{
+    return _rows[tup_num];
+}
+
+Result::size_type Result::size() const
+{
+    return _rows.size();
+}
+
+Result::size_type Result::getFieldCount() const
+{
+    return _numCols;
+}
+
+}
+}

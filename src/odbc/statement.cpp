@@ -31,6 +31,7 @@
 #include <tntdb/odbc/error.h>
 #include <tntdb/odbc/value.h>
 #include <tntdb/odbc/row.h>
+#include <tntdb/odbc/result.h>
 
 #include <tntdb/result.h>
 #include <tntdb/row.h>
@@ -240,39 +241,7 @@ Statement::size_type Statement::execute()
 
 tntdb::Result Statement::select()
 {
-    SQLSMALLINT numCols;
-    SQLNumResultCols(_hStmt, &numCols);
-
-    log_debug(numCols << " columns");
-
-    for (SQLSMALLINT c = 0; c < numCols; ++c)
-    {
-        std::vector<SQLCHAR> columnName(16);
-        SQLSMALLINT nameLength;
-        SQLSMALLINT dataType;
-        SQLULEN columnSize;
-        SQLSMALLINT decimalDigits;
-        SQLSMALLINT nullable;
-
-        log_debug("SQLDescribeCol");
-        SQLDescribeCol(_hStmt, c + 1, &columnName[0], columnName.size(), &nameLength,
-            &dataType, &columnSize, &decimalDigits, &nullable);
-
-        if (nameLength >= static_cast<SQLSMALLINT>(columnName.size()))
-        {
-            columnName.resize(nameLength + 1);
-            SQLDescribeCol(_hStmt, c + 1, &columnName[0], columnName.size(), &nameLength,
-                &dataType, &columnSize, &decimalDigits, &nullable);
-        }
-
-        log_debug("column " << c << " name: \"" << &columnName[0] << "\" dataType: " << dataType
-            << " columnSize: " << columnSize << " decimalDigits: " << decimalDigits
-            << " nullable: " << nullable);
-    }
-    // TODO
-
-    throw std::runtime_error("tntdb::odbc::Statement::selectResult not implemented yet");
-    return tntdb::Result();
+    return tntdb::Result(new Result(_hStmt));
 }
 
 tntdb::Row Statement::selectRow()

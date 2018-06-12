@@ -42,11 +42,21 @@ namespace tntdb
         class Value : public IValue
         {
             std::vector<char> _data;
+            std::string _columnName;
             SQLLEN _lenOrInd;
             SQLSMALLINT _dataType;
 
+            void bind(SQLHSTMT hStmt, SQLUSMALLINT columnNumber,
+                SQLSMALLINT dataType, SQLULEN columnSize,
+                SQLSMALLINT decimalDigits, SQLSMALLINT nullable);
+
         public:
             Value(SQLHSTMT hStmt, SQLUSMALLINT columnNumber);
+            Value(SQLHSTMT hStmt, SQLUSMALLINT columnNumber, const std::string& columnName,
+                SQLSMALLINT dataType, SQLULEN columnSize,
+                SQLSMALLINT decimalDigits, SQLSMALLINT nullable);
+
+            const std::string& columnName() const   { return _columnName; }
 
             virtual bool isNull() const;
             virtual bool getBool() const;

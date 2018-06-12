@@ -26,11 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TNTDB_ODBC_ROW_H
-#define TNTDB_ODBC_ROW_H
+#ifndef TNTDB_ODBC_RESULT_H
+#define TNTDB_ODBC_RESULT_H
 
-#include <tntdb/iface/irow.h>
-#include <tntdb/value.h>
+#include <tntdb/iface/iresult.h>
+#include <tntdb/row.h>
 
 #include <sqltypes.h>
 
@@ -40,17 +40,17 @@ namespace tntdb
 {
     namespace odbc
     {
-        class Row : public IRow
+        class Result : public IResult
         {
-            std::vector<tntdb::Value> _values;
+            SQLSMALLINT _numCols;
+            std::vector<tntdb::Row> _rows;
 
         public:
-            explicit Row(SQLHSTMT hStmt);
+            explicit Result(SQLHSTMT hStmt);
 
+            virtual tntdb::Row getRow(size_type tup_num) const;
             virtual size_type size() const;
-            virtual tntdb::Value getValueByNumber(size_type field_num) const;
-            virtual tntdb::Value getValueByName(const std::string& field_name) const;
-            virtual std::string getColumnName(size_type field_num) const;
+            virtual size_type getFieldCount() const;
         };
     }
 }

@@ -5,6 +5,7 @@ sources = \
 	connectionmanager.cpp \
 	error.cpp \
 	handle.cpp \
+	result.cpp \
 	row.cpp \
 	statement.cpp \
 	value.cpp

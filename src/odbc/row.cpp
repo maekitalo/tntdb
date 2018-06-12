@@ -69,7 +69,11 @@ tntdb::Value Row::getValueByNumber(size_type field_num) const
 
 tntdb::Value Row::getValueByName(const std::string& field_name) const
 {
-    throw std::runtime_error("tntdb::odbc::Row::getValueByName not implemented yet");
+    for (unsigned n = 0; n < _values.size(); ++n)
+        if (dynamic_cast<const odbc::Value*>(_values[n].getImpl())->columnName() == field_name)
+            return _values[n];
+
+    throw FieldNotFound(field_name);
 }
 
 std::string Row::getColumnName(size_type field_num) const
