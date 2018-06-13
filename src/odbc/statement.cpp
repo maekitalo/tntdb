@@ -32,6 +32,7 @@
 #include <tntdb/odbc/value.h>
 #include <tntdb/odbc/row.h>
 #include <tntdb/odbc/result.h>
+#include <tntdb/odbc/cursor.h>
 
 #include <tntdb/result.h>
 #include <tntdb/row.h>
@@ -287,8 +288,7 @@ tntdb::Value Statement::selectValue()
 
 ICursor* Statement::createCursor(unsigned fetchsize)
 {
-    // TODO
-    throw std::runtime_error("tntdb::odbc::Statement::createCursor not implemented yet");
+    return new Cursor(_hStmt);
 }
 
 }

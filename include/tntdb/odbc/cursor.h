@@ -26,60 +26,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <tntdb/odbc/result.h>
-#include <tntdb/odbc/row.h>
-#include <tntdb/odbc/error.h>
+#ifndef TNTDB_ODBC_CURSOR_H
+#define TNTDB_ODBC_CURSOR_H
 
-#include <cxxtools/log.h>
+#include <tntdb/iface/icursor.h>
+#include <tntdb/row.h>
 
-#include <sql.h>
-#include <sqlext.h>
 #include <sqltypes.h>
-
-log_define("tntdb.odbc.result")
 
 namespace tntdb
 {
-namespace odbc
-{
-Result::Result(SQLHSTMT hStmt)
-{
-    SQLRETURN retval;
-
-    log_debug("SQLExecute");
-    retval = SQLExecute(hStmt);
-	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
-        throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, hStmt);
-
-    while (true)
+    namespace odbc
     {
-        tntdb::Row ret(new odbc::Row(hStmt));
+        class Cursor : public ICursor
+        {
+            SQLHSTMT _hStmt;
+            tntdb::Row _row;
 
-        log_debug("SQLFetch");
-        retval = SQLFetch(hStmt);
-        if (retval == SQL_NO_DATA)
-            break;
-        if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
-            throw Error("SQLFetch failed", retval, SQL_HANDLE_STMT, hStmt);
-
-        _rows.push_back(ret);
+        public:
+            explicit Cursor(SQLHSTMT hStmt);
+            virtual tntdb::Row fetch();
+        };
     }
 }
 
-tntdb::Row Result::getRow(size_type tup_num) const
-{
-    return _rows[tup_num];
-}
-
-Result::size_type Result::size() const
-{
-    return _rows.size();
-}
-
-Result::size_type Result::getFieldCount() const
-{
-    return _numCols;
-}
-
-}
-}
+#endif

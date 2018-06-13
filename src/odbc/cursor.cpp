@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <tntdb/odbc/result.h>
+#include <tntdb/odbc/cursor.h>
 #include <tntdb/odbc/row.h>
 #include <tntdb/odbc/error.h>
 
@@ -36,13 +36,14 @@
 #include <sqlext.h>
 #include <sqltypes.h>
 
-log_define("tntdb.odbc.result")
+log_define("tntdb.odbc.cursor")
 
 namespace tntdb
 {
 namespace odbc
 {
-Result::Result(SQLHSTMT hStmt)
+Cursor::Cursor(SQLHSTMT hStmt)
+    : _hStmt(hStmt)
 {
     SQLRETURN retval;
 
@@ -51,34 +52,22 @@ Result::Result(SQLHSTMT hStmt)
 	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
         throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, hStmt);
 
-    while (true)
-    {
-        tntdb::Row ret(new odbc::Row(hStmt));
-
-        log_debug("SQLFetch");
-        retval = SQLFetch(hStmt);
-        if (retval == SQL_NO_DATA)
-            break;
-        if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
-            throw Error("SQLFetch failed", retval, SQL_HANDLE_STMT, hStmt);
-
-        _rows.push_back(ret);
-    }
+    _row = tntdb::Row(new Row(hStmt));
 }
 
-tntdb::Row Result::getRow(size_type tup_num) const
+tntdb::Row Cursor::fetch()
 {
-    return _rows[tup_num];
-}
+    SQLRETURN retval;
 
-Result::size_type Result::size() const
-{
-    return _rows.size();
-}
+    log_debug("SQLFetch");
+    retval = SQLFetch(_hStmt);
+    if (retval == SQL_NO_DATA)
+        return tntdb::Row();
 
-Result::size_type Result::getFieldCount() const
-{
-    return _numCols;
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+        throw Error("SQLFetch failed", retval, SQL_HANDLE_STMT, _hStmt);
+
+    return _row;
 }
 
 }
