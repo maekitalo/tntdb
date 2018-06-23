@@ -32,6 +32,7 @@
 #include <tntdb/iface/istatement.h>
 #include <tntdb/odbc/handle.h>
 
+#include <sql.h>
 #include <sqltypes.h>
 
 #include <cxxtools/smartptr.h>
@@ -45,11 +46,36 @@ namespace tntdb
     {
         class Connection;
 
-        struct Bind : public cxxtools::RefCounted
+        class Bind : public cxxtools::RefCounted
         {
-            std::vector<unsigned> colnums;
+            union {
+                char* ptr;
+                long longValue;
+                unsigned long ulongValue;
+                short shortValue;
+                unsigned short ushortValue;
+            } _u;
+            size_t _allocatedSize;
 
-            std::vector<char> data;
+            void releaseBuffer();
+
+        public:
+            std::vector<SQLSMALLINT> colnums;
+            SQLSMALLINT boundType;
+
+            Bind()
+                : _allocatedSize(0),
+                  boundType(SQL_UNKNOWN_TYPE)
+                { }
+
+            ~Bind()
+                { releaseBuffer(); }
+
+            char* ptr(size_t size);
+            long& longValue()             { releaseBuffer(); return _u.longValue; }
+            unsigned long& ulongValue()   { releaseBuffer(); return _u.ulongValue; }
+            short& shortValue()           { releaseBuffer(); return _u.shortValue; }
+            unsigned short& ushortValue() { releaseBuffer(); return _u.ushortValue; }
         };
 
         typedef std::map<std::string, cxxtools::SmartPtr<Bind> > BindMap;
@@ -61,7 +87,7 @@ namespace tntdb
 
             BindMap _binds;
 
-            Bind* getBind(const std::string& col) const;
+            Bind& getBind(const std::string& col) const;
 
         public:
             Statement(Connection* conn, const std::string& query);

@@ -90,16 +90,44 @@ namespace
     const std::string SE::_hostvarInd = "?";
 }
 
-Bind* Statement::getBind(const std::string& col) const
+char* Bind::ptr(size_t size)
+{
+    if (size <= _allocatedSize)
+        return _u.ptr;
+
+    releaseBuffer();
+
+    if (size <= sizeof(_u))
+    {
+        return reinterpret_cast<char*>(&_u);
+    }
+    else
+    {
+        _u.ptr = new char[size];
+        _allocatedSize = size;
+        return _u.ptr;
+    }
+}
+
+void Bind::releaseBuffer()
+{
+    if (_allocatedSize > 0)
+    {
+        delete[] _u.ptr;
+        _allocatedSize = 0;
+    }
+}
+
+Bind& Statement::getBind(const std::string& col) const
 {
     BindMap::const_iterator it = _binds.find(col);
     if (it == _binds.end())
     {
         log_warn("hostvar \"" << col << "\" not found");
-        return 0;
+        throw tntdb::Error("hostvar \"" + col + "\" not found");
     }
 
-    return it->second.getPointer();
+    return *it->second;
 }
 
 Statement::Statement(Connection* conn, const std::string& query)
@@ -137,37 +165,184 @@ void Statement::clear()
 
 void Statement::setNull(const std::string& col)
 {
-    Bind* bind = getBind(col);
-    if (!bind)
-        return;
+    Bind& bind = getBind(col);
 }
 
 void Statement::setBool(const std::string& col, bool data)
 {
+    Bind& bind = getBind(col);
 }
 
 void Statement::setShort(const std::string& col, short data)
 {
+    log_debug("setShort(\"" << col << "\", " << data << ')');
+
+    SQLRETURN retval;
+
+    Bind& bind = getBind(col);
+    short& shortValue = bind.shortValue();
+
+    if (bind.boundType != SQL_C_SHORT)
+    {
+        for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        {
+            log_debug("SQLBindParameter(hStmt, " << bind.colnums[n]+1 << ", SQL_PARAM_INPUT, SQL_C_SHORT, SQLINTEGER, 0, 0, ptr, " << sizeof(long) << ", 0)");
+            retval = SQLBindParameter(_hStmt,
+                bind.colnums[n] + 1,
+                SQL_PARAM_INPUT,
+                SQL_C_SHORT,
+                SQL_INTEGER,
+                0, // ColumnSize
+                0, // DecimalDigits
+                &shortValue,
+                sizeof(short),
+                0);
+
+            if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+            {
+                bind.boundType = SQL_UNKNOWN_TYPE;
+                throw Error("SQLBindParameter(" + col + ") failed", retval, SQL_HANDLE_STMT, _hStmt);
+            }
+
+        }
+
+        bind.boundType = SQL_C_SHORT;
+    }
+
+    for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        shortValue = data;
 }
 
 void Statement::setInt(const std::string& col, int data)
 {
+    log_debug("setInt(\"" << col << "\", " << data << ')');
+    setLong(col, data);
 }
 
 void Statement::setLong(const std::string& col, long data)
 {
+    log_debug("setLong(\"" << col << "\", " << data << ')');
+
+    SQLRETURN retval;
+
+    Bind& bind = getBind(col);
+    long& longValue = bind.longValue();
+
+    if (bind.boundType != SQL_C_SLONG)
+    {
+        for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        {
+            log_debug("SQLBindParameter(hStmt, " << bind.colnums[n]+1 << ", SQL_PARAM_INPUT, SQL_C_SLONG, SQLINTEGER, 0, 0, ptr, " << sizeof(long) << ", 0)");
+            retval = SQLBindParameter(_hStmt,
+                bind.colnums[n] + 1,
+                SQL_PARAM_INPUT,
+                SQL_C_SLONG,
+                SQL_INTEGER,
+                0, // ColumnSize
+                0, // DecimalDigits
+                &longValue,
+                sizeof(long),
+                0);
+
+            if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+            {
+                bind.boundType = SQL_UNKNOWN_TYPE;
+                throw Error("SQLBindParameter(" + col + ") failed", retval, SQL_HANDLE_STMT, _hStmt);
+            }
+
+        }
+
+        bind.boundType = SQL_C_SLONG;
+    }
+
+    for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        longValue = data;
 }
 
 void Statement::setUnsignedShort(const std::string& col, unsigned short data)
 {
+    log_debug("setUnsignedShort(\"" << col << "\", " << data << ')');
+
+    SQLRETURN retval;
+
+    Bind& bind = getBind(col);
+    unsigned short& ushortValue = bind.ushortValue();
+
+    if (bind.boundType != SQL_C_USHORT)
+    {
+        for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        {
+            log_debug("SQLBindParameter(hStmt, " << bind.colnums[n]+1 << ", SQL_PARAM_INPUT, SQL_C_USHORT, SQLINTEGER, 0, 0, ptr, " << sizeof(long) << ", 0)");
+            retval = SQLBindParameter(_hStmt,
+                bind.colnums[n] + 1,
+                SQL_PARAM_INPUT,
+                SQL_C_USHORT,
+                SQL_INTEGER,
+                0, // ColumnSize
+                0, // DecimalDigits
+                &ushortValue,
+                sizeof(unsigned short),
+                0);
+
+            if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+            {
+                bind.boundType = SQL_UNKNOWN_TYPE;
+                throw Error("SQLBindParameter(" + col + ") failed", retval, SQL_HANDLE_STMT, _hStmt);
+            }
+
+        }
+
+        bind.boundType = SQL_C_USHORT;
+    }
+
+    for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        ushortValue = data;
 }
 
 void Statement::setUnsigned(const std::string& col, unsigned data)
 {
+    log_debug("setUnsigned(\"" << col << "\", " << data << ')');
+    setUnsignedLong(col, data);
 }
 
 void Statement::setUnsignedLong(const std::string& col, unsigned long data)
 {
+    log_debug("setUnsignedLong(\"" << col << "\", " << data << ')');
+
+    SQLRETURN retval;
+
+    Bind& bind = getBind(col);
+    unsigned long& ulongValue = bind.ulongValue();
+
+    if (bind.boundType != SQL_C_ULONG)
+    {
+        for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        {
+            log_debug("SQLBindParameter(hStmt, " << bind.colnums[n]+1 << ", SQL_PARAM_INPUT, SQL_C_ULONG, SQLINTEGER, 0, 0, ptr, " << sizeof(long) << ", 0)");
+            retval = SQLBindParameter(_hStmt,
+                bind.colnums[n] + 1,
+                SQL_PARAM_INPUT,
+                SQL_C_ULONG,
+                SQL_INTEGER,
+                0, // ColumnSize
+                0, // DecimalDigits
+                &ulongValue,
+                sizeof(unsigned long),
+                0);
+
+            if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+            {
+                bind.boundType = SQL_UNKNOWN_TYPE;
+                throw Error("SQLBindParameter(" + col + ") failed", retval, SQL_HANDLE_STMT, _hStmt);
+            }
+
+        }
+
+        bind.boundType = SQL_C_ULONG;
+    }
+
+    for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        ulongValue = data;
 }
 
 void Statement::setInt32(const std::string& col, int32_t data)
