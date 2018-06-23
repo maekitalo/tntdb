@@ -103,20 +103,45 @@ Connection::~Connection()
 
 void Connection::beginTransaction()
 {
-    // TODO
-    throw std::runtime_error("tntdb::odbc::Connection::beginTransation not implemented yet");
+    SQLRETURN retval;
+
+    retval = SQLSetConnectAttr(_hDbc,
+        SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)0, 0);
+
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("Failed to start transaction", retval, SQL_HANDLE_DBC, _hDbc);
 }
 
 void Connection::commitTransaction()
 {
-    // TODO
-    throw std::runtime_error("tntdb::odbc::Connection::commitTransaction not implemented yet");
+    SQLRETURN retval;
+
+    retval = SQLEndTran(SQL_HANDLE_DBC, _hDbc, SQL_COMMIT);
+
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("Failed to commit transaction", retval, SQL_HANDLE_DBC, _hDbc);
+
+    retval = SQLSetConnectAttr(_hDbc,
+        SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)1, 0);
+
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("Failed to disable transaction", retval, SQL_HANDLE_DBC, _hDbc);
 }
 
 void Connection::rollbackTransaction()
 {
-    // TODO
-    throw std::runtime_error("tntdb::odbc::Connection::rollbackTransaction not implemented yet");
+    SQLRETURN retval;
+
+    retval = SQLEndTran(SQL_HANDLE_DBC, _hDbc, SQL_ROLLBACK);
+
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("Failed to rollback transaction", retval, SQL_HANDLE_DBC, _hDbc);
+
+    retval = SQLSetConnectAttr(_hDbc,
+        SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)1, 0);
+
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("Failed to disable transaction", retval, SQL_HANDLE_DBC, _hDbc);
 }
 
 Connection::size_type Connection::execute(const std::string& query)
