@@ -64,7 +64,8 @@ log_define("tntdb.unit.types")
       CXXTOOLS_UNIT_ASSERT(cursor != sel.end());     \
       isNotNull = (*cursor)[0].get(res);             \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);
+      CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);         \
+      cursor = tntdb::Statement::const_iterator();
 
 #define TESTEQ(val)                                  \
       del.execute();                                 \
