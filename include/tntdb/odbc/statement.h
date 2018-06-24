@@ -54,6 +54,8 @@ namespace tntdb
                 unsigned long ulongValue;
                 short shortValue;
                 unsigned short ushortValue;
+                float floatValue;
+                double doubleValue;
             } _u;
             size_t _allocatedSize;
 
@@ -76,6 +78,8 @@ namespace tntdb
             unsigned long& ulongValue()   { releaseBuffer(); return _u.ulongValue; }
             short& shortValue()           { releaseBuffer(); return _u.shortValue; }
             unsigned short& ushortValue() { releaseBuffer(); return _u.ushortValue; }
+            float& floatValue()           { releaseBuffer(); return _u.floatValue; }
+            double& doubleValue()         { releaseBuffer(); return _u.doubleValue; }
         };
 
         typedef std::map<std::string, cxxtools::SmartPtr<Bind> > BindMap;

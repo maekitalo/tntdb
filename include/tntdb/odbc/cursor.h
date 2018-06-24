@@ -45,6 +45,7 @@ namespace tntdb
 
         public:
             explicit Cursor(SQLHSTMT hStmt);
+            ~Cursor();
             virtual tntdb::Row fetch();
         };
     }

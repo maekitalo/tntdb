@@ -318,7 +318,7 @@ void Statement::setUnsignedLong(const std::string& col, unsigned long data)
     {
         for (unsigned n = 0; n < bind.colnums.size(); ++n)
         {
-            log_debug("SQLBindParameter(hStmt, " << bind.colnums[n]+1 << ", SQL_PARAM_INPUT, SQL_C_ULONG, SQLINTEGER, 0, 0, ptr, " << sizeof(long) << ", 0)");
+            log_debug("SQLBindParameter(hStmt, " << bind.colnums[n]+1 << ", SQL_PARAM_INPUT, SQL_C_ULONG, SQLINTEGER, 0, 0, ptr, " << sizeof(unsigned long) << ", 0)");
             retval = SQLBindParameter(_hStmt,
                 bind.colnums[n] + 1,
                 SQL_PARAM_INPUT,
@@ -347,18 +347,22 @@ void Statement::setUnsignedLong(const std::string& col, unsigned long data)
 
 void Statement::setInt32(const std::string& col, int32_t data)
 {
+    setLong(col, data);
 }
 
 void Statement::setUnsigned32(const std::string& col, uint32_t data)
 {
+    setUnsignedLong(col, data);
 }
 
 void Statement::setInt64(const std::string& col, int64_t data)
 {
+    setLong(col, data);
 }
 
 void Statement::setUnsigned64(const std::string& col, uint64_t data)
 {
+    setUnsignedLong(col, data);
 }
 
 void Statement::setDecimal(const std::string& col, const Decimal& data)
@@ -367,10 +371,82 @@ void Statement::setDecimal(const std::string& col, const Decimal& data)
 
 void Statement::setFloat(const std::string& col, float data)
 {
+    log_debug("setFloat(\"" << col << "\", " << data << ')');
+
+    SQLRETURN retval;
+
+    Bind& bind = getBind(col);
+    float& floatValue = bind.floatValue();
+
+    if (bind.boundType != SQL_C_FLOAT)
+    {
+        for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        {
+            log_debug("SQLBindParameter(hStmt, " << bind.colnums[n]+1 << ", SQL_PARAM_INPUT, SQL_C_FLOAT, SQLINTEGER, 0, 0, ptr, " << sizeof(float) << ", 0)");
+            retval = SQLBindParameter(_hStmt,
+                bind.colnums[n] + 1,
+                SQL_PARAM_INPUT,
+                SQL_C_FLOAT,
+                SQL_FLOAT,
+                0, // ColumnSize
+                0, // DecimalDigits
+                &floatValue,
+                sizeof(float),
+                0);
+
+            if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+            {
+                bind.boundType = SQL_UNKNOWN_TYPE;
+                throw Error("SQLBindParameter(" + col + ") failed", retval, SQL_HANDLE_STMT, _hStmt);
+            }
+
+        }
+
+        bind.boundType = SQL_C_FLOAT;
+    }
+
+    for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        floatValue = data;
 }
 
 void Statement::setDouble(const std::string& col, double data)
 {
+    log_debug("setDouble(\"" << col << "\", " << data << ')');
+
+    SQLRETURN retval;
+
+    Bind& bind = getBind(col);
+    double& doubleValue = bind.doubleValue();
+
+    if (bind.boundType != SQL_C_DOUBLE)
+    {
+        for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        {
+            log_debug("SQLBindParameter(hStmt, " << bind.colnums[n]+1 << ", SQL_PARAM_INPUT, SQL_C_DOUBLE, SQLINTEGER, 0, 0, ptr, " << sizeof(long) << ", 0)");
+            retval = SQLBindParameter(_hStmt,
+                bind.colnums[n] + 1,
+                SQL_PARAM_INPUT,
+                SQL_C_DOUBLE,
+                SQL_DOUBLE,
+                0, // ColumnSize
+                0, // DecimalDigits
+                &doubleValue,
+                sizeof(double),
+                0);
+
+            if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
+            {
+                bind.boundType = SQL_UNKNOWN_TYPE;
+                throw Error("SQLBindParameter(" + col + ") failed", retval, SQL_HANDLE_STMT, _hStmt);
+            }
+
+        }
+
+        bind.boundType = SQL_C_FLOAT;
+    }
+
+    for (unsigned n = 0; n < bind.colnums.size(); ++n)
+        doubleValue = data;
 }
 
 void Statement::setChar(const std::string& col, char data)
@@ -401,7 +477,7 @@ Statement::size_type Statement::execute()
 {
     SQLRETURN retval;
 
-    log_debug("SQLExecute");
+    log_debug("SQLExecute(" << _hStmt << ')');
     retval = SQLExecute(_hStmt);
 	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
         throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, _hStmt);
@@ -424,7 +500,7 @@ tntdb::Row Statement::selectRow()
 {
     SQLRETURN retval;
 
-    log_debug("SQLExecute");
+    log_debug("SQLExecute(" << _hStmt << ')');
     retval = SQLExecute(_hStmt);
 	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
         throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, _hStmt);
@@ -436,6 +512,10 @@ tntdb::Row Statement::selectRow()
     if (retval == SQL_NO_DATA)
         throw NotFound();
 
+    retval = SQLFreeStmt(_hStmt, SQL_CLOSE);
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("SQLFreeStmt failed", retval, SQL_HANDLE_STMT, _hStmt);
+
     return ret;
 }
 
@@ -443,7 +523,7 @@ tntdb::Value Statement::selectValue()
 {
     SQLRETURN retval;
 
-    log_debug("SQLExecute");
+    log_debug("SQLExecute(" << _hStmt << ')');
     retval = SQLExecute(_hStmt);
 	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
         throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, _hStmt);
@@ -457,6 +537,10 @@ tntdb::Value Statement::selectValue()
 
     if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
         throw Error("SQLFetch failed", retval, SQL_HANDLE_STMT, _hStmt);
+
+    retval = SQLFreeStmt(_hStmt, SQL_CLOSE);
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+        throw Error("SQLFreeStmt failed", retval, SQL_HANDLE_STMT, _hStmt);
 
     return ret;
 }

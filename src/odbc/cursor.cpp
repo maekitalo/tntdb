@@ -55,6 +55,17 @@ Cursor::Cursor(SQLHSTMT hStmt)
     _row = tntdb::Row(new Row(hStmt));
 }
 
+Cursor::~Cursor()
+{
+    SQLRETURN retval;
+    retval = SQLFreeStmt(_hStmt, SQL_CLOSE);
+    if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO)
+    {
+        log_error(Error("SQLFreeStmt failed", retval, SQL_HANDLE_STMT, _hStmt).what());
+    }
+
+}
+
 tntdb::Row Cursor::fetch()
 {
     SQLRETURN retval;

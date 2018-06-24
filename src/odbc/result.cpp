@@ -46,7 +46,7 @@ Result::Result(SQLHSTMT hStmt)
 {
     SQLRETURN retval;
 
-    log_debug("SQLExecute");
+    log_debug("SQLExecute(" << hStmt << ')');
     retval = SQLExecute(hStmt);
 	if (retval != SQL_SUCCESS && retval != SQL_SUCCESS_WITH_INFO && retval != SQL_NO_DATA)
         throw Error("SQLExecute failed", retval, SQL_HANDLE_STMT, hStmt);

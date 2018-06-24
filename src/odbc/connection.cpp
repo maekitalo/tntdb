@@ -207,7 +207,7 @@ bool Connection::ping()
 long Connection::lastInsertId(const std::string& name)
 {
     // TODO
-    return 0l;
+    throw std::runtime_error("Connection::lastInsertId not supported in odbc driver");
 }
 
 void Connection::lockTable(const std::string& tablename, bool exclusive)
