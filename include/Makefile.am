@@ -94,6 +94,7 @@ nobase_noinst_HEADERS = \
 	tntdb/oracle/singlerow.h \
 	tntdb/oracle/singlevalue.h \
 	tntdb/oracle/statement.h \
+	tntdb/oracle/string.h \
 	tntdb/oracle/value.h
 
 nobase_nodist_include_HEADERS = \
