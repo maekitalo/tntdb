@@ -42,7 +42,13 @@ BuildRequires:  lzo-devel
 BuildRequires:  mysql-devel
 BuildRequires:  openssl-devel
 BuildRequires:  pkg-config
+%if 0%{?suse_version} > 1315
+### 42ity-OBS offers several implementation and bugs out
+BuildRequires:  postgresql96-devel
+BuildRequires:  postgresql96
+%else
 BuildRequires:  postgresql-devel
+%endif
 BuildRequires:  sqlite-devel
 BuildRequires:  zip
 BuildRequires:  zlib-devel
