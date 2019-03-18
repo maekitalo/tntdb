@@ -29,10 +29,7 @@
 #ifndef TNTDB_SERIALIZATION_H
 #define TNTDB_SERIALIZATION_H
 
-namespace cxxtools
-{
-    class SerializationInfo;
-}
+#include <cxxtools/serializationinfo.h>
 
 namespace tntdb
 {
@@ -64,7 +61,7 @@ namespace tntdb
     /** Serialize objects into tntdb::Statement.
      *  This sets the placeholder variables in statement to the value of the
      *  object to serialize.
-     *  
+     *
      *  Example:
      *  /code
      *    MyObject obj = ...;
