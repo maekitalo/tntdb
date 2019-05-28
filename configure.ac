@@ -1,4 +1,4 @@
-AC_INIT(tntdb, 1.4rc3, [Tommi Maekitalo <tommi@tntnet.org>])
+AC_INIT(tntdb, 1.4, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 LT_INIT([disable-static])
 
