@@ -352,7 +352,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           int value;
-          log_debug("OCINumberToInt");
+          log_finer("OCINumberToInt");
           sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(int), OCI_NUMBER_SIGNED, &value);
           _conn->checkError(ret, "OCINumberToInt");
           return value != 0;

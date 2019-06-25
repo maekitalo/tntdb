@@ -127,7 +127,7 @@ namespace tntdb
             tntdb::Statement st1 = conn.prepare(
                 tntdb::SqlBuilder(
                     "select foo from mytable where bar = 17 %cond"
-                        .replaceIf(!searchString.empty(), "s", "and bar like %s")
+                        .replaceIf(!searchString.empty(), "cond", "and bar like :s")
                 );
             // => select foo from mytable where bar = 17
 
@@ -135,7 +135,7 @@ namespace tntdb
             tntdb::Statement st2 = conn.prepare(
                 tntdb::SqlBuilder(
                     "select foo from mytable where bar = 17 %cond"
-                        .replaceIf(!searchString.empty(), "s", "and bar like :s")
+                        .replaceIf(!searchString.empty(), "cond", "and bar like :s")
                 );
             // => select foo from mytable where bar = 17 and bar like :s
 
