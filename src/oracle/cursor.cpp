@@ -79,12 +79,12 @@ namespace tntdb
     {
       if (rowcount > 0 && srow->row() < rowcount - 1)
       {
-        log_debug("increase row counter to " << (srow->row() + 1));
+        log_finer("increase row counter to " << (srow->row() + 1));
         srow->row(srow->row()+1);
       }
       else if (rowcount > 0 && rowcount < fetchsize)
       {
-        log_debug("last fetch returned " << rowcount << " rows but " << fetchsize << " was expected - finish cursor");
+        log_finer("last fetch returned " << rowcount << " rows but " << fetchsize << " was expected - finish cursor");
         row = tntdb::Row();
         srow = 0;
       }
