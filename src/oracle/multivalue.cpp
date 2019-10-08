@@ -323,12 +323,16 @@ namespace tntdb
 
     bool MultiValue::isNull(unsigned n) const
     {
+      log_debug("isNull(" << n << ')');
+
       return _nullind[n] != 0;
     }
 
     bool MultiValue::getBool(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getBool(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -368,7 +372,9 @@ namespace tntdb
 
     short MultiValue::getShort(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getShort(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -390,7 +396,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           short value;
-          log_debug("OCINumberToInt");
+          log_finer("OCINumberToInt");
           sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(short), OCI_NUMBER_SIGNED, &value);
           _conn->checkError(ret, "OCINumberToInt");
           return value;
@@ -403,7 +409,9 @@ namespace tntdb
 
     int MultiValue::getInt(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getInt(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -425,7 +433,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           int value;
-          log_debug("OCINumberToInt");
+          log_finer("OCINumberToInt");
           sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(int), OCI_NUMBER_SIGNED, &value);
           _conn->checkError(ret, "OCINumberToInt");
           return value;
@@ -438,7 +446,9 @@ namespace tntdb
 
     long MultiValue::getLong(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getLong(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -460,7 +470,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           long value;
-          log_debug("OCINumberToInt");
+          log_finer("OCINumberToInt");
           sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(long), OCI_NUMBER_SIGNED, &value);
           _conn->checkError(ret, "OCINumberToInt");
           return value;
@@ -473,12 +483,16 @@ namespace tntdb
 
     int32_t MultiValue::getInt32(unsigned n) const
     {
+      log_debug("getInt32(" << n << "), type=" << _type);
+
       return getInt(n);
     }
 
     unsigned short MultiValue::getUnsignedShort(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getUnsignedShort(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -500,7 +514,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           unsigned short value;
-          log_debug("OCINumberToInt");
+          log_finer("OCINumberToInt");
           sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(unsigned short), OCI_NUMBER_UNSIGNED, &value);
           _conn->checkError(ret, "OCINumberToInt");
           return value;
@@ -513,7 +527,9 @@ namespace tntdb
 
     unsigned MultiValue::getUnsigned(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getUnsigned(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -535,7 +551,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           unsigned value;
-          log_debug("OCINumberToInt");
+          log_finer("OCINumberToInt");
           sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(unsigned), OCI_NUMBER_UNSIGNED, &value);
           _conn->checkError(ret, "OCINumberToInt");
           return value;
@@ -548,7 +564,9 @@ namespace tntdb
 
     unsigned long MultiValue::getUnsignedLong(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getUnsignedLong(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -570,7 +588,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           unsigned long value;
-          log_debug("OCINumberToInt");
+          log_finer("OCINumberToInt");
           sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(unsigned long), OCI_NUMBER_UNSIGNED, &value);
           _conn->checkError(ret, "OCINumberToInt");
           return value;
@@ -583,12 +601,16 @@ namespace tntdb
 
     uint32_t MultiValue::getUnsigned32(unsigned n) const
     {
+      log_debug("getUnsigned32(" << n << "), type=" << _type);
+
       return getUnsigned(n);
     }
 
     int64_t MultiValue::getInt64(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getInt64(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -610,7 +632,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           int64_t value;
-          log_debug("OCINumberToInt");
+          log_finer("OCINumberToInt");
           sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(int64_t), OCI_NUMBER_SIGNED, &value);
           _conn->checkError(ret, "OCINumberToInt");
           return value;
@@ -623,7 +645,9 @@ namespace tntdb
 
     uint64_t MultiValue::getUnsigned64(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getUnsigned64(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -645,7 +669,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           uint64_t value;
-          log_debug("OCINumberToInt");
+          log_finer("OCINumberToInt");
           sword ret = OCINumberToInt(_conn->getErrorHandle(), &number(n), sizeof(uint64_t), OCI_NUMBER_UNSIGNED, &value);
           _conn->checkError(ret, "OCINumberToInt");
           return value;
@@ -658,7 +682,9 @@ namespace tntdb
 
     Decimal MultiValue::getDecimal(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getDecimal(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -687,7 +713,9 @@ namespace tntdb
 
     float MultiValue::getFloat(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getFloat(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -709,7 +737,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           float value;
-          log_debug("OCINumberToReal");
+          log_finer("OCINumberToReal");
           sword ret = OCINumberToReal(_conn->getErrorHandle(), &number(n), sizeof(float), &value);
           _conn->checkError(ret, "OCINumberToReal");
           return value;
@@ -722,7 +750,9 @@ namespace tntdb
 
     double MultiValue::getDouble(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getDouble(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -744,7 +774,7 @@ namespace tntdb
         case SQLT_VNU:
         {
           double value;
-          log_debug("OCINumberToReal");
+          log_finer("OCINumberToReal");
           sword ret = OCINumberToReal(_conn->getErrorHandle(), &number(n), sizeof(double), &value);
           _conn->checkError(ret, "OCINumberToReal");
           return value;
@@ -757,7 +787,9 @@ namespace tntdb
 
     char MultiValue::getChar(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getChar(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -780,7 +812,9 @@ namespace tntdb
 
     void MultiValue::getString(unsigned n, std::string& ret) const
     {
-      if (_type != SQLT_AFC && _type != SQLT_CHR && isNull(n))
+      log_debug("getString(" << n << "), type=" << _type);
+
+      if (_type != SQLT_AFC && _type != SQLT_CHR && _nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -813,7 +847,9 @@ namespace tntdb
 
     void MultiValue::getBlob(unsigned n, tntdb::Blob& ret) const
     {
-      if (isNull(n))
+      log_debug("getBlob(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -840,7 +876,9 @@ namespace tntdb
 
     Date MultiValue::getDate(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getDate(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -858,7 +896,9 @@ namespace tntdb
 
     Time MultiValue::getTime(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("getTime(" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)
@@ -876,7 +916,9 @@ namespace tntdb
 
     tntdb::Datetime MultiValue::getDatetime(unsigned n) const
     {
-      if (isNull(n))
+      log_debug("Datetime (" << n << "), type=" << _type);
+
+      if (_nullind[n] != 0)
         throw NullValue();
 
       switch (_type)

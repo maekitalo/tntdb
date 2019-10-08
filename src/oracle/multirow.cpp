@@ -60,11 +60,13 @@ namespace tntdb
 
     MultiValue::Ptr MultiRow::getValuesByNumber(unsigned field_num) const
     {
+      log_debug("getValuesByNumber(" << field_num << ')');
       return _columns.at(field_num);
     }
 
     MultiValue::Ptr MultiRow::getValuesByName(const std::string& field_name) const
     {
+      log_debug("getValuesByName(" << field_name << ')');
       return getValuesByNumber(getColIndexByName(field_name));
     }
 
