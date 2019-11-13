@@ -176,9 +176,9 @@ AC_ARG_WITH(
 
 if test "$with_mysql" = yes
 then
-  AC_PATH_PROGS(MYSQL_CONFIG, mysql_config)
+  AC_PATH_PROGS(MYSQL_CONFIG, mysql_config mariadb_config)
   if ! test -x "$MYSQL_CONFIG"; then
-    AC_MSG_ERROR([mysql configuration script was not found])
+    AC_MSG_ERROR([mysql (or mariadb) configuration script was not found])
   fi
 
   MYSQL_CFLAGS=`$MYSQL_CONFIG --cflags`
