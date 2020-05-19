@@ -38,7 +38,7 @@ namespace tntdb
   {
     class Connection : public IStmtCacheConnection
     {
-        MYSQL* mysql = nullptr;
+        MYSQL* mysql;
         bool initialized;
         unsigned transactionActive;
         std::string lockTablesQuery;

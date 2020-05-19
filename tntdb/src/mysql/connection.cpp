@@ -50,7 +50,7 @@ namespace tntdb
                        : std::string("null");
       }
       const char* zstr(const char* s)
-      { return s && s[0] ? s : nullptr; }
+      { return s && s[0] ? s : NULL; }
     }
 
     void Connection::open(const char* app, const char* host, const char* user,
@@ -67,7 +67,7 @@ namespace tntdb
         << str(unix_socket) << ", "
         << client_flag << ')');
 
-      mysql = ::mysql_init(nullptr);
+      mysql = ::mysql_init(NULL);
       if (!mysql)
         throw std::runtime_error("cannot initalize mysql");
       initialized = true;
@@ -86,14 +86,16 @@ namespace tntdb
     Connection::Connection(const char* app, const char* host, const char* user,
       const char* passwd, const char* db, unsigned int port,
       const char* unix_socket, unsigned long client_flag)
-      : initialized(false),
-        transactionActive(0)
+      : mysql(NULL)
+      , initialized(false)
+      , transactionActive(0)
     {
       open(app, host, user, passwd, db, port, unix_socket, client_flag);
     }
 
     Connection::Connection(const char* conn)
-      : initialized(false)
+      : mysql(NULL)
+      , initialized(false)
       , transactionActive(0)
     {
       log_debug("Connection::Connection(\"" << conn << "\")");
@@ -256,7 +258,7 @@ namespace tntdb
 
         log_debug("mysql_close(" << mysql << ')');
         ::mysql_close(mysql);
-        mysql = nullptr;
+        mysql = NULL;
       }
     }
 
