@@ -50,7 +50,7 @@ namespace tntdb
                        : std::string("null");
       }
       const char* zstr(const char* s)
-      { return s && s[0] ? s : 0; }
+      { return s && s[0] ? s : nullptr; }
     }
 
     void Connection::open(const char* app, const char* host, const char* user,
@@ -67,19 +67,20 @@ namespace tntdb
         << str(unix_socket) << ", "
         << client_flag << ')');
 
-      if (::mysql_init(&mysql) == 0)
+      mysql = ::mysql_init(nullptr);
+      if (!mysql)
         throw std::runtime_error("cannot initalize mysql");
       initialized = true;
 
       unsigned int timeout = 300;
-      mysql_options(&mysql, MYSQL_OPT_READ_TIMEOUT, &timeout);
+      mysql_options(mysql, MYSQL_OPT_READ_TIMEOUT, &timeout);
 
-      if (::mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, app && app[0] ? app : "tntdb") != 0)
-        throw MysqlError("mysql_options", &mysql);
+      if (::mysql_options(mysql, MYSQL_READ_DEFAULT_GROUP, app && app[0] ? app : "tntdb") != 0)
+        throw MysqlError("mysql_options", mysql);
 
-      if (!::mysql_real_connect(&mysql, zstr(host), zstr(user), zstr(passwd),
-                                zstr(db), port, zstr(unix_socket), client_flag))
-        throw MysqlError("mysql_real_connect", &mysql);
+      if (!::mysql_real_connect(mysql, zstr(host), zstr(user), zstr(passwd),
+                                zstr(db), 0, zstr(unix_socket), client_flag))
+        throw MysqlError("mysql_real_connect", mysql);
     }
 
     Connection::Connection(const char* app, const char* host, const char* user,
@@ -93,6 +94,7 @@ namespace tntdb
 
     Connection::Connection(const char* conn)
       : initialized(false)
+      , transactionActive(0)
     {
       log_debug("Connection::Connection(\"" << conn << "\")");
       std::string app;
@@ -248,12 +250,13 @@ namespace tntdb
         if (!lockTablesQuery.empty())
         {
           log_debug("mysql_query(\"UNLOCK TABLES\")");
-          if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
-            log_warn(MysqlError("mysql_query", &mysql).what());
+          if (::mysql_query(mysql, "UNLOCK TABLES") != 0)
+            log_warn(MysqlError("mysql_query", mysql).what());
         }
 
-        log_debug("mysql_close(" << &mysql << ')');
-        ::mysql_close(&mysql);
+        log_debug("mysql_close(" << mysql << ')');
+        ::mysql_close(mysql);
+        mysql = nullptr;
       }
     }
 
@@ -261,9 +264,9 @@ namespace tntdb
     {
       if (transactionActive == 0)
       {
-        log_debug("mysql_autocomit(" << &mysql << ", " << 0 << ')');
-        if (::mysql_autocommit(&mysql, 0) != 0)
-          throw MysqlError("mysql_autocommit", &mysql);
+        log_debug("mysql_autocomit(" << mysql << ", " << 0 << ')');
+        if (::mysql_autocommit(mysql, 0) != 0)
+          throw MysqlError("mysql_autocommit", mysql);
       }
 
       ++transactionActive;
@@ -273,21 +276,21 @@ namespace tntdb
     {
       if (transactionActive == 0 || --transactionActive == 0)
       {
-        log_debug("mysql_commit(" << &mysql << ')');
-        if (::mysql_commit(&mysql) != 0)
-          throw MysqlError("mysql_commit", &mysql);
+        log_debug("mysql_commit(" << mysql << ')');
+        if (::mysql_commit(mysql) != 0)
+          throw MysqlError("mysql_commit", mysql);
 
         if (!lockTablesQuery.empty())
         {
           log_debug("mysql_query(\"UNLOCK TABLES\")");
-          if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
-            throw MysqlError("mysql_query", &mysql);
+          if (::mysql_query(mysql, "UNLOCK TABLES") != 0)
+            throw MysqlError("mysql_query", mysql);
           lockTablesQuery.clear();
         }
 
-        log_debug("mysql_autocomit(" << &mysql << ", " << 1 << ')');
-        if (::mysql_autocommit(&mysql, 1) != 0)
-          throw MysqlError("mysql_autocommit", &mysql);
+        log_debug("mysql_autocomit(" << mysql << ", " << 1 << ')');
+        if (::mysql_autocommit(mysql, 1) != 0)
+          throw MysqlError("mysql_autocommit", mysql);
 
       }
     }
@@ -296,21 +299,21 @@ namespace tntdb
     {
       if (transactionActive == 0 || --transactionActive == 0)
       {
-        log_debug("mysql_rollback(" << &mysql << ')');
-        if (::mysql_rollback(&mysql) != 0)
-          throw MysqlError("mysql_rollback", &mysql);
+        log_debug("mysql_rollback(" << mysql << ')');
+        if (::mysql_rollback(mysql) != 0)
+          throw MysqlError("mysql_rollback", mysql);
 
         if (!lockTablesQuery.empty())
         {
           log_debug("mysql_query(\"UNLOCK TABLES\")");
-          if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
-            throw MysqlError("mysql_query", &mysql);
+          if (::mysql_query(mysql, "UNLOCK TABLES") != 0)
+            throw MysqlError("mysql_query", mysql);
           lockTablesQuery.clear();
         }
 
-        log_debug("mysql_autocommit(" << &mysql << ", " << 1 << ')');
-        if (::mysql_autocommit(&mysql, 1) != 0)
-          throw MysqlError("mysql_autocommit", &mysql);
+        log_debug("mysql_autocommit(" << mysql << ", " << 1 << ')');
+        if (::mysql_autocommit(mysql, 1) != 0)
+          throw MysqlError("mysql_autocommit", mysql);
 
       }
     }
@@ -318,23 +321,23 @@ namespace tntdb
     Connection::size_type Connection::execute(const std::string& query)
     {
       log_debug("mysql_query(\"" << query << "\")");
-      if (::mysql_query(&mysql, query.c_str()) != 0)
-        throw MysqlError("mysql_query", &mysql);
+      if (::mysql_real_query(mysql, query.c_str(), query.size()) != 0)
+        throw MysqlError("mysql_query", mysql);
 
-      log_debug("mysql_affected_rows(" << &mysql << ')');
-      return ::mysql_affected_rows(&mysql);
+      log_debug("mysql_affected_rows(" << mysql << ')');
+      return ::mysql_affected_rows(mysql);
     }
 
     tntdb::Result Connection::select(const std::string& query)
     {
       execute(query);
 
-      log_debug("mysql_store_result(" << &mysql << ')');
-      MYSQL_RES* res = ::mysql_store_result(&mysql);
+      log_debug("mysql_store_result(" << mysql << ')');
+      MYSQL_RES* res = ::mysql_store_result(mysql);
       if (res == 0)
-        throw MysqlError("mysql_store_result", &mysql);
+        throw MysqlError("mysql_store_result", mysql);
 
-      return tntdb::Result(new Result(tntdb::Connection(this), &mysql, res));
+      return tntdb::Result(new Result(tntdb::Connection(this), mysql, res));
     }
 
     Row Connection::selectRow(const std::string& query)
@@ -357,19 +360,19 @@ namespace tntdb
 
     tntdb::Statement Connection::prepare(const std::string& query)
     {
-      return tntdb::Statement(new Statement(this, &mysql, query));
+      return tntdb::Statement(new Statement(this, mysql, query));
     }
 
     bool Connection::ping()
     {
-      int ret = ::mysql_ping(&mysql);
+      int ret = ::mysql_ping(mysql);
       log_debug("mysql_ping() => " << ret);
       return ret == 0;
     }
 
     long Connection::lastInsertId(const std::string& name)
     {
-      return static_cast<long>(::mysql_insert_id(&mysql));
+      return static_cast<long>(::mysql_insert_id(mysql));
     }
 
     void Connection::lockTable(const std::string& tablename, bool exclusive)
@@ -383,8 +386,8 @@ namespace tntdb
       lockTablesQuery += exclusive ? " WRITE" : " READ";
 
       log_debug("mysql_query(\"" << lockTablesQuery << "\")");
-      if (::mysql_query(&mysql, lockTablesQuery.c_str()) != 0)
-        throw MysqlError("mysql_query", &mysql);
+      if (::mysql_query(mysql, lockTablesQuery.c_str()) != 0)
+        throw MysqlError("mysql_query", mysql);
     }
 
   }
