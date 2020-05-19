@@ -79,7 +79,7 @@ namespace tntdb
         throw MysqlError("mysql_options", mysql);
 
       if (!::mysql_real_connect(mysql, zstr(host), zstr(user), zstr(passwd),
-                                zstr(db), 0, zstr(unix_socket), client_flag))
+                                zstr(db), port, zstr(unix_socket), client_flag))
         throw MysqlError("mysql_real_connect", mysql);
     }
 
