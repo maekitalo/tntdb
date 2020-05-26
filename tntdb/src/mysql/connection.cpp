@@ -66,10 +66,20 @@ namespace tntdb
         << port << ", "
         << str(unix_socket) << ", "
         << client_flag << ')');
-
-      mysql = ::mysql_init(NULL);
+      
+      //We already open the connection
+      if(mysql)
+      {
+        ::mysql_init(mysql);
+      }
+      else
+      {
+        mysql = ::mysql_init(NULL);
+      }
+      
       if (!mysql)
         throw std::runtime_error("cannot initalize mysql");
+      
       initialized = true;
 
       unsigned int timeout = 300;
