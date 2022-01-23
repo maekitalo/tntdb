@@ -65,7 +65,10 @@ namespace tntdb
     {
       if (!lib)
       {
-        std::string d = DRIVERDIR + cxxtools::Directory::sep() + libraryPrefix + driverName;
+        std::string d = DRIVERDIR;
+        d += cxxtools::Directory::sep();
+        d += libraryPrefix;
+        d += driverName;
         log_debug("loading library \"" << d << '"');
         lib = cxxtools::Library(d);
       }
