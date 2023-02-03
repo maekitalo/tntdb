@@ -32,182 +32,184 @@
 #include <tntdb/iface/irow.h>
 #include <tntdb/bits/value.h>
 #include <tntdb/blob.h>
-#include <tntdb/config.h>
-#include <cxxtools/smartptr.h>
+#include <memory>
 
 namespace tntdb
 {
-  class RowReader;
+class RowReader;
 
-  /**
-   * Row represents a row, which is fetched from the database.
-   */
-  class Row
-  {
-    public:
-      /// Iterator for iterating through the values of this row.
-      class const_iterator;
-      typedef unsigned size_type;
-      typedef Value value_type;
+/**
+ * Row represents a _row, which is fetched from the database.
+ */
+class Row
+{
+public:
+    /// Iterator for iterating through the values of this _row.
+    class const_iterator;
+    typedef unsigned size_type;
+    typedef Value value_type;
 
-    private:
-      cxxtools::SmartPtr<IRow> row;
+private:
+    std::shared_ptr<IRow> _row;
 
-    public:
-      Row()  { }
-      Row(IRow* row_)
-        : row(row_)
-        { }
+public:
+    Row()  { }
+    explicit Row(const std::shared_ptr<IRow>& row)
+      : _row(row)
+      { }
+    explicit Row(IRow* row)
+      : _row(row)
+      { }
 
-      /// Returns the number of columns of this row.
-      unsigned size() const   { return row->size(); }
-      /// Returns true, if this row-object has no columns.
-      bool empty() const      { return !row || size() == 0; }
+    /// Returns the number of columns of this _row.
+    unsigned size() const   { return _row->size(); }
+    /// Returns true, if this _row-object has no columns.
+    bool empty() const      { return !_row || size() == 0; }
 
-      /// Returns the field_num's value-object.
-      Value getValue(size_type field_num) const
-        { return row->getValueByNumber(field_num); }
-      /// Returns the value-object by name.
-      Value getValue(const std::string& field_name) const
-        { return row->getValueByName(field_name); }
-      /// Returns the field_num's value-object.
-      Value operator[] (size_type field_num) const
-        { return row->getValueByNumber(field_num); }
-      /// Returns the value-object by name.
-      Value operator[] (const std::string& field_name) const
-        { return row->getValueByName(field_name); }
-      /// Returns the name of the field_num's column
-      std::string getName(size_type field_num) const
-        { return row->getColumnName(field_num); }
+    /// Returns the field_num's value-object.
+    Value getValue(size_type field_num) const
+      { return _row->getValueByNumber(field_num); }
+    /// Returns the value-object by name.
+    Value getValue(const std::string& field_name) const
+      { return _row->getValueByName(field_name); }
+    /// Returns the field_num's value-object.
+    Value operator[] (size_type field_num) const
+      { return _row->getValueByNumber(field_num); }
+    /// Returns the value-object by name.
+    Value operator[] (const std::string& field_name) const
+      { return _row->getValueByName(field_name); }
+    /// Returns the name of the field_num's column
+    std::string getName(size_type field_num) const
+      { return _row->getColumnName(field_num); }
 
-      /// Return true, if the specified value is null.
-      bool isNull(size_type field_num) const
-        { return getValue(field_num).isNull(); }
-      /// Return true, if the specified value is null.
-      bool isNull(const std::string& field_name) const
-        { return getValue(field_name).isNull(); }
+    /// Return true, if the specified value is null.
+    bool isNull(size_type field_num) const
+      { return getValue(field_num).isNull(); }
+    /// Return true, if the specified value is null.
+    bool isNull(const std::string& field_name) const
+      { return getValue(field_name).isNull(); }
 
-      //@{
-      /**
-       * The get-methods try to convert the value of the speicfied column to
-       * the requested type.
-       */
+    //@{
+    /**
+     * The get-methods try to convert the value of the speicfied column to
+     * the requested type.
+     */
 
-      bool getBool(size_type field_num) const
-        { return getValue(field_num).getBool(); }
-      short getShort(size_type field_num) const
-        { return getValue(field_num).getShort(); }
-      int getInt(size_type field_num) const
-        { return getValue(field_num).getInt(); }
-      long getLong(size_type field_num) const
-        { return getValue(field_num).getLong(); }
-      unsigned short getUnsignedShort(size_type field_num) const
-        { return getValue(field_num).getUnsignedShort(); }
-      unsigned getUnsigned(size_type field_num) const
-        { return getValue(field_num).getUnsigned(); }
-      unsigned long getUnsignedLong(size_type field_num) const
-        { return getValue(field_num).getUnsignedLong(); }
-      int32_t getInt32(size_type field_num) const
-        { return getValue(field_num).getInt32(); }
-      uint32_t getUnsigned32(size_type field_num) const
-        { return getValue(field_num).getUnsigned32(); }
-      int64_t getInt64(size_type field_num) const
-        { return getValue(field_num).getInt64(); }
-      uint64_t getUnsigned64(size_type field_num) const
-        { return getValue(field_num).getUnsigned64(); }
-      Decimal getDecimal(size_type field_num) const
-        { return getValue(field_num).getDecimal(); }
-      float getFloat(size_type field_num) const
-        { return getValue(field_num).getFloat(); }
-      double getDouble(size_type field_num) const
-        { return getValue(field_num).getDouble(); }
-      char getChar(size_type field_num) const
-        { return getValue(field_num).getChar(); }
-      std::string getString(size_type field_num) const
-        { return getValue(field_num).getString(); }
-      void getString(size_type field_num, std::string& ret) const
-        { return getValue(field_num).getString(ret); }
-      Blob getBlob(size_type field_num) const
-        { return getValue(field_num).getBlob(); }
-      void getBlob(size_type field_num, Blob& ret) const
-        { return getValue(field_num).getBlob(ret); }
-      Date getDate(size_type field_num) const
-        { return getValue(field_num).getDate(); }
-      Time getTime(size_type field_num) const
-        { return getValue(field_num).getTime(); }
-      Datetime getDatetime(size_type field_num) const
-        { return getValue(field_num).getDatetime(); }
+    bool getBool(size_type field_num) const
+      { return getValue(field_num).getBool(); }
+    short getShort(size_type field_num) const
+      { return getValue(field_num).getShort(); }
+    int getInt(size_type field_num) const
+      { return getValue(field_num).getInt(); }
+    long getLong(size_type field_num) const
+      { return getValue(field_num).getLong(); }
+    unsigned short getUnsignedShort(size_type field_num) const
+      { return getValue(field_num).getUnsignedShort(); }
+    unsigned getUnsigned(size_type field_num) const
+      { return getValue(field_num).getUnsigned(); }
+    unsigned long getUnsignedLong(size_type field_num) const
+      { return getValue(field_num).getUnsignedLong(); }
+    int32_t getInt32(size_type field_num) const
+      { return getValue(field_num).getInt32(); }
+    uint32_t getUnsigned32(size_type field_num) const
+      { return getValue(field_num).getUnsigned32(); }
+    int64_t getInt64(size_type field_num) const
+      { return getValue(field_num).getInt64(); }
+    uint64_t getUnsigned64(size_type field_num) const
+      { return getValue(field_num).getUnsigned64(); }
+    Decimal getDecimal(size_type field_num) const
+      { return getValue(field_num).getDecimal(); }
+    float getFloat(size_type field_num) const
+      { return getValue(field_num).getFloat(); }
+    double getDouble(size_type field_num) const
+      { return getValue(field_num).getDouble(); }
+    char getChar(size_type field_num) const
+      { return getValue(field_num).getChar(); }
+    std::string getString(size_type field_num) const
+      { return getValue(field_num).getString(); }
+    void getString(size_type field_num, std::string& ret) const
+      { return getValue(field_num).getString(ret); }
+    Blob getBlob(size_type field_num) const
+      { return getValue(field_num).getBlob(); }
+    void getBlob(size_type field_num, Blob& ret) const
+      { return getValue(field_num).getBlob(ret); }
+    Date getDate(size_type field_num) const
+      { return getValue(field_num).getDate(); }
+    Time getTime(size_type field_num) const
+      { return getValue(field_num).getTime(); }
+    Datetime getDatetime(size_type field_num) const
+      { return getValue(field_num).getDatetime(); }
 
-      bool getBool(const std::string& field_name) const
-        { return getValue(field_name).getBool(); }
-      short getShort(const std::string& field_name) const
-        { return getValue(field_name).getShort(); }
-      int getInt(const std::string& field_name) const
-        { return getValue(field_name).getInt(); }
-      long getLong(const std::string& field_name) const
-        { return getValue(field_name).getLong(); }
-      unsigned getUnsigned(const std::string& field_name) const
-        { return getValue(field_name).getUnsigned(); }
-      unsigned long getUnsignedLong(const std::string& field_name) const
-        { return getValue(field_name).getUnsignedLong(); }
-      int32_t getInt32(const std::string& field_name) const
-        { return getValue(field_name).getInt32(); }
-      uint32_t getUnsigned32(const std::string& field_name) const
-        { return getValue(field_name).getUnsigned32(); }
-      int64_t getInt64(const std::string& field_name) const
-        { return getValue(field_name).getInt64(); }
-      uint64_t getUnsigned64(const std::string& field_name) const
-        { return getValue(field_name).getUnsigned64(); }
-      Decimal getDecimal(const std::string& field_name) const
-        { return getValue(field_name).getDecimal(); }
-      float getFloat(const std::string& field_name) const
-        { return getValue(field_name).getFloat(); }
-      double getDouble(const std::string& field_name) const
-        { return getValue(field_name).getDouble(); }
-      char getChar(const std::string& field_name) const
-        { return getValue(field_name).getChar(); }
-      std::string getString(const std::string& field_name) const
-        { return getValue(field_name).getString(); }
-      void getString(const std::string& field_name, std::string& ret) const
-        { return getValue(field_name).getString(ret); }
-      Blob getBlob(const std::string& field_name) const
-        { return getValue(field_name).getBlob(); }
-      void getBlob(const std::string& field_name, Blob& ret) const
-        { return getValue(field_name).getBlob(ret); }
-      Date getDate(const std::string& field_name) const
-        { return getValue(field_name).getDate(); }
-      Time getTime(const std::string& field_name) const
-        { return getValue(field_name).getTime(); }
-      Datetime getDatetime(const std::string& field_name) const
-        { return getValue(field_name).getDatetime(); }
-      //@}
+    bool getBool(const std::string& field_name) const
+      { return getValue(field_name).getBool(); }
+    short getShort(const std::string& field_name) const
+      { return getValue(field_name).getShort(); }
+    int getInt(const std::string& field_name) const
+      { return getValue(field_name).getInt(); }
+    long getLong(const std::string& field_name) const
+      { return getValue(field_name).getLong(); }
+    unsigned getUnsigned(const std::string& field_name) const
+      { return getValue(field_name).getUnsigned(); }
+    unsigned long getUnsignedLong(const std::string& field_name) const
+      { return getValue(field_name).getUnsignedLong(); }
+    int32_t getInt32(const std::string& field_name) const
+      { return getValue(field_name).getInt32(); }
+    uint32_t getUnsigned32(const std::string& field_name) const
+      { return getValue(field_name).getUnsigned32(); }
+    int64_t getInt64(const std::string& field_name) const
+      { return getValue(field_name).getInt64(); }
+    uint64_t getUnsigned64(const std::string& field_name) const
+      { return getValue(field_name).getUnsigned64(); }
+    Decimal getDecimal(const std::string& field_name) const
+      { return getValue(field_name).getDecimal(); }
+    float getFloat(const std::string& field_name) const
+      { return getValue(field_name).getFloat(); }
+    double getDouble(const std::string& field_name) const
+      { return getValue(field_name).getDouble(); }
+    char getChar(const std::string& field_name) const
+      { return getValue(field_name).getChar(); }
+    std::string getString(const std::string& field_name) const
+      { return getValue(field_name).getString(); }
+    void getString(const std::string& field_name, std::string& ret) const
+      { return getValue(field_name).getString(ret); }
+    Blob getBlob(const std::string& field_name) const
+      { return getValue(field_name).getBlob(); }
+    void getBlob(const std::string& field_name, Blob& ret) const
+      { return getValue(field_name).getBlob(ret); }
+    Date getDate(const std::string& field_name) const
+      { return getValue(field_name).getDate(); }
+    Time getTime(const std::string& field_name) const
+      { return getValue(field_name).getTime(); }
+    Datetime getDatetime(const std::string& field_name) const
+      { return getValue(field_name).getDatetime(); }
+    //@}
 
-      template <typename T>
-      bool getValue(size_type field_num, T& ret) const
-        { return getValue(field_num).getValue(ret); }
+    template <typename T>
+    bool getValue(size_type field_num, T& ret) const
+      { return getValue(field_num).getValue(ret); }
 
-      /// Returns a iterator to the first column
-      const_iterator begin() const;
-      /// Returns a iterator past the last column
-      const_iterator end() const;
+    /// Returns a iterator to the first column
+    const_iterator begin() const;
+    /// Returns a iterator past the last column
+    const_iterator end() const;
 
-      /// Returns true, if this class is not connected to a actual databaserow.
-      bool operator!() const         { return !row; }
-      /// Returns the actual implementation-class.
-      const IRow* getImpl() const    { return &*row; }
+    /// Returns true, if this class is not connected to a actual databaserow.
+    bool operator!() const         { return !_row; }
+    /// Returns the actual implementation-class.
+    const IRow* getImpl() const    { return &*_row; }
 
-      /// Instantiates a tntdb::RowReader with the passed initial column counter.
-      RowReader reader(size_type n = 0) const;
+    /// Instantiates a tntdb::RowReader with the passed initial column counter.
+    RowReader reader(size_type n = 0) const;
 
-      /// Instantiates a tntdb::RowReader and fetches the value of the first column.
-      template <typename T>
-      RowReader get(T& ret) const;
+    /// Instantiates a tntdb::RowReader and fetches the value of the first column.
+    template <typename T>
+    RowReader get(T& ret) const;
 
-      /// Instantiates a tntdb::RowReader and fetches the value of the first column and sets the null indicator.
-      template <typename T>
-      RowReader get(T& ret, bool& nullInd) const;
+    /// Instantiates a tntdb::RowReader and fetches the value of the first column and sets the null indicator.
+    template <typename T>
+    RowReader get(T& ret, bool& nullInd) const;
 
-  };
+};
 }
 
 #endif // TNTDB_BITS_ROW_H

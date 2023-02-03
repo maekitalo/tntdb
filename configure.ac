@@ -2,7 +2,7 @@ AC_INIT(tntdb, 1.4, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 LT_INIT([disable-static])
 
-abi_current=5
+abi_current=6
 abi_revision=0
 abi_age=0
 sonumber=${abi_current}:${abi_revision}:${abi_age}
@@ -11,7 +11,6 @@ AC_SUBST(abi_current)
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([src/config.h])
-AC_CONFIG_FILES([include/tntdb/config.h])
 AC_CONFIG_SRCDIR([src/connect.cpp])
 
 AC_PROG_CXX
@@ -110,7 +109,7 @@ AC_SUBST(UNSIGNED_UINT64_T_CONFLICT)
 #
 # Cxxtools
 #
-AC_CHECK_HEADER([cxxtools/condition.h], , AC_MSG_ERROR([cxxtools headers not found]))
+AC_CHECK_HEADER([cxxtools/log.h], , AC_MSG_ERROR([cxxtools headers not found]))
 LDFLAGS="$LDFLAGS -lcxxtools"
 
 #
@@ -167,7 +166,7 @@ AC_ARG_WITH(
 
 AS_IF([test "$with_mysql" = yes],
 [
-  AC_CHECK_PROG(MYSQL_CONFIG, mysql_config, mysql_config)
+  AC_CHECK_PROGS(MYSQL_CONFIG, [mysql_config mariadb_config], mysql_config)
   if test -z "$MYSQL_CONFIG"; then
     AC_MSG_ERROR([mysql configuration script was not found; install mysql developent package or use --without-mysql])
   fi

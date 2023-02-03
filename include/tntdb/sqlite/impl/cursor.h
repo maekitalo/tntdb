@@ -30,31 +30,30 @@
 #define TNTDB_SQLITE_IMPL_CURSOR_H
 
 #include <tntdb/iface/icursor.h>
-#include <cxxtools/smartptr.h>
 #include <sqlite3.h>
 
 namespace tntdb
 {
-  namespace sqlite
-  {
-    class Statement;
+namespace sqlite
+{
+class Statement;
 
-    class Cursor : public ICursor
-    {
-        cxxtools::SmartPtr<Statement> statement;
-        sqlite3_stmt* stmt;
+class Cursor : public ICursor
+{
+    Statement* statement;
+    sqlite3_stmt* stmt;
 
-      public:
-        Cursor(Statement* statement, sqlite3_stmt* stmt);
-        ~Cursor();
+public:
+    Cursor(Statement* statement, sqlite3_stmt* stmt);
+    ~Cursor();
 
-        // method for ICursor
-        Row fetch();
+    // method for ICursor
+    Row fetch();
 
-        // specific methods of sqlite-driver
-        sqlite3_stmt* getStmt() const   { return stmt; }
-    };
-  }
+    // specific methods of sqlite-driver
+    sqlite3_stmt* getStmt() const   { return stmt; }
+};
+}
 }
 
 #endif // TNTDB_SQLITE_IMPL_CURSOR_H

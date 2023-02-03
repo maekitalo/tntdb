@@ -32,82 +32,73 @@
 
 #include <tntdb/iface/iblob.h>
 #include <tntdb/impl/blob.h>
-#include <cxxtools/smartptr.h>
+#include <memory>
 
 namespace tntdb
 {
-  /// @brief Binary large objects
-  class Blob
-  {
-  public:
-      /// @brief Release policy for SmartPtr
-      template <typename T>
-      struct Release
-      {
-        void destroy(IBlob* blob)
-          { blob->destroy(); }
-      };
+/// @brief Binary large objects
+class Blob
+{
+    /// @brief Pointer to shared data
+    std::shared_ptr<IBlob> _data;
 
-  private:
-      /// @brief Pointer to shared data
-      cxxtools::SmartPtr<IBlob, cxxtools::InternalRefCounted, Release> _data;
-
-  public:
-      Blob()
-        : _data(BlobImpl::emptyInstance())
+public:
+    Blob()
+        : _data(BlobImpl::emptyInstance(), [](IBlob*){ })
         { }
 
-      /** Construct a Blob with data of a given length
+    /** Construct a Blob with data of a given length
 
-          Constructs a Blob using a default implementation using new/delete
-          to manage the blob-data and the shared data object. The first \a len
-          bytes of the data pointed to by \a data are copied to this Blob.
-       */
-      Blob(const char* data, std::size_t len)
-        : _data(new BlobImpl())
+        Constructs a Blob using a default implementation using new/delete
+        to manage the blob-data and the shared data object. The first \a len
+        bytes of the data pointed to by \a data are copied to this Blob.
+     */
+    Blob(const char* data, std::size_t len)
+        : _data(new BlobImpl(), [](IBlob* blob){ blob->destroy(); })
         { _data->assign(data, len); }
 
-      /// Construct a Blob to use a customized implementation
-      explicit Blob(IBlob* b)
+    /// Construct a Blob to use a customized implementation
+    explicit Blob(IBlob* b)
         : _data(b)
         { }
 
-      /// Assigns the data to this blob object
-      void assign(const char* data, std::size_t len)
-      {
-          // copy-on-write
-          if (_data->refs() > 1)
-            _data = _data->create();
+    /// Assigns the data to this blob object
+    void assign(const char* data, std::size_t len)
+    {
+        // copy-on-write
+        if (_data.get() == BlobImpl::emptyInstance()
+         || !_data.unique())
+            _data.reset(_data->create());
+        _data->assign(data, len);
+    }
 
-          _data->assign(data, len);
-      }
+    /** Make sure the buffer is big enough to hold at least len bytes
 
-      /** Make sure the buffer is big enough to hold at least len bytes
-
-           If shrink is set, the buffer will be exactly len bytes.
-           Data is not preserved when reallocated.
-       */
-      char* reserve(std::size_t len, bool shrink = false)
-      {
-        if (_data.getPointer() == BlobImpl::emptyInstance())
-          _data = _data->create();
+        If shrink is set, the buffer will be exactly len bytes.
+        Data is not preserved when reallocated.
+     */
+    char* reserve(std::size_t len, bool shrink = false)
+    {
+        if (_data.get() == BlobImpl::emptyInstance()
+         || !_data.unique())
+            _data.reset(_data->create());
         return _data->reserve(len, shrink);
-      }
+    }
 
-      bool operator==(const Blob& b) const
+    bool operator==(const Blob& b) const
         { return *_data == *b._data; }
 
-      bool operator!=(const Blob& b) const
+    bool operator!=(const Blob& b) const
         { return !operator==(b); }
 
-      /// Get a pointer to the data or 0 if no data is set.
-      const char* data() const
-        { return  _data->data(); }
+    /// Get a pointer to the data or 0 if no data is set.
+    const char* data() const
+        { return    _data->data(); }
 
-      /// Get the size of the data
-      std::size_t size() const
+    /// Get the size of the data
+    std::size_t size() const
         { return _data->size(); }
-  };
+};
 }
 
 #endif // TNTDB_BITS_BLOB_H

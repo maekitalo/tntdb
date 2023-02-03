@@ -43,48 +43,25 @@ namespace tntdb
 */
 class BlobImpl : public IBlob
 {
-    public:
-        BlobImpl()
-        { }
+public:
+    BlobImpl()
+    { }
 
-        ~BlobImpl()
-        {
-            delete[] _data;
-        }
-
-        virtual void assign(const char* data, std::size_t len);
-
-        virtual char* reserve(std::size_t len, bool shrink);
-
-        virtual IBlob* create() const;
-
-        virtual void destroy();
-
-        static BlobImpl* emptyInstance()
-        {
-            static BlobImpl empty(1);
-            return &empty;
-        }
-
-    protected:
-        // ctor, which constructs a instance, with a reference-counter of 1
-        explicit BlobImpl(int)
-        { addRef(); }
-};
-
-
-/** @internal Initialize statics in BlobImpl during static initialization
-
-    Thread-safety.
-*/
-static struct BlobDataInitializer
-{
-    BlobDataInitializer()
+    ~BlobImpl()
     {
-        BlobImpl::emptyInstance();
+        delete[] _data;
     }
-} tntdb_blobdata_initializer;
 
+    virtual void assign(const char* data, std::size_t len);
+
+    virtual char* reserve(std::size_t len, bool shrink);
+
+    virtual IBlob* create() const;
+
+    virtual void destroy();
+
+    static IBlob* emptyInstance();
+};
 
 }
 

@@ -29,171 +29,173 @@
 #ifndef TNTDB_BITS_CONNECTION_H
 #define TNTDB_BITS_CONNECTION_H
 
-#include <string>
-#include <cxxtools/smartptr.h>
 #include <tntdb/iface/iconnection.h>
 #include <tntdb/bits/statement.h>
+#include <string>
+#include <memory>
 
 namespace tntdb
 {
-  class Result;
-  class Row;
-  class Value;
-  class Statement;
+class Result;
+class Row;
+class Value;
+class Statement;
 
-  /** This class holds a connection to a database
+/** This class holds a connection to a database
 
-      Normally you would create a connection with tntdb::connect(url). The actual
-      connection is reference counted. You can copy this class as you need. When
-      the last copy of it is destroyed, the connection is closed.
+    Normally you would create a connection with tntdb::connect(url). The actual
+    connection is reference counted. You can copy this class as you need. When
+    the last copy of it is destroyed, the connection is closed.
 
-      Example:
-      @code
-        try
-        {
-          tntdb::Connection conn = tntdb::connect("postgresql:dbname=mydatabase");
-          tntdb::Statement st = conn.prepare("SELECT col1, col2 FROM mytable");
+    Example:
+    @code
+      try
+      {
+        tntdb::Connection conn = tntdb::connect("postgresql:dbname=mydatabase");
+        tntdb::Statement st = conn.prepare("SELECT col1, col2 FROM mytable");
 
-          for (tntdb::Statement::const_iterator it = res.begin(); it != res.end(); ++it)
-            std::cout << "col1 = " << it->getString() << ", col2 = " << it->getInt() << std::endl;
-        }
-        catch (const std::exception& e)
-        {
-          std::cerr << e.what() << std::endl;
-        }
-      @endcode
-   */
-  class Connection
-  {
-    public:
-      typedef unsigned size_type;
+        for (tntdb::Statement::const_iterator it = res.begin(); it != res.end(); ++it)
+          std::cout << "col1 = " << it->getString() << ", col2 = " << it->getInt() << std::endl;
+      }
+      catch (const std::exception& e)
+      {
+        std::cerr << e.what() << std::endl;
+      }
+    @endcode
+ */
+class Connection
+{
+public:
+    typedef unsigned size_type;
 
-    private:
-      cxxtools::SmartPtr<IConnection> _conn;
+private:
+    std::shared_ptr<IConnection> _conn;
 
-    public:
-      /// Create an empty %Connection object
-      Connection() { }
+public:
+    /// Create an empty %Connection object
+    Connection() { }
 
-      /// Create a %Connection object from conn
-      Connection(IConnection* conn)
-        : _conn(conn)
-        { }
+    /// Create a %Connection object from conn
+    Connection(const std::shared_ptr<IConnection>& conn)
+      : _conn(conn)
+      { }
+    Connection(IConnection* conn)
+      : _conn(conn)
+      { }
 
-      /** Remove the reference to the connected database. If this was
-          the last reference, the connection is actually closed.
-       */
-      void close() { _conn = 0; }
+    /** Remove the reference to the connected database. If this was
+        the last reference, the connection is actually closed.
+     */
+    void close() { _conn = 0; }
 
-      /** Start a transaction
+    /** Start a transaction
 
-          Normally this is not needed. It is better to use the class Transaction instead.
-       */
-      void beginTransaction();
+        Normally this is not needed. It is better to use the class Transaction instead.
+     */
+    void beginTransaction();
 
-      /// Commit the current transaction
-      void commitTransaction();
+    /// Commit the current transaction
+    void commitTransaction();
 
-      /// Roll back the current transaction
-      void rollbackTransaction();
+    /// Roll back the current transaction
+    void rollbackTransaction();
 
-      /** Execute a static query without returning results
+    /** Execute a static query without returning results
 
-          The query normally is an INSERT, UPDATE or DELETE statement. As with the
-          other query execution methods this should be used only for static queries.
-          If you need to pass parameters it is always better to use the Statement class.
-       */
-      size_type execute(const std::string& query);
+        The query normally is an INSERT, UPDATE or DELETE statement. As with the
+        other query execution methods this should be used only for static queries.
+        If you need to pass parameters it is always better to use the Statement class.
+     */
+    size_type execute(const std::string& query);
 
-      /** Execute a static query which returns a result
+    /** Execute a static query which returns a result
 
-          The query normally is a SELECT statement.
-       */
-      Result select(const std::string& query);
+        The query normally is a SELECT statement.
+     */
+    Result select(const std::string& query);
 
-      /** Execute a static query which returns a result
+    /** Execute a static query which returns a result
 
-          The first row is returned. If the query returns an empty
-          result, a NotFound exception is thrown.
-       */
-      Row selectRow(const std::string& query);
+        The first row is returned. If the query returns an empty
+        result, a NotFound exception is thrown.
+     */
+    Row selectRow(const std::string& query);
 
-      /** Execute a static query which returns a result
+    /** Execute a static query which returns a result
 
-          The first value of the first row is returned. If the query
-          returns an empty result, a NotFound exception is thrown.
-       */
-      Value selectValue(const std::string& query);
+        The first value of the first row is returned. If the query
+        returns an empty result, a NotFound exception is thrown.
+     */
+    Value selectValue(const std::string& query);
 
-      /// Create a new Statement object with the given query
-      Statement prepare(const std::string& query);
+    /// Create a new Statement object with the given query
+    Statement prepare(const std::string& query);
 
-      /** Create a new Statement object with the given query added by a range limitation.
+    /** Create a new Statement object with the given query added by a range limitation.
 
-          The `limit` and `offset` parameters are the names of the host variables, which receive the limits.
-          The offset is optional. When an empty string is passed to offset, just the limit is used.
-       */
-      Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string());
+        The `limit` and `offset` parameters are the names of the host variables, which receive the limits.
+        The offset is optional. When an empty string is passed to offset, just the limit is used.
+     */
+    Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string());
 
-      /** Create a new Statement object with the given query and store it in a cache
+    /** Create a new Statement object with the given query and store it in a cache
 
-          When called again with the same query, the cached object is returned
-       */
-      Statement prepareCached(const std::string& query)
-        { return prepareCached(query, query); }
+        When called again with the same query, the cached object is returned
+     */
+    Statement prepareCached(const std::string& query)
+      { return prepareCached(query, query); }
 
-      /** Create a new Statement object with the given query and caching key
+    /** Create a new Statement object with the given query and caching key
 
-          Per default, prepareCached() uses the query as key which identifies
-          a Statement object in the cache. With this method you can provide
-          your own key (because shorter keys mean faster lookup in the cache).
-          Be aware though that when using this, you have to ensure the same
-          key won't be used twice.
-       */
-      Statement prepareCached(const std::string& query, const std::string& key);
+        Per default, prepareCached() uses the query as key which identifies
+        a Statement object in the cache. With this method you can provide
+        your own key (because shorter keys mean faster lookup in the cache).
+        Be aware though that when using this, you have to ensure the same
+        key won't be used twice.
+     */
+    Statement prepareCached(const std::string& query, const std::string& key);
 
-      /** Create a new Statement object with the given query added by a range limitation.
+    /** Create a new Statement object with the given query added by a range limitation.
 
-          This is like `prepareWithLimit` but the prepared statement cache is used.
-       */
-      Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string())
-        { return prepareCachedWithLimit(query, limit, offset, query); }
+        This is like `prepareWithLimit` but the prepared statement cache is used.
+     */
+    Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string())
+      { return prepareCachedWithLimit(query, limit, offset, query); }
 
-      /** Create a new Statement object with the given query added by a range limitation.
+    /** Create a new Statement object with the given query added by a range limitation.
 
-          This is like `prepareWithLimit` but the prepared statement cache is
-          used. Like in `prepareCached` an optional key can be used.
-       */
-      Statement prepareCachedWithLimit(const std::string& query, const
-      std::string& limit, const std::string& offset, const std::string& key);
+        This is like `prepareWithLimit` but the prepared statement cache is
+        used. Like in `prepareCached` an optional key can be used.
+     */
+    Statement prepareCachedWithLimit(const std::string& query, const
+    std::string& limit, const std::string& offset, const std::string& key);
 
-      /// Clear the Statement cache used from prepareCached()
-      void clearStatementCache()
-        { _conn->clearStatementCache(); }
+    /// Clear the Statement cache used from prepareCached()
+    void clearStatementCache()
+      { _conn->clearStatementCache(); }
 
-      /** Remove a query from the statement cache
+    /** Remove a query from the statement cache
 
-          The return value is true if the given key was found in the cache, false otherwise.
-       */
-      bool clearStatementCache(const std::string& key)
-        { return _conn->clearStatementCache(key); }
+        The return value is true if the given key was found in the cache, false otherwise.
+     */
+    bool clearStatementCache(const std::string& key)
+      { return _conn->clearStatementCache(key); }
 
-      /// Check whether the connection is alive
-      bool ping()                        { return _conn->ping(); }
+    /// Check whether the connection is alive
+    bool ping()                        { return _conn->ping(); }
 
-      /// Get the last inserted insert id
-      long lastInsertId(const std::string& name = std::string())
-        { return _conn->lastInsertId(name); }
+    /// Get the last inserted insert id
+    long lastInsertId(const std::string& name = std::string())
+      { return _conn->lastInsertId(name); }
 
-      /// Check if a connection is established (<b>true if not</b>)
-      bool operator!() const             { return !_conn; }
+    /// Check if a connection is established (<b>true if not</b>)
+    bool operator!() const             { return !_conn; }
 
-      /// @{
-      /// Get the actual implementation object
-      const IConnection* getImpl() const { return &*_conn; }
-      IConnection* getImpl()             { return &*_conn; }
-      /// @}
-  };
+    /// @{
+    /// Get the actual implementation object
+    std::shared_ptr<IConnection> getImpl()      { return _conn; }
+    /// @}
+};
 }
 
 #endif // TNTDB_BITS_CONNECTION_H

@@ -33,36 +33,36 @@
 
 namespace tntdb
 {
-  class Blob;
+class Blob;
 
-  /** @brief streambuf for reading from a tntdb::Blob
-   */
-  class BlobStreamBuf : public std::streambuf
-  {
-    public:
-      explicit BlobStreamBuf(Blob& blob);
+/** @brief streambuf for reading from a tntdb::Blob
+ */
+class BlobStreamBuf : public std::streambuf
+{
+public:
+    explicit BlobStreamBuf(Blob& blob);
 
-      /// see std::streambuf
-      int_type overflow(int_type c);
-      /// see std::streambuf
-      int_type underflow();
-      /// see std::streambuf
-      int sync();
+    /// see std::streambuf
+    int_type overflow(int_type c);
+    /// see std::streambuf
+    int_type underflow();
+    /// see std::streambuf
+    int sync();
 
-  };
+};
 
-  /** @brief istream for reading from a tntdb::Blob
-   */
-  class BlobIStream : public std::istream
-  {
-      BlobStreamBuf streambuf;
+/** @brief istream for reading from a tntdb::Blob
+ */
+class BlobIStream : public std::istream
+{
+    BlobStreamBuf streambuf;
 
-    public:
-      explicit BlobIStream(Blob& blob)
-        : std::istream(0),
-          streambuf(blob)
-      { init(&streambuf); }
-  };
+public:
+    explicit BlobIStream(Blob& blob)
+      : std::istream(0),
+        streambuf(blob)
+    { init(&streambuf); }
+};
 
 }
 

@@ -127,7 +127,7 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
     tntdb::Connection conn;
     tntdb::Statement del;
 
-  public:
+public:
     TntdbTypesTest()
       : cxxtools::unit::TestSuite("types")
     {
@@ -163,348 +163,362 @@ class TntdbTypesTest : public cxxtools::unit::TestSuite
 
     void setUp()
     {
-      if (!conn)
-      {
-        const char* dburl = getenv("TNTDBURL");
-        if (!dburl)
-          dburl = "sqlite:test.db";
+        if (!conn)
+        {
+            const char* dburl = getenv("TNTDBURL");
+            if (!dburl)
+              dburl = "sqlite:test.db";
 
-        log_info("testing with dburl=" << dburl);
+            log_info("testing with dburl=" << dburl);
 
-        conn = tntdb::connect(dburl);
-        del = conn.prepare("delete from tntdbtest");
-      }
+            conn = tntdb::connect(dburl);
+            del = conn.prepare("delete from tntdbtest");
+        }
     }
 
     void tearDown()
     {
-      del.execute();
+        del.execute();
     }
 
     void testBool()
     {
-      BEGIN_TEST(bool, "boolcol");
-      TEST(true);
-      TEST(false);
+        BEGIN_TEST(bool, "boolcol");
+        TEST(true);
+        TEST(false);
     }
 
     void testShort()
     {
-      BEGIN_TEST(short, "shortcol");
-      TEST(static_cast<short>(42));
-      TEST(static_cast<short>(-123));
-      TEST(std::numeric_limits<short>::max());
-      TEST(std::numeric_limits<short>::min());
+        BEGIN_TEST(short, "shortcol");
+        TEST(static_cast<short>(42));
+        TEST(static_cast<short>(-123));
+        TEST(std::numeric_limits<short>::max());
+        TEST(std::numeric_limits<short>::min());
     }
 
     void testInt()
     {
-      BEGIN_TEST(int, "intcol");
-      TEST(static_cast<int>(42));
-      TEST(static_cast<int>(-123));
-      TEST(std::numeric_limits<int>::max());
-      TEST(std::numeric_limits<int>::min());
+        BEGIN_TEST(int, "intcol");
+        TEST(static_cast<int>(42));
+        TEST(static_cast<int>(-123));
+        TEST(std::numeric_limits<int>::max());
+        TEST(std::numeric_limits<int>::min());
     }
 
     void testLong()
     {
-      BEGIN_TEST(long, "longcol");
-      TEST(static_cast<long>(42));
-      TEST(static_cast<long>(-123));
-      TEST(std::numeric_limits<long>::max());
-      TEST(std::numeric_limits<long>::min());
+        BEGIN_TEST(long, "longcol");
+        TEST(static_cast<long>(42));
+        TEST(static_cast<long>(-123));
+        TEST(std::numeric_limits<long>::max());
+        TEST(std::numeric_limits<long>::min());
     }
 
     void testUnsignedShort()
     {
-      BEGIN_TEST(unsigned short, "unsignedshortcol");
-      TEST(static_cast<unsigned short>(42));
-      TEST(std::numeric_limits<unsigned short>::max());
-      TEST(std::numeric_limits<unsigned short>::min());
+        BEGIN_TEST(unsigned short, "unsignedshortcol");
+        TEST(static_cast<unsigned short>(42));
+        TEST(std::numeric_limits<unsigned short>::max());
+        TEST(std::numeric_limits<unsigned short>::min());
     }
 
     void testUnsigned()
     {
-      BEGIN_TEST(unsigned, "unsignedcol");
-      TEST(static_cast<unsigned>(42));
-      TEST(std::numeric_limits<unsigned>::max());
-      TEST(std::numeric_limits<unsigned>::min());
+        BEGIN_TEST(unsigned, "unsignedcol");
+        TEST(static_cast<unsigned>(42));
+        TEST(std::numeric_limits<unsigned>::max());
+        TEST(std::numeric_limits<unsigned>::min());
     }
 
     void testUnsignedLong()
     {
-      BEGIN_TEST(unsigned long, "unsignedlongcol");
-      TEST(static_cast<unsigned long>(42));
-      TEST(std::numeric_limits<unsigned long>::max());
-      TEST(std::numeric_limits<unsigned long>::min());
+        BEGIN_TEST(unsigned long, "unsignedlongcol");
+        TEST(static_cast<unsigned long>(42));
+        TEST(std::numeric_limits<unsigned long>::max());
+        TEST(std::numeric_limits<unsigned long>::min());
     }
 
     void testInt32()
     {
-      BEGIN_TEST(int32_t, "int32col");
-      TEST(static_cast<int32_t>(42));
-      TEST(static_cast<int32_t>(-123));
-      TEST(std::numeric_limits<int32_t>::max());
-      TEST(std::numeric_limits<int32_t>::min());
+        BEGIN_TEST(int32_t, "int32col");
+        TEST(static_cast<int32_t>(42));
+        TEST(static_cast<int32_t>(-123));
+        TEST(std::numeric_limits<int32_t>::max());
+        TEST(std::numeric_limits<int32_t>::min());
     }
 
     void testUint32()
     {
-      BEGIN_TEST(uint32_t, "uint32col");
-      TEST(static_cast<uint32_t>(42));
-      TEST(std::numeric_limits<uint32_t>::max());
-      TEST(std::numeric_limits<uint32_t>::min());
+        BEGIN_TEST(uint32_t, "uint32col");
+        TEST(static_cast<uint32_t>(42));
+        TEST(std::numeric_limits<uint32_t>::max());
+        TEST(std::numeric_limits<uint32_t>::min());
     }
 
     void testInt64()
     {
-      BEGIN_TEST(int64_t, "int64col");
-      TEST(static_cast<int64_t>(42));
-      TEST(static_cast<int64_t>(-123));
-      TEST(std::numeric_limits<int64_t>::max());
-      TEST(std::numeric_limits<int64_t>::min());
+        BEGIN_TEST(int64_t, "int64col");
+        TEST(static_cast<int64_t>(42));
+        TEST(static_cast<int64_t>(-123));
+        TEST(std::numeric_limits<int64_t>::max());
+        TEST(std::numeric_limits<int64_t>::min());
     }
 
     void testUint64()
     {
-      BEGIN_TEST(uint64_t, "uint64col");
-      TEST(static_cast<uint64_t>(42));
-      TEST(std::numeric_limits<uint64_t>::max());
-      TEST(std::numeric_limits<uint64_t>::min());
+        BEGIN_TEST(uint64_t, "uint64col");
+        TEST(static_cast<uint64_t>(42));
+        TEST(std::numeric_limits<uint64_t>::max());
+        TEST(std::numeric_limits<uint64_t>::min());
     }
 
     void testDecimal()
     {
-      BEGIN_TEST(tntdb::Decimal, "decimalcol");
-      TEST(tntdb::Decimal(456, 8));
-      TEST(tntdb::Decimal(456, -4));
-      TEST(tntdb::Decimal(-456, 8));
+        BEGIN_TEST(tntdb::Decimal, "decimalcol");
+        TEST(tntdb::Decimal(456, 8));
+        TEST(tntdb::Decimal(456, -4));
+        TEST(tntdb::Decimal(-456, 8));
     }
 
     void testFloat()
     {
-      BEGIN_TEST(float, "floatcol");
-      TESTFLOAT(static_cast<float>(42));
-      TESTFLOAT(static_cast<float>(-123));
-      TESTFLOAT(std::numeric_limits<float>::max() * .999999);
-      TESTFLOAT(std::numeric_limits<float>::min() * 1.00001);
-      TEST(std::numeric_limits<double>::infinity());
-      TEST(-std::numeric_limits<double>::infinity());
+        BEGIN_TEST(float, "floatcol");
+        TESTFLOAT(static_cast<float>(42));
+        TESTFLOAT(static_cast<float>(-123));
+        TESTFLOAT(std::numeric_limits<float>::max() * .999999);
+        TESTFLOAT(std::numeric_limits<float>::min() * 1.00001);
+        TEST(std::numeric_limits<double>::infinity());
+        TEST(-std::numeric_limits<double>::infinity());
     }
 
     void testFloatFromDecimal()
     {
-      BEGIN_TEST(float, "decimalcol");
-      TESTFLOAT(static_cast<float>(42));
-      TESTFLOAT(static_cast<float>(-123));
+        BEGIN_TEST(float, "decimalcol");
+        TESTFLOAT(static_cast<float>(42));
+        TESTFLOAT(static_cast<float>(-123));
     }
 
     void testDouble()
     {
-      BEGIN_TEST(double, "doublecol");
-      TESTFLOAT(static_cast<double>(42));
-      TESTFLOAT(static_cast<double>(-123));
-      TESTFLOAT(std::numeric_limits<double>::max() * .999999);
-      TESTFLOAT(std::numeric_limits<double>::min() * 1.00001);
-      TEST(std::numeric_limits<double>::infinity());
-      TEST(-std::numeric_limits<double>::infinity());
+        BEGIN_TEST(double, "doublecol");
+        TESTFLOAT(static_cast<double>(42));
+        TESTFLOAT(static_cast<double>(-123));
+        TESTFLOAT(std::numeric_limits<double>::max() * .999999);
+        TESTFLOAT(std::numeric_limits<double>::min() * 1.00001);
+        TEST(std::numeric_limits<double>::infinity());
+        TEST(-std::numeric_limits<double>::infinity());
     }
 
     void testChar()
     {
-      BEGIN_TEST(char, "charcol");
-      TEST('A');
-      TEST('Z');
-      TEST('\n');
+        BEGIN_TEST(char, "charcol");
+        TEST('A');
+        TEST('Z');
+        TEST('\n');
     }
 
     void testString()
     {
-      BEGIN_TEST(std::string, "stringcol");
-      TEST(std::string("Hello\n"));
-      TEST(std::string("M\xc3\xa4kitalo"));
+        BEGIN_TEST(std::string, "stringcol");
+        TEST(std::string("Hello\n"));
+        TEST(std::string("M\xc3\xa4kitalo"));
     }
 
     void testBlob()
     {
-      BEGIN_TEST(tntdb::Blob, "blobcol");
-      tntdb::Blob blobval = tntdb::Blob("\0\1\2\3\0xff", 5);
-      TESTEQ(blobval);
+        BEGIN_TEST(tntdb::Blob, "blobcol");
+        tntdb::Blob val = tntdb::Blob("\0\1\2\3\0xff", 5);
+        del.execute();
+        ins.set(colName, val).execute();
+        dbvalue = sel.selectValue();
+        isNotNull = dbvalue.get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(val == res);
+        dbvalue = sel.select()[0][0];
+        isNotNull = dbvalue.get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(val == res);
+        cursor = sel.begin(4);
+        CXXTOOLS_UNIT_ASSERT(cursor != sel.end());
+        isNotNull = (*cursor)[0].get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(val == res);
     }
 
     void testDate()
     {
-      BEGIN_TEST(tntdb::Date, "datecol");
-      TESTDT(tntdb::Date(2010, 2, 15));
-      TESTDT(tntdb::Date());
+        BEGIN_TEST(tntdb::Date, "datecol");
+        TESTDT(tntdb::Date(2010, 2, 15));
+        TESTDT(tntdb::Date());
     }
 
     void testTime()
     {
-      BEGIN_TEST(tntdb::Time, "timecol");
-      TESTDT(tntdb::Time(20, 9, 31, 12));
-      TESTDT(tntdb::Time());
+        BEGIN_TEST(tntdb::Time, "timecol");
+        TESTDT(tntdb::Time(20, 9, 31, 12));
+        TESTDT(tntdb::Time());
     }
 
     void testDatetime()
     {
-      BEGIN_TEST(tntdb::Datetime, "datetimecol");
-      TESTDT(tntdb::Datetime(2010, 2, 15, 20, 9, 31, 12));
-      TESTDT(tntdb::Datetime());
+        BEGIN_TEST(tntdb::Datetime, "datetimecol");
+        TESTDT(tntdb::Datetime(2010, 2, 15, 20, 9, 31, 12));
+        TESTDT(tntdb::Datetime());
     }
 
     void testSequence()
     {
-      del.execute();
+        del.execute();
 
-      tntdb::Statement ins = conn.prepare(
-        "insert into tntdbtest(intcol) values(:intcol)");
+        tntdb::Statement ins = conn.prepare(
+          "insert into tntdbtest(intcol) values(:intcol)");
 
-      ins.set("intcol", 42)
-         .execute();
+        ins.set("intcol", 42)
+           .execute();
 
-      long serialval = conn.lastInsertId("tntdbtest_seq");
+        long serialval = conn.lastInsertId("tntdbtest_seq");
 
-      tntdb::Statement sel = conn.prepare(
-        "select id from tntdbtest");
+        tntdb::Statement sel = conn.prepare(
+          "select id from tntdbtest");
 
-      tntdb::Value dbvalue = sel.selectValue();
+        tntdb::Value dbvalue = sel.selectValue();
 
-      long serialres = -1;
-      dbvalue.get(serialres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(serialval, serialres);
+        long serialres = -1;
+        dbvalue.get(serialres);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(serialval, serialres);
     }
 
     void testLimits()
     {
-      del.execute();
+        del.execute();
 
-      tntdb::Statement ins = conn.prepare(
-        "insert into tntdbtest("
-        "    intcol, longcol, unsignedcol, unsignedlongcol,"
-        "    int32col, uint32col, int64col, uint64col,"
-        "    floatcol, doublecol)"
-        " values("
-        "    :intcol, :longcol, :unsignedcol, :unsignedlongcol,"
-        "    :int32col, :uint32col, :int64col, :uint64col,"
-        "    :floatcol, :doublecol)");
+        tntdb::Statement ins = conn.prepare(
+          "insert into tntdbtest("
+          "    intcol, longcol, unsignedcol, unsignedlongcol,"
+          "    int32col, uint32col, int64col, uint64col,"
+          "    floatcol, doublecol)"
+          " values("
+          "    :intcol, :longcol, :unsignedcol, :unsignedlongcol,"
+          "    :int32col, :uint32col, :int64col, :uint64col,"
+          "    :floatcol, :doublecol)");
 
-      int intval                  = std::numeric_limits<int>::max();
-      long longval                = std::numeric_limits<long>::max();
-      unsigned uval               = std::numeric_limits<unsigned>::max();
-      unsigned long ulongval      = std::numeric_limits<unsigned long>::max();
-      int32_t int32val            = std::numeric_limits<int32_t>::max();
-      uint32_t uint32val          = std::numeric_limits<uint32_t>::max();
-      int64_t int64val            = std::numeric_limits<int64_t>::max();
-      uint64_t uint64val          = std::numeric_limits<uint64_t>::max();
-      float floatval              = std::numeric_limits<float>::max() * .999999;
-      double doubleval            = std::numeric_limits<double>::max() * .999999;
+        int intval                  = std::numeric_limits<int>::max();
+        long longval                = std::numeric_limits<long>::max();
+        unsigned uval               = std::numeric_limits<unsigned>::max();
+        unsigned long ulongval      = std::numeric_limits<unsigned long>::max();
+        int32_t int32val            = std::numeric_limits<int32_t>::max();
+        uint32_t uint32val          = std::numeric_limits<uint32_t>::max();
+        int64_t int64val            = std::numeric_limits<int64_t>::max();
+        uint64_t uint64val          = std::numeric_limits<uint64_t>::max();
+        float floatval              = std::numeric_limits<float>::max() * .999999;
+        double doubleval            = std::numeric_limits<double>::max() * .999999;
 
-      ins.set("intcol", intval)
-         .set("longcol", longval)
-         .set("unsignedcol", uval)
-         .set("unsignedlongcol", ulongval)
-         .set("int32col", int32val)
-         .set("uint32col", uint32val)
-         .set("int64col", int64val)
-         .set("uint64col", uint64val)
-         .set("floatcol", floatval)
-         .set("doublecol", doubleval)
-         .execute();
+        ins.set("intcol", intval)
+           .set("longcol", longval)
+           .set("unsignedcol", uval)
+           .set("unsignedlongcol", ulongval)
+           .set("int32col", int32val)
+           .set("uint32col", uint32val)
+           .set("int64col", int64val)
+           .set("uint64col", uint64val)
+           .set("floatcol", floatval)
+           .set("doublecol", doubleval)
+           .execute();
 
-      int intres = 0;
-      long longres = 0;
-      unsigned ures = 0;
-      unsigned long ulongres = 0;
-      int32_t int32res = 0;
-      uint32_t uint32res = 0;
-      int64_t int64res = 0;
-      uint64_t uint64res = 0;
-      float floatres = 0;
-      double doubleres = 0;
+        int intres = 0;
+        long longres = 0;
+        unsigned ures = 0;
+        unsigned long ulongres = 0;
+        int32_t int32res = 0;
+        uint32_t uint32res = 0;
+        int64_t int64res = 0;
+        uint64_t uint64res = 0;
+        float floatres = 0;
+        double doubleres = 0;
 
-      tntdb::Statement sel = conn.prepare(
-        "select"
-        "    intcol, longcol, unsignedcol, unsignedlongcol,"
-        "    int32col, uint32col, int64col, uint64col,"
-        "    floatcol, doublecol"
-        " from tntdbtest");
+        tntdb::Statement sel = conn.prepare(
+          "select"
+          "    intcol, longcol, unsignedcol, unsignedlongcol,"
+          "    int32col, uint32col, int64col, uint64col,"
+          "    floatcol, doublecol"
+          " from tntdbtest");
 
-      tntdb::Row row = sel.selectRow();
-      row[0].get(intres);
-      row[1].get(longres);
-      row[2].get(ures);
-      row[3].get(ulongres);
-      row[4].get(int32res);
-      row[5].get(uint32res);
-      row[6].get(int64res);
-      row[7].get(uint64res);
-      row[8].get(floatres);
-      row[9].get(doubleres);
+        tntdb::Row row = sel.selectRow();
+        row[0].get(intres);
+        row[1].get(longres);
+        row[2].get(ures);
+        row[3].get(ulongres);
+        row[4].get(int32res);
+        row[5].get(uint32res);
+        row[6].get(int64res);
+        row[7].get(uint64res);
+        row[8].get(floatres);
+        row[9].get(doubleres);
 
-      float fq = floatval / floatres;
-      double dq = doubleval / doubleres;
+        float fq = floatval / floatres;
+        double dq = doubleval / doubleres;
 
-      CXXTOOLS_UNIT_ASSERT_EQUALS(intval, intres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(longval, longres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(uval, ures);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(ulongval, ulongres);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(int32val, int32res);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(uint32val, uint32res);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(int64val, int64res);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(uint64val, uint64res);
-      CXXTOOLS_UNIT_ASSERT(fq >= .9999 && fq <= 1.0001);
-      CXXTOOLS_UNIT_ASSERT(dq >= .9999 && dq <= 1.0001);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(intval, intres);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(longval, longres);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(uval, ures);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(ulongval, ulongres);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(int32val, int32res);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(uint32val, uint32res);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(int64val, int64res);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(uint64val, uint64res);
+        CXXTOOLS_UNIT_ASSERT(fq >= .9999 && fq <= 1.0001);
+        CXXTOOLS_UNIT_ASSERT(dq >= .9999 && dq <= 1.0001);
     }
 
     void testNull()
     {
-      tntdb::Statement ins = conn.prepare(
-        "insert into tntdbtest(intcol, longcol)"
-        " values(:intcol, :longcol)");
+        tntdb::Statement ins = conn.prepare(
+          "insert into tntdbtest(intcol, longcol)"
+          " values(:intcol, :longcol)");
 
-      long longval = 43;
+        long longval = 43;
 
-      ins.setNull("intcol")
-         .set("longcol", longval)
-         .execute();
+        ins.setNull("intcol")
+           .set("longcol", longval)
+           .execute();
 
-      int intres;
-      long longres;
+        int intres;
+        long longres;
 
-      tntdb::Statement sel = conn.prepare(
-        "select intcol, longcol"
-        " from tntdbtest");
+        tntdb::Statement sel = conn.prepare(
+          "select intcol, longcol"
+          " from tntdbtest");
 
-      tntdb::Row row = sel.selectRow();
-      bool intnotnull = row[0].get(intres);
-      bool longnotnull = row[1].get(longres);
-      CXXTOOLS_UNIT_ASSERT(!intnotnull);
-      CXXTOOLS_UNIT_ASSERT(longnotnull);
+        tntdb::Row row = sel.selectRow();
+        bool intnotnull = row[0].get(intres);
+        bool longnotnull = row[1].get(longres);
+        CXXTOOLS_UNIT_ASSERT(!intnotnull);
+        CXXTOOLS_UNIT_ASSERT(longnotnull);
     }
 
     void testFloatNan()
     {
-      BEGIN_TEST(float, "floatcol");
-      float n = std::numeric_limits<float>::quiet_NaN();
-      del.execute();                                 \
-      ins.set("floatcol", n).execute();
-      dbvalue = sel.selectValue();
-      isNotNull = dbvalue.get(res);
-      CXXTOOLS_UNIT_ASSERT(isNotNull);
-      CXXTOOLS_UNIT_ASSERT(res != res);
+        BEGIN_TEST(float, "floatcol");
+        float n = std::numeric_limits<float>::quiet_NaN();
+        del.execute();                                 \
+        ins.set("floatcol", n).execute();
+        dbvalue = sel.selectValue();
+        isNotNull = dbvalue.get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(res != res);
     }
 
     void testDoubleNan()
     {
-      BEGIN_TEST(double, "doublecol");
-      double n = std::numeric_limits<double>::quiet_NaN();
-      del.execute();                                 \
-      ins.set("doublecol", n).execute();
-      dbvalue = sel.selectValue();
-      isNotNull = dbvalue.get(res);
-      CXXTOOLS_UNIT_ASSERT(isNotNull);
-      CXXTOOLS_UNIT_ASSERT(res != res);
+        BEGIN_TEST(double, "doublecol");
+        double n = std::numeric_limits<double>::quiet_NaN();
+        del.execute();                                 \
+        ins.set("doublecol", n).execute();
+        dbvalue = sel.selectValue();
+        isNotNull = dbvalue.get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(res != res);
     }
 
 };

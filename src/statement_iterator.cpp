@@ -33,38 +33,38 @@ log_define("tntdb.statement.iterator")
 
 namespace tntdb
 {
-  Statement::const_iterator::const_iterator(ICursor* cursor_)
-    : cursor(cursor_)
-  {
+Statement::const_iterator::const_iterator(ICursor* cursor_)
+  : cursor(cursor_)
+{
     if (cursor_)
     {
-      log_finer("initial fetch");
-      current = cursor_->fetch();
-      if (!current)
-      {
-        cursor = 0;
-        log_finer("no row fetched");
-      }
+        log_finer("initial fetch");
+        current = cursor_->fetch();
+        if (!current)
+        {
+            cursor = 0;
+            log_finer("no row fetched");
+        }
     }
-  }
+}
 
-  Statement::const_iterator& Statement::const_iterator::operator++()
-  {
+Statement::const_iterator& Statement::const_iterator::operator++()
+{
     log_finest("fetch next row");
     current = cursor->fetch();
     if (!current)
     {
-      log_debug("no more rows");
-      cursor = 0;
+        log_debug("no more rows");
+        cursor = 0;
     }
     return *this;
-  }
+}
 
-  Statement::const_iterator Statement::const_iterator::operator++(int)
-  {
+Statement::const_iterator Statement::const_iterator::operator++(int)
+{
     Statement::const_iterator tmp = *this;
     operator++();
     return tmp;
-  }
+}
 
 }

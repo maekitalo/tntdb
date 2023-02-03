@@ -29,24 +29,29 @@
 #ifndef TNTDB_IFACE_IROW_H
 #define TNTDB_IFACE_IROW_H
 
-#include <cxxtools/refcounted.h>
 #include <string>
 
 namespace tntdb
 {
-  class Value;
+class Value;
 
-  /// common interface for row-types
-  class IRow : public cxxtools::RefCounted
-  {
-    public:
-      typedef unsigned size_type;
+/// common interface for row-types
+class IRow
+{
+    IRow(const IRow&) = delete;
+    IRow& operator=(const IRow&) = delete;
 
-      virtual size_type size() const = 0;
-      virtual Value getValueByNumber(size_type field_num) const = 0;
-      virtual Value getValueByName(const std::string& field_name) const = 0;
-      virtual std::string getColumnName(size_type field_num) const = 0;
-  };
+protected:
+    IRow() { }
+
+public:
+    typedef unsigned size_type;
+
+    virtual size_type size() const = 0;
+    virtual Value getValueByNumber(size_type field_num) const = 0;
+    virtual Value getValueByName(const std::string& field_name) const = 0;
+    virtual std::string getColumnName(size_type field_num) const = 0;
+};
 }
 
 #endif // TNTDB_IFACE_IROW_H

@@ -51,35 +51,35 @@ log_define("tntdb.postgresql.statement")
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    typedef std::map<std::string, unsigned> hostvarMapType;
+namespace postgresql
+{
+typedef std::map<std::string, unsigned> hostvarMapType;
 
-    namespace
+namespace
+{
+    class SE : public StmtEvent
     {
-      class SE : public StmtEvent
-      {
-          hostvarMapType& hostvarMap;
-          unsigned idx;
+        hostvarMapType& hostvarMap;
+        unsigned idx;
 
-        public:
-          SE(hostvarMapType& hm)
-            : hostvarMap(hm),
-              idx(0)
-            { }
-          std::string onHostVar(const std::string& name);
-          unsigned getMaxIdx() const  { return idx; }
-      };
+    public:
+        SE(hostvarMapType& hm)
+          : hostvarMap(hm),
+            idx(0)
+          { }
+        std::string onHostVar(const std::string& name);
+        unsigned getMaxIdx() const  { return idx; }
+    };
 
-      std::string SE::onHostVar(const std::string& name)
-      {
+    std::string SE::onHostVar(const std::string& name)
+    {
         unsigned n;
 
         hostvarMapType::const_iterator it = hostvarMap.find(name);
         if (it == hostvarMap.end())
         {
-          n = idx++;
-          hostvarMap[name] = n;
+            n = idx++;
+            hostvarMap[name] = n;
         }
         else
           n = it->second;
@@ -89,440 +89,440 @@ namespace tntdb
         std::ostringstream r;
         r << '$' << (n + 1);
         return r.str();
-      }
     }
+}
 
-    Statement::Statement(Connection* conn_, const std::string& query_)
-      : conn(conn_)
-    {
-      // parse hostvars
-      StmtParser parser;
-      SE se(hostvarMap);
-      parser.parse(query_, se);
+Statement::Statement(Connection* conn_, const std::string& query_)
+  : conn(conn_)
+{
+    // parse hostvars
+    StmtParser parser;
+    SE se(hostvarMap);
+    parser.parse(query_, se);
 
-      values.resize(se.getMaxIdx());
+    values.resize(se.getMaxIdx());
 
-      query = parser.getSql();
+    query = parser.getSql();
 
-      paramValues.resize(se.getMaxIdx());
-      paramLengths.resize(se.getMaxIdx());
-      paramFormats.resize(se.getMaxIdx());
-    }
+    paramValues.resize(se.getMaxIdx());
+    paramLengths.resize(se.getMaxIdx());
+    paramFormats.resize(se.getMaxIdx());
+}
 
-    Statement::~Statement()
-    {
-      if (!stmtName.empty())
+Statement::~Statement()
+{
+    if (!stmtName.empty())
         conn->deallocateStatement(stmtName);
-    }
+}
 
-    void Statement::doPrepare()
-    {
-      // create statementname
-      std::ostringstream s;
-      s << "tntdbstmt" << conn->getNextStmtNumber();
+void Statement::doPrepare()
+{
+    // create statementname
+    std::ostringstream s;
+    s << "tntdbstmt" << conn->getNextStmtNumber();
 
-      // prepare statement
+    // prepare statement
 #ifdef HAVE_PQPREPARE
-      log_debug("PQprepare(" << getPGConn() << ", \"" << s.str()
-        << "\", \"" << query << "\", 0, 0)");
-      PGresult* result = PQprepare(getPGConn(),
+    log_debug("PQprepare(" << getPGConn() << ", \"" << s.str()
+      << "\", \"" << query << "\", 0, 0)");
+    PGresult* result = PQprepare(getPGConn(),
         s.str().c_str(), query.c_str(), 0, 0);
 
-      if (isError(result))
-      {
+    if (isError(result))
+    {
         log_error(PQresultErrorMessage(result));
         throw PgSqlError(query, "PQprepare", result, true);
-      }
+    }
 #else
-      std::ostringstream sql;
-      sql << "PREPARE " << s.str();
-      for (valuesType::const_iterator it = values.begin(); it != values.end(); ++it)
+    std::ostringstream sql;
+    sql << "PREPARE " << s.str();
+    for (valuesType::const_iterator it = values.begin(); it != values.end(); ++it)
         sql << (it == values.begin() ? " (" : ", " ) << it->getType();
-      if (!values.empty())
+    if (!values.empty())
         sql << ')';
-      sql << " AS " << query;
+    sql << " AS " << query;
 
-      log_debug("PQexec(" << getPGConn() << ", \"" << sql.str() << "\")");
-      PGresult* result = PQexec(getPGConn(), sql.str().c_str());
+    log_debug("PQexec(" << getPGConn() << ", \"" << sql.str() << "\")");
+    PGresult* result = PQexec(getPGConn(), sql.str().c_str());
 
-      if (isError(result))
-      {
+    if (isError(result))
+    {
         log_error(PQresultErrorMessage(result));
         throw PgSqlError(sql.str(), "PQexec", result, true);
-      }
+    }
 #endif
 
-      stmtName = s.str();
+    stmtName = s.str();
 
-      log_debug("PQclear(" << result << ')');
-      PQclear(result);
-    }
+    log_debug("PQclear(" << result << ')');
+    PQclear(result);
+}
 
-    PGresult* Statement::execPrepared()
-    {
-      if (stmtName.empty())
+PGresult* Statement::execPrepared()
+{
+    if (stmtName.empty())
         doPrepare();
 
-      log_debug("PQexecPrepared(" << getPGConn() << ", \"" << stmtName
-        << "\", " << values.size() << ", paramValues, paramLengths, paramFormats, 0)");
-      PGresult* result = PQexecPrepared(getPGConn(), stmtName.c_str(),
+    log_debug("PQexecPrepared(" << getPGConn() << ", \"" << stmtName
+      << "\", " << values.size() << ", paramValues, paramLengths, paramFormats, 0)");
+    PGresult* result = PQexecPrepared(getPGConn(), stmtName.c_str(),
         getNParams(), getParamValues(), getParamLengths(), getParamFormats(), 0);
 
-      if (isError(result))
-      {
+    if (isError(result))
+    {
         log_error(PQresultErrorMessage(result));
         throw PgSqlError(query, "PQexecPrepared", result, true);
-      }
-
-      return result;
     }
 
-    template <typename T>
-    void Statement::setValue(const std::string& col, T data)
-    {
-      hostvarMapType::const_iterator it = hostvarMap.find(col);
-      if (it == hostvarMap.end())
+    return result;
+}
+
+template <typename T>
+void Statement::setValue(const std::string& col, T data)
+{
+    hostvarMapType::const_iterator it = hostvarMap.find(col);
+    if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
-      else
-      {
+    else
+    {
         std::string v = cxxtools::convert<std::string>(data);
         values[it->second].setValue(v);
         paramFormats[it->second] = 0;
-      }
     }
+}
 
-    template <>
-    void Statement::setValue(const std::string& col, float data)
-    {
-      hostvarMapType::const_iterator it = hostvarMap.find(col);
-      if (it == hostvarMap.end())
+template <>
+void Statement::setValue(const std::string& col, float data)
+{
+    hostvarMapType::const_iterator it = hostvarMap.find(col);
+    if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
-      else
-      {
+    else
+    {
         std::ostringstream v;
         v.precision(24);
         v << data;
         values[it->second].setValue(v.str());
         paramFormats[it->second] = 0;
-      }
     }
+}
 
-    template <>
-    void Statement::setValue(const std::string& col, double data)
-    {
-      hostvarMapType::const_iterator it = hostvarMap.find(col);
-      if (it == hostvarMap.end())
+template <>
+void Statement::setValue(const std::string& col, double data)
+{
+    hostvarMapType::const_iterator it = hostvarMap.find(col);
+    if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
-      else
-      {
+    else
+    {
         std::ostringstream v;
         v.precision(24);
         v << data;
         values[it->second].setValue(v.str());
         paramFormats[it->second] = 0;
-      }
     }
+}
 
-    template <>
-    void Statement::setValue(const std::string& col, Decimal data)
-    {
-      hostvarMapType::const_iterator it = hostvarMap.find(col);
-      if (it == hostvarMap.end())
+template <>
+void Statement::setValue(const std::string& col, Decimal data)
+{
+    hostvarMapType::const_iterator it = hostvarMap.find(col);
+    if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
-      else
-      {
+    else
+    {
         std::ostringstream v;
         v.precision(24);
         v << data;
         values[it->second].setValue(v.str());
         paramFormats[it->second] = 0;
-      }
     }
+}
 
-    template <typename T>
-    void Statement::setStringValue(const std::string& col, T data, bool binary)
-    {
-      hostvarMapType::const_iterator it = hostvarMap.find(col);
-      if (it == hostvarMap.end())
+template <typename T>
+void Statement::setStringValue(const std::string& col, T data, bool binary)
+{
+    hostvarMapType::const_iterator it = hostvarMap.find(col);
+    if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
-      else
-      {
+    else
+    {
         values[it->second].setValue(data);
         paramFormats[it->second] = binary;
-      }
     }
+}
 
-    template <typename T>
-    void Statement::setIsoValue(const std::string& col, T data)
-    {
-      hostvarMapType::const_iterator it = hostvarMap.find(col);
-      if (it == hostvarMap.end())
+template <typename T>
+void Statement::setIsoValue(const std::string& col, T data)
+{
+    hostvarMapType::const_iterator it = hostvarMap.find(col);
+    if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
-      else
-      {
+    else
+    {
         values[it->second].setValue(data.getIso());
         paramFormats[it->second] = 0;
-      }
     }
+}
 
 #ifndef HAVE_PQPREPARE
-    void Statement::setType(const std::string& col, const std::string& type)
-    {
-      hostvarMapType::const_iterator it = hostvarMap.find(col);
-      if (it != hostvarMap.end())
+void Statement::setType(const std::string& col, const std::string& type)
+{
+    hostvarMapType::const_iterator it = hostvarMap.find(col);
+    if (it != hostvarMap.end())
         values[it->second].setType(type);
-    }
+}
 #endif
 
-    void Statement::clear()
-    {
-      log_debug("clear()");
-      for (valuesType::iterator it = values.begin(); it != values.end(); ++it)
+void Statement::clear()
+{
+    log_debug("clear()");
+    for (valuesType::iterator it = values.begin(); it != values.end(); ++it)
         it->setNull();
-    }
+}
 
-    void Statement::setNull(const std::string& col)
-    {
-      log_debug("setNull(\"" << col << "\")");
+void Statement::setNull(const std::string& col)
+{
+    log_debug("setNull(\"" << col << "\")");
 
-      hostvarMapType::const_iterator it = hostvarMap.find(col);
-      if (it == hostvarMap.end())
+    hostvarMapType::const_iterator it = hostvarMap.find(col);
+    if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
-      else
-      {
+    else
+    {
         values[it->second].setNull();
         paramFormats[it->second] = 0;
-      }
     }
+}
 
-    void Statement::setBool(const std::string& col, bool data)
-    {
-      log_debug("setBool(\"" << col << "\", " << data << ')');
+void Statement::setBool(const std::string& col, bool data)
+{
+    log_debug("setBool(\"" << col << "\", " << data << ')');
 
-      hostvarMapType::const_iterator it = hostvarMap.find(col);
-      if (it == hostvarMap.end())
+    hostvarMapType::const_iterator it = hostvarMap.find(col);
+    if (it == hostvarMap.end())
         log_warn("hostvariable :" << col << " not found");
-      else
-      {
+    else
+    {
         values[it->second].setValue(data ? "1" : "0");
         paramFormats[it->second] = 0;
-      }
-
-      SET_TYPE(col, "bool");
     }
 
-    void Statement::setShort(const std::string& col, short data)
-    {
-      log_debug("setShort(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "short");
-    }
+    SET_TYPE(col, "bool");
+}
 
-    void Statement::setInt(const std::string& col, int data)
-    {
-      log_debug("setInt(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "int");
-    }
+void Statement::setShort(const std::string& col, short data)
+{
+    log_debug("setShort(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "short");
+}
 
-    void Statement::setLong(const std::string& col, long data)
-    {
-      log_debug("setLong(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "long");
-    }
+void Statement::setInt(const std::string& col, int data)
+{
+    log_debug("setInt(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "int");
+}
 
-    void Statement::setUnsignedShort(const std::string& col, unsigned short data)
-    {
-      log_debug("setUnsignedShort(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "unsigned short");
-    }
+void Statement::setLong(const std::string& col, long data)
+{
+    log_debug("setLong(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "long");
+}
 
-    void Statement::setUnsigned(const std::string& col, unsigned data)
-    {
-      log_debug("setUnsigned(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "unsigned");
-    }
+void Statement::setUnsignedShort(const std::string& col, unsigned short data)
+{
+    log_debug("setUnsignedShort(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "unsigned short");
+}
 
-    void Statement::setUnsignedLong(const std::string& col, unsigned long data)
-    {
-      log_debug("setUnsignedLong(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "unsigned long");
-    }
+void Statement::setUnsigned(const std::string& col, unsigned data)
+{
+    log_debug("setUnsigned(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "unsigned");
+}
 
-    void Statement::setInt32(const std::string& col, int32_t data)
-    {
-      log_debug("setInt32(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "int");
-    }
+void Statement::setUnsignedLong(const std::string& col, unsigned long data)
+{
+    log_debug("setUnsignedLong(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "unsigned long");
+}
 
-    void Statement::setUnsigned32(const std::string& col, uint32_t data)
-    {
-      log_debug("setUnsigned32(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "int");
-    }
+void Statement::setInt32(const std::string& col, int32_t data)
+{
+    log_debug("setInt32(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "int");
+}
 
-    void Statement::setInt64(const std::string& col, int64_t data)
-    {
-      log_debug("setInt64(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "bigint");
-    }
+void Statement::setUnsigned32(const std::string& col, uint32_t data)
+{
+    log_debug("setUnsigned32(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "int");
+}
 
-    void Statement::setUnsigned64(const std::string& col, uint64_t data)
-    {
-      log_debug("setUnsigned64(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "bigint");
-    }
+void Statement::setInt64(const std::string& col, int64_t data)
+{
+    log_debug("setInt64(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "bigint");
+}
 
-    void Statement::setDecimal(const std::string& col, const Decimal& data)
-    {
-      log_debug("setDecimal(\"" << col << "\", " << data << ')');
-      setValue(col, data);
-      SET_TYPE(col, "numeric");
-    }
+void Statement::setUnsigned64(const std::string& col, uint64_t data)
+{
+    log_debug("setUnsigned64(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "bigint");
+}
 
-    void Statement::setFloat(const std::string& col, float data)
-    {
-      log_debug("setFloat(\"" << col << "\", " << data << ')');
-      if (data != data)
+void Statement::setDecimal(const std::string& col, const Decimal& data)
+{
+    log_debug("setDecimal(\"" << col << "\", " << data << ')');
+    setValue(col, data);
+    SET_TYPE(col, "numeric");
+}
+
+void Statement::setFloat(const std::string& col, float data)
+{
+    log_debug("setFloat(\"" << col << "\", " << data << ')');
+    if (data != data)
         setValue(col, "NaN");
-      else if (data == std::numeric_limits<float>::infinity())
+    else if (data == std::numeric_limits<float>::infinity())
         setValue(col, "Infinity");
-      else if (data == -std::numeric_limits<float>::infinity())
+    else if (data == -std::numeric_limits<float>::infinity())
         setValue(col, "-Infinity");
-      else
+    else
         setValue(col, data);
-      SET_TYPE(col, "numeric");
-    }
+    SET_TYPE(col, "numeric");
+}
 
-    void Statement::setDouble(const std::string& col, double data)
-    {
-      log_debug("setDouble(\"" << col << "\", " << data << ')');
-      if (data != data)
+void Statement::setDouble(const std::string& col, double data)
+{
+    log_debug("setDouble(\"" << col << "\", " << data << ')');
+    if (data != data)
         setValue(col, "NaN");
-      else if (data == std::numeric_limits<double>::infinity())
+    else if (data == std::numeric_limits<double>::infinity())
         setValue(col, "Infinity");
-      else if (data == -std::numeric_limits<double>::infinity())
+    else if (data == -std::numeric_limits<double>::infinity())
         setValue(col, "-Infinity");
-      else
+    else
         setValue(col, data);
-      SET_TYPE(col, "numeric");
-    }
+    SET_TYPE(col, "numeric");
+}
 
-    void Statement::setChar(const std::string& col, char data)
-    {
-      log_debug("setChar(\"" << col << "\", '" << data << "')");
-      setStringValue(col, std::string(1, data));
-      SET_TYPE(col, "text");
-    }
+void Statement::setChar(const std::string& col, char data)
+{
+    log_debug("setChar(\"" << col << "\", '" << data << "')");
+    setStringValue(col, std::string(1, data));
+    SET_TYPE(col, "text");
+}
 
-    void Statement::setString(const std::string& col, const std::string& data)
-    {
-      log_debug("setString(\"" << col << "\", \"" << data << "\")");
-      setStringValue(col, data);
-      SET_TYPE(col, "text");
-    }
+void Statement::setString(const std::string& col, const std::string& data)
+{
+    log_debug("setString(\"" << col << "\", \"" << data << "\")");
+    setStringValue(col, data);
+    SET_TYPE(col, "text");
+}
 
-    void Statement::setBlob(const std::string& col, const Blob& data)
-    {
-      log_debug("setBlob(\"" << col << "\", Blob)");
-      setStringValue(col, std::string(data.data(), data.size()), true);
-      SET_TYPE(col, "blob");
-    }
+void Statement::setBlob(const std::string& col, const Blob& data)
+{
+    log_debug("setBlob(\"" << col << "\", Blob)");
+    setStringValue(col, std::string(data.data(), data.size()), true);
+    SET_TYPE(col, "blob");
+}
 
-    void Statement::setDate(const std::string& col, const Date& data)
-    {
-      log_debug("setDate(\"" << col << "\", " << data.getIso() << ')');
-      setIsoValue(col, data);
-      SET_TYPE(col, "date");
-    }
+void Statement::setDate(const std::string& col, const Date& data)
+{
+    log_debug("setDate(\"" << col << "\", " << data.getIso() << ')');
+    setIsoValue(col, data);
+    SET_TYPE(col, "date");
+}
 
-    void Statement::setTime(const std::string& col, const Time& data)
-    {
-      log_debug("setTime(\"" << col << "\", " << data.getIso() << ')');
-      setIsoValue(col, data);
-      SET_TYPE(col, "time");
-    }
+void Statement::setTime(const std::string& col, const Time& data)
+{
+    log_debug("setTime(\"" << col << "\", " << data.getIso() << ')');
+    setIsoValue(col, data);
+    SET_TYPE(col, "time");
+}
 
-    void Statement::setDatetime(const std::string& col, const Datetime& data)
-    {
-      log_debug("setDatetime(\"" << col << "\", " << data.getIso() << ')');
-      setIsoValue(col, data);
-      SET_TYPE(col, "datetime");
-    }
+void Statement::setDatetime(const std::string& col, const Datetime& data)
+{
+    log_debug("setDatetime(\"" << col << "\", " << data.getIso() << ')');
+    setIsoValue(col, data);
+    SET_TYPE(col, "datetime");
+}
 
-    Statement::size_type Statement::execute()
-    {
-      log_debug("execute()");
+Statement::size_type Statement::execute()
+{
+    log_debug("execute()");
 
-      PGresult* result = execPrepared();
+    PGresult* result = execPrepared();
 
-      std::istringstream tuples(PQcmdTuples(result));
-      unsigned ret = 0;
-      tuples >> ret;
+    std::istringstream tuples(PQcmdTuples(result));
+    unsigned ret = 0;
+    tuples >> ret;
 
-      log_debug("PQclear(" << result << ')');
-      PQclear(result);
+    log_debug("PQclear(" << result << ')');
+    PQclear(result);
 
-      return ret;
-    }
+    return ret;
+}
 
-    tntdb::Result Statement::select()
-    {
-      log_debug("select()");
-      PGresult* result = execPrepared();
-      return tntdb::Result(new Result(tntdb::Connection(conn), result));
-    }
+tntdb::Result Statement::select()
+{
+    log_debug("select()");
+    PGresult* result = execPrepared();
+    return tntdb::Result(new Result(tntdb::Connection(conn), result));
+}
 
-    tntdb::Row Statement::selectRow()
-    {
-      tntdb::Result result = select();
+tntdb::Row Statement::selectRow()
+{
+    tntdb::Result result = select();
 
-      if (result.size() <= 0)
+    if (result.size() <= 0)
         throw NotFound();
 
-      return result[0];
-    }
+    return result[0];
+}
 
-    tntdb::Value Statement::selectValue()
-    {
-      tntdb::Result result = select();
+tntdb::Value Statement::selectValue()
+{
+    tntdb::Result result = select();
 
-      if (result.size() <= 0)
+    if (result.size() <= 0)
         throw NotFound();
 
-      return result[0][0];
-    }
+    return result[0][0];
+}
 
-    ICursor* Statement::createCursor(unsigned fetchsize)
-    {
-      return new Cursor(this, fetchsize);
-    }
+ICursor* Statement::createCursor(unsigned fetchsize)
+{
+    return new Cursor(this, fetchsize);
+}
 
-    const char* const* Statement::getParamValues()
-    {
-      for (unsigned n = 0; n < values.size(); ++n)
+const char* const* Statement::getParamValues()
+{
+    for (unsigned n = 0; n < values.size(); ++n)
         paramValues[n] = values[n].getValue();
-      return &paramValues[0];
-    }
+    return &paramValues[0];
+}
 
-    const int* Statement::getParamLengths()
-    {
-      for (unsigned n = 0; n < values.size(); ++n)
+const int* Statement::getParamLengths()
+{
+    for (unsigned n = 0; n < values.size(); ++n)
         paramLengths[n] = values[n].getLength();
-      return &paramLengths[0];
-    }
+    return &paramLengths[0];
+}
 
-    PGconn* Statement::getPGConn()
-    {
-      return conn->getPGConn();
-    }
-  }
+PGconn* Statement::getPGConn()
+{
+    return conn->getPGConn();
+}
+}
 }

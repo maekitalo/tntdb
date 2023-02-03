@@ -29,119 +29,112 @@
 #ifndef TNTDB_CONNECTIONPOOL_H
 #define TNTDB_CONNECTIONPOOL_H
 
-#include <cxxtools/pool.h>
 #include <map>
 #include <string>
+#include <vector>
+#include <mutex>
+#include <memory>
 
 namespace tntdb
 {
-  class Connection;
+class Connection;
+class IConnection;
 
-  class ConnectionPool
-  {
-      class Connector
-      {
-          std::string url;
-          std::string username;
-          std::string password;
+class ConnectionPool
+{
+    friend class PoolConnection;
 
-        public:
-          Connector(const std::string& url_, const std::string& username_, const std::string& password_)
-            : url(url_),
-              username(username_),
-              password(password_)
-            { }
+    std::string _url;
+    std::string _username;
+    std::string _password;
 
-          Connection* operator() ();
-      };
+    std::vector<std::shared_ptr<IConnection>> _connectionPool;
+    unsigned _maxSpare;
+    void put(std::shared_ptr<IConnection>& conn);
 
-      typedef cxxtools::Pool<Connection, Connector> PoolType;
-      PoolType pool;
-
-    public:
-      typedef PoolType::Ptr PoolObjectType;
-
-    public:
-      explicit ConnectionPool(const std::string& url, const std::string& username, const std::string& password, unsigned maxcount = 0)
-        : pool(maxcount, Connector(url, username, password))
+public:
+    explicit ConnectionPool(const std::string& url, const std::string& username, const std::string& password, unsigned maxSpare = 0)
+        : _url(url),
+          _username(username),
+          _password(password),
+          _maxSpare(maxSpare)
         { }
 
-      Connection connect();
+    Connection connect();
 
-      /// Release unused connections; keep the given number of connections
-      unsigned drop(unsigned keep = 0);
+    /// Release unused connections; keep the given number of connections
+    void drop(unsigned keep = 0);
 
-      unsigned getMaximumSize()       { return pool.getMaximumSize(); }
-      void setMaximumSize(unsigned m) { pool.setMaximumSize(m); }
-      unsigned getCurrentSize() const { return pool.getCurrentSize(); }
-  };
+    unsigned getMaxSpare() const    { return _maxSpare; }
+    void setMaxSpare(unsigned m);
+    unsigned getCurrentSize() const { return _connectionPool.size(); }
+};
 
-  class ConnectionPools
-  {
-      ConnectionPools(const ConnectionPools&) { }
-      ConnectionPools& operator=(const ConnectionPools&) { return *this; }
+class ConnectionPools
+{
+    ConnectionPools(const ConnectionPools&) { }
+    ConnectionPools& operator=(const ConnectionPools&) { return *this; }
 
-    public:
-      struct ConnectionParameter
-      {
+public:
+    struct ConnectionParameter
+    {
         std::string url;
         std::string username;
         std::string password;
 
         ConnectionParameter() { }
         ConnectionParameter(const std::string& url_, const std::string& username_, const std::string& password_)
-          : url(url_),
-            username(username_),
-            password(password_)
+            : url(url_),
+              username(username_),
+              password(password_)
         { }
 
         bool operator< (const ConnectionParameter& other) const
         {
-          int c;
+            int c;
 
-          c = url.compare(other.url);
-          if (c != 0)
-            return c < 0;
+            c = url.compare(other.url);
+            if (c != 0)
+                return c < 0;
 
-          c = username.compare(other.username);
-          if (c != 0)
-            return c < 0;
+            c = username.compare(other.username);
+            if (c != 0)
+                return c < 0;
 
-          return password < other.password;
+            return password < other.password;
         }
-      };
+    };
 
-      typedef ConnectionPool PoolType;
-      typedef std::map<ConnectionParameter, PoolType*> PoolsType;
+    typedef ConnectionPool PoolType;
+    typedef std::map<ConnectionParameter, std::unique_ptr<PoolType>> PoolsType;
 
-    private:
-      PoolsType pools;
-      unsigned maxcount;
-      mutable cxxtools::Mutex mutex;
+private:
+    PoolsType _pools;
+    unsigned _maxcount;
+    mutable std::mutex _mutex;
 
-    public:
-      explicit ConnectionPools(unsigned maxcount_ = 0)
-        : maxcount(maxcount_)
-        { }
-      ~ConnectionPools();
+public:
+    explicit ConnectionPools(unsigned maxcount = 0)
+      : _maxcount(maxcount)
+      { }
 
-      Connection connect(const std::string& url, const std::string& username, const std::string& password);
+    Connection connect(const std::string& url, const std::string& username, const std::string& password);
 
-      /// Release unused connections; keep the given number of connections
-      unsigned drop(unsigned keep = 0);
+    /// Release unused connections per pool; keep the given number of connections
+    void drop(unsigned keep = 0);
 
-      /** Release unused connections with the given database url;
-          keep the given number of connections
-       */
-      unsigned drop(const std::string& url, const std::string& username, const std::string& password, unsigned keep = 0);
+    /** Release unused connections with the given database url;
+        keep the given number of connections
+     */
+    void drop(const std::string& url, const std::string& username, const std::string& password, unsigned keep = 0);
 
-      unsigned getMaximumSize()
-        { return maxcount; }
+    unsigned getMaximumSize()
+        { return _maxcount; }
 
-      void setMaximumSize(unsigned m);
-      unsigned getCurrentSize(const std::string& url, const std::string& username, const std::string& password) const;
-      unsigned getCurrentSize() const;
-  };
+    void setMaxSpare(unsigned m);
+    unsigned getCurrentSize(const std::string& url, const std::string& username, const std::string& password) const;
+    unsigned getCurrentSize() const;
+};
 }
 
 #endif // TNTDB_CONNECTIONPOOL_H

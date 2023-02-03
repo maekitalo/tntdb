@@ -34,21 +34,21 @@
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    class BoundRow : public IRow, public BindValues
-    {
-      public:
-        explicit BoundRow(unsigned n)
-          : BindValues(n)
-          { }
+namespace mysql
+{
+class BoundRow : public IRow, public BindValues
+{
+public:
+    explicit BoundRow(unsigned n)
+      : BindValues(n)
+      { }
 
-        size_type size() const;
-        Value getValueByNumber(size_type field_num) const;
-        Value getValueByName(const std::string& field_name) const;
-        std::string getColumnName(size_type field_num) const;
-    };
-  }
+    size_type size() const;
+    Value getValueByNumber(size_type field_num) const;
+    Value getValueByName(const std::string& field_name) const;
+    std::string getColumnName(size_type field_num) const;
+};
+}
 }
 
 #endif // TNTDB_MYSQL_IMPL_BOUNDROW_H
