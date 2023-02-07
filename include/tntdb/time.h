@@ -33,89 +33,89 @@
 
 namespace tntdb
 {
-  /// This class holds a time.
-  class Time
-  {
-    private:
-      short _hour;
-      unsigned short _minute;
-      unsigned short _second;
-      unsigned short _millis;
+/// This class holds a time.
+class Time
+{
+private:
+    short _hour;
+    unsigned short _minute;
+    unsigned short _second;
+    unsigned short _millis;
 
-    public:
-      /// Create a Time object with empty values
-      Time()
-        : _hour(-1),
-          _minute(0),
-          _second(0),
-          _millis(0)
-          { }
+public:
+    /// Create a Time object with empty values
+    Time()
+      : _hour(-1),
+        _minute(0),
+        _second(0),
+        _millis(0)
+        { }
 
-      /** Create a Time object with the given values
+    /** Create a Time object with the given values
 
-          No range checks are done.
-       */
-      Time(unsigned short hour,
-           unsigned short minute,
-           unsigned short second,
-           unsigned short millis = 0)
-        : _hour(hour),
-          _minute(minute),
-          _second(second),
-          _millis(millis)
-          { }
+        No range checks are done.
+     */
+    Time(unsigned short hour,
+         unsigned short minute,
+         unsigned short second,
+         unsigned short millis = 0)
+      : _hour(hour),
+        _minute(minute),
+        _second(second),
+        _millis(millis)
+        { }
 
-      static Time localtime();
-      static Time gmtime();
+    static Time localtime();
+    static Time gmtime();
 
-      /// Get the hour part of the Time
-      unsigned short getHour() const   { return static_cast<unsigned short>(_hour); }
-      /// Get the minute part of the Time
-      unsigned short getMinute() const { return _minute; }
-      /// Get the second part of the Time
-      unsigned short getSecond() const { return _second; }
-      /// Get the millisecond part of the Time
-      unsigned short getMillis() const { return _millis; }
+    /// Get the hour part of the Time
+    unsigned short getHour() const   { return static_cast<unsigned short>(_hour); }
+    /// Get the minute part of the Time
+    unsigned short getMinute() const { return _minute; }
+    /// Get the second part of the Time
+    unsigned short getSecond() const { return _second; }
+    /// Get the millisecond part of the Time
+    unsigned short getMillis() const { return _millis; }
 
-      bool isNull() const  { return _hour < 0; }
+    bool isNull() const  { return _hour < 0; }
 
-      /** Sets the time
+    /** Sets the time
 
-          No range checks are done
-       */
-      void set(unsigned short hour,
-               unsigned short minute,
-               unsigned short second,
-               unsigned short millis = 0)
-      {
+        No range checks are done
+     */
+    void set(unsigned short hour,
+             unsigned short minute,
+             unsigned short second,
+             unsigned short millis = 0)
+    {
         _hour = static_cast<short>(hour);
         _minute = minute;
         _second = second;
         _millis = millis;
-      }
+    }
 
-      /// Get the time in ISO format (hh:mm:ss.hhh)
-      std::string getIso() const;
+    /// Get the time in ISO format (hh:mm:ss.hhh)
+    std::string getIso() const;
 
-      /** Construct a Time object from the given ISO date string
+    /** Construct a Time object from the given ISO date string
 
-          If the string is not in ISO format, an exception of type tntdb::TypeError is thrown.
-       */
-      static Time fromIso(const std::string& s);
+        If the string is not in ISO format, an exception of type tntdb::TypeError is thrown.
+     */
+    static Time fromIso(const std::string& s);
 
-      bool operator== (const Time& dt) const
-      {
+    bool operator== (const Time& dt) const
+    {
         return _hour == dt._hour
           && _minute == dt._minute
           && _second == dt._second
           && _millis == dt._millis;
-      }
+    }
 
-      bool operator!= (const Time& dt) const
-        { return !operator==(dt); }
+    bool operator!= (const Time& dt) const
+      { return !operator==(dt); }
 
-      bool operator< (const Time& dt) const
-      {
+    bool operator< (const Time& dt) const
+    {
         return _hour < dt._hour   ? true
           : _hour    > dt._hour   ? false
           : _minute  < dt._minute ? true
@@ -123,17 +123,17 @@ namespace tntdb
           : _second  < dt._second ? true
           : _second  > dt._second ? false
           : _millis  < dt._millis;
-      }
+    }
 
-      bool operator> (const Time& dt) const
-        { return dt < *this; }
+    bool operator> (const Time& dt) const
+      { return dt < *this; }
 
-      bool operator<= (const Time& dt) const
-        { return !(*this > dt); }
+    bool operator<= (const Time& dt) const
+      { return !(*this > dt); }
 
-      bool operator>= (const Time& dt) const
-        { return !(*this < dt); }
-  };
+    bool operator>= (const Time& dt) const
+      { return !(*this < dt); }
+};
 }
 
 #endif // TNTDB_TIME_H

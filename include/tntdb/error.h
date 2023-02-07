@@ -34,62 +34,61 @@
 
 namespace tntdb
 {
-  /** Base class for database errors
+/** Base class for database errors
 
-      All errors are handled by throwing this or a derived class.
-   */
-  class Error : public std::runtime_error
-  {
-    public:
-      /// Constructor
-      explicit Error(const std::string& msg);
-  };
+    All errors are handled by throwing this or a derived class.
+ */
+class Error : public std::runtime_error
+{
+public:
+    /// Constructor
+    explicit Error(const std::string& msg);
+};
 
-  /// Exception thrown when selectRow or selectValue doesn't fetch any data
-  class NotFound : public Error
-  {
-    public:
-      NotFound();
-  };
+/// Exception thrown when selectRow or selectValue doesn't fetch any data
+class NotFound : public Error
+{
+public:
+    NotFound();
+};
 
-  /// Exception thrown when a Value::get...() is called on a NULL value
-  class NullValue : public Error
-  {
-    public:
-      NullValue();
-  };
+/// Exception thrown when a Value::get...() is called on a NULL value
+class NullValue : public Error
+{
+public:
+    NullValue();
+};
 
-  /// Exception thrown when a Value can't be converted to a requested type
-  class TypeError : public Error
-  {
-    public:
-      explicit TypeError(const std::string& msg = "type error");
-  };
+/// Exception thrown when a Value can't be converted to a requested type
+class TypeError : public Error
+{
+public:
+    explicit TypeError(const std::string& msg = "type error");
+};
 
-  /// Exception thrown when the execution of an SQL statement caused an error
-  class SqlError : public Error
-  {
-      std::string sql;
+/// Exception thrown when the execution of an SQL statement caused an error
+class SqlError : public Error
+{
+    std::string sql;
 
-    public:
-      explicit SqlError(const std::string& sql_, const std::string& msg = "sql error");
-      ~SqlError() throw()
-        { }
+public:
+    explicit SqlError(const std::string& sql_, const std::string& msg = "sql error");
+    ~SqlError() throw()
+      { }
 
-      const std::string& getSql() const { return sql; }
-  };
+    const std::string& getSql() const { return sql; }
+};
 
-  class FieldNotFound : public Error
-  {
-      std::string field;
+class FieldNotFound : public Error
+{
+    std::string field;
 
-    public:
-      explicit FieldNotFound(const std::string& field);
-      ~FieldNotFound() throw() { }
+public:
+    explicit FieldNotFound(const std::string& field);
+    ~FieldNotFound() throw() { }
 
-      const std::string& getField() const { return field; }
-  };
+    const std::string& getField() const { return field; }
+};
 }
 
 #endif // TNTDB_ERROR_H
-

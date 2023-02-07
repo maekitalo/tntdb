@@ -33,93 +33,93 @@
 
 namespace tntdb
 {
-  /// This class holds a date.
-  class Date
-  {
-    private:
-      unsigned short _year;
-      unsigned short _month;
-      unsigned short _day;
+/// This class holds a date.
+class Date
+{
+private:
+    unsigned short _year;
+    unsigned short _month;
+    unsigned short _day;
 
-    public:
-      /// Create a Date object with empty values
-      Date()
-        : _year(0), _month(0), _day(0)
+public:
+    /// Create a Date object with empty values
+    Date()
+      : _year(0), _month(0), _day(0)
+      { }
+
+    /** Create a date object with the given values
+
+        No range checks are done.
+     */
+    Date(unsigned short year,
+         unsigned short month,
+         unsigned short day)
+      : _year(year),
+        _month(month),
+        _day(day)
         { }
 
-      /** Create a date object with the given values
+    static Date localtime();
+    static Date gmtime();
 
-          No range checks are done.
-       */
-      Date(unsigned short year,
-           unsigned short month,
-           unsigned short day)
-        : _year(year),
-          _month(month),
-          _day(day)
-          { }
+    /// Get the year part of the Date
+    unsigned short getYear() const  { return _year; }
+    /// Get the month part of the Date
+    unsigned short getMonth() const { return _month; }
+    /// Get the day part of the Date
+    unsigned short getDay() const   { return _day; }
+    /// Get the day of week of the Date (from 0 = sunday to 6 = saturday)
+    unsigned short getWDay() const;
 
-      static Date localtime();
-      static Date gmtime();
+    bool isNull() const  { return _month == 0; }
 
-      /// Get the year part of the Date
-      unsigned short getYear() const  { return _year; }
-      /// Get the month part of the Date
-      unsigned short getMonth() const { return _month; }
-      /// Get the day part of the Date
-      unsigned short getDay() const   { return _day; }
-      /// Get the day of week of the Date (from 0 = sunday to 6 = saturday)
-      unsigned short getWDay() const;
-
-      bool isNull() const  { return _month == 0; }
-
-      /// Set the date
-      void set(unsigned short year,
-               unsigned short month,
-               unsigned short day)
-      {
+    /// Set the date
+    void set(unsigned short year,
+             unsigned short month,
+             unsigned short day)
+    {
         _year = year;
         _month = month;
         _day = day;
-      }
+    }
 
-      /// Get the date in ISO format (yyyy-mm-dd)
-      std::string getIso() const;
+    /// Get the date in ISO format (yyyy-mm-dd)
+    std::string getIso() const;
 
-      /** Construct a Date object from the given ISO date string
+    /** Construct a Date object from the given ISO date string
 
-          If the string is not in ISO format, an exception of type tntdb::TypeError is thrown.
-       */
-      static Date fromIso(const std::string& s);
+        If the string is not in ISO format, an exception of type tntdb::TypeError is thrown.
+     */
+    static Date fromIso(const std::string& s);
 
-      bool operator== (const Date& dt) const
-      {
+    bool operator== (const Date& dt) const
+    {
         return _year == dt._year
           && _month  == dt._month
           && _day    == dt._day;
-      }
+    }
 
-      bool operator!= (const Date& dt) const
-        { return !operator==(dt); }
+    bool operator!= (const Date& dt) const
+      { return !operator==(dt); }
 
-      bool operator< (const Date& dt) const
-      {
+    bool operator< (const Date& dt) const
+    {
         return _year < dt._year  ? true
           : _year    > dt._year  ? false
           : _month   < dt._month ? true
           : _month   > dt._month ? false
           : _day     < dt._day;
-      }
+    }
 
-      bool operator> (const Date& dt) const
-        { return dt < *this; }
+    bool operator> (const Date& dt) const
+      { return dt < *this; }
 
-      bool operator<= (const Date& dt) const
-        { return !(*this > dt); }
+    bool operator<= (const Date& dt) const
+      { return !(*this > dt); }
 
-      bool operator>= (const Date& dt) const
-        { return !(*this < dt); }
-  };
+    bool operator>= (const Date& dt) const
+      { return !(*this < dt); }
+};
 }
 
 #endif // TNTDB_DATE_H

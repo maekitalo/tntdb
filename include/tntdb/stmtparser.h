@@ -33,43 +33,43 @@
 
 namespace tntdb
 {
-  class StmtEvent
-  {
-    public:
-      virtual ~StmtEvent()  {}
-      // returns replacementvalue
-      virtual std::string onHostVar(const std::string& name) = 0;
-  };
+class StmtEvent
+{
+public:
+    virtual ~StmtEvent()  {}
+    // returns replacementvalue
+    virtual std::string onHostVar(const std::string& name) = 0;
+};
 
-  /** Search host variables
+/** Search host variables
 
-      Host variables start with a ':' followed by alpha characters.
-      For each variable found the event handler StmtEvent is called.
-      The host variable is removed and replaced with the value returned
-      by the event handler.
+    Host variables start with a ':' followed by alpha characters.
+    For each variable found the event handler StmtEvent is called.
+    The host variable is removed and replaced with the value returned
+    by the event handler.
 
-      The character '\' is treated as an escape character. It is removed
-      and the following character is processed as is. Name parsing
-      is stopped at '\', so if you need to put alpha characters directly
-      after a host variable, you can escape the character following the
-      host variables name.
+    The character '\' is treated as an escape character. It is removed
+    and the following character is processed as is. Name parsing
+    is stopped at '\', so if you need to put alpha characters directly
+    after a host variable, you can escape the character following the
+    host variables name.
 
-      Strings enclosed in ', " or ` are skipped.
-   */
-  class StmtParser
-  {
-      char praefixChar;
-      std::string sql;
+    Strings enclosed in ', " or ` are skipped.
+ */
+class StmtParser
+{
+    char praefixChar;
+    std::string sql;
 
-    public:
-      explicit StmtParser(char praefixChar_ = ':')
-        : praefixChar(praefixChar_)
-        { }
+public:
+    explicit StmtParser(char praefixChar_ = ':')
+      : praefixChar(praefixChar_)
+      { }
 
-      void parse(const std::string& sqlIn, StmtEvent& event);
+    void parse(const std::string& sqlIn, StmtEvent& event);
 
-      const std::string& getSql() const { return sql; }
-  };
+    const std::string& getSql() const { return sql; }
+};
 }
 
 #endif // TNTDB_STMTPARSER_H
