@@ -31,6 +31,7 @@
 
 #include <cxxtools/string.h>
 #include <string>
+#include <memory>
 #include <stdint.h>
 
 namespace tntdb
@@ -50,9 +51,10 @@ class IStatement
     IStatement(const IStatement&) = delete;
     IStatement& operator=(const IStatement&) = delete;
 
-public:
-    IStatement() { }
+protected:
+    IStatement() = default;
 
+public:
     typedef unsigned size_type;
 
     virtual void clear() = 0;
@@ -84,7 +86,7 @@ public:
     virtual Result select() = 0;
     virtual Row selectRow() = 0;
     virtual Value selectValue() = 0;
-    virtual ICursor* createCursor(unsigned fetchsize) = 0;
+    virtual std::shared_ptr<ICursor> createCursor(unsigned fetchsize) = 0;
 
     virtual void maxNumDelay(size_type n);
     virtual size_type numDelayed() const;

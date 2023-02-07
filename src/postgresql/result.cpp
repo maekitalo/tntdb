@@ -35,39 +35,38 @@ log_define("tntdb.postgresql.result")
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    Result::Result(const tntdb::Connection& c, PGresult* r)
-      : conn(c),
-        result(r)
-    {
-      log_debug("postgresql-result " << r);
-    }
+namespace postgresql
+{
+Result::Result(PGresult* r)
+  : result(r)
+{
+    log_debug("postgresql-result " << r);
+}
 
-    Result::~Result()
+Result::~Result()
+{
+    if (result)
     {
-      if (result)
-      {
         log_debug("PQclear(" << result << ')');
         ::PQclear(result);
-      }
     }
+}
 
-    Row Result::getRow(size_type tup_num) const
-    {
-      return Row(new ResultRow(const_cast<Result*>(this), tup_num));
-    }
+Row Result::getRow(size_type tup_num) const
+{
+    return Row(std::make_shared<ResultRow>(*this, tup_num));
+}
 
-    Result::size_type Result::size() const
-    {
-      log_finest("PQntuples(" << result << ')');
-      return ::PQntuples(result);
-    }
+Result::size_type Result::size() const
+{
+    log_finest("PQntuples(" << result << ')');
+    return ::PQntuples(result);
+}
 
-    Result::size_type Result::getFieldCount() const
-    {
-      log_debug("PQnfields(" << result << ')');
-      return ::PQnfields(result);
-    }
-  }
+Result::size_type Result::getFieldCount() const
+{
+    log_debug("PQnfields(" << result << ')');
+    return ::PQnfields(result);
+}
+}
 }

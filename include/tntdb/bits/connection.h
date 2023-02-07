@@ -76,10 +76,7 @@ public:
     Connection() { }
 
     /// Create a %Connection object from conn
-    Connection(const std::shared_ptr<IConnection>& conn)
-      : _conn(conn)
-      { }
-    Connection(IConnection* conn)
+    explicit Connection(const std::shared_ptr<IConnection>& conn)
       : _conn(conn)
       { }
 
@@ -193,7 +190,7 @@ public:
 
     /// @{
     /// Get the actual implementation object
-    std::shared_ptr<IConnection> getImpl()      { return _conn; }
+    std::shared_ptr<IConnection> getImpl() const { return _conn; }
     /// @}
 };
 }

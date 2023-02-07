@@ -27,6 +27,7 @@
  */
 
 #include <tntdb/postgresql/impl/resultvalue.h>
+#include <tntdb/postgresql/impl/resultrow.h>
 #include <tntdb/error.h>
 #include <sstream>
 #include <cxxtools/log.h>
@@ -37,117 +38,117 @@ log_define("tntdb.postgresql.resultvalue")
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    bool ResultValue::isNull() const
-    {
-      return PQgetisnull(getPGresult(), row->getRowNumber(), tup_num) != 0;
-    }
+namespace postgresql
+{
+bool ResultValue::isNull() const
+{
+    return PQgetisnull(_row.getPGresult(), _row.getRowNumber(), _tup_num) != 0;
+}
 
-    bool ResultValue::getBool() const
-    {
-      char* value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
-      return value[0] == 't' || value[0] == 'T'
-          || value[0] == 'y' || value[0] == 'Y'
-          || value[0] == '1';
-    }
+bool ResultValue::getBool() const
+{
+    char* value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    return value[0] == 't' || value[0] == 'T'
+        || value[0] == 'y' || value[0] == 'Y'
+        || value[0] == '1';
+}
 
-    short ResultValue::getShort() const
-    {
-      return cxxtools::convert<short>(getString());
-    }
+short ResultValue::getShort() const
+{
+    return cxxtools::convert<short>(getString());
+}
 
-    int ResultValue::getInt() const
-    {
-      return cxxtools::convert<int>(getString());
-    }
+int ResultValue::getInt() const
+{
+    return cxxtools::convert<int>(getString());
+}
 
-    long ResultValue::getLong() const
-    {
-      return cxxtools::convert<long>(getString());
-    }
+long ResultValue::getLong() const
+{
+    return cxxtools::convert<long>(getString());
+}
 
-    unsigned short ResultValue::getUnsignedShort() const
-    {
-      return cxxtools::convert<unsigned short>(getString());
-    }
+unsigned short ResultValue::getUnsignedShort() const
+{
+    return cxxtools::convert<unsigned short>(getString());
+}
 
-    unsigned ResultValue::getUnsigned() const
-    {
-      return cxxtools::convert<unsigned>(getString());
-    }
+unsigned ResultValue::getUnsigned() const
+{
+    return cxxtools::convert<unsigned>(getString());
+}
 
-    unsigned long ResultValue::getUnsignedLong() const
-    {
-      return cxxtools::convert<unsigned long>(getString());
-    }
+unsigned long ResultValue::getUnsignedLong() const
+{
+    return cxxtools::convert<unsigned long>(getString());
+}
 
-    int32_t ResultValue::getInt32() const
-    {
-      return cxxtools::convert<int32_t>(getString());
-    }
+int32_t ResultValue::getInt32() const
+{
+    return cxxtools::convert<int32_t>(getString());
+}
 
-    uint32_t ResultValue::getUnsigned32() const
-    {
-      return cxxtools::convert<uint32_t>(getString());
-    }
+uint32_t ResultValue::getUnsigned32() const
+{
+    return cxxtools::convert<uint32_t>(getString());
+}
 
-    int64_t ResultValue::getInt64() const
-    {
-      return cxxtools::convert<int64_t>(getString());
-    }
+int64_t ResultValue::getInt64() const
+{
+    return cxxtools::convert<int64_t>(getString());
+}
 
-    uint64_t ResultValue::getUnsigned64() const
-    {
-      return cxxtools::convert<uint64_t>(getString());
-    }
+uint64_t ResultValue::getUnsigned64() const
+{
+    return cxxtools::convert<uint64_t>(getString());
+}
 
-    Decimal ResultValue::getDecimal() const
-    {
-      return Decimal(getString());
-    }
+Decimal ResultValue::getDecimal() const
+{
+    return Decimal(getString());
+}
 
-    float ResultValue::getFloat() const
-    {
-      return cxxtools::convert<float>(getString());
-    }
+float ResultValue::getFloat() const
+{
+    return cxxtools::convert<float>(getString());
+}
 
-    double ResultValue::getDouble() const
-    {
-      return cxxtools::convert<double>(getString());
-    }
+double ResultValue::getDouble() const
+{
+    return cxxtools::convert<double>(getString());
+}
 
-    char ResultValue::getChar() const
-    {
-      char* value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
-      return *value;
-    }
+char ResultValue::getChar() const
+{
+    char* value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    return *value;
+}
 
-    void ResultValue::getString(std::string& ret) const
-    {
-      if (PQgetisnull(getPGresult(), row->getRowNumber(), tup_num))
-        throw NullValue();
-      char* value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
-      int len = PQgetlength(getPGresult(), row->getRowNumber(), tup_num);
-      ret.assign(value, len);
-    }
+void ResultValue::getString(std::string& ret) const
+{
+    if (PQgetisnull(_row.getPGresult(), _row.getRowNumber(), _tup_num))
+      throw NullValue();
+    char* value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    int len = PQgetlength(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    ret.assign(value, len);
+}
 
-    void ResultValue::getBlob(Blob& ret) const
-    {
-      char* value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
-      int len = PQgetlength(getPGresult(), row->getRowNumber(), tup_num);
-      log_debug("PQgetlength returns " << len);
-      size_t to_len;
-      unsigned char* data = PQunescapeBytea(reinterpret_cast<unsigned char*>(value), &to_len);
-      ret.assign(reinterpret_cast<char*>(data), to_len);
-      PQfreemem(data);
-    }
+void ResultValue::getBlob(Blob& ret) const
+{
+    char* value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    int len = PQgetlength(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    log_debug("PQgetlength returns " << len);
+    size_t to_len;
+    unsigned char* data = PQunescapeBytea(reinterpret_cast<unsigned char*>(value), &to_len);
+    ret.assign(reinterpret_cast<char*>(data), to_len);
+    PQfreemem(data);
+}
 
-    Date ResultValue::getDate() const
+Date ResultValue::getDate() const
+{
+    std::string value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    if (value.find('-') != std::string::npos)
     {
-      std::string value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
-      if (value.find('-') != std::string::npos)
-      {
         // ISO 8601/SQL standard
         char ch;
         unsigned short year, month, day;
@@ -155,9 +156,9 @@ namespace tntdb
         in >> year >> ch >> month >> ch >> day;
         if (in)
           return Date(year, month, day);
-      }
-      else if (value.find('/') != std::string::npos)
-      {
+    }
+    else if (value.find('/') != std::string::npos)
+    {
         // tradition style
         char ch;
         unsigned short year, month, day;
@@ -165,9 +166,9 @@ namespace tntdb
         in >> month >> ch >> day >> ch >> year;
         if (in)
           return Date(year, month, day);
-      }
-      else if (value.find('.') != std::string::npos)
-      {
+    }
+    else if (value.find('.') != std::string::npos)
+    {
         // german/regional style
         char ch;
         unsigned short year, month, day;
@@ -175,40 +176,40 @@ namespace tntdb
         in >> day >> ch >> month >> ch >> year;
         if (in)
           return Date(year, month, day);
-      }
-
-      std::ostringstream msg;
-      msg << "can't convert \"" << value << "\" to Date";
-      throw TypeError(msg.str());
     }
 
-    Time ResultValue::getTime() const
+    std::ostringstream msg;
+    msg << "can't convert \"" << value << "\" to Date";
+    throw TypeError(msg.str());
+}
+
+Time ResultValue::getTime() const
+{
+    std::string value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    char ch;
+    unsigned short hour, min, sec, msec;
+    float fsec;
+    std::istringstream in(value);
+    in >> hour >> ch >> min >> ch >> fsec;
+    if (in)
     {
-      std::string value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
-      char ch;
-      unsigned short hour, min, sec, msec;
-      float fsec;
-      std::istringstream in(value);
-      in >> hour >> ch >> min >> ch >> fsec;
-      if (in)
-      {
         fsec += .0005;
         sec = static_cast<unsigned short>(fsec);
         msec = static_cast<unsigned short>((fsec - sec) * 1000);
         return Time(hour, min, sec, msec);
-      }
-
-      std::ostringstream msg;
-      msg << "can't convert \"" << value << "\" to Time";
-      throw TypeError(msg.str());
     }
 
-    Datetime ResultValue::getDatetime() const
+    std::ostringstream msg;
+    msg << "can't convert \"" << value << "\" to Time";
+    throw TypeError(msg.str());
+}
+
+Datetime ResultValue::getDatetime() const
+{
+    std::string value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    log_debug("datetime value=" << value);
+    if (value.find('-') != std::string::npos)
     {
-      std::string value = PQgetvalue(getPGresult(), row->getRowNumber(), tup_num);
-      log_debug("datetime value=" << value);
-      if (value.find('-') != std::string::npos)
-      {
         // ISO 8601/SQL standard
         char ch;
         unsigned short year, month, day, hour, min, sec, msec;
@@ -217,14 +218,14 @@ namespace tntdb
         in >> year >> ch >> month >> ch >> day >> hour >> ch >> min >> ch >> fsec;
         if (in)
         {
-          fsec += .0005;
-          sec = static_cast<unsigned short>(fsec);
-          msec = static_cast<unsigned short>((fsec - sec) * 1000);
-          return Datetime(year, month, day, hour, min, sec, msec);
+            fsec += .0005;
+            sec = static_cast<unsigned short>(fsec);
+            msec = static_cast<unsigned short>((fsec - sec) * 1000);
+            return Datetime(year, month, day, hour, min, sec, msec);
         }
-      }
-      else if (value.find('/') != std::string::npos)
-      {
+    }
+    else if (value.find('/') != std::string::npos)
+    {
         // traditional style
         char ch;
         unsigned short year, month, day, hour, min, sec;
@@ -232,9 +233,9 @@ namespace tntdb
         in >> month >> ch >> day >> ch >> year >> hour >> ch >> min >> ch >> sec;
         if (in)
           return Datetime(year, month, day, hour, min, sec);
-      }
-      else if (value.find('.') != std::string::npos)
-      {
+    }
+    else if (value.find('.') != std::string::npos)
+    {
         // german/regional style
         char ch;
         unsigned short year, month, day, hour, min, sec;
@@ -242,12 +243,12 @@ namespace tntdb
         in >> day >> ch >> month >> ch >> year >> hour >> ch >> min >> ch >> sec;
         if (in)
           return Datetime(year, month, day, hour, min, sec);
-      }
-
-      std::ostringstream msg;
-      msg << "can't convert \"" << value << "\" to Datetime";
-      throw TypeError(msg.str());
     }
 
-  }
+    std::ostringstream msg;
+    msg << "can't convert \"" << value << "\" to Datetime";
+    throw TypeError(msg.str());
+}
+
+}
 }

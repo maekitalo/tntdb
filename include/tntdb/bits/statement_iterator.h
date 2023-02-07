@@ -48,7 +48,8 @@ class Statement::const_iterator
     std::shared_ptr<ICursor> cursor;
 
 public:
-    explicit const_iterator(ICursor* cursor_ = 0);
+    const_iterator() { }
+    explicit const_iterator(std::shared_ptr<ICursor> cursor_);
 
     /**
      * Returns true, when the cursor points to the same iteration as the

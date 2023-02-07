@@ -42,7 +42,7 @@ class IRow
     IRow& operator=(const IRow&) = delete;
 
 protected:
-    IRow() { }
+    IRow() = default;
 
 public:
     typedef unsigned size_type;

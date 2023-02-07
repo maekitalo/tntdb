@@ -181,11 +181,160 @@ public:
         del.execute();
     }
 
+    void testLimits()
+    {
+        del.execute();
+
+        tntdb::Statement ins = conn.prepare(
+          "insert into tntdbtest("
+          "    intcol, longcol, unsignedcol, unsignedlongcol,"
+          "    int32col, uint32col, int64col, uint64col,"
+          "    floatcol, doublecol)"
+          " values("
+          "    :intcol, :longcol, :unsignedcol, :unsignedlongcol,"
+          "    :int32col, :uint32col, :int64col, :uint64col,"
+          "    :floatcol, :doublecol)");
+
+        int intval                  = std::numeric_limits<int>::max();
+        long longval                = std::numeric_limits<long>::max();
+        unsigned uval               = std::numeric_limits<unsigned>::max();
+        unsigned long ulongval      = std::numeric_limits<unsigned long>::max();
+        int32_t int32val            = std::numeric_limits<int32_t>::max();
+        uint32_t uint32val          = std::numeric_limits<uint32_t>::max();
+        int64_t int64val            = std::numeric_limits<int64_t>::max();
+        uint64_t uint64val          = std::numeric_limits<uint64_t>::max();
+        float floatval              = std::numeric_limits<float>::max() * .999999;
+        double doubleval            = std::numeric_limits<double>::max() * .999999;
+
+        ins.set("intcol", intval)
+           .set("longcol", longval)
+           .set("unsignedcol", uval)
+           .set("unsignedlongcol", ulongval)
+           .set("int32col", int32val)
+           .set("uint32col", uint32val)
+           .set("int64col", int64val)
+           .set("uint64col", uint64val)
+           .set("floatcol", floatval)
+           .set("doublecol", doubleval)
+           .execute();
+
+        int intres = 0;
+        long longres = 0;
+        unsigned ures = 0;
+        unsigned long ulongres = 0;
+        int32_t int32res = 0;
+        uint32_t uint32res = 0;
+        int64_t int64res = 0;
+        uint64_t uint64res = 0;
+        float floatres = 0;
+        double doubleres = 0;
+
+        tntdb::Statement sel = conn.prepare(
+          "select"
+          "    intcol, longcol, unsignedcol, unsignedlongcol,"
+          "    int32col, uint32col, int64col, uint64col,"
+          "    floatcol, doublecol"
+          " from tntdbtest");
+
+        tntdb::Row row = sel.selectRow();
+        row[0].get(intres);
+        row[1].get(longres);
+        row[2].get(ures);
+        row[3].get(ulongres);
+        row[4].get(int32res);
+        row[5].get(uint32res);
+        row[6].get(int64res);
+        row[7].get(uint64res);
+        row[8].get(floatres);
+        row[9].get(doubleres);
+
+        float fq = floatval / floatres;
+        double dq = doubleval / doubleres;
+
+        CXXTOOLS_UNIT_ASSERT_EQUALS(intval, intres);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(longval, longres);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(uval, ures);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(ulongval, ulongres);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(int32val, int32res);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(uint32val, uint32res);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(int64val, int64res);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(uint64val, uint64res);
+        CXXTOOLS_UNIT_ASSERT(fq >= .9999 && fq <= 1.0001);
+        CXXTOOLS_UNIT_ASSERT(dq >= .9999 && dq <= 1.0001);
+    }
+
+    void testNull()
+    {
+        tntdb::Statement ins = conn.prepare(
+          "insert into tntdbtest(intcol, longcol)"
+          " values(:intcol, :longcol)");
+
+        long longval = 43;
+
+        ins.setNull("intcol")
+           .set("longcol", longval)
+           .execute();
+
+        int intres;
+        long longres;
+
+        tntdb::Statement sel = conn.prepare(
+          "select intcol, longcol"
+          " from tntdbtest");
+
+        tntdb::Row row = sel.selectRow();
+        bool intnotnull = row[0].get(intres);
+        bool longnotnull = row[1].get(longres);
+        CXXTOOLS_UNIT_ASSERT(!intnotnull);
+        CXXTOOLS_UNIT_ASSERT(longnotnull);
+    }
+
     void testBool()
     {
-        BEGIN_TEST(bool, "boolcol");
-        TEST(true);
-        TEST(false);
+        //BEGIN_TEST(bool, "boolcol");
+        const std::string colName = "boolcol";
+        bool isNotNull = false;
+        tntdb::Statement::const_iterator cursor;
+        tntdb::Statement ins = conn.prepare(
+          "insert into tntdbtest(boolcol) values(:boolcol)");
+        tntdb::Statement sel = conn.prepare(
+          "select boolcol from tntdbtest");
+        tntdb::Value dbvalue;
+        bool res;
+        //TEST(true);
+        //TEST(false);
+        del.execute();
+        ins.set(colName, true).execute();
+        dbvalue = sel.selectValue();
+        isNotNull = dbvalue.get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(true, res);
+        dbvalue = sel.select()[0][0];
+        isNotNull = dbvalue.get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(true, res);
+        cursor = sel.begin(4);
+        CXXTOOLS_UNIT_ASSERT(cursor != sel.end());
+        isNotNull = (*cursor)[0].get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(true, res);
+
+        del.execute();
+        ins.set(colName, false).execute();
+        dbvalue = sel.selectValue();
+        isNotNull = dbvalue.get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(false, res);
+        dbvalue = sel.select()[0][0];
+        isNotNull = dbvalue.get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(false, res);
+        cursor = sel.begin(4);
+        CXXTOOLS_UNIT_ASSERT(cursor != sel.end());
+        isNotNull = (*cursor)[0].get(res);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(false, res);
+
     }
 
     void testShort()
@@ -389,119 +538,11 @@ public:
         CXXTOOLS_UNIT_ASSERT_EQUALS(serialval, serialres);
     }
 
-    void testLimits()
-    {
-        del.execute();
-
-        tntdb::Statement ins = conn.prepare(
-          "insert into tntdbtest("
-          "    intcol, longcol, unsignedcol, unsignedlongcol,"
-          "    int32col, uint32col, int64col, uint64col,"
-          "    floatcol, doublecol)"
-          " values("
-          "    :intcol, :longcol, :unsignedcol, :unsignedlongcol,"
-          "    :int32col, :uint32col, :int64col, :uint64col,"
-          "    :floatcol, :doublecol)");
-
-        int intval                  = std::numeric_limits<int>::max();
-        long longval                = std::numeric_limits<long>::max();
-        unsigned uval               = std::numeric_limits<unsigned>::max();
-        unsigned long ulongval      = std::numeric_limits<unsigned long>::max();
-        int32_t int32val            = std::numeric_limits<int32_t>::max();
-        uint32_t uint32val          = std::numeric_limits<uint32_t>::max();
-        int64_t int64val            = std::numeric_limits<int64_t>::max();
-        uint64_t uint64val          = std::numeric_limits<uint64_t>::max();
-        float floatval              = std::numeric_limits<float>::max() * .999999;
-        double doubleval            = std::numeric_limits<double>::max() * .999999;
-
-        ins.set("intcol", intval)
-           .set("longcol", longval)
-           .set("unsignedcol", uval)
-           .set("unsignedlongcol", ulongval)
-           .set("int32col", int32val)
-           .set("uint32col", uint32val)
-           .set("int64col", int64val)
-           .set("uint64col", uint64val)
-           .set("floatcol", floatval)
-           .set("doublecol", doubleval)
-           .execute();
-
-        int intres = 0;
-        long longres = 0;
-        unsigned ures = 0;
-        unsigned long ulongres = 0;
-        int32_t int32res = 0;
-        uint32_t uint32res = 0;
-        int64_t int64res = 0;
-        uint64_t uint64res = 0;
-        float floatres = 0;
-        double doubleres = 0;
-
-        tntdb::Statement sel = conn.prepare(
-          "select"
-          "    intcol, longcol, unsignedcol, unsignedlongcol,"
-          "    int32col, uint32col, int64col, uint64col,"
-          "    floatcol, doublecol"
-          " from tntdbtest");
-
-        tntdb::Row row = sel.selectRow();
-        row[0].get(intres);
-        row[1].get(longres);
-        row[2].get(ures);
-        row[3].get(ulongres);
-        row[4].get(int32res);
-        row[5].get(uint32res);
-        row[6].get(int64res);
-        row[7].get(uint64res);
-        row[8].get(floatres);
-        row[9].get(doubleres);
-
-        float fq = floatval / floatres;
-        double dq = doubleval / doubleres;
-
-        CXXTOOLS_UNIT_ASSERT_EQUALS(intval, intres);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(longval, longres);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(uval, ures);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(ulongval, ulongres);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(int32val, int32res);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(uint32val, uint32res);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(int64val, int64res);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(uint64val, uint64res);
-        CXXTOOLS_UNIT_ASSERT(fq >= .9999 && fq <= 1.0001);
-        CXXTOOLS_UNIT_ASSERT(dq >= .9999 && dq <= 1.0001);
-    }
-
-    void testNull()
-    {
-        tntdb::Statement ins = conn.prepare(
-          "insert into tntdbtest(intcol, longcol)"
-          " values(:intcol, :longcol)");
-
-        long longval = 43;
-
-        ins.setNull("intcol")
-           .set("longcol", longval)
-           .execute();
-
-        int intres;
-        long longres;
-
-        tntdb::Statement sel = conn.prepare(
-          "select intcol, longcol"
-          " from tntdbtest");
-
-        tntdb::Row row = sel.selectRow();
-        bool intnotnull = row[0].get(intres);
-        bool longnotnull = row[1].get(longres);
-        CXXTOOLS_UNIT_ASSERT(!intnotnull);
-        CXXTOOLS_UNIT_ASSERT(longnotnull);
-    }
-
     void testFloatNan()
     {
         BEGIN_TEST(float, "floatcol");
         float n = std::numeric_limits<float>::quiet_NaN();
-        del.execute();                                 \
+        del.execute();
         ins.set("floatcol", n).execute();
         dbvalue = sel.selectValue();
         isNotNull = dbvalue.get(res);
@@ -513,7 +554,7 @@ public:
     {
         BEGIN_TEST(double, "doublecol");
         double n = std::numeric_limits<double>::quiet_NaN();
-        del.execute();                                 \
+        del.execute();
         ins.set("doublecol", n).execute();
         dbvalue = sel.selectValue();
         isNotNull = dbvalue.get(res);

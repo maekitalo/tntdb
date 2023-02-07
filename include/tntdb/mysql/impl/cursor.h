@@ -42,12 +42,12 @@ class Statement;
 
 class Cursor : public ICursor
 {
-    std::unique_ptr<BoundRow> row;
-    std::unique_ptr<Statement> mysqlStatement;
+    std::shared_ptr<BoundRow> row;
+    Statement& mysqlStatement;
     MYSQL_STMT* stmt;
 
 public:
-    Cursor(Statement* statement, unsigned fetchsize);
+    Cursor(Statement& statement, unsigned fetchsize);
     ~Cursor();
 
     // method for ICursor

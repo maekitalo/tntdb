@@ -591,9 +591,9 @@ tntdb::Value Statement::selectValue()
     return t.getValue(0);
 }
 
-ICursor* Statement::createCursor(unsigned fetchsize)
+std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)
 {
-    return new Cursor(this, fetchsize);
+    return std::make_shared<Cursor>(*this, fetchsize);
 }
 
 MYSQL_STMT* Statement::getStmt()
@@ -700,7 +700,7 @@ MYSQL_FIELD* Statement::getFields()
         log_debug("mysql_stmt_result_metadata(" << stmt << ')');
         MYSQL_RES* metadata = mysql_stmt_result_metadata(stmt);
         if (!metadata)
-          throw Error("no metadata avaliable");
+            throw Error("no metadata avaliable");
         log_debug("mysql_stmt_result_metadata(" << stmt << ") => " << metadata);
 
         log_debug("mysql_fetch_fields(" << metadata << ')');

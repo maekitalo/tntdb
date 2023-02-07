@@ -40,7 +40,7 @@ class IResult
     IResult& operator=(const IResult&) = delete;
 
 protected:
-    IResult() { }
+    IResult() = default;
 
 public:
     typedef unsigned size_type;

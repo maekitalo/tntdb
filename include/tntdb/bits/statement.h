@@ -80,9 +80,6 @@ public:
     explicit Statement(const std::shared_ptr<IStatement>& stmt)
       : _stmt(stmt)
       { }
-    explicit Statement(IStatement* stmt)
-      : _stmt(stmt)
-      { }
 
     /// Set all host variables to NULL
     Statement& clear()

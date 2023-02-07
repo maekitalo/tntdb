@@ -131,7 +131,7 @@ public:
     tntdb::Result select();
     tntdb::Row selectRow();
     tntdb::Value selectValue();
-    ICursor* createCursor(unsigned fetchsize);
+    std::shared_ptr<ICursor> createCursor(unsigned fetchsize);
 
     // specific methods
     const std::string& getQuery() const     { return query; }

@@ -38,69 +38,69 @@ log_define("tntdb.statement")
 
 namespace tntdb
 {
-  Statement::size_type Statement::execute()
-  {
+Statement::size_type Statement::execute()
+{
     log_trace("Statement::execute()");
     return _stmt->execute();
-  }
+}
 
-  Result Statement::select()
-  {
+Result Statement::select()
+{
     log_trace("Statement::select()");
     return _stmt->select();
-  }
+}
 
-  Row Statement::selectRow()
-  {
+Row Statement::selectRow()
+{
     log_trace("Statement::selectRow()");
     return _stmt->selectRow();
-  }
+}
 
-  Value Statement::selectValue()
-  {
+Value Statement::selectValue()
+{
     log_trace("Statement::selectValue()");
     return _stmt->selectValue();
-  }
+}
 
-  Statement::const_iterator Statement::begin(unsigned fetchsize) const
-  {
+Statement::const_iterator Statement::begin(unsigned fetchsize) const
+{
     log_trace("Statement::begin(" << fetchsize << ')');
     return const_iterator(_stmt->createCursor(fetchsize));
-  }
+}
 
-  void Statement::maxNumDelay(size_type n)
-  {
-      _stmt->maxNumDelay(n);
-  }
+void Statement::maxNumDelay(size_type n)
+{
+    _stmt->maxNumDelay(n);
+}
 
-  Statement::size_type Statement::numDelayed() const
-  {
-      return _stmt->numDelayed();
-  }
+Statement::size_type Statement::numDelayed() const
+{
+    return _stmt->numDelayed();
+}
 
-  Statement::size_type Statement::flush()
-  {
-      return _stmt->flush();
-  }
+Statement::size_type Statement::flush()
+{
+    return _stmt->flush();
+}
 
-  void IStatement::setUString(const std::string& col, const cxxtools::String& data)
-  {
+void IStatement::setUString(const std::string& col, const cxxtools::String& data)
+{
     setString(col, cxxtools::Utf8Codec::encode(data));
-  }
+}
 
-  void IStatement::maxNumDelay(unsigned /*n*/)
-  {
-  }
+void IStatement::maxNumDelay(unsigned /*n*/)
+{
+}
 
-  unsigned IStatement::numDelayed() const
-  {
-      return 0;
-  }
+unsigned IStatement::numDelayed() const
+{
+    return 0;
+}
 
-  Statement::size_type IStatement::flush()
-  {
-      return 0;
-  }
+Statement::size_type IStatement::flush()
+{
+    return 0;
+}
 
 }
 

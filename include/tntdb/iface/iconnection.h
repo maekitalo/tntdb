@@ -47,7 +47,7 @@ class IConnection
     IConnection& operator=(const IConnection&) = delete;
 
 protected:
-    IConnection() { }
+    IConnection() = default;
 
 public:
     typedef unsigned size_type;

@@ -478,7 +478,7 @@ tntdb::Result Statement::select()
 {
     log_debug("select()");
     PGresult* result = execPrepared();
-    return tntdb::Result(new Result(tntdb::Connection(conn), result));
+    return tntdb::Result(std::make_shared<Result>(result));
 }
 
 tntdb::Row Statement::selectRow()
@@ -501,9 +501,9 @@ tntdb::Value Statement::selectValue()
     return result[0][0];
 }
 
-ICursor* Statement::createCursor(unsigned fetchsize)
+std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)
 {
-    return new Cursor(this, fetchsize);
+    return std::make_shared<Cursor>(*this, fetchsize);
 }
 
 const char* const* Statement::getParamValues()

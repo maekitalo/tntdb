@@ -69,7 +69,7 @@ class TestStmt : public tntdb::IStatement
         virtual tntdb::Result select()   { return tntdb::Result(); }
         virtual tntdb::Row selectRow()   { return tntdb::Row(); }
         virtual tntdb::Value selectValue()   { return tntdb::Value(); }
-        virtual tntdb::ICursor* createCursor(unsigned fetchsize)   { return 0; }
+        virtual std::shared_ptr<tntdb::ICursor> createCursor(unsigned fetchsize)   { return std::shared_ptr<tntdb::ICursor>(); }
 
         std::string value(const std::string& col) const
         {
@@ -94,7 +94,7 @@ class StatementTest : public cxxtools::unit::TestSuite
 
         void testSetValue()
         {
-            TestStmt* testStmt = new TestStmt();
+            std::shared_ptr<TestStmt> testStmt = std::make_shared<TestStmt>();
             tntdb::Statement stmt(testStmt);
             stmt.set("bool", true)
                 .set("short", short(42))
@@ -140,7 +140,7 @@ class StatementTest : public cxxtools::unit::TestSuite
 
         void testClear()
         {
-            TestStmt* testStmt = new TestStmt();
+            std::shared_ptr<TestStmt> testStmt = std::make_shared<TestStmt>();
             tntdb::Statement stmt(testStmt);
             stmt.set("bool", true)
                 .set("int", short(42));
@@ -156,7 +156,7 @@ class StatementTest : public cxxtools::unit::TestSuite
 
         void testSetTimespan()
         {
-            TestStmt* testStmt = new TestStmt();
+            std::shared_ptr<TestStmt> testStmt = std::make_shared<TestStmt>();
             tntdb::Statement stmt(testStmt);
             stmt.set("us", cxxtools::Microseconds(17))
                 .set("ms", cxxtools::Milliseconds(18))

@@ -52,6 +52,9 @@ class IBlob
     IBlob(const IBlob&) = delete;
     IBlob& operator=(const IBlob&) = delete;
 
+protected:
+    IBlob() = default;
+
 public:
     /** @brief Destructor
     */
@@ -101,13 +104,8 @@ public:
     }
 
 protected:
-    IBlob()
-    : _data(0)
-    , _size(0)
-    { }
-
-    char* _data;
-    std::size_t _size;
+    char* _data = nullptr;
+    std::size_t _size = 0;
 };
 
 }

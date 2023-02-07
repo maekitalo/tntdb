@@ -30,7 +30,6 @@
 #define TNTDB_MYSQL_IMPL_RESULT_H
 
 #include <tntdb/iface/iresult.h>
-#include <tntdb/bits/connection.h>
 #include <mysql.h>
 
 namespace tntdb
