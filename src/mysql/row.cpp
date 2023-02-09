@@ -35,21 +35,21 @@ log_define("tntdb.mysql.row")
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    Row::Row(const Result result_, MYSQL_RES* res, MYSQL_ROW row_)
-      : row(new ResultRow(result_, res, row_))
-    {
-    }
+namespace mysql
+{
+Row::Row(const Result result_, MYSQL_RES* res, MYSQL_ROW row_)
+  : row(new ResultRow(result_, res, row_))
+{
+}
 
-    Row::const_iterator Row::begin() const
-    {
-      return const_iterator(*this, 0);
-    }
+Row::const_iterator Row::begin() const
+{
+    return const_iterator(*this, 0);
+}
 
-    Row::const_iterator Row::end() const
-    {
-      return const_iterator(*this, size());
-    }
-  }
+Row::const_iterator Row::end() const
+{
+    return const_iterator(*this, size());
+}
+}
 }

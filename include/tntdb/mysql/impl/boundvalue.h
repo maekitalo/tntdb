@@ -49,13 +49,11 @@ public:
     typedef unsigned size_type;
 
 private:
-    std::unique_ptr<IRow> row;
     MYSQL_BIND& mysql_bind;
 
 public:
-    BoundValue(IRow* row_, MYSQL_BIND& bind)
-        : row(row_),
-          mysql_bind(bind)
+    explicit BoundValue(MYSQL_BIND& bind)
+        : mysql_bind(bind)
         { }
 
     virtual bool isNull() const;

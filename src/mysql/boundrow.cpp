@@ -45,7 +45,7 @@ Value BoundRow::getValueByNumber(size_type field_num) const
     // TODO eliminate creation of BoundValue, by preallocating them.
     // We can maintain a vector<BoundValue> and prevent dynamic deallocation
     // of elements by overriding BoundValue::release
-    return Value(std::make_shared<BoundValue>(const_cast<IRow*>(static_cast<const IRow*>(this)), getMysqlBind()[field_num]));
+    return Value(std::make_shared<BoundValue>(getMysqlBind()[field_num]));
 }
 
 Value BoundRow::getValueByName(const std::string& field_name) const
