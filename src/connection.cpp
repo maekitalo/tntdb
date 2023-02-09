@@ -100,20 +100,6 @@ Statement Connection::prepareWithLimit(const std::string& query, const std::stri
     return _conn->prepareWithLimit(query, limit, offset);
 }
 
-Statement Connection::prepareCached(const std::string& query, const std::string& key)
-{
-    log_trace("Connection::prepareCached(\"" << query << "\")");
-
-    return _conn->prepareCached(query, key);
-}
-
-Statement Connection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
-{
-    log_trace("Connection::prepareCachedWithLimit(\"" << query << ", " << limit << "\", \"" << offset << "\", \"" << key << "\")");
-
-    return _conn->prepareCachedWithLimit(query, limit, offset, key);
-}
-
 std::string IConnection::url(const std::string& url, const std::string& username, const std::string& password)
 {
     enum {
@@ -183,65 +169,5 @@ std::string IConnection::url(const std::string& url, const std::string& username
     return ret;
 }
 
-Statement IStmtCacheConnection::prepareCached(const std::string& query, const std::string& key)
-{
-    log_trace("IStmtCacheConnection::prepareCached(\"" << query << ", " << key << "\")");
-
-    stmtCacheType::iterator it = _stmtCache.find(key);
-    if (it == _stmtCache.end())
-    {
-        log_debug("statement for query \"" << key << "\" not found in cache");
-        Statement stmt = prepare(query);
-        IStatement* istmt = const_cast<IStatement*>(stmt.getImpl());
-        _stmtCache.emplace(key, istmt);
-        return stmt;
-    }
-    else
-    {
-        log_debug("statement for query \"" << key << "\" fetched from cache");
-        return Statement(it->second);
-    }
-}
-
-Statement IStmtCacheConnection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
-{
-    log_trace("IStmtCacheConnection::prepareCachedWithLimit(\"" << query << ", " << limit << "\", \"" << offset << "\", \"" << key << "\")");
-
-    std::string lkey = key + ':' + limit + ':' + offset;
-    stmtCacheType::iterator it = _stmtCache.find(lkey);
-    if (it == _stmtCache.end())
-    {
-        log_debug("statement for query \"" << lkey << "\" not found in cache");
-        Statement stmt = prepareWithLimit(query, limit, offset);
-        IStatement* istmt = const_cast<IStatement*>(stmt.getImpl());
-        _stmtCache.insert(stmtCacheType::value_type(lkey, istmt));
-        return stmt;
-    }
-    else
-    {
-        log_debug("statement for query \"" << lkey << "\" fetched from cache");
-        return Statement(it->second);
-    }
-}
-
-void IStmtCacheConnection::clearStatementCache()
-{
-    log_trace("IStmtCacheConnection::clearStatementCache()");
-
-    _stmtCache.clear();
-}
-
-bool IStmtCacheConnection::clearStatementCache(const std::string& key)
-{
-    log_trace("IStmtCacheConnection::clearStatementCache(\"" << key << "\")");
-
-    stmtCacheType::iterator it = _stmtCache.find(key);
-    if (it == _stmtCache.end())
-        return  false;
-
-    log_debug("remove statement for query \"" << key << "\" from cache");
-    _stmtCache.erase(it);
-    return true;
-}
 }
 

@@ -63,7 +63,7 @@ namespace tntdb
 namespace mysql
 {
 /// Implements a connection to a Mysql database.
-class Connection : public IStmtCacheConnection
+class Connection : public IConnection
 {
     MYSQL mysql;
     bool initialized;

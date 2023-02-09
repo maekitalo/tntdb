@@ -80,11 +80,6 @@ Connection::Connection(const std::string& url, const std::string& username, cons
     log_debug(connections.size() << " connections");
 }
 
-Connection::~Connection()
-{
-    clearStatementCache();
-}
-
 void Connection::beginTransaction()
 {
     for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)

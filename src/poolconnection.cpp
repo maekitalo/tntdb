@@ -109,26 +109,6 @@ Statement PoolConnection::prepare(const std::string& query)
     return _connection->prepare(query);
 }
 
-Statement PoolConnection::prepareCached(const std::string& query, const std::string& key)
-{
-    return _connection->prepareCached(query, key);
-}
-
-Statement PoolConnection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
-{
-    return _connection->prepareCachedWithLimit(query, limit, offset, key);
-}
-
-void PoolConnection::clearStatementCache()
-{
-    return _connection->clearStatementCache();
-}
-
-bool PoolConnection::clearStatementCache(const std::string& key)
-{
-    return _connection->clearStatementCache(key);
-}
-
 bool PoolConnection::ping()
 {
     bool ok = _connection->ping();
