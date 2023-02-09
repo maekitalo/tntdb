@@ -27,7 +27,7 @@
  */
 
 #include <tntdb/postgresql/impl/resultvalue.h>
-#include <tntdb/postgresql/impl/resultrow.h>
+#include <tntdb/postgresql/impl/result.h>
 #include <tntdb/error.h>
 #include <sstream>
 #include <cxxtools/log.h>
@@ -40,14 +40,29 @@ namespace tntdb
 {
 namespace postgresql
 {
+ResultValue::ResultValue(const std::shared_ptr<Result>& resultref, const Result& result, unsigned rownumber, int tup_num)
+    : _resultref(resultref),
+      _result(result),
+      _rownumber(rownumber),
+      _tup_num(tup_num)
+{
+}
+
+ResultValue::ResultValue(const Result& result, unsigned rownumber, int tup_num)
+    : _result(result),
+      _rownumber(rownumber),
+      _tup_num(tup_num)
+{
+}
+
 bool ResultValue::isNull() const
 {
-    return PQgetisnull(_row.getPGresult(), _row.getRowNumber(), _tup_num) != 0;
+    return PQgetisnull(_result.getPGresult(), _rownumber, _tup_num) != 0;
 }
 
 bool ResultValue::getBool() const
 {
-    char* value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    char* value = PQgetvalue(_result.getPGresult(), _rownumber, _tup_num);
     return value[0] == 't' || value[0] == 'T'
         || value[0] == 'y' || value[0] == 'Y'
         || value[0] == '1';
@@ -120,23 +135,23 @@ double ResultValue::getDouble() const
 
 char ResultValue::getChar() const
 {
-    char* value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    char* value = PQgetvalue(_result.getPGresult(), _rownumber, _tup_num);
     return *value;
 }
 
 void ResultValue::getString(std::string& ret) const
 {
-    if (PQgetisnull(_row.getPGresult(), _row.getRowNumber(), _tup_num))
+    if (PQgetisnull(_result.getPGresult(), _rownumber, _tup_num))
       throw NullValue();
-    char* value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
-    int len = PQgetlength(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    char* value = PQgetvalue(_result.getPGresult(), _rownumber, _tup_num);
+    int len = PQgetlength(_result.getPGresult(), _rownumber, _tup_num);
     ret.assign(value, len);
 }
 
 void ResultValue::getBlob(Blob& ret) const
 {
-    char* value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
-    int len = PQgetlength(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    char* value = PQgetvalue(_result.getPGresult(), _rownumber, _tup_num);
+    int len = PQgetlength(_result.getPGresult(), _rownumber, _tup_num);
     log_debug("PQgetlength returns " << len);
     size_t to_len;
     unsigned char* data = PQunescapeBytea(reinterpret_cast<unsigned char*>(value), &to_len);
@@ -146,7 +161,7 @@ void ResultValue::getBlob(Blob& ret) const
 
 Date ResultValue::getDate() const
 {
-    std::string value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    std::string value = PQgetvalue(_result.getPGresult(), _rownumber, _tup_num);
     if (value.find('-') != std::string::npos)
     {
         // ISO 8601/SQL standard
@@ -185,7 +200,7 @@ Date ResultValue::getDate() const
 
 Time ResultValue::getTime() const
 {
-    std::string value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    std::string value = PQgetvalue(_result.getPGresult(), _rownumber, _tup_num);
     char ch;
     unsigned short hour, min, sec, msec;
     float fsec;
@@ -206,7 +221,7 @@ Time ResultValue::getTime() const
 
 Datetime ResultValue::getDatetime() const
 {
-    std::string value = PQgetvalue(_row.getPGresult(), _row.getRowNumber(), _tup_num);
+    std::string value = PQgetvalue(_result.getPGresult(), _rownumber, _tup_num);
     log_debug("datetime value=" << value);
     if (value.find('-') != std::string::npos)
     {

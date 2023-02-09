@@ -64,12 +64,6 @@ Cursor::Cursor(Statement& statement, unsigned fetchsize)
     statement.execute(stmt, fetchsize);
 }
 
-Cursor::~Cursor()
-{
-    if (stmt)
-        mysqlStatement.putback(stmt);
-}
-
 Row Cursor::fetch()
 {
     log_debug("mysql_stmt_fetch(" << stmt << ')');
@@ -98,8 +92,6 @@ Row Cursor::fetch()
     {
         log_debug("MYSQL_NO_DATA");
         row = 0;
-        if (stmt)
-            mysqlStatement.putback(stmt);
         return Row();
     }
     else if (ret == 1)

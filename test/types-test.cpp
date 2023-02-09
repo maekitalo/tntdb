@@ -56,8 +56,7 @@ log_define("tntdb.unit.types")
       isNotNull = dbvalue.get(res);                  \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);         \
-      dbvalue = sel.select()[0][0];                  \
-      isNotNull = dbvalue.get(res);                  \
+      isNotNull = sel.select()[0][0].get(res);       \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);         \
       cursor = sel.begin(4);                         \
@@ -73,8 +72,7 @@ log_define("tntdb.unit.types")
       isNotNull = dbvalue.get(res);                  \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT(val == res);              \
-      dbvalue = sel.select()[0][0];                  \
-      isNotNull = dbvalue.get(res);                  \
+      isNotNull = sel.select()[0][0].get(res);       \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT(val == res);              \
       cursor = sel.begin(4);                         \
@@ -90,8 +88,7 @@ log_define("tntdb.unit.types")
       isNotNull = dbvalue.get(res);                  \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT(val / res >= .9999 && val / res <= 1.0001); \
-      dbvalue = sel.select()[0][0];                  \
-      isNotNull = dbvalue.get(res);                  \
+      isNotNull = sel.select()[0][0].get(res);       \
       CXXTOOLS_UNIT_ASSERT(isNotNull);               \
       CXXTOOLS_UNIT_ASSERT(val / res >= .9999 && val / res <= 1.0001); \
       cursor = sel.begin(4);                         \
@@ -112,8 +109,7 @@ log_define("tntdb.unit.types")
       }                                              \
       else                                           \
         CXXTOOLS_UNIT_ASSERT(val.isNull());          \
-      dbvalue = sel.select()[0][0];                   \
-      isNotNull = dbvalue.get(res);                  \
+      isNotNull = sel.select()[0][0].get(res);       \
       if (isNotNull)                                 \
       {                                              \
         CXXTOOLS_UNIT_ASSERT(!res.isNull());         \
@@ -291,50 +287,9 @@ public:
 
     void testBool()
     {
-        //BEGIN_TEST(bool, "boolcol");
-        const std::string colName = "boolcol";
-        bool isNotNull = false;
-        tntdb::Statement::const_iterator cursor;
-        tntdb::Statement ins = conn.prepare(
-          "insert into tntdbtest(boolcol) values(:boolcol)");
-        tntdb::Statement sel = conn.prepare(
-          "select boolcol from tntdbtest");
-        tntdb::Value dbvalue;
-        bool res;
-        //TEST(true);
-        //TEST(false);
-        del.execute();
-        ins.set(colName, true).execute();
-        dbvalue = sel.selectValue();
-        isNotNull = dbvalue.get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(true, res);
-        dbvalue = sel.select()[0][0];
-        isNotNull = dbvalue.get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(true, res);
-        cursor = sel.begin(4);
-        CXXTOOLS_UNIT_ASSERT(cursor != sel.end());
-        isNotNull = (*cursor)[0].get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(true, res);
-
-        del.execute();
-        ins.set(colName, false).execute();
-        dbvalue = sel.selectValue();
-        isNotNull = dbvalue.get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(false, res);
-        dbvalue = sel.select()[0][0];
-        isNotNull = dbvalue.get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(false, res);
-        cursor = sel.begin(4);
-        CXXTOOLS_UNIT_ASSERT(cursor != sel.end());
-        isNotNull = (*cursor)[0].get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT_EQUALS(false, res);
-
+        BEGIN_TEST(bool, "boolcol");
+        TEST(true);
+        TEST(false);
     }
 
     void testShort()
@@ -484,8 +439,7 @@ public:
         isNotNull = dbvalue.get(res);
         CXXTOOLS_UNIT_ASSERT(isNotNull);
         CXXTOOLS_UNIT_ASSERT(val == res);
-        dbvalue = sel.select()[0][0];
-        isNotNull = dbvalue.get(res);
+        isNotNull = sel.select()[0][0].get(res);
         CXXTOOLS_UNIT_ASSERT(isNotNull);
         CXXTOOLS_UNIT_ASSERT(val == res);
         cursor = sel.begin(4);

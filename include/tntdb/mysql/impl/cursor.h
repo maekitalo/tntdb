@@ -48,7 +48,6 @@ class Cursor : public ICursor
 
 public:
     Cursor(Statement& statement, unsigned fetchsize);
-    ~Cursor();
 
     // method for ICursor
     Row fetch();

@@ -37,18 +37,18 @@ namespace tntdb
 {
 namespace postgresql
 {
-Result::Result(PGresult* r)
-  : result(r)
+Result::Result(PGresult* result)
+  : _result(result)
 {
-    log_debug("postgresql-result " << r);
+    log_debug("postgresql-result " << _result);
 }
 
 Result::~Result()
 {
-    if (result)
+    if (_result)
     {
-        log_debug("PQclear(" << result << ')');
-        ::PQclear(result);
+        log_debug("PQclear(" << _result << ')');
+        ::PQclear(_result);
     }
 }
 
@@ -59,14 +59,14 @@ Row Result::getRow(size_type tup_num) const
 
 Result::size_type Result::size() const
 {
-    log_finest("PQntuples(" << result << ')');
-    return ::PQntuples(result);
+    log_finest("PQntuples(" << _result << ')');
+    return ::PQntuples(_result);
 }
 
 Result::size_type Result::getFieldCount() const
 {
-    log_debug("PQnfields(" << result << ')');
-    return ::PQnfields(result);
+    log_debug("PQnfields(" << _result << ')');
+    return ::PQnfields(_result);
 }
 }
 }

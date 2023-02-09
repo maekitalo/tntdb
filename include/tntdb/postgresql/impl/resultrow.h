@@ -35,6 +35,8 @@
 
 namespace tntdb
 {
+class IResult;
+
 namespace postgresql
 {
 class Result;
@@ -42,10 +44,12 @@ class Result;
 /// Row of a result-set of type Result
 class ResultRow : public IRow
 {
+    std::shared_ptr<Result> _resultref;
     const Result& _result;
     size_type _rownumber;
 
 public:
+    ResultRow(const std::shared_ptr<Result>& resultref, size_type rownumber);
     ResultRow(const Result& result, size_type rownumber);
 
     unsigned size() const;

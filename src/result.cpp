@@ -35,32 +35,32 @@ log_define("tntdb.result")
 
 namespace tntdb
 {
-  Row Result::getRow(size_type tup_num) const
-  {
+Row Result::getRow(size_type tup_num) const
+{
     return result->getRow(tup_num);
-  }
+}
 
-  Value Result::getValue(size_type tup_num, size_type field_num) const
-  {
+Value Result::getValue(size_type tup_num, size_type field_num) const
+{
     return getRow(tup_num).getValue(field_num);
-  }
+}
 
-  Row Result::operator[] (size_type row_num) const
-  {
+Row Result::operator[] (size_type row_num) const
+{
     return getRow(row_num);
-  }
+}
 
-  Result::const_iterator Result::begin() const
-  {
+Result::const_iterator Result::begin() const
+{
     log_debug("Result::begin()");
     return const_iterator(*this, 0);
-  }
+}
 
-  Result::const_iterator Result::end() const
-  {
+Result::const_iterator Result::end() const
+{
     size_type s = size();
     log_debug("Result::end(), size=" << s);
     return const_iterator(*this, s);
-  }
+}
 
 }

@@ -137,7 +137,7 @@ std::shared_ptr<IRow> Statement::fetchRow()
     return ptr;
 }
 
-Statement::Statement(Connection* conn_, MYSQL* mysql_,
+Statement::Statement(Connection& conn_, MYSQL* mysql_,
   const std::string& query_)
   : conn(conn_),
     mysql(mysql_),
@@ -517,7 +517,7 @@ Statement::size_type Statement::execute()
     log_debug("execute statement " << stmt);
     if (hostvarMap.empty())
     {
-        return conn->execute(query);
+        return conn.execute(query);
     }
     else
     {
@@ -533,7 +533,7 @@ tntdb::Result Statement::select()
     log_debug("select");
 
     if (hostvarMap.empty())
-        return conn->select(query);
+        return conn.select(query);
 
     if (fields)
         getRow();
@@ -562,7 +562,7 @@ tntdb::Row Statement::selectRow()
     log_debug("selectRow");
 
     if (hostvarMap.empty())
-        return conn->selectRow(query);
+        return conn.selectRow(query);
 
     if (fields)
         getRow();
@@ -598,55 +598,51 @@ std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)
 
 MYSQL_STMT* Statement::getStmt()
 {
-    MYSQL_STMT* ret;
-
     if (stmt)
-    {
-        ret = stmt;
-        stmt = 0;
-        return ret;
-    }
+        return stmt;
 
     // initialize statement
     log_debug("mysql_stmt_init(" << mysql << ')');
-    ret = ::mysql_stmt_init(mysql);
-    if (ret == 0)
+    stmt = ::mysql_stmt_init(mysql);
+    if (stmt == 0)
         throw MysqlError(mysql);
-    log_debug("mysql_stmt_init(" << mysql << ") => " << ret);
+    log_debug("mysql_stmt_init(" << mysql << ") => " << stmt);
 
-    log_debug("mysql_stmt_prepare(" << ret << ", \"" << query << "\")");
-    if (mysql_stmt_prepare(ret, query.data(), query.size()) != 0)
+    log_debug("mysql_stmt_prepare(" << stmt << ", \"" << query << "\")");
+    if (mysql_stmt_prepare(stmt, query.data(), query.size()) != 0)
     {
         // MysqlStmtError fetches the last error from MYSQL_STMT, so we need
         // to instantiate this before mysql_stmt_close
-        MysqlStmtError e("mysql_stmt_prepare", ret);
-        log_debug("mysql_stmt_close(" << ret << ')');
-        ::mysql_stmt_close(ret);
+        MysqlStmtError e("mysql_stmt_prepare", stmt);
+        log_debug("mysql_stmt_close(" << stmt << ')');
+        ::mysql_stmt_close(stmt);
+        stmt = 0;
         throw e;
     }
 
   /*
     // read always with cursor
-    log_debug("mysql_stmt_attr_set(" << ret << ", STMT_ATTR_CURSOR_TYPE)");
+    log_debug("mysql_stmt_attr_set(" << stmt << ", STMT_ATTR_CURSOR_TYPE)");
     unsigned long cursorType = CURSOR_TYPE_READ_ONLY;
-    if (mysql_stmt_attr_set(ret, STMT_ATTR_CURSOR_TYPE, &cursorType) != 0)
+    if (mysql_stmt_attr_set(stmt, STMT_ATTR_CURSOR_TYPE, &cursorType) != 0)
     {
         log_debug("error");
 
-        MysqlStmtError e("mysql_stmt_attr_set", ret);
-        log_debug("mysql_stmt_close(" << ret << ')');
-        ::mysql_stmt_close(ret);
+        MysqlStmtError e("mysql_stmt_attr_set", stmt);
+        log_debug("mysql_stmt_close(" << stmt << ')');
+        ::mysql_stmt_close(stmt);
         throw e;
     }
   */
 
     // check parametercount
-    log_debug("mysql_stmt_param_count(" << ret << ')');
-    unsigned param_count = mysql_stmt_param_count(ret);
+    log_debug("mysql_stmt_param_count(" << stmt << ')');
+    unsigned param_count = mysql_stmt_param_count(stmt);
     if (param_count != inVars.getSize())
     {
-        log_debug("mysql_stmt_close(" << ret << ')');
-        ::mysql_stmt_close(ret);
+        log_debug("mysql_stmt_close(" << stmt << ')');
+        ::mysql_stmt_close(stmt);
+        stmt = 0;
         std::ostringstream msg;
         msg << "invalid parametercount in query; "
             << inVars.getSize() << " expected "
@@ -654,8 +650,8 @@ MYSQL_STMT* Statement::getStmt()
         throw std::runtime_error(msg.str());
     }
 
-    log_debug("statement initialized " << ret);
-    return ret;
+    log_debug("statement initialized " << stmt);
+    return stmt;
 }
 
 void Statement::execute(MYSQL_STMT* stmt, unsigned fetchsize)
@@ -674,21 +670,6 @@ void Statement::execute(MYSQL_STMT* stmt, unsigned fetchsize)
     log_debug("mysql_stmt_execute(" << stmt << ')');
     if (mysql_stmt_execute(stmt) != 0)
         throw MysqlStmtError("mysql_stmt_execute", stmt);
-}
-
-void Statement::putback(MYSQL_STMT* stmt_)
-{
-    if (stmt)
-    {
-        // we have a statement already - free the offered statement
-        log_debug("mysql_stmt_close(" << stmt_ << ')');
-        ::mysql_stmt_close(stmt_);
-    }
-    else
-    {
-        // store for reuse
-        stmt = stmt_;
-    }
 }
 
 MYSQL_FIELD* Statement::getFields()

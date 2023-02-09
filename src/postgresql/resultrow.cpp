@@ -37,11 +37,16 @@ namespace tntdb
 {
 namespace postgresql
 {
+ResultRow::ResultRow(const std::shared_ptr<Result>& resultref, size_type rownumber)
+    : _resultref(resultref),
+      _result(*resultref),
+      _rownumber(rownumber)
+{ }
+
 ResultRow::ResultRow(const Result& result, size_type rownumber)
-  : _result(result),
-    _rownumber(rownumber)
-{
-}
+    : _result(result),
+      _rownumber(rownumber)
+{ }
 
 unsigned ResultRow::size() const
 {
@@ -50,7 +55,7 @@ unsigned ResultRow::size() const
 
 Value ResultRow::getValueByNumber(size_type field_num) const
 {
-    return Value(std::make_shared<ResultValue>(*this, field_num));
+    return Value(std::make_shared<ResultValue>(_resultref, _result, _rownumber, field_num));
 }
 
 Value ResultRow::getValueByName(const std::string& field_name) const

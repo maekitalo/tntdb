@@ -28,6 +28,8 @@
 
 #include <tntdb/postgresql/impl/connection.h>
 #include <tntdb/postgresql/impl/result.h>
+#include <tntdb/postgresql/impl/resultrow.h>
+#include <tntdb/postgresql/impl/resultvalue.h>
 #include <tntdb/postgresql/impl/statement.h>
 #include <tntdb/postgresql/error.h>
 #include <tntdb/result.h>
@@ -103,6 +105,7 @@ Connection::size_type Connection::execute(const std::string& query)
 
     log_debug("PQexec(" << conn << ", \"" << query << "\")");
     PGresult* result = PQexec(conn, query.c_str());
+    log_debug("PGresult=" << static_cast<void*>(result));
     if (isError(result))
     {
         log_error(PQresultErrorMessage(result));
@@ -119,39 +122,43 @@ Connection::size_type Connection::execute(const std::string& query)
     return ret;
 }
 
-tntdb::Result Connection::select(const std::string& query)
+std::shared_ptr<Result> Connection::pgselect(const std::string& query)
 {
-    log_debug("select(\"" << query << "\")");
-
     log_debug("PQexec(" << conn << ", \"" << query << "\")");
     PGresult* result = PQexec(conn, query.c_str());
+    log_debug("PGresult=" << static_cast<void*>(result));
     if (isError(result))
     {
         log_error(PQresultErrorMessage(result));
         throw PgSqlError(query, "PQexec", result, true);
     }
 
-    return tntdb::Result(std::make_shared<Result>(result));
+    return std::make_shared<Result>(result);
+}
+
+tntdb::Result Connection::select(const std::string& query)
+{
+    return tntdb::Result(pgselect(query));
 }
 
 Row Connection::selectRow(const std::string& query)
 {
     log_debug("selectRow(\"" << query << "\")");
-    tntdb::Result result = select(query);
-    if (result.empty())
+    auto result = pgselect(query);
+    if (result->size() == 0)
         throw NotFound();
 
-    return result.getRow(0);
+    return Row(std::make_shared<ResultRow>(result, 0));
 }
 
 Value Connection::selectValue(const std::string& query)
 {
     log_debug("selectValue(\"" << query << "\")");
-    Row t = selectRow(query);
-    if (t.empty())
+    auto result = pgselect(query);
+    if (result->size() == 0)
         throw NotFound();
 
-    return t.getValue(0);
+    return Value(std::make_shared<ResultValue>(result, *result, 0, 0));
 }
 
 tntdb::Statement Connection::prepare(const std::string& query)
@@ -269,6 +276,7 @@ void Connection::deallocateStatements()
 
         log_debug("PQexec(" << getPGConn() << ", \"" << sql << "\")");
         PGresult* result = PQexec(getPGConn(), sql.c_str());
+        log_debug("PGresult=" << static_cast<void*>(result));
 
         if (isError(result))
             log_error("error deallocating statement: " << PQresultErrorMessage(result));
