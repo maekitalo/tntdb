@@ -42,639 +42,639 @@ log_define("tntdb.oracle.statement")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    Statement::Bind* Statement::getBindPtr(const std::string& col)
-    {
-      BindMapType::iterator it = bindMap.find(col);
-      if (it == bindMap.end())
+namespace oracle
+{
+std::shared_ptr<Statement::Bind> Statement::getBindPtr(const std::string& col)
+{
+    BindMapType::iterator it = bindMap.find(col);
+    if (it == bindMap.end())
         it = bindMap.insert(BindMapType::value_type(col, new Bind())).first;
-      return it->second.getPointer();
-    }
+    return it->second;
+}
 
-    Statement::Statement(Connection* conn_, const std::string& query_)
-      : conn(conn_),
-        query(query_),
-        stmtp(0)
-    {
-      getHandle();
-    }
+Statement::Statement(Connection& conn, const std::string& query)
+  : _conn(conn),
+    _query(query),
+    _stmtp(0)
+{
+    getHandle();
+}
 
-    Statement::~Statement()
+Statement::~Statement()
+{
+    if (_stmtp)
     {
-      if (stmtp)
-      {
-        log_debug("release statement handle " << stmtp);
-        sword ret = OCIHandleFree(stmtp, OCI_HTYPE_STMT);
+        log_debug("release statement handle " << _stmtp);
+        sword ret = OCIHandleFree(_stmtp, OCI_HTYPE_STMT);
         if (ret != OCI_SUCCESS)
-          log_error("OCIHandleFree(" << stmtp << " OCI_HTYPE_STMT) failed");
-      }
+            log_error("OCIHandleFree(" << _stmtp << " OCI_HTYPE_STMT) failed");
     }
+}
 
-    // methods of IStatement
+// methods of IStatement
 
-    void Statement::clear()
+void Statement::clear()
+{
+    for (BindMapType::iterator it = bindMap.begin(); it != bindMap.end(); ++it)
     {
-      for (BindMapType::iterator it = bindMap.begin(); it != bindMap.end(); ++it)
-      {
         it->second->setNull();
 
         log_debug("OCIBindByName, clear(\"" << it->first << "\")");
-        sword ret = OCIBindByName(getHandle(), &it->second->ptr, conn->getErrorHandle(),
-          0, 0, 0, 0,
-          SQLT_INT, &it->second->indicator, 0, 0, 0, 0, OCI_DEFAULT);
+        sword ret = OCIBindByName(getHandle(), &it->second->ptr, _conn.getErrorHandle(),
+            0, 0, 0, 0,
+            SQLT_INT, &it->second->indicator, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
-      }
+        _conn.checkError(ret, "OCIBindByName");
     }
+}
 
-    void Statement::setNull(const std::string& col)
+void Statement::setNull(const std::string& col)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setNull(\"" << col << "\")");
+
+    Bind &b = getBind(col);
+    b.setNull();
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_CHR || b.boundLength != 0)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setNull(\"" << col << "\")");
-
-      Bind &b = getBind(col);
-      b.setNull();
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_CHR || b.boundLength != 0)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setNull(\"" << col << "\")");
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
-          0, 0,
-          SQLT_CHR, &b.indicator, 0, 0, 0, 0, OCI_DEFAULT);
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
+            0, 0,
+            SQLT_CHR, &b.indicator, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_CHR;
-      }
     }
+}
 
-    void Statement::setBool(const std::string& col, bool data)
+void Statement::setBool(const std::string& col, bool data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setBool(\"" << col << "\", " << data << ')');
+    Bind &b = getBind(col);
+    b.setData(reinterpret_cast<char*>(&data), sizeof(bool));
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_INT || b.boundLength != sizeof(bool))
     {
-      log_debug("OCIStmt(" << getHandle() << ").setBool(\"" << col << "\", " << data << ')');
-      Bind &b = getBind(col);
-      b.setData(reinterpret_cast<char*>(&data), sizeof(bool));
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_INT || b.boundLength != sizeof(bool))
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setBool(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], sizeof(bool),
-          SQLT_INT, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_INT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_INT;
         b.boundLength = sizeof(bool);
-      }
     }
+}
 
-    void Statement::setShort(const std::string& col, short data)
+void Statement::setShort(const std::string& col, short data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setShort(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.setData(reinterpret_cast<char*>(&data), sizeof(int));
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_INT || b.boundLength != sizeof(short))
     {
-      log_debug("OCIStmt(" << getHandle() << ").setShort(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.setData(reinterpret_cast<char*>(&data), sizeof(int));
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_INT || b.boundLength != sizeof(short))
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setInt(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], sizeof(short),
-          SQLT_INT, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_INT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_INT;
         b.boundLength = sizeof(short);
-      }
     }
+}
 
-    void Statement::setInt(const std::string& col, int data)
+void Statement::setInt(const std::string& col, int data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setInt(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.setData(reinterpret_cast<char*>(&data), sizeof(int));
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_INT || b.boundLength != sizeof(int))
     {
-      log_debug("OCIStmt(" << getHandle() << ").setInt(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.setData(reinterpret_cast<char*>(&data), sizeof(int));
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_INT || b.boundLength != sizeof(int))
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setInt(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], sizeof(int),
-          SQLT_INT, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_INT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_INT;
         b.boundLength = sizeof(int);
-      }
     }
+}
 
-    void Statement::setLong(const std::string& col, long data)
+void Statement::setLong(const std::string& col, long data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setLong(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.number.setLong(data, _conn.getErrorHandle());
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setLong(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.number.setLong(data, conn->getErrorHandle());
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setLong(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
-          b.number.getHandle(), OCI_NUMBER_SIZE, SQLT_VNU,
-          0, 0, 0, 0, 0, OCI_DEFAULT);
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
+            b.number.getHandle(), OCI_NUMBER_SIZE, SQLT_VNU,
+            0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_VNU;
-      }
     }
+}
 
-    void Statement::setUnsignedShort(const std::string& col, unsigned short data)
+void Statement::setUnsignedShort(const std::string& col, unsigned short data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setUnsignedShort(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.setData(reinterpret_cast<char*>(&data), sizeof(unsigned short));
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_UIN || b.boundLength != sizeof(unsigned short))
     {
-      log_debug("OCIStmt(" << getHandle() << ").setUnsignedShort(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.setData(reinterpret_cast<char*>(&data), sizeof(unsigned short));
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_UIN || b.boundLength != sizeof(unsigned short))
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setUnsigned(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], sizeof(unsigned short),
-          SQLT_UIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_UIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_UIN;
         b.boundLength = sizeof(unsigned short);
-      }
     }
+}
 
-    void Statement::setUnsigned(const std::string& col, unsigned data)
+void Statement::setUnsigned(const std::string& col, unsigned data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setUnsigned(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.setData(reinterpret_cast<char*>(&data), sizeof(unsigned));
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_UIN || b.boundLength != sizeof(unsigned))
     {
-      log_debug("OCIStmt(" << getHandle() << ").setUnsigned(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.setData(reinterpret_cast<char*>(&data), sizeof(unsigned));
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_UIN || b.boundLength != sizeof(unsigned))
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setUnsigned(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], sizeof(unsigned),
-          SQLT_UIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_UIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_UIN;
         b.boundLength = sizeof(unsigned);
-      }
     }
+}
 
-    void Statement::setUnsignedLong(const std::string& col, unsigned long data)
+void Statement::setUnsignedLong(const std::string& col, unsigned long data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setUnsignedLong(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.number.setUnsignedLong(data, _conn.getErrorHandle());
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setUnsignedLong(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.number.setUnsignedLong(data, conn->getErrorHandle());
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setUnsignedLong(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
-          b.number.getHandle(), OCI_NUMBER_SIZE, SQLT_VNU,
-          0, 0, 0, 0, 0, OCI_DEFAULT);
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
+            b.number.getHandle(), OCI_NUMBER_SIZE, SQLT_VNU,
+            0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_VNU;
-      }
     }
+}
 
-    void Statement::setInt32(const std::string& col, int32_t data)
+void Statement::setInt32(const std::string& col, int32_t data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setInt32(\"" << col << "\", " << data << ')');
+    return setInt(col, data);
+}
+
+void Statement::setUnsigned32(const std::string& col, uint32_t data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setUnsigned32(\"" << col << "\", " << data << ')');
+    return setUnsigned(col, data);
+}
+
+void Statement::setInt64(const std::string& col, int64_t data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setInt64(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.number.setInt64(data, _conn.getErrorHandle());
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setInt32(\"" << col << "\", " << data << ')');
-      return setInt(col, data);
-    }
-
-    void Statement::setUnsigned32(const std::string& col, uint32_t data)
-    {
-      log_debug("OCIStmt(" << getHandle() << ").setUnsigned32(\"" << col << "\", " << data << ')');
-      return setUnsigned(col, data);
-    }
-
-    void Statement::setInt64(const std::string& col, int64_t data)
-    {
-      log_debug("OCIStmt(" << getHandle() << ").setInt64(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.number.setInt64(data, conn->getErrorHandle());
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setUnsignedLong(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
-          b.number.getHandle(), OCI_NUMBER_SIZE, SQLT_VNU,
-          0, 0, 0, 0, 0, OCI_DEFAULT);
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
+            b.number.getHandle(), OCI_NUMBER_SIZE, SQLT_VNU,
+            0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_VNU;
-      }
     }
+}
 
 
-    void Statement::setUnsigned64(const std::string& col, uint64_t data)
+void Statement::setUnsigned64(const std::string& col, uint64_t data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setUnsigned64(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.number.setUnsigned64(data, _conn.getErrorHandle());
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setUnsigned64(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.number.setUnsigned64(data, conn->getErrorHandle());
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setUnsignedLong(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           (void *)b.number.getHandle(), OCI_NUMBER_SIZE, SQLT_VNU,
-          0, 0, 0, 0, 0, OCI_DEFAULT);
+            0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_VNU;
-      }
     }
+}
 
-    void Statement::setDecimal(const std::string& col, const Decimal& decimal)
+void Statement::setDecimal(const std::string& col, const Decimal& decimal)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setDecimal(\"" << col << "\", " << decimal << ')');
+
+    Bind &b = getBind(col);
+    b.number.setDecimal(decimal, _conn.getErrorHandle());
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setDecimal(\"" << col << "\", " << decimal << ')');
-
-      Bind &b = getBind(col);
-      b.number.setDecimal(decimal, conn->getErrorHandle());
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_VNU)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setDecimal(\"" << col << "\", " << decimal << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
-          b.number.getHandle(), OCI_NUMBER_SIZE,
-          SQLT_VNU, 0, 0, 0, 0, 0, OCI_DEFAULT);
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
+            b.number.getHandle(), OCI_NUMBER_SIZE,
+            SQLT_VNU, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_VNU;
-      }
     }
+}
 
-    void Statement::setFloat(const std::string& col, float data)
+void Statement::setFloat(const std::string& col, float data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setFloat(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.setData(reinterpret_cast<char*>(&data), sizeof(float));
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_FLT || b.boundLength != sizeof(float))
     {
-      log_debug("OCIStmt(" << getHandle() << ").setFloat(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.setData(reinterpret_cast<char*>(&data), sizeof(float));
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_FLT || b.boundLength != sizeof(float))
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setFloat(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], sizeof(float),
-          SQLT_FLT, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_FLT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_FLT;
         b.boundLength = sizeof(float);
-      }
     }
+}
 
-    void Statement::setDouble(const std::string& col, double data)
+void Statement::setDouble(const std::string& col, double data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setDouble(\"" << col << "\", " << data << ')');
+
+    Bind &b = getBind(col);
+    b.setData(reinterpret_cast<char*>(&data), sizeof(double));
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_FLT || b.boundLength != sizeof(double))
     {
-      log_debug("OCIStmt(" << getHandle() << ").setDouble(\"" << col << "\", " << data << ')');
-
-      Bind &b = getBind(col);
-      b.setData(reinterpret_cast<char*>(&data), sizeof(double));
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_FLT || b.boundLength != sizeof(double))
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setDouble(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], sizeof(double),
-          SQLT_FLT, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_FLT, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_FLT;
         b.boundLength = sizeof(double);
-      }
     }
+}
 
-    void Statement::setChar(const std::string& col, char data)
+void Statement::setChar(const std::string& col, char data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setChar(\"" << col << "\", '" << data << "')");
+
+    Bind &b = getBind(col);
+    b.setData(&data, 1);
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_AFC || b.boundLength != 1)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setChar(\"" << col << "\", '" << data << "')");
-
-      Bind &b = getBind(col);
-      b.setData(&data, 1);
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_AFC || b.boundLength != 1)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setChar(\"" << col << "\", " << data << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], 1,
-          SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_AFC;
         b.boundLength = 1;
-      }
     }
+}
 
-    void Statement::setString(const std::string& col, const std::string& data)
+void Statement::setString(const std::string& col, const std::string& data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setString(\"" << col << "\", \"" << data << "\")");
+
+    Bind &b = getBind(col);
+    b.setData(data);
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_AFC || b.boundLength != data.size())
     {
-      log_debug("OCIStmt(" << getHandle() << ").setString(\"" << col << "\", \"" << data << "\")");
-
-      Bind &b = getBind(col);
-      b.setData(data);
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_AFC || b.boundLength != data.size())
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setString(\"" << col << "\", \"" << data << "\")");
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], data.size(),
-          SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_AFC, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_AFC;
         b.boundLength = data.size();
-      }
     }
+}
 
-    void Statement::setBlob(const std::string& col, const tntdb::Blob& data)
+void Statement::setBlob(const std::string& col, const tntdb::Blob& data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setBlob(\"" << col << "\", data(" << data.size() << "))");
+
+    Bind &b = getBind(col);
+    b.setData(data.data(), data.size());
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_BIN || b.boundLength != data.size())
     {
-      log_debug("OCIStmt(" << getHandle() << ").setBlob(\"" << col << "\", data(" << data.size() << "))");
-
-      Bind &b = getBind(col);
-      b.setData(data.data(), data.size());
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_BIN || b.boundLength != data.size())
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setBlob(\"" << col << "\", data{" << data.size() << "})");
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.data[0], data.size(),
-          SQLT_BIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_BIN, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_BIN;
         b.boundLength = data.size();
-      }
     }
+}
 
-    void Statement::setDate(const std::string& col, const Date& data)
+void Statement::setDate(const std::string& col, const Date& data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setDate(\"" << col << "\", \"" << data.getIso() << "\")");
+
+    Bind &b = getBind(col);
+    b.datetime.assign(&_conn, data);
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_TIMESTAMP)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setDate(\"" << col << "\", \"" << data.getIso() << "\")");
-
-      Bind &b = getBind(col);
-      b.datetime.assign(conn, data);
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_TIMESTAMP)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setDate(\"" << col << "\", " << data.getIso() << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.datetime.getHandle(), sizeof(OCIDateTime**),
-          SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_TIMESTAMP;
-      }
     }
+}
 
-    void Statement::setTime(const std::string& col, const Time& data)
+void Statement::setTime(const std::string& col, const Time& data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setTime(\"" << col << "\", \"" << data.getIso() << "\")");
+
+    Bind &b = getBind(col);
+    b.datetime.assign(&_conn, data);
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_TIMESTAMP)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setTime(\"" << col << "\", \"" << data.getIso() << "\")");
-
-      Bind &b = getBind(col);
-      b.datetime.assign(conn, data);
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_TIMESTAMP)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setTime(\"" << col << "\", " << data.getIso() << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.datetime.getHandle(), sizeof(OCIDateTime**),
-          SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_TIMESTAMP;
-      }
     }
+}
 
-    void Statement::setDatetime(const std::string& col, const tntdb::Datetime& data)
+void Statement::setDatetime(const std::string& col, const tntdb::Datetime& data)
+{
+    log_debug("OCIStmt(" << getHandle() << ").setDatetime(\"" << col << "\", \"" << data.getIso() << "\")");
+
+    Bind &b = getBind(col);
+    b.datetime.assign(&_conn, data);
+
+    if (b.boundPtr != &b.data[0] || b.boundType != SQLT_TIMESTAMP)
     {
-      log_debug("OCIStmt(" << getHandle() << ").setDatetime(\"" << col << "\", \"" << data.getIso() << "\")");
-
-      Bind &b = getBind(col);
-      b.datetime.assign(conn, data);
-
-      if (b.boundPtr != &b.data[0] || b.boundType != SQLT_TIMESTAMP)
-      {
         b.boundPtr = 0;
         b.boundType = 0;
         b.boundLength = 0;
 
         log_debug("OCIBindByName, setDatetime(\"" << col << "\", " << data.getIso() << ')');
-        sword ret = OCIBindByName(getHandle(), &b.ptr, conn->getErrorHandle(),
-          reinterpret_cast<const text*>(col.data()), col.size(),
+        sword ret = OCIBindByName(getHandle(), &b.ptr, _conn.getErrorHandle(),
+            reinterpret_cast<const text*>(col.data()), col.size(),
           &b.datetime.getHandle(), sizeof(OCIDateTime**),
-          SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
+            SQLT_TIMESTAMP, 0, 0, 0, 0, 0, OCI_DEFAULT);
 
-        checkError(ret, "OCIBindByName");
+        _conn.checkError(ret, "OCIBindByName");
 
         b.boundPtr = &b.data[0];
         b.boundType = SQLT_TIMESTAMP;
-      }
     }
+}
 
-    Statement::size_type Statement::execute()
-    {
-      log_debug("execute statement " << getHandle() << " mode=" << (conn->isTransactionActive() ? "OCI_DEFAULT" : "OCI_COMMIT_ON_SUCCESS"));
-      sword ret = OCIStmtExecute(conn->getSvcCtxHandle(), getHandle(), conn->getErrorHandle(),
-        1, 0, 0, 0, conn->isTransactionActive() ? OCI_DEFAULT : OCI_COMMIT_ON_SUCCESS);
-      checkError(ret, "OCIStmtExecute");
+Statement::size_type Statement::execute()
+{
+    log_debug("execute statement " << getHandle() << " mode=" << (_conn.isTransactionActive() ? "OCI_DEFAULT" : "OCI_COMMIT_ON_SUCCESS"));
+    sword ret = OCIStmtExecute(_conn.getSvcCtxHandle(), getHandle(), _conn.getErrorHandle(),
+        1, 0, 0, 0, _conn.isTransactionActive() ? OCI_DEFAULT : OCI_COMMIT_ON_SUCCESS);
+    _conn.checkError(ret, "OCIStmtExecute");
 
-      ub4 rowcnt = 0;
-      ret = OCIAttrGet(getHandle(), OCI_HTYPE_STMT, &rowcnt, 0, OCI_ATTR_ROW_COUNT,
-        conn->getErrorHandle());
-      checkError(ret, "OCIAttrGet");
+    ub4 rowcnt = 0;
+    ret = OCIAttrGet(getHandle(), OCI_HTYPE_STMT, &rowcnt, 0, OCI_ATTR_ROW_COUNT,
+        _conn.getErrorHandle());
+    _conn.checkError(ret, "OCIAttrGet");
 
-      return rowcnt;
-    }
+    return rowcnt;
+}
 
-    tntdb::Result Statement::select()
-    {
-      return tntdb::Result(new Result(this, 64));
-    }
+tntdb::Result Statement::select()
+{
+    return tntdb::Result(std::make_shared<Result>(*this, 64));
+}
 
-    tntdb::Row Statement::selectRow()
-    {
-      sword ret = OCIStmtExecute(getConnection()->getSvcCtxHandle(),
-        getHandle(), getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
-      checkError(ret, "OCIStmtExecute");
+tntdb::Row Statement::selectRow()
+{
+    sword ret = OCIStmtExecute(_conn.getSvcCtxHandle(),
+        getHandle(), _conn.getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
+    _conn.checkError(ret, "OCIStmtExecute");
 
-      tntdb::Row row(new oracle::Row(this));
-      ret = OCIStmtFetch(getHandle(), getErrorHandle(), 1, OCI_FETCH_NEXT,
+    auto row = std::make_shared<Row>(*this);
+    ret = OCIStmtFetch(getHandle(), _conn.getErrorHandle(), 1, OCI_FETCH_NEXT,
         OCI_DEFAULT);
-      checkError(ret, "OCIStmtFetch");
+    _conn.checkError(ret, "OCIStmtFetch");
 
-      return row;
-    }
+    return tntdb::Row(row);
+}
 
-    tntdb::Value Statement::selectValue()
-    {
-      sword ret = OCIStmtExecute(getConnection()->getSvcCtxHandle(),
-        getHandle(), getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
-      checkError(ret, "OCIStmtExecute");
+tntdb::Value Statement::selectValue()
+{
+    sword ret = OCIStmtExecute(_conn.getSvcCtxHandle(),
+        getHandle(), _conn.getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
+    _conn.checkError(ret, "OCIStmtExecute");
 
-      tntdb::Value value(new oracle::Value(this, 0));
-      ret = OCIStmtFetch(getHandle(), getErrorHandle(), 1, OCI_FETCH_NEXT,
+    auto value = std::make_shared<Value>(*this, 0);
+    ret = OCIStmtFetch(getHandle(), _conn.getErrorHandle(), 1, OCI_FETCH_NEXT,
         OCI_DEFAULT);
-      checkError(ret, "OCIStmtFetch");
+    _conn.checkError(ret, "OCIStmtFetch");
 
-      return value;
-    }
+    return tntdb::Value(value);
+}
 
-    ICursor* Statement::createCursor(unsigned fetchsize)
+std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)
+{
+    return std::make_shared<Cursor>(*this, fetchsize);
+}
+
+OCIStmt* Statement::getHandle()
+{
+    if (_stmtp == 0)
     {
-      return new Cursor(this, fetchsize);
+        log_debug("prepare statement \"" << _query << '"');
+
+        sword ret = OCIHandleAlloc(_conn.getEnvHandle(), (void**)&_stmtp, OCI_HTYPE_STMT, 0, 0);
+        _conn.checkError(ret, "OCIHandleAlloc(OCI_HTYPE_STMT)");
+
+        ret = OCIStmtPrepare(_stmtp, _conn.getErrorHandle(),
+            reinterpret_cast<const unsigned char*>(_query.data()),
+            _query.size(), OCI_NTV_SYNTAX, OCI_DEFAULT);
+        _conn.checkError(ret, "OCIStmtPrepare");
+
+        log_debug("statement handle " << _stmtp);
     }
 
-    OCIStmt* Statement::getHandle()
-    {
-      if (stmtp == 0)
-      {
-        log_debug("prepare statement \"" << query << '"');
-
-        sword ret = OCIHandleAlloc(conn->getEnvHandle(), (void**)&stmtp, OCI_HTYPE_STMT, 0, 0);
-        checkError(ret, "OCIHandleAlloc(OCI_HTYPE_STMT)");
-
-        ret = OCIStmtPrepare(stmtp, conn->getErrorHandle(),
-          reinterpret_cast<const unsigned char*>(query.data()),
-          query.size(), OCI_NTV_SYNTAX, OCI_DEFAULT);
-        checkError(ret, "OCIStmtPrepare");
-
-        log_debug("statement handle " << stmtp);
-      }
-
-      return stmtp;
-    }
-  }
+    return _stmtp;
+}
+}
 }

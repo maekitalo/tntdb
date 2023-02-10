@@ -37,75 +37,74 @@
 
 namespace tntdb
 {
-  /**
+/**
 
-   This namespace contains the implementation of the Oracle driver for tntdb.
-   Note that the oracle driver is not compiled by default when tntdb is built.
-   It must be enabled using the configure switch --with-oracle.
+ This namespace contains the implementation of the Oracle driver for tntdb.
+ Note that the oracle driver is not compiled by default when tntdb is built.
+ It must be enabled using the configure switch --with-oracle.
 
-   The driver makes it possible to access a Oracle database using tntdb.
+ The driver makes it possible to access a Oracle database using tntdb.
 
-   To get a connection to a Oracle database, the dburl to the tntdb::connect function
-   must start with "oracle:". The remaining string specifies the connection parameters
-   to the oracle database.
+ To get a connection to a Oracle database, the dburl to the tntdb::connect function
+ must start with "oracle:". The remaining string specifies the connection parameters
+ to the oracle database.
 
-   The attributes user and passwd are extracted and the rest is passed to the
-   `OCIServerAttach` function of OCI.
+ The attributes user and passwd are extracted and the rest is passed to the
+ `OCIServerAttach` function of OCI.
 
-   A typical connection with a Oracle driver looks like that:
+ A typical connection with a Oracle driver looks like that:
 
-   @code
-     tntdb::Connection conn = tntdb::connect("oracle:XE;user=hr;passwd=hr");
-   @endcode
+ @code
+   tntdb::Connection conn = tntdb::connect("oracle:XE;user=hr;passwd=hr");
+ @endcode
 
-   */
+ */
 
-  namespace oracle
-  {
-    class Connection : public IStmtCacheConnection
-    {
-        OCIEnv*     envhp;   /* the environment handle */
-        OCIServer*  srvhp;   /* the server handle */
-        OCIError*   errhp;   /* the error handle */
-        OCISession* usrhp;   /* user session handle */
-        OCISvcCtx*  svchp;   /* the service handle */
-        typedef std::map<std::string, tntdb::Statement> SeqStmtType;
-        SeqStmtType seqStmt;
-        pid_t       pid;
+namespace oracle
+{
+class Connection : public IConnection
+{
+    OCIEnv*     envhp;   /* the environment handle */
+    OCIServer*  srvhp;   /* the server handle */
+    OCIError*   errhp;   /* the error handle */
+    OCISession* usrhp;   /* user session handle */
+    OCISvcCtx*  svchp;   /* the service handle */
+    typedef std::map<std::string, tntdb::Statement> SeqStmtType;
+    SeqStmtType seqStmt;
+    pid_t       pid;
 
-        void logon(const std::string& dblink, const std::string& user, const std::string& password);
+    void logon(const std::string& dblink, const std::string& user, const std::string& password);
 
-        unsigned transactionActive;
+    unsigned transactionActive;
 
-      public:
-        void checkError(sword ret, const char* function = 0) const;
+public:
+    void checkError(sword ret, const char* function = 0) const;
 
-        Connection(const std::string& url, const std::string& username, const std::string& password);
-        ~Connection();
+    Connection(const std::string& url, const std::string& username, const std::string& password);
+    ~Connection();
 
-        void beginTransaction();
-        void commitTransaction();
-        void rollbackTransaction();
+    void beginTransaction();
+    void commitTransaction();
+    void rollbackTransaction();
 
-        size_type execute(const std::string& query);
-        tntdb::Result select(const std::string& query);
-        tntdb::Row selectRow(const std::string& query);
-        tntdb::Value selectValue(const std::string& query);
-        tntdb::Statement prepare(const std::string& query);
-        tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
-        void clearStatementCache();
-        bool ping();
-        long lastInsertId(const std::string& name);
-        void lockTable(const std::string& tablename, bool exclusive);
+    size_type execute(const std::string& query);
+    tntdb::Result select(const std::string& query);
+    tntdb::Row selectRow(const std::string& query);
+    tntdb::Value selectValue(const std::string& query);
+    tntdb::Statement prepare(const std::string& query);
+    tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
+    bool ping();
+    long lastInsertId(const std::string& name);
+    void lockTable(const std::string& tablename, bool exclusive);
 
-        OCIEnv* getEnvHandle() const        { return envhp; }
-        OCIError* getErrorHandle() const    { return errhp; }
-        OCIServer* getSrvHandle() const     { return srvhp; }
-        OCISvcCtx* getSvcCtxHandle() const  { return svchp; }
-        bool isTransactionActive() const    { return transactionActive > 0; }
-    };
+    OCIEnv* getEnvHandle() const        { return envhp; }
+    OCIError* getErrorHandle() const    { return errhp; }
+    OCIServer* getSrvHandle() const     { return srvhp; }
+    OCISvcCtx* getSvcCtxHandle() const  { return svchp; }
+    bool isTransactionActive() const    { return transactionActive > 0; }
+};
 
-  }
+}
 }
 
 #endif // TNTDB_ORACLE_CONNECTION_H

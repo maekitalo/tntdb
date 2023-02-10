@@ -34,65 +34,65 @@ log_define("tntdb.oracle.multirow")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    MultiRow::MultiRow(Statement* stmt, unsigned rowcount)
-    {
-      ub4 columncount;
+namespace oracle
+{
+MultiRow::MultiRow(Statement& stmt, unsigned rowcount)
+{
+    ub4 columncount;
 
-      sword ret = OCIAttrGet(stmt->getHandle(), OCI_HTYPE_STMT, &columncount,
-        0, OCI_ATTR_PARAM_COUNT, stmt->getErrorHandle());
-      stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
+    sword ret = OCIAttrGet(stmt.getHandle(), OCI_HTYPE_STMT, &columncount,
+        0, OCI_ATTR_PARAM_COUNT, stmt.getConnection().getErrorHandle());
+    stmt.getConnection().checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
 
-      log_debug("define " << columncount << " parameters");
-      _columns.resize(columncount);
-      for (ub4 pos = 0; pos < columncount; ++pos)
-        _columns[pos] = new MultiValue(stmt, pos, rowcount);
-    }
+    log_debug("define " << columncount << " parameters");
+    _columns.resize(columncount);
+    for (ub4 pos = 0; pos < columncount; ++pos)
+        _columns[pos] = std::make_shared<MultiValue>(stmt, pos, rowcount);
+}
 
-    MultiRow::MultiRow(Statement* stmt, unsigned rowcount, unsigned columncount)
-    {
-      log_debug("define " << columncount << " parameters");
-      _columns.resize(columncount);
-      for (ub4 pos = 0; pos < columncount; ++pos)
-        _columns[pos] = new MultiValue(stmt, pos, rowcount);
-    }
+MultiRow::MultiRow(Statement& stmt, unsigned rowcount, unsigned columncount)
+{
+    log_debug("define " << columncount << " parameters");
+    _columns.resize(columncount);
+    for (ub4 pos = 0; pos < columncount; ++pos)
+        _columns[pos] = std::make_shared<MultiValue>(stmt, pos, rowcount);
+}
 
-    MultiValue::Ptr MultiRow::getValuesByNumber(unsigned field_num) const
-    {
-      log_debug("getValuesByNumber(" << field_num << ')');
-      return _columns.at(field_num);
-    }
+std::shared_ptr<MultiValue> MultiRow::getValuesByNumber(unsigned field_num) const
+{
+    log_debug("getValuesByNumber(" << field_num << ')');
+    return _columns.at(field_num);
+}
 
-    MultiValue::Ptr MultiRow::getValuesByName(const std::string& field_name) const
-    {
-      log_debug("getValuesByName(" << field_name << ')');
-      return getValuesByNumber(getColIndexByName(field_name));
-    }
+std::shared_ptr<MultiValue> MultiRow::getValuesByName(const std::string& field_name) const
+{
+    log_debug("getValuesByName(" << field_name << ')');
+    return getValuesByNumber(getColIndexByName(field_name));
+}
 
-    MultiRow::Columns::size_type MultiRow::getColIndexByName(const std::string& field_name) const
-    {
-      std::string field_name_upper;
-      field_name_upper.reserve(field_name.size());
-      for (std::string::const_iterator it = field_name.begin();
+MultiRow::Columns::size_type MultiRow::getColIndexByName(const std::string& field_name) const
+{
+    std::string field_name_upper;
+    field_name_upper.reserve(field_name.size());
+    for (std::string::const_iterator it = field_name.begin();
         it != field_name.end(); ++it)
-          field_name_upper += std::toupper(*it);
+            field_name_upper += std::toupper(*it);
 
-      Columns::size_type i;
-      for (i = 0; i < _columns.size(); ++i)
+    Columns::size_type i;
+    for (i = 0; i < _columns.size(); ++i)
         if (_columns[i]->getColumnName() == field_name_upper)
-          break;
+            break;
 
-      if (i == _columns.size())
+    if (i == _columns.size())
         throw FieldNotFound(field_name);
 
-      return i;
-    }
+    return i;
+}
 
-    std::string MultiRow::getColumnName(unsigned field_num) const
-    {
-      return _columns.at(field_num)->getColumnName();
-    }
+std::string MultiRow::getColumnName(unsigned field_num) const
+{
+    return _columns.at(field_num)->getColumnName();
+}
 
-  }
+}
 }

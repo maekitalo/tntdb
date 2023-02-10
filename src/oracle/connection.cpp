@@ -42,305 +42,304 @@ typedef void (*sighandler_t)(int);
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    namespace error
-    {
-      log_define("tntdb.oracle.error")
+namespace oracle
+{
+namespace error
+{
+log_define("tntdb.oracle.error")
 
-      void checkError(OCIError* errhp, sword ret, const char* function)
-      {
-        switch (ret)
-        {
-          case OCI_SUCCESS:
+void checkError(OCIError* errhp, sword ret, const char* function)
+{
+    switch (ret)
+    {
+        case OCI_SUCCESS:
             break;
 
-          case OCI_SUCCESS_WITH_INFO:
+        case OCI_SUCCESS_WITH_INFO:
             log_warn(function << ": OCI_SUCCESS_WITH_INFO");
             break;
 
-          case OCI_NEED_DATA:
+        case OCI_NEED_DATA:
             log_warn(function << ": OCI_NEED_DATA");
             throw Error(errhp, function);
 
-          case OCI_NO_DATA:
+        case OCI_NO_DATA:
             log_debug(function << ": OCI_NO_DATA");
             throw NotFound();
 
-          case OCI_ERROR:
+        case OCI_ERROR:
             throw Error(errhp, function);
 
-          case OCI_INVALID_HANDLE:
+        case OCI_INVALID_HANDLE:
             log_error("OCI_INVALID_HANDLE");
             throw InvalidHandle(function);
 
-          case OCI_STILL_EXECUTING:
+        case OCI_STILL_EXECUTING:
             log_error("OCI_STILL_EXECUTING");
             throw StillExecuting(function);
 
-          case OCI_CONTINUE:
+        case OCI_CONTINUE:
             log_error("OCI_CONTINUE");
             throw ErrorContinue(function);
-        }
-      }
+    }
+}
+}
+
+void Connection::checkError(sword ret, const char* function) const
+{
+    error::checkError(getErrorHandle(), ret, function);
+}
+
+namespace
+{
+class SighandlerSaver
+{
+    int signum;
+    sighandler_t sighandler;
+
+public:
+    explicit SighandlerSaver(int signum_)
+        : signum(signum_)
+    {
+        sighandler = signal(signum, SIG_DFL);
     }
 
-    void Connection::checkError(sword ret, const char* function) const
+    ~SighandlerSaver()
     {
-      error::checkError(getErrorHandle(), ret, function);
+        signal(signum, sighandler);
     }
+};
+}
 
-    namespace
-    {
-        class SighandlerSaver
-        {
-                int signum;
-                sighandler_t sighandler;
+void Connection::logon(const std::string& dblink, const std::string& user, const std::string& password)
+{
+    log_debug("logon \"" << dblink << "\" user=\"" << user << '"');
 
-            public:
-                explicit SighandlerSaver(int signum_)
-                    : signum(signum_)
-                {
-                    sighandler = signal(signum, SIG_DFL);
-                }
+    // workaround for OCI problem: OCI redirects SIGINT, which causes Ctrl-C to fail
+    SighandlerSaver sighandlerSaver(SIGINT);
 
-                ~SighandlerSaver()
-                {
-                    signal(signum, sighandler);
-                }
-        };
-    }
+    pid = ::getpid();
 
-    void Connection::logon(const std::string& dblink, const std::string& user, const std::string& password)
-    {
-      log_debug("logon \"" << dblink << "\" user=\"" << user << '"');
+    sword ret;
 
-      // workaround for OCI problem: OCI redirects SIGINT, which causes Ctrl-C to fail
-      SighandlerSaver sighandlerSaver(SIGINT);
-
-      pid = ::getpid();
-
-      sword ret;
-
-      log_finer("create oracle environment");
-      ret = OCIEnvCreate(&envhp, OCI_OBJECT|OCI_THREADED|OCI_NO_MUTEX, 0, 0, 0, 0, 0, 0);
-      if (ret != OCI_SUCCESS)
+    log_finer("create oracle environment");
+    ret = OCIEnvCreate(&envhp, OCI_OBJECT|OCI_THREADED|OCI_NO_MUTEX, 0, 0, 0, 0, 0, 0);
+    if (ret != OCI_SUCCESS)
         throw Error("cannot create environment handle");
-      log_finer("environment handle => " << envhp);
+    log_finer("environment handle => " << envhp);
 
-      log_finer("allocate error handle");
-      ret = OCIHandleAlloc(envhp, (void**)&errhp, OCI_HTYPE_ERROR, 0, 0);
-      if (ret != OCI_SUCCESS)
+    log_finer("allocate error handle");
+    ret = OCIHandleAlloc(envhp, (void**)&errhp, OCI_HTYPE_ERROR, 0, 0);
+    if (ret != OCI_SUCCESS)
         throw Error("cannot create error handle");
-      log_finer("error handle => " << errhp);
+    log_finer("error handle => " << errhp);
 
-      log_finer("allocate server handle");
-      ret = OCIHandleAlloc(envhp, (void**)&srvhp, OCI_HTYPE_SERVER, 0, 0);
-      checkError(ret, "OCIHandleAlloc(OCI_HTYPE_SERVER)");
-      log_finer("server handle => " << srvhp);
+    log_finer("allocate server handle");
+    ret = OCIHandleAlloc(envhp, (void**)&srvhp, OCI_HTYPE_SERVER, 0, 0);
+    checkError(ret, "OCIHandleAlloc(OCI_HTYPE_SERVER)");
+    log_finer("server handle => " << srvhp);
 
-      log_finer("allocate service handle");
-      ret = OCIHandleAlloc(envhp, (void**)&svchp, OCI_HTYPE_SVCCTX, 0, 0);
-      checkError(ret, "OCIHandleAlloc(OCI_HTYPE_SVCCTX)");
-      log_finer("service handle => " << svchp);
+    log_finer("allocate service handle");
+    ret = OCIHandleAlloc(envhp, (void**)&svchp, OCI_HTYPE_SVCCTX, 0, 0);
+    checkError(ret, "OCIHandleAlloc(OCI_HTYPE_SVCCTX)");
+    log_finer("service handle => " << svchp);
 
-      log_finer("attach to server");
-      ret = OCIServerAttach(srvhp, errhp, reinterpret_cast<const text*>(dblink.data()), dblink.size(), 0);
-      checkError(ret, "OCIServerAttach");
+    log_finer("attach to server");
+    ret = OCIServerAttach(srvhp, errhp, reinterpret_cast<const text*>(dblink.data()), dblink.size(), 0);
+    checkError(ret, "OCIServerAttach");
 
-      /* set attribute server context in the service context */
-      ret = OCIAttrSet(svchp, OCI_HTYPE_SVCCTX, srvhp, 0, OCI_ATTR_SERVER, errhp);
-      checkError(ret, "OCIAttrSet(OCI_ATTR_SERVER)");
+    /* set attribute server context in the service context */
+    ret = OCIAttrSet(svchp, OCI_HTYPE_SVCCTX, srvhp, 0, OCI_ATTR_SERVER, errhp);
+    checkError(ret, "OCIAttrSet(OCI_ATTR_SERVER)");
 
-      log_finer("allocate session handle");
-      ret = OCIHandleAlloc((dvoid*)envhp, (dvoid**)&usrhp, OCI_HTYPE_SESSION, 0, (dvoid**)0);
-      checkError(ret, "OCIHandleAlloc(OCI_HTYPE_SESSION)");
+    log_finer("allocate session handle");
+    ret = OCIHandleAlloc((dvoid*)envhp, (dvoid**)&usrhp, OCI_HTYPE_SESSION, 0, (dvoid**)0);
+    checkError(ret, "OCIHandleAlloc(OCI_HTYPE_SESSION)");
 
-      /* set username attribute in user session handle */
-      log_finer("set username attribute in session handle");
-      ret = OCIAttrSet(usrhp, OCI_HTYPE_SESSION,
-        reinterpret_cast<void*>(const_cast<char*>(user.data())),
-        user.size(), OCI_ATTR_USERNAME, errhp);
-      checkError(ret, "OCIAttrSet(OCI_ATTR_USERNAME)");
+    /* set username attribute in user session handle */
+    log_finer("set username attribute in session handle");
+    ret = OCIAttrSet(usrhp, OCI_HTYPE_SESSION,
+      reinterpret_cast<void*>(const_cast<char*>(user.data())),
+      user.size(), OCI_ATTR_USERNAME, errhp);
+    checkError(ret, "OCIAttrSet(OCI_ATTR_USERNAME)");
 
-      /* set password attribute in user session handle */
-      ret = OCIAttrSet(usrhp, OCI_HTYPE_SESSION,
-        reinterpret_cast<void*>(const_cast<char*>(password.data())),
-        password.size(), OCI_ATTR_PASSWORD, errhp);
-      checkError(ret, "OCIAttrSet(OCI_ATTR_PASSWORD)");
+    /* set password attribute in user session handle */
+    ret = OCIAttrSet(usrhp, OCI_HTYPE_SESSION,
+      reinterpret_cast<void*>(const_cast<char*>(password.data())),
+      password.size(), OCI_ATTR_PASSWORD, errhp);
+    checkError(ret, "OCIAttrSet(OCI_ATTR_PASSWORD)");
 
-      /* start session */
-      log_finer("start session");
-      ret = OCISessionBegin(svchp, errhp, usrhp, OCI_CRED_RDBMS, OCI_DEFAULT);
-      checkError(ret, "OCISessionBegin");
+    /* start session */
+    log_finer("start session");
+    ret = OCISessionBegin(svchp, errhp, usrhp, OCI_CRED_RDBMS, OCI_DEFAULT);
+    checkError(ret, "OCISessionBegin");
 
-      /* set user session attrubte in the service context handle */
-      ret = OCIAttrSet(svchp, OCI_HTYPE_SVCCTX, usrhp, 0, OCI_ATTR_SESSION, errhp);
-      checkError(ret, "OCIAttrSet(OCI_ATTR_SESSION)");
-    }
+    /* set user session attrubte in the service context handle */
+    ret = OCIAttrSet(svchp, OCI_HTYPE_SVCCTX, usrhp, 0, OCI_ATTR_SESSION, errhp);
+    checkError(ret, "OCIAttrSet(OCI_ATTR_SESSION)");
+}
 
-    namespace
-    {
-      std::string extractAttribute(std::string& value, const std::string& key)
-      {
-        std::string::size_type p0 = value.find(key);
-        if (p0 == std::string::npos)
-          return std::string();
+namespace
+{
+std::string extractAttribute(std::string& value, const std::string& key)
+{
+    std::string::size_type p0 = value.find(key);
+    if (p0 == std::string::npos)
+        return std::string();
 
-        if (p0 > 0 && value.at(p0 - 1) != ';')
-          return std::string();
+    if (p0 > 0 && value.at(p0 - 1) != ';')
+        return std::string();
 
-        std::string::size_type p1 = value.find(';', p0);
-        if (p1 == std::string::npos)
-          p1 = value.size();
-        std::string::size_type n = p1 - p0;
+    std::string::size_type p1 = value.find(';', p0);
+    if (p1 == std::string::npos)
+        p1 = value.size();
+    std::string::size_type n = p1 - p0;
 
-        std::string ret(value, p0 + key.size(), n - key.size());
-        if (p0 > 0)
-          value.erase(p0 - 1, n + 1);
-        else
-          value.erase(p0, n);
-        return ret;
-      }
-    }
+    std::string ret(value, p0 + key.size(), n - key.size());
+    if (p0 > 0)
+        value.erase(p0 - 1, n + 1);
+    else
+        value.erase(p0, n);
 
-    Connection::Connection(const std::string& url, const std::string& username, const std::string& password)
-      : envhp(0),
-        srvhp(0),
-        errhp(0),
-        usrhp(0),
-        svchp(0),
-        transactionActive(0)
-    {
-      std::string conninfo(url);
-      std::string au = extractAttribute(conninfo, "user=");
-      std::string ap = extractAttribute(conninfo, "passwd=");
-      log_warn_if(!ap.empty(), "password should not be given in dburl");
-      log_warn_if(!au.empty() && !username.empty(), "username given in url and parameter");
-      log_warn_if(!ap.empty() && !password.empty(), "password given in url and parameter");
-      if (au.empty() && ap.empty())
+    return ret;
+}
+}
+
+Connection::Connection(const std::string& url, const std::string& username, const std::string& password)
+  : envhp(0),
+    srvhp(0),
+    errhp(0),
+    usrhp(0),
+    svchp(0),
+    transactionActive(0)
+{
+    std::string conninfo(url);
+    std::string au = extractAttribute(conninfo, "user=");
+    std::string ap = extractAttribute(conninfo, "passwd=");
+    log_warn_if(!ap.empty(), "password should not be given in dburl");
+    log_warn_if(!au.empty() && !username.empty(), "username given in url and parameter");
+    log_warn_if(!ap.empty() && !password.empty(), "password given in url and parameter");
+    if (au.empty() && ap.empty())
         logon(conninfo, username, password);
-      else
+    else
         logon(conninfo, au, ap);
-    }
+}
 
-    Connection::~Connection()
+Connection::~Connection()
+{
+    if (envhp)
     {
-      if (envhp)
-      {
         sword ret;
 
-        clearStatementCache();
-
         try
         {
-          log_finer("OCISessionEnd");
-          ret = OCISessionEnd(svchp, errhp, usrhp, OCI_DEFAULT);
-          checkError(ret, "OCISessionEnd");
+            log_finer("OCISessionEnd");
+            ret = OCISessionEnd(svchp, errhp, usrhp, OCI_DEFAULT);
+            checkError(ret, "OCISessionEnd");
         }
         catch (const std::exception& e)
         {
-          log_error(e.what());
+            log_error(e.what());
         }
 
         try
         {
-          log_finer("OCIServerDetach");
-          ret = OCIServerDetach(srvhp, errhp, OCI_DEFAULT);
-          checkError(ret, "OCIServerDetach");
+            log_finer("OCIServerDetach");
+            ret = OCIServerDetach(srvhp, errhp, OCI_DEFAULT);
+            checkError(ret, "OCIServerDetach");
         }
         catch (const std::exception& e)
         {
-          log_error(e.what());
+            log_error(e.what());
         }
 
         log_finer("OCIHandleFree(" << envhp << ')');
         ret = OCIHandleFree(envhp, OCI_HTYPE_ENV);
         if (ret == OCI_SUCCESS)
-          log_finer("handle released");
+            log_finer("handle released");
         else
-          log_error("OCIHandleFree failed");
-      }
+            log_error("OCIHandleFree failed");
     }
+}
 
-    void Connection::beginTransaction()
-    {
-      //log_debug("OCITransStart(" << svchp << ", " << errhp << ')');
-      //checkError(OCITransStart(svchp, errhp, 10, OCI_TRANS_NEW), "OCITransStart");
-      ++transactionActive;
-    }
+void Connection::beginTransaction()
+{
+    //log_debug("OCITransStart(" << svchp << ", " << errhp << ')');
+    //checkError(OCITransStart(svchp, errhp, 10, OCI_TRANS_NEW), "OCITransStart");
+    ++transactionActive;
+}
 
-    void Connection::commitTransaction()
+void Connection::commitTransaction()
+{
+    if (transactionActive == 0 || --transactionActive == 0)
     {
-      if (transactionActive == 0 || --transactionActive == 0)
-      {
         log_debug("OCITransCommit(" << srvhp << ", " << errhp << ')');
         checkError(OCITransCommit(svchp, errhp, OCI_DEFAULT), "OCITransCommit");
-      }
     }
+}
 
-    void Connection::rollbackTransaction()
+void Connection::rollbackTransaction()
+{
+    if (transactionActive == 0 || --transactionActive == 0)
     {
-      if (transactionActive == 0 || --transactionActive == 0)
-      {
         log_debug("OCITransRollback(" << srvhp << ", " << errhp << ')');
         checkError(OCITransRollback(svchp, errhp, OCI_DEFAULT), "OCITransRollback");
-      }
     }
+}
 
-    Connection::size_type Connection::execute(const std::string& query)
-    {
-      return prepare(query).execute();
-    }
+Connection::size_type Connection::execute(const std::string& query)
+{
+    return prepare(query).execute();
+}
 
-    tntdb::Result Connection::select(const std::string& query)
-    {
-      return prepare(query).select();
-    }
+tntdb::Result Connection::select(const std::string& query)
+{
+    return prepare(query).select();
+}
 
-    Row Connection::selectRow(const std::string& query)
-    {
-      return prepare(query).selectRow();
-    }
+Row Connection::selectRow(const std::string& query)
+{
+    return prepare(query).selectRow();
+}
 
-    Value Connection::selectValue(const std::string& query)
-    {
-      return prepare(query).selectValue();
-    }
+Value Connection::selectValue(const std::string& query)
+{
+    return prepare(query).selectValue();
+}
 
-    tntdb::Statement Connection::prepare(const std::string& query)
-    {
-      return tntdb::Statement(new Statement(this, query));
-    }
+tntdb::Statement Connection::prepare(const std::string& query)
+{
+    return tntdb::Statement(std::make_shared<Statement>(*this, query));
+}
 
-    tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+{
+    std::string q;
+    if (limit.empty())
     {
-      std::string q;
-      if (limit.empty())
-      {
         if (offset.empty())
         {
-          q = query;
+            q = query;
         }
         else
         {
-          // no limit, just offset
-          q = "select * from (select a.*, rownum tntdbrownum from(";
-          q += query;
-          q += ")a) where tntdbrownum > :";
-          q += offset;
+            // no limit, just offset
+            q = "select * from (select a.*, rownum tntdbrownum from(";
+            q += query;
+            q += ")a) where tntdbrownum > :";
+            q += offset;
         }
-      }
-      else if (offset.empty())
-      {
+    }
+    else if (offset.empty())
+    {
         // just limit, no offset
         q = "select * from (select a.*, rownum tntdbrownum from(";
         q += query;
         q += ")a) where tntdbrownum <= :";
         q += limit;
-      }
-      else
-      {
+    }
+    else
+    {
         // limit and offset set
         q = "select * from (select a.*, rownum tntdbrownum from(";
         q += query;
@@ -350,36 +349,29 @@ namespace tntdb
         q += offset;
         q += " + :";
         q += limit;
-      }
-
-      return prepare(q);
     }
 
-    void Connection::clearStatementCache()
-    {
-      IStmtCacheConnection::clearStatementCache();
-      seqStmt.clear();
-    }
+    return prepare(q);
+}
 
-    bool Connection::ping()
+bool Connection::ping()
+{
+    try
     {
-      try
-      {
         if (pid != getpid())
         {
-          // database connection is not valid any more after a fork
-          log_warn("pid has changed; current pid=" << getpid() << " connection pid=" << pid << ", release environment handle");
+            // database connection is not valid any more after a fork
+            log_warn("pid has changed; current pid=" << getpid() << " connection pid=" << pid << ", release environment handle");
 
-          clearStatementCache();
-          seqStmt.clear();
+            seqStmt.clear();
 
-          sword ret = OCIHandleFree(envhp, OCI_HTYPE_ENV);
-          if (ret != OCI_SUCCESS)
-            log_error("OCIHandleFree(" << envhp << " OCI_HTYPE_ENV) failed");
+            sword ret = OCIHandleFree(envhp, OCI_HTYPE_ENV);
+            if (ret != OCI_SUCCESS)
+                log_error("OCIHandleFree(" << envhp << " OCI_HTYPE_ENV) failed");
 
-          envhp = 0;
+            envhp = 0;
 
-          return false;
+            return false;
         }
 
         // OCIPing crashed on oracle 10.2.0.4.0
@@ -391,46 +383,46 @@ namespace tntdb
         log_debug("oracle version " << version);
 #endif
         return true;
-      }
-      catch (const Error&)
-      {
-        return false;
-      }
     }
-
-    long Connection::lastInsertId(const std::string& name)
+    catch (const Error&)
     {
-      tntdb::Statement stmt;
-      SeqStmtType::iterator s = seqStmt.find(name);
-      if (s == seqStmt.end())
-      {
+        return false;
+    }
+}
+
+long Connection::lastInsertId(const std::string& name)
+{
+    tntdb::Statement stmt;
+    SeqStmtType::iterator s = seqStmt.find(name);
+    if (s == seqStmt.end())
+    {
         // check for valid sequence name
         for (std::string::const_iterator it = name.begin(); it != name.end(); ++it)
-          if (! ((*it >= 'a' && *it <= 'z')
-              || (*it >= 'A' && *it <= 'Z')
-              || (*it >= '0' && *it <= '9')
-              || *it == '_'))
-            throw Error("invalid sequence name \"" + name + '"');
+            if (! ((*it >= 'a' && *it <= 'z')
+                || (*it >= 'A' && *it <= 'Z')
+                || (*it >= '0' && *it <= '9')
+                || *it == '_'))
+                throw Error("invalid sequence name \"" + name + '"');
 
         stmt = prepare(
             "select " + name + ".currval from dual");
         seqStmt[name] = stmt;
-      }
-      else
+    }
+    else
         stmt = s->second;
 
-      long ret;
-      stmt.selectValue().get(ret);
-      return ret;
-    }
+    long ret;
+    stmt.selectValue().get(ret);
+    return ret;
+}
 
-    void Connection::lockTable(const std::string& tablename, bool exclusive)
-    {
-      std::string sql = "LOCK TABLE ";
-      sql += tablename;
-      sql += exclusive ? " IN EXCLUSIVE MODE" : " IN SHARE MODE";
-      execute(sql);
-    }
+void Connection::lockTable(const std::string& tablename, bool exclusive)
+{
+    std::string sql = "LOCK TABLE ";
+    sql += tablename;
+    sql += exclusive ? " IN EXCLUSIVE MODE" : " IN SHARE MODE";
+    execute(sql);
+}
 
-  }
+}
 }

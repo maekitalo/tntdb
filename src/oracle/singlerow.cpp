@@ -33,55 +33,55 @@ log_define("tntdb.oracle.singlerow")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    SingleRow::SingleRow(MultiRow::Ptr mr, unsigned row)
-      : _mr(mr),
-        _row(row)
-    {
-        _values.resize(mr->size());
-    }
+namespace oracle
+{
+SingleRow::SingleRow(std::shared_ptr<MultiRow> mr, unsigned row)
+  : _mr(mr),
+    _row(row)
+{
+    _values.resize(mr->size());
+}
 
-    void SingleRow::row(unsigned r)
+void SingleRow::row(unsigned r)
+{
+    if (r != _row)
     {
-      if (r != _row)
-      {
         for (unsigned n = 0; n < _values.size(); ++n)
         {
-          if (_values[n])
-            _values[n]->row(r);
+            if (_values[n])
+              _values[n]->row(r);
         }
 
         _row = r;
-      }
     }
+}
 
-    SingleRow::size_type SingleRow::size() const
+SingleRow::size_type SingleRow::size() const
+{
+    return _mr->size();
+}
+
+tntdb::Value SingleRow::getValueByNumber(size_type field_num) const
+{
+    Values& v = const_cast<Values&>(_values);
+
+    if (!v[field_num])
     {
-      return _mr->size();
+        v[field_num] = std::make_shared<SingleValue>(_mr->getValuesByNumber(field_num), _row);
     }
 
-    tntdb::Value SingleRow::getValueByNumber(size_type field_num) const
-    {
-      Values& v = const_cast<Values&>(_values);
+    return tntdb::Value(v[field_num]);
+}
 
-      if (!v[field_num])
-      {
-        v[field_num] = new SingleValue(_mr->getValuesByNumber(field_num), _row);
-      }
+tntdb::Value SingleRow::getValueByName(const std::string& field_name) const
+{
+    return getValueByNumber(_mr->getColIndexByName(field_name));
+}
 
-      return tntdb::Value(v[field_num].getPointer());
-    }
+std::string SingleRow::getColumnName(size_type field_num) const
+{
+    return _mr->getColumnName(field_num);
+}
 
-    tntdb::Value SingleRow::getValueByName(const std::string& field_name) const
-    {
-      return getValueByNumber(_mr->getColIndexByName(field_name));
-    }
-
-    std::string SingleRow::getColumnName(size_type field_num) const
-    {
-      return _mr->getColumnName(field_num);
-    }
-
-  }
+}
 }

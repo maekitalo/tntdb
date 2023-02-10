@@ -35,30 +35,28 @@
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class MultiRow : public cxxtools::RefCounted
-    {
-        typedef std::vector<cxxtools::SmartPtr<MultiValue> > Columns;
-        typedef std::vector<tntdb::Value> Values;
-        Columns _columns;
-        Values _values;
+namespace oracle
+{
+class MultiRow
+{
+    typedef std::vector<std::shared_ptr<MultiValue>> Columns;
+    typedef std::vector<tntdb::Value> Values;
+    Columns _columns;
+    Values _values;
 
-      public:
-        typedef cxxtools::SmartPtr<MultiRow> Ptr;
+public:
+    MultiRow(Statement& stmt, unsigned rowcount);
+    MultiRow(Statement& stmt, unsigned rowcount, unsigned columncount);
 
-        MultiRow(Statement* stmt, unsigned rowcount);
-        MultiRow(Statement* stmt, unsigned rowcount, unsigned columncount);
+    unsigned size() const
+    { return _columns.size(); }
 
-        unsigned size() const
-        { return _columns.size(); }
-
-        MultiValue::Ptr getValuesByNumber(unsigned field_num) const;
-        MultiValue::Ptr getValuesByName(const std::string& field_name) const;
-        Columns::size_type getColIndexByName(const std::string& field_name) const;
-        std::string getColumnName(unsigned field_num) const;
-    };
-  }
+    std::shared_ptr<MultiValue> getValuesByNumber(unsigned field_num) const;
+    std::shared_ptr<MultiValue> getValuesByName(const std::string& field_name) const;
+    Columns::size_type getColIndexByName(const std::string& field_name) const;
+    std::string getColumnName(unsigned field_num) const;
+};
+}
 }
 
 #endif // TNTDB_ORACLE_MULTIROW_H

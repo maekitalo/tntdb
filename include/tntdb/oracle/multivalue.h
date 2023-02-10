@@ -34,99 +34,95 @@
 #include <tntdb/oracle/statement.h>
 #include <tntdb/oracle/number.h>
 #include <oci.h>
-#include <cxxtools/refcounted.h>
-#include <cxxtools/smartptr.h>
+#include <vector>
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class MultiValue : public cxxtools::RefCounted
-    {
-        OCIDefine* _defp;
-        mutable Connection* _conn;
-        ub2 _type;
-        ub2 _collen;
-        ub2* _len;
-        ub2* _nullind;
-        unsigned _n;
-        std::string _colName;
+namespace oracle
+{
+class MultiValue
+{
+    OCIDefine* _defp;
+    Connection& _conn;
+    ub2 _type;
+    ub2 _collen;
+    std::vector<ub2> _len;
+    std::vector<ub2> _nullind;
+    unsigned _n;
+    std::string _colName;
 
-        // _data points to allocated data depending of _type:
-        //
-        //  _type              _data points to
-        //  ------------------ -------------------------------
-        //  SQLT_INT           long *
-        //  SQLT_UIN           unsigned long *
-        //  SQLT_FLT           double*
-        //  SQLT_NUM           tntdb::oracle::Number*
-        //  SQLT_VNU           tntdb::oracle::Number*
-        //  SQLT_DAT           OCIDateTime*
-        //  SQLT_TIMESTAMP     OCIDateTime*
-        //  SQLT_TIMESTAMP_TZ  OCIDateTime*
-        //  SQLT_TIMESTAMP_LTZ OCIDateTime*
-        //  SQLT_BLOB          tntdb::oracle::Blob*
-        //  other              char*
+    // _data points to allocated data depending of _type:
+    //
+    //  _type              _data points to
+    //  ------------------ -------------------------------
+    //  SQLT_INT           long *
+    //  SQLT_UIN           unsigned long *
+    //  SQLT_FLT           double*
+    //  SQLT_NUM           tntdb::oracle::Number*
+    //  SQLT_VNU           tntdb::oracle::Number*
+    //  SQLT_DAT           OCIDateTime*
+    //  SQLT_TIMESTAMP     OCIDateTime*
+    //  SQLT_TIMESTAMP_TZ  OCIDateTime*
+    //  SQLT_TIMESTAMP_LTZ OCIDateTime*
+    //  SQLT_BLOB          tntdb::oracle::Blob*
+    //  other              char*
 
-        char* _data;
+    char* _data;
 
-        void init(Statement* stmt, OCIParam* paramp, ub4 pos);
+    void init(Statement& stmt, OCIParam* paramp, ub4 pos);
 
-        long longValue(unsigned n) const
-        { return reinterpret_cast<long*>(_data)[n]; }
-        unsigned long unsignedValue(unsigned n) const
-        { return reinterpret_cast<unsigned long*>(_data)[n]; }
-        double doubleValue(unsigned n) const
-        { return reinterpret_cast<double*>(_data)[n]; }
-        OCIDateTime* datetime(unsigned n) const
-        { return reinterpret_cast<OCIDateTime**>(_data)[n]; }
-        const OCINumber& number(unsigned n) const
-        { return reinterpret_cast<const OCINumber*>(_data)[n]; }
-        Decimal decimal(unsigned n) const
-        { return Number::getDecimal(&number(n), _conn->getErrorHandle()); }
-        OCILobLocator* blob(unsigned n) const
-        { return reinterpret_cast<OCILobLocator**>(_data)[n]; }
-        const char* data(unsigned n) const
-        { return &_data[n * (_collen + 16)]; }
+    long longValue(unsigned n) const
+    { return reinterpret_cast<long*>(_data)[n]; }
+    unsigned long unsignedValue(unsigned n) const
+    { return reinterpret_cast<unsigned long*>(_data)[n]; }
+    double doubleValue(unsigned n) const
+    { return reinterpret_cast<double*>(_data)[n]; }
+    OCIDateTime* datetime(unsigned n) const
+    { return reinterpret_cast<OCIDateTime**>(_data)[n]; }
+    const OCINumber& number(unsigned n) const
+    { return reinterpret_cast<const OCINumber*>(_data)[n]; }
+    Decimal decimal(unsigned n) const
+    { return Number::getDecimal(&number(n), _conn.getErrorHandle()); }
+    OCILobLocator* blob(unsigned n) const
+    { return reinterpret_cast<OCILobLocator**>(_data)[n]; }
+    const char* data(unsigned n) const
+    { return &_data[n * (_collen + 16)]; }
 
-        // make non copyable:
-        MultiValue(const MultiValue&)  { }
-        MultiValue& operator= (MultiValue&)  { return *this; }
+    MultiValue(const MultiValue&) = delete;
+    MultiValue& operator= (MultiValue&) = delete;
 
-      public:
-        typedef cxxtools::SmartPtr<MultiValue> Ptr;
+public:
+    MultiValue(Statement& stmt, OCIParam* paramp_, ub4 pos, unsigned n);
+    MultiValue(Statement& stmt, ub4 pos, unsigned n);
+    ~MultiValue();
 
-        MultiValue(Statement* stmt, OCIParam* paramp_, ub4 pos, unsigned n);
-        MultiValue(Statement* stmt, ub4 pos, unsigned n);
-        ~MultiValue();
+    unsigned size() const  { return _n; }
 
-        unsigned size() const  { return _n; }
+    bool isNull(unsigned n) const;
+    bool getBool(unsigned n) const;
+    short getShort(unsigned n) const;
+    int getInt(unsigned n) const;
+    long getLong(unsigned n) const;
+    unsigned short getUnsignedShort(unsigned n) const;
+    unsigned getUnsigned(unsigned n) const;
+    unsigned long getUnsignedLong(unsigned n) const;
+    int32_t getInt32(unsigned n) const;
+    uint32_t getUnsigned32(unsigned n) const;
+    int64_t getInt64(unsigned n) const;
+    uint64_t getUnsigned64(unsigned n) const;
+    Decimal getDecimal(unsigned n) const;
+    float getFloat(unsigned n) const;
+    double getDouble(unsigned n) const;
+    char getChar(unsigned n) const;
+    void getString(unsigned n, std::string& ret) const;
+    void getBlob(unsigned n, tntdb::Blob& ret) const;
+    Date getDate(unsigned n) const;
+    Time getTime(unsigned n) const;
+    tntdb::Datetime getDatetime(unsigned n) const;
 
-        bool isNull(unsigned n) const;
-        bool getBool(unsigned n) const;
-        short getShort(unsigned n) const;
-        int getInt(unsigned n) const;
-        long getLong(unsigned n) const;
-        unsigned short getUnsignedShort(unsigned n) const;
-        unsigned getUnsigned(unsigned n) const;
-        unsigned long getUnsignedLong(unsigned n) const;
-        int32_t getInt32(unsigned n) const;
-        uint32_t getUnsigned32(unsigned n) const;
-        int64_t getInt64(unsigned n) const;
-        uint64_t getUnsigned64(unsigned n) const;
-        Decimal getDecimal(unsigned n) const;
-        float getFloat(unsigned n) const;
-        double getDouble(unsigned n) const;
-        char getChar(unsigned n) const;
-        void getString(unsigned n, std::string& ret) const;
-        void getBlob(unsigned n, tntdb::Blob& ret) const;
-        Date getDate(unsigned n) const;
-        Time getTime(unsigned n) const;
-        tntdb::Datetime getDatetime(unsigned n) const;
-
-        const std::string& getColumnName() const  { return _colName; }
-    };
-  }
+    const std::string& getColumnName() const  { return _colName; }
+};
+}
 }
 
 #endif // TNTDB_ORACLE_MULTIVALUE_H
