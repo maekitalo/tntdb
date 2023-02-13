@@ -27,11 +27,10 @@
  */
 
 
-#include <cxxtools/unit/testsuite.h>
+#include "testbase.h"
 #include <cxxtools/unit/registertest.h>
 #include <cxxtools/log.h>
 #include <stdlib.h>
-#include <tntdb/connect.h>
 #include <tntdb/statement.h>
 #include <tntdb/row.h>
 #include <limits>
@@ -180,78 +179,54 @@ public:
     }
 };
 
-class TntdbTypesTest : public cxxtools::unit::TestSuite
+class TntdbTypesTest : public TntdbTestBase
 {
-    tntdb::Connection conn;
-    tntdb::Statement del;
-
 public:
     TntdbTypesTest()
-      : cxxtools::unit::TestSuite("types")
+      : TntdbTestBase("types")
     {
-      registerMethod("testLimits", *this, &TntdbTypesTest::testLimits);
-      registerMethod("testNull", *this, &TntdbTypesTest::testNull);
+        registerMethod("testLimits", *this, &TntdbTypesTest::testLimits);
+        registerMethod("testNull", *this, &TntdbTypesTest::testNull);
 
-      registerMethod("testBool", *this, &TntdbTypesTest::testBool);
-      registerMethod("testShort", *this, &TntdbTypesTest::testShort);
-      registerMethod("testInt", *this, &TntdbTypesTest::testInt);
-      registerMethod("testLong", *this, &TntdbTypesTest::testLong);
-      registerMethod("testUnsignedShort", *this, &TntdbTypesTest::testUnsignedShort);
-      registerMethod("testUnsigned", *this, &TntdbTypesTest::testUnsigned);
-      registerMethod("testUnsignedLong", *this, &TntdbTypesTest::testUnsignedLong);
-      registerMethod("testInt32", *this, &TntdbTypesTest::testInt32);
-      registerMethod("testUint32", *this, &TntdbTypesTest::testUint32);
-      registerMethod("testInt64", *this, &TntdbTypesTest::testInt64);
-      registerMethod("testUint64", *this, &TntdbTypesTest::testUint64);
-      registerMethod("testDecimal", *this, &TntdbTypesTest::testDecimal);
-      registerMethod("testFloat", *this, &TntdbTypesTest::testFloat);
-      registerMethod("testFloatFromDecimal", *this, &TntdbTypesTest::testFloatFromDecimal);
-      registerMethod("testDouble", *this, &TntdbTypesTest::testDouble);
-      registerMethod("testChar", *this, &TntdbTypesTest::testChar);
-      registerMethod("testString", *this, &TntdbTypesTest::testString);
-      registerMethod("testBlob", *this, &TntdbTypesTest::testBlob);
-      registerMethod("testDate", *this, &TntdbTypesTest::testDate);
-      registerMethod("testTime", *this, &TntdbTypesTest::testTime);
-      registerMethod("testDatetime", *this, &TntdbTypesTest::testDatetime);
-      registerMethod("testSequence", *this, &TntdbTypesTest::testSequence);
-      registerMethod("testFloatNan", *this, &TntdbTypesTest::testFloatNan);
-      registerMethod("testDoubleNan", *this, &TntdbTypesTest::testDoubleNan);
+        registerMethod("testBool", *this, &TntdbTypesTest::testBool);
+        registerMethod("testShort", *this, &TntdbTypesTest::testShort);
+        registerMethod("testInt", *this, &TntdbTypesTest::testInt);
+        registerMethod("testLong", *this, &TntdbTypesTest::testLong);
+        registerMethod("testUnsignedShort", *this, &TntdbTypesTest::testUnsignedShort);
+        registerMethod("testUnsigned", *this, &TntdbTypesTest::testUnsigned);
+        registerMethod("testUnsignedLong", *this, &TntdbTypesTest::testUnsignedLong);
+        registerMethod("testInt32", *this, &TntdbTypesTest::testInt32);
+        registerMethod("testUint32", *this, &TntdbTypesTest::testUint32);
+        registerMethod("testInt64", *this, &TntdbTypesTest::testInt64);
+        registerMethod("testUint64", *this, &TntdbTypesTest::testUint64);
+        registerMethod("testDecimal", *this, &TntdbTypesTest::testDecimal);
+        registerMethod("testFloat", *this, &TntdbTypesTest::testFloat);
+        registerMethod("testFloatFromDecimal", *this, &TntdbTypesTest::testFloatFromDecimal);
+        registerMethod("testDouble", *this, &TntdbTypesTest::testDouble);
+        registerMethod("testChar", *this, &TntdbTypesTest::testChar);
+        registerMethod("testString", *this, &TntdbTypesTest::testString);
+        registerMethod("testBlob", *this, &TntdbTypesTest::testBlob);
+        registerMethod("testDate", *this, &TntdbTypesTest::testDate);
+        registerMethod("testTime", *this, &TntdbTypesTest::testTime);
+        registerMethod("testDatetime", *this, &TntdbTypesTest::testDatetime);
+        registerMethod("testSequence", *this, &TntdbTypesTest::testSequence);
+        registerMethod("testFloatNan", *this, &TntdbTypesTest::testFloatNan);
+        registerMethod("testDoubleNan", *this, &TntdbTypesTest::testDoubleNan);
 
-    }
-
-    void setUp()
-    {
-        if (!conn)
-        {
-            const char* dburl = getenv("TNTDBURL");
-            if (!dburl)
-              dburl = "sqlite:test.db";
-
-            log_info("testing with dburl=" << dburl);
-
-            conn = tntdb::connect(dburl);
-            del = conn.prepare("delete from tntdbtest");
-        }
-    }
-
-    void tearDown()
-    {
-        del.execute();
     }
 
     void testLimits()
     {
-        del.execute();
-
-        tntdb::Statement ins = conn.prepare(
-          "insert into tntdbtest("
-          "    intcol, longcol, unsignedcol, unsignedlongcol,"
-          "    int32col, uint32col, int64col, uint64col,"
-          "    floatcol, doublecol)"
-          " values("
-          "    :intcol, :longcol, :unsignedcol, :unsignedlongcol,"
-          "    :int32col, :uint32col, :int64col, :uint64col,"
-          "    :floatcol, :doublecol)");
+        tntdb::Statement ins = conn.prepare(R"SQL(
+          insert into tntdbtest(
+              intcol, longcol, unsignedcol, unsignedlongcol,
+              int32col, uint32col, int64col, uint64col,
+              floatcol, doublecol)
+           values(
+              :intcol, :longcol, :unsignedcol, :unsignedlongcol,
+              :int32col, :uint32col, :int64col, :uint64col,
+              :floatcol, :doublecol)
+          )SQL");
 
         int intval                  = std::numeric_limits<int>::max();
         long longval                = std::numeric_limits<long>::max();
@@ -287,12 +262,13 @@ public:
         float floatres = 0;
         double doubleres = 0;
 
-        tntdb::Statement sel = conn.prepare(
-          "select"
-          "    intcol, longcol, unsignedcol, unsignedlongcol,"
-          "    int32col, uint32col, int64col, uint64col,"
-          "    floatcol, doublecol"
-          " from tntdbtest");
+        tntdb::Statement sel = conn.prepare(R"SQL(
+          select
+              intcol, longcol, unsignedcol, unsignedlongcol,
+              int32col, uint32col, int64col, uint64col,
+              floatcol, doublecol
+           from tntdbtest
+          )SQL");
 
         tntdb::Row row = sel.selectRow();
         row[0].get(intres);
@@ -323,9 +299,10 @@ public:
 
     void testNull()
     {
-        tntdb::Statement ins = conn.prepare(
-          "insert into tntdbtest(intcol, longcol)"
-          " values(:intcol, :longcol)");
+        tntdb::Statement ins = conn.prepare(R"SQL(
+          insert into tntdbtest(intcol, longcol)
+           values(:intcol, :longcol)
+           )SQL");
 
         long longval = 43;
 
@@ -336,9 +313,10 @@ public:
         int intres;
         long longres;
 
-        tntdb::Statement sel = conn.prepare(
-          "select intcol, longcol"
-          " from tntdbtest");
+        tntdb::Statement sel = conn.prepare(R"SQL(
+          select intcol, longcol
+           from tntdbtest
+          )SQL");
 
         tntdb::Row row = sel.selectRow();
         bool intnotnull = row[0].get(intres);
@@ -520,8 +498,6 @@ public:
 
     void testSequence()
     {
-        del.execute();
-
         tntdb::Statement ins = conn.prepare(
           "insert into tntdbtest(intcol) values(:intcol)");
 

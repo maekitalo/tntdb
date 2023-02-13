@@ -35,47 +35,47 @@
 class SqlBuilderTest : public cxxtools::unit::TestSuite
 {
 
-  public:
+public:
     SqlBuilderTest()
-      : cxxtools::unit::TestSuite("sqlbuilder")
+        : cxxtools::unit::TestSuite("sqlbuilder")
     {
-      registerMethod("testExtendParam", *this, &SqlBuilderTest::testExtendParam);
-      registerMethod("testReplace", *this, &SqlBuilderTest::testReplace);
-      registerMethod("testReplaceQ", *this, &SqlBuilderTest::testReplaceQ);
-      registerMethod("testReplaceIf", *this, &SqlBuilderTest::testReplaceIf);
+        registerMethod("testExtendParam", *this, &SqlBuilderTest::testExtendParam);
+        registerMethod("testReplace", *this, &SqlBuilderTest::testReplace);
+        registerMethod("testReplaceQ", *this, &SqlBuilderTest::testReplaceQ);
+        registerMethod("testReplaceIf", *this, &SqlBuilderTest::testReplaceIf);
     }
 
     void testExtendParam()
     {
-      tntdb::SqlBuilder s("select a from tab1 where b in (%c)");
-      s.extendParam("c", 3);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from tab1 where b in ( :c0,:c1,:c2 )");
+        tntdb::SqlBuilder s("select a from tab1 where b in (%c)");
+        s.extendParam("c", 3);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from tab1 where b in ( :c0,:c1,:c2 )");
     }
 
     void testReplace()
     {
-      tntdb::SqlBuilder s("select a from %table where b = 5");
-      s.replace("table", "foo");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from foo where b = 5");
+        tntdb::SqlBuilder s("select a from %table where b = 5");
+        s.replace("table", "foo");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from foo where b = 5");
     }
 
     void testReplaceQ()
     {
-      tntdb::SqlBuilder s("select a from tab1 where b = 'Hi' and %col = 5");
-      s.replace("col", "c");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from tab1 where b = 'Hi' and c = 5");
+        tntdb::SqlBuilder s("select a from tab1 where b = 'Hi' and %col = 5");
+        s.replace("col", "c");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from tab1 where b = 'Hi' and c = 5");
 
-      tntdb::SqlBuilder s2("select a from tab1 where b = '\\' and %col = 5");
-      s2.replace("col", "c");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(s2.str(), "select a from tab1 where b = '\\' and c = 5");
+        tntdb::SqlBuilder s2("select a from tab1 where b = '\\' and %col = 5");
+        s2.replace("col", "c");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(s2.str(), "select a from tab1 where b = '\\' and c = 5");
     }
 
     void testReplaceIf()
     {
-      tntdb::SqlBuilder s("select a from tab1 where b = 5 %c1 %c2");
-      s.replaceIf(true, "c1", "and c = :c")
-       .replaceIf(false, "c2", "and d = :d");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from tab1 where b = 5 and c = :c ");
+        tntdb::SqlBuilder s("select a from tab1 where b = 5 %c1 %c2");
+        s.replaceIf(true, "c1", "and c = :c")
+         .replaceIf(false, "c2", "and d = :d");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(s.str(), "select a from tab1 where b = 5 and c = :c ");
     }
 
 };
