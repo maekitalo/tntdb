@@ -46,6 +46,7 @@ class IConnection
 
 protected:
     IConnection() = default;
+    virtual ~IConnection() = default;
 
 public:
     typedef unsigned size_type;

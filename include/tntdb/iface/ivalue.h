@@ -50,6 +50,7 @@ class IValue
 
 protected:
     IValue() = default;
+    virtual ~IValue() = default;
 
 public:
     virtual bool isNull() const = 0;

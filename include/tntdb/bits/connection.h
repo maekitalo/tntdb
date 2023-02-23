@@ -189,7 +189,7 @@ public:
         The return value is true if the given key was found in the cache, false otherwise.
      */
     DEPRECATED
-    bool clearStatementCache(const std::string& key)
+    bool clearStatementCache(const std::string&)
       { return true; }
 
     /// Check whether the connection is alive

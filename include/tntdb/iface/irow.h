@@ -43,6 +43,7 @@ class IRow
 
 protected:
     IRow() = default;
+    virtual ~IRow() = default;
 
 public:
     typedef unsigned size_type;

@@ -53,6 +53,7 @@ class IStatement
 
 protected:
     IStatement() = default;
+    virtual ~IStatement() = default;
 
 public:
     typedef unsigned size_type;

@@ -30,7 +30,6 @@
 #ifndef TNTDB_IFACE_IBLOB_H
 #define TNTDB_IFACE_IBLOB_H
 
-#include <cxxtools/refcounted.h>
 #include <cstddef>
 #include <cstring>
 
