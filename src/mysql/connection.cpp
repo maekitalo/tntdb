@@ -28,6 +28,8 @@
 
 #include <tntdb/mysql/impl/connection.h>
 #include <tntdb/mysql/impl/result.h>
+#include <tntdb/mysql/impl/resultrow.h>
+#include <tntdb/mysql/impl/rowvalue.h>
 #include <tntdb/mysql/impl/statement.h>
 #include <tntdb/result.h>
 #include <tntdb/statement.h>
@@ -324,7 +326,7 @@ Connection::size_type Connection::execute(const std::string& query)
     return ::mysql_affected_rows(&mysql);
 }
 
-tntdb::Result Connection::select(const std::string& query)
+std::shared_ptr<Result> Connection::myselect(const std::string& query)
 {
     execute(query);
 
@@ -333,25 +335,30 @@ tntdb::Result Connection::select(const std::string& query)
     if (res == 0)
         throw MysqlError("mysql_store_result", &mysql);
 
-    return tntdb::Result(std::make_shared<Result>(&mysql, res));
+    return std::make_shared<Result>(&mysql, res);
+}
+
+tntdb::Result Connection::select(const std::string& query)
+{
+    return tntdb::Result(myselect(query));
 }
 
 Row Connection::selectRow(const std::string& query)
 {
-    tntdb::Result result = select(query);
-    if (result.empty())
+    auto result = myselect(query);
+    if (result->size() == 0)
         throw NotFound();
 
-    return result.getRow(0);
+    return tntdb::Row(result->getMysqlRow(0));
 }
 
 Value Connection::selectValue(const std::string& query)
 {
-    Row t = selectRow(query);
-    if (t.empty())
+    auto result = myselect(query);
+    if (result->size() == 0)
         throw NotFound();
 
-    return t.getValue(0);
+    return tntdb::Value(ResultRow::getMysqlValue(result->getMysqlRow(0), 0));
 }
 
 tntdb::Statement Connection::prepare(const std::string& query)

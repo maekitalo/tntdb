@@ -27,6 +27,7 @@
  */
 
 #include <tntdb/mysql/impl/boundvalue.h>
+#include <tntdb/mysql/impl/boundrow.h>
 #include <tntdb/mysql/bindutils.h>
 #include <tntdb/date.h>
 #include <tntdb/time.h>
@@ -37,6 +38,11 @@ namespace tntdb
 {
 namespace mysql
 {
+BoundValue::BoundValue(std::shared_ptr<BoundRow> boundRow, MYSQL_BIND& bind)
+  : _boundRow(boundRow),
+    mysql_bind(bind)
+{ }
+
 bool BoundValue::isNull() const
 {
     return mysql::isNull(mysql_bind);

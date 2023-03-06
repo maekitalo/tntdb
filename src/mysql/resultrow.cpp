@@ -27,6 +27,7 @@
  */
 
 #include <tntdb/mysql/impl/resultrow.h>
+#include <tntdb/mysql/impl/result.h>
 #include <tntdb/mysql/impl/rowvalue.h>
 #include <tntdb/bits/value.h>
 #include <tntdb/error.h>
@@ -38,32 +39,49 @@ namespace tntdb
 {
 namespace mysql
 {
-ResultRow::ResultRow(MYSQL_RES* res, MYSQL_ROW row_, unsigned field_count_)
-    : row(row_),
-      field_count(field_count_)
+ResultRow::ResultRow(std::shared_ptr<Result> resultref, MYSQL_ROW row, unsigned field_count)
+    : _resultref(resultref),
+      _row(row),
+      _field_count(field_count)
 {
     log_debug("mysql_fetch_lengths");
-    lengths = ::mysql_fetch_lengths(res);
+    _lengths = ::mysql_fetch_lengths(resultref->getMysqlRes());
 
     log_debug("mysql_fetch_fields");
-    fields = ::mysql_fetch_fields(res);
+    _fields = ::mysql_fetch_fields(resultref->getMysqlRes());
+}
+
+ResultRow::ResultRow(MYSQL_RES* res, MYSQL_ROW row, unsigned field_count)
+    : _row(row),
+      _field_count(field_count)
+{
+    log_debug("mysql_fetch_lengths");
+    _lengths = ::mysql_fetch_lengths(res);
+
+    log_debug("mysql_fetch_fields");
+    _fields = ::mysql_fetch_fields(res);
 }
 
 unsigned ResultRow::size() const
 {
-    return field_count;
+    return _field_count;
+}
+
+std::shared_ptr<RowValue> ResultRow::getMysqlValue(std::shared_ptr<ResultRow> result, size_type field_num)
+{
+    return std::make_shared<RowValue>(result, result->_row, field_num, result->_lengths[field_num]);
 }
 
 Value ResultRow::getValueByNumber(size_type field_num) const
 {
-    return Value(std::make_shared<RowValue>(row, field_num, lengths[field_num]));
+    return Value(std::make_shared<RowValue>(_row, field_num, _lengths[field_num]));
 }
 
 Value ResultRow::getValueByName(const std::string& field_name) const
 {
     size_type field_num;
     for (field_num = 0; field_num < size(); ++field_num)
-        if (fields[field_num].name == field_name)
+        if (_fields[field_num].name == field_name)
              break;
 
     if (field_num >= size())
@@ -74,7 +92,7 @@ Value ResultRow::getValueByName(const std::string& field_name) const
 
 std::string ResultRow::getColumnName(size_type field_num) const
 {
-    return fields[field_num].name;
+    return _fields[field_num].name;
 }
 
 }

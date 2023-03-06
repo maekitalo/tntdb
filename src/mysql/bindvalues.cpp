@@ -37,82 +37,82 @@ log_define("tntdb.mysql.bindvalues")
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    BindValues::BindValues()
-      : valuesSize(0),
-        values(0),
-        bindAttributes(0)
-    { }
+namespace mysql
+{
+BindValues::BindValues()
+  : valuesSize(0),
+    values(0),
+    bindAttributes(0)
+{ }
 
-    BindValues::BindValues(unsigned n)
-      : valuesSize(n),
-        values(new MYSQL_BIND[n]),
-        bindAttributes(new BindAttributes[n])
+BindValues::BindValues(unsigned n)
+  : valuesSize(n),
+    values(new MYSQL_BIND[n]),
+    bindAttributes(new BindAttributes[n])
+{
+    ::memset(values, 0, sizeof(MYSQL_BIND) * valuesSize);
+    for (unsigned n = 0; n < valuesSize; ++n)
     {
-      ::memset(values, 0, sizeof(MYSQL_BIND) * valuesSize);
-      for (unsigned n = 0; n < valuesSize; ++n)
-      {
         values[n].length = &bindAttributes[n].length;
         values[n].is_null = &bindAttributes[n].isNull;
-      }
     }
+}
 
-    BindValues::~BindValues()
-    {
-      if (values)
+BindValues::~BindValues()
+{
+    if (values)
         for (unsigned n = 0; n < valuesSize; ++n)
-          delete[] static_cast<char*>(values[n].buffer);
+            delete[] static_cast<char*>(values[n].buffer);
 
-      delete[] values;
-      delete[] bindAttributes;
-    }
+    delete[] values;
+    delete[] bindAttributes;
+}
 
-    void BindValues::setSize(unsigned n)
-    {
-      if (valuesSize == n)
+void BindValues::setSize(unsigned n)
+{
+    if (valuesSize == n)
         return;
 
-      if (values)
-      {
+    if (values)
+    {
         for (unsigned nn = 0; nn < valuesSize; ++nn)
-          delete[] static_cast<char*>(values[nn].buffer);
+            delete[] static_cast<char*>(values[nn].buffer);
         delete[] values;
         delete[] bindAttributes;
-      }
+    }
 
-      valuesSize = n,
-      values = new MYSQL_BIND[n];
-      bindAttributes = new BindAttributes[n];
+    valuesSize = n,
+    values = new MYSQL_BIND[n];
+    bindAttributes = new BindAttributes[n];
 
-      ::memset(values, 0, sizeof(MYSQL_BIND) * valuesSize);
-      for (unsigned n = 0; n < valuesSize; ++n)
-      {
+    ::memset(values, 0, sizeof(MYSQL_BIND) * valuesSize);
+    for (unsigned n = 0; n < valuesSize; ++n)
+    {
         values[n].length = &bindAttributes[n].length;
         values[n].is_null = &bindAttributes[n].isNull;
-      }
     }
+}
 
-    void BindValues::initOutBuffer(unsigned n, MYSQL_FIELD& f)
-    {
-      log_debug("initOutBuffer name=" << f.name << " n=" << n << " length=" << f.length << " type=" << f.type
-        << " max_length=" << f.max_length << " flags=" << f.flags << " unsigned=" << bool(f.flags & UNSIGNED_FLAG));
+void BindValues::initOutBuffer(unsigned n, MYSQL_FIELD& f)
+{
+    log_debug("initOutBuffer name=" << f.name << " n=" << n << " length=" << f.length << " type=" << f.type
+      << " max_length=" << f.max_length << " flags=" << f.flags << " unsigned=" << bool(f.flags & UNSIGNED_FLAG));
 
-      reserve(values[n], std::max(f.length, f.max_length));
-      if (f.type == 0)
+    reserve(values[n], std::max(f.length, f.max_length));
+    if (f.type == 0)
         log_debug("no type in metadata for field " << n << "; using MYSQL_TYPE_VAR_STRING");
-      values[n].buffer_type = f.type ? f.type : MYSQL_TYPE_VAR_STRING;
-      values[n].is_unsigned = bool(f.flags & UNSIGNED_FLAG);
-      if (f.name)
+    values[n].buffer_type = f.type ? f.type : MYSQL_TYPE_VAR_STRING;
+    values[n].is_unsigned = bool(f.flags & UNSIGNED_FLAG);
+    if (f.name)
         bindAttributes[n].name = f.name;
-      else
+    else
         bindAttributes[n].name.clear();
-    }
+}
 
-    void BindValues::clear()
-    {
-      for (unsigned n = 0; n < valuesSize; ++n)
+void BindValues::clear()
+{
+    for (unsigned n = 0; n < valuesSize; ++n)
         bindAttributes[n].isNull = 1;
-    }
-  }
+}
+}
 }

@@ -37,24 +37,33 @@ namespace tntdb
 {
 namespace mysql
 {
+class ResultRow;
 class RowValue : public IValue
 {
 public:
     typedef unsigned size_type;
 
 private:
-    MYSQL_ROW row;
-    size_type col;
-    size_type len;
+    std::shared_ptr<ResultRow> _rowref;
+    MYSQL_ROW _row;
+    size_type _col;
+    size_type _len;
 
 public:
-    RowValue(MYSQL_ROW row_, size_type col_, size_type len_)
-      : row(row_),
-        col(col_),
-        len(len_)
-        { }
+    RowValue(std::shared_ptr<ResultRow> rowref, MYSQL_ROW row, size_type col, size_type len)
+        : _rowref(rowref),
+          _row(row),
+          _col(col),
+          _len(len)
+          { }
 
-    size_type size() const        { return len; }
+    RowValue(MYSQL_ROW row, size_type col, size_type len)
+       : _row(row),
+          _col(col),
+          _len(len)
+          { }
+
+    size_type size() const        { return _len; }
 
     virtual bool isNull() const;
     virtual bool getBool() const;

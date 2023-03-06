@@ -43,15 +43,19 @@ class Decimal;
 
 namespace mysql
 {
+class BoundRow;
+
 class BoundValue : public IValue
 {
 public:
     typedef unsigned size_type;
 
 private:
+    std::shared_ptr<BoundRow> _boundRow;
     MYSQL_BIND& mysql_bind;
 
 public:
+    BoundValue(std::shared_ptr<BoundRow> boundRow, MYSQL_BIND& bind);
     explicit BoundValue(MYSQL_BIND& bind)
         : mysql_bind(bind)
         { }

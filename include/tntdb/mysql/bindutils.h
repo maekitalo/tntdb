@@ -35,14 +35,14 @@
 
 namespace tntdb
 {
-  class Blob;
-  class Date;
-  class Time;
-  class Datetime;
-  class Decimal;
+class Blob;
+class Date;
+class Time;
+class Datetime;
+class Decimal;
 
-  namespace mysql
-  {
+namespace mysql
+{
     void setNull(MYSQL_BIND& value);
     void setBool(MYSQL_BIND& value, bool data);
     void setShort(MYSQL_BIND& value, short data);
@@ -104,13 +104,13 @@ namespace tntdb
     template <typename c_type>
     void setValue(MYSQL_BIND& bind, c_type value, enum_field_types mysql_type)
     {
-      reserve(bind, sizeof(c_type));
-      *static_cast<c_type*>(bind.buffer) = value;
-      bind.buffer_type = mysql_type;
-      bind.is_null = 0;
+        reserve(bind, sizeof(c_type));
+        *static_cast<c_type*>(bind.buffer) = value;
+        bind.buffer_type = mysql_type;
+        bind.is_null = 0;
     }
 
-  }
+}
 }
 
 #endif // TNTDB_MYSQL_BINDUTILS_H

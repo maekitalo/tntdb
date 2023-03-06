@@ -31,11 +31,13 @@
 
 #include <tntdb/iface/iresult.h>
 #include <mysql.h>
+#include <memory>
 
 namespace tntdb
 {
 namespace mysql
 {
+class ResultRow;
 class Result : public IResult
 {
     MYSQL* mysql;
@@ -47,6 +49,7 @@ public:
     ~Result();
 
     MYSQL_RES* getMysqlRes() const  { return result; }
+    std::shared_ptr<ResultRow> getMysqlRow(size_type tup_num) const;
 
     Row getRow(size_type tup_num) const;
     size_type size() const;
@@ -56,4 +59,3 @@ public:
 }
 
 #endif // TNTDB_MYSQL_IMPL_RESULT_H
-
