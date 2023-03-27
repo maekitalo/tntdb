@@ -144,10 +144,18 @@ public:
     bool getValue(T& ret) const
       { return *this >> ret; }
 
+    template <typename T>
+    bool getValue(T&& ret) const
+      { return *this >> std::move(ret); }
+
     /// Shorter name for getValue.
     template <typename T>
     bool get(T& ret) const
       { return *this >> ret; }
+
+    template <typename T>
+    bool get(T&& ret) const
+      { return *this >> std::move(ret); }
 
     /// Returns true, if this class is not connected to a actual statement.
     bool operator!() const              { return !_value; }
