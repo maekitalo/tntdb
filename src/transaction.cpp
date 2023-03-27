@@ -34,7 +34,8 @@ log_define("tntdb.transaction")
 namespace tntdb
 {
 Transaction::Transaction(IConnection& db, bool starttransaction)
-    : _db(db)
+    : _db(db),
+      _active(false)
 {
     if (starttransaction)
         begin();
