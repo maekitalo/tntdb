@@ -1,6 +1,19 @@
 AM_CPPFLAGS = @MYSQL_CFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 
-sources = bindutils.cpp bindvalues.cpp boundrow.cpp boundvalue.cpp connection.cpp connectionmanager.cpp cursor.cpp error.cpp resultrow.cpp rowcontainer.cpp rowvalue.cpp statement.cpp result.cpp
+sources = \
+    bindutils.cpp \
+    bindvalues.cpp \
+    boundrow.cpp \
+    boundvalue.cpp \
+    connection.cpp \
+    connectionmanager.cpp \
+    cursor.cpp \
+    error.cpp \
+    result.cpp \
+    resultrow.cpp \
+    rowcontainer.cpp \
+    rowvalue.cpp \
+    statement.cpp
 
 if MAKE_MYSQL
 

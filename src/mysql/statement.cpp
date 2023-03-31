@@ -29,6 +29,7 @@
 #include <tntdb/mysql/impl/statement.h>
 #include <tntdb/mysql/impl/rowcontainer.h>
 #include <tntdb/mysql/impl/boundrow.h>
+#include <tntdb/mysql/impl/boundvalue.h>
 #include <tntdb/mysql/impl/cursor.h>
 #include <tntdb/result.h>
 #include <tntdb/row.h>
@@ -100,7 +101,7 @@ std::shared_ptr<BoundRow> Statement::getRow()
     return rowPtr;
 }
 
-std::shared_ptr<IRow> Statement::fetchRow()
+std::shared_ptr<BoundRow> Statement::fetchRow()
 {
     std::shared_ptr<BoundRow> ptr = getRow();
 
@@ -557,12 +558,9 @@ tntdb::Result Statement::select()
     return tntdb::Result(result);
 }
 
-tntdb::Row Statement::selectRow()
+std::shared_ptr<BoundRow> Statement::selectBoundRow()
 {
     log_debug("selectRow");
-
-    if (hostvarMap.empty())
-        return conn.selectRow(query);
 
     if (fields)
         getRow();
@@ -578,17 +576,26 @@ tntdb::Row Statement::selectRow()
     if (!ptr)
         throw NotFound();
 
-    return Row(ptr);
+    return ptr;
+}
+
+tntdb::Row Statement::selectRow()
+{
+    if (hostvarMap.empty())
+        return conn.selectRow(query);
+    return Row(selectBoundRow());
 }
 
 tntdb::Value Statement::selectValue()
 {
     log_debug("selectValue");
-    Row t = selectRow();
-    if (t.empty())
+    if (hostvarMap.empty())
+        return conn.selectValue(query);
+    auto row = selectBoundRow();
+    if (row->size() == 0)
         throw NotFound();
 
-    return t.getValue(0);
+    return Value(std::make_shared<BoundValue>(row, row->getMysqlBind()[0]));
 }
 
 std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)

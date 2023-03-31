@@ -58,7 +58,7 @@ Result::~Result()
     }
 }
 
-Row Result::getRow(size_type tup_num) const
+std::shared_ptr<ResultRow> Result::getMysqlRow(size_type tup_num) const
 {
     log_debug("mysql_data_seek(" << tup_num << ')');
     ::mysql_data_seek(result, tup_num);
@@ -68,7 +68,12 @@ Row Result::getRow(size_type tup_num) const
     if (row == 0)
       throw MysqlError("mysql_fetch_row", mysql);
 
-    return Row(std::make_shared<ResultRow>(result, row, field_count));
+    return std::make_shared<ResultRow>(result, row, field_count);
+}
+
+Row Result::getRow(size_type tup_num) const
+{
+    return Row(getMysqlRow(tup_num));
 }
 
 Result::size_type Result::size() const

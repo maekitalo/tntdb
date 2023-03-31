@@ -62,6 +62,8 @@ namespace tntdb
 
 namespace mysql
 {
+class Result;
+
 /// Implements a connection to a Mysql database.
 class Connection : public IConnection
 {
@@ -74,6 +76,7 @@ class Connection : public IConnection
       const char* user, const char* passwd,
       const char* db, unsigned int port,
       const char* unix_socket, unsigned long client_flag);
+    std::shared_ptr<Result> myselect(const std::string& query);
 
 public:
     Connection(const std::string& conn, const std::string& username, const std::string& password);

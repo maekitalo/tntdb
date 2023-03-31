@@ -56,7 +56,8 @@ class Statement : public IStatement
     std::shared_ptr<BoundRow> rowPtr;
 
     std::shared_ptr<BoundRow> getRow();
-    std::shared_ptr<IRow> fetchRow();
+    std::shared_ptr<BoundRow> fetchRow();
+    std::shared_ptr<BoundRow> selectBoundRow();
 
 public:
     Statement(Connection& conn, MYSQL* mysql,
