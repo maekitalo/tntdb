@@ -176,7 +176,7 @@ public:
      */
     DEPRECATED
     Statement prepareCachedWithLimit(const std::string& query, const
-    std::string& limit, const std::string& offset, const std::string& key)
+    std::string& limit, const std::string& offset, const std::string&)
       { return prepareWithLimit(query, limit, offset); }
 
     /// Clear the Statement cache used from prepareCached()
