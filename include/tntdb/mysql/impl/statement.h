@@ -96,6 +96,9 @@ public:
 
     // specfic methods
 
+    // creates stmt handle - caller is responsible for removal
+    MYSQL_STMT* createStmt();
+    // creates stmt handle - handle is managed by this
     MYSQL_STMT* getStmt();
     void execute(MYSQL_STMT* stmt, unsigned fetchsize);
 

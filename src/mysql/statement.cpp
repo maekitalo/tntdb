@@ -596,6 +596,13 @@ std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)
     return std::make_shared<Cursor>(*this, fetchsize);
 }
 
+MYSQL_STMT* Statement::createStmt()
+{
+    MYSQL_STMT* result = getStmt();
+    stmt = 0;
+    return result;
+}
+
 MYSQL_STMT* Statement::getStmt()
 {
     if (stmt)
