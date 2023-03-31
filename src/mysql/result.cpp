@@ -68,9 +68,7 @@ Row Result::getRow(size_type tup_num) const
     if (row == 0)
       throw MysqlError("mysql_fetch_row", mysql);
 
-    const IResult* resc = this;
-    IResult* res = const_cast<IResult*>(resc);
-    return Row(new ResultRow(tntdb::Result(res), result, row));
+    return Row(std::make_shared<ResultRow>(result, row, field_count));
 }
 
 Result::size_type Result::size() const

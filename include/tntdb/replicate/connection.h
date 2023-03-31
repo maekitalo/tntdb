@@ -35,38 +35,38 @@
 
 namespace tntdb
 {
-  namespace replicate
-  {
-    class Statement;
+namespace replicate
+{
+class Statement;
 
-    class Connection : public IStmtCacheConnection
-    {
-        friend class Statement;
+class Connection : public IStmtCacheConnection
+{
+    friend class Statement;
 
-        typedef std::vector<tntdb::Connection> Connections;
-        Connections connections;
-        tntdb::Connection primaryConnection;
+    typedef std::vector<tntdb::Connection> Connections;
+    Connections connections;
+    tntdb::Connection primaryConnection;
 
-      public:
-        Connection(const std::string& url, const std::string& username, const std::string& password);
-        ~Connection();
+public:
+    Connection(const std::string& url, const std::string& username, const std::string& password);
+    ~Connection();
 
-        void beginTransaction();
-        void commitTransaction();
-        void rollbackTransaction();
+    void beginTransaction();
+    void commitTransaction();
+    void rollbackTransaction();
 
-        size_type execute(const std::string& query);
-        tntdb::Result select(const std::string& query);
-        tntdb::Row selectRow(const std::string& query);
-        tntdb::Value selectValue(const std::string& query);
-        tntdb::Statement prepare(const std::string& query);
-        tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
-        bool ping();
-        long lastInsertId(const std::string& name);
-        void lockTable(const std::string& tablename, bool exclusive);
-    };
+    size_type execute(const std::string& query);
+    tntdb::Result select(const std::string& query);
+    tntdb::Row selectRow(const std::string& query);
+    tntdb::Value selectValue(const std::string& query);
+    tntdb::Statement prepare(const std::string& query);
+    tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
+    bool ping();
+    long lastInsertId(const std::string& name);
+    void lockTable(const std::string& tablename, bool exclusive);
+};
 
-  }
+}
 }
 
 #endif // TNTDB_REPLICATE_IMPL_CONNECTION_H

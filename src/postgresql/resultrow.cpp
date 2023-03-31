@@ -35,47 +35,46 @@
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    ResultRow::ResultRow(Result* result_, size_type rownumber_)
-      : tntdbResult(result_),
-        result(result_),
-        rownumber(rownumber_)
-    {
-    }
+namespace postgresql
+{
+ResultRow::ResultRow(const Result& result, size_type rownumber)
+  : _result(result),
+    _rownumber(rownumber)
+{
+}
 
-    unsigned ResultRow::size() const
-    {
-      return result->getFieldCount();
-    }
+unsigned ResultRow::size() const
+{
+    return _result.getFieldCount();
+}
 
-    Value ResultRow::getValueByNumber(size_type field_num) const
-    {
-      return Value(new ResultValue(const_cast<ResultRow*>(this), field_num));
-    }
+Value ResultRow::getValueByNumber(size_type field_num) const
+{
+    return Value(std::make_shared<ResultValue>(*this, field_num));
+}
 
-    Value ResultRow::getValueByName(const std::string& field_name) const
-    {
-      unsigned fc = result->getFieldCount();
-      unsigned n;
-      for (n = 0; n < fc; ++n)
+Value ResultRow::getValueByName(const std::string& field_name) const
+{
+    unsigned fc = _result.getFieldCount();
+    unsigned n;
+    for (n = 0; n < fc; ++n)
         if (field_name == PQfname(getPGresult(), n))
-          break;
+            break;
 
-      if (n == fc)
+    if (n == fc)
         throw FieldNotFound(field_name);
 
-      return getValueByNumber(n);
-    }
+    return getValueByNumber(n);
+}
 
-    std::string ResultRow::getColumnName(size_type field_num) const
-    {
-        return PQfname(getPGresult(), field_num);
-    }
+std::string ResultRow::getColumnName(size_type field_num) const
+{
+    return PQfname(getPGresult(), field_num);
+}
 
-    PGresult* ResultRow::getPGresult() const
-    {
-      return result->getPGresult();
-    }
-  }
+PGresult* ResultRow::getPGresult() const
+{
+    return _result.getPGresult();
+}
+}
 }

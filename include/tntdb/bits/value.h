@@ -44,11 +44,13 @@ namespace tntdb
  */
 class Value
 {
-    std::shared_ptr<IValue> value;
+    std::shared_ptr<IValue> _value;
 
 public:
-    explicit Value(IValue* value = 0)
-      : value(value)
+    Value() { }
+
+    explicit Value(const std::shared_ptr<IValue>& value)
+      : _value(value)
       { }
 
     //@{
@@ -59,64 +61,64 @@ public:
      * type tntdb::TypeError is thrown.
      */
     /// return true, when value is null
-    bool isNull() const                 { return !value || value->isNull(); }
+    bool isNull() const                 { return !_value || _value->isNull(); }
     /// return true, when value represents boolean true.
-    bool getBool() const                { return value->getBool(); }
+    bool getBool() const                { return _value->getBool(); }
     /// tries to convert value into an short.
-    short getShort() const              { return value->getShort(); }
+    short getShort() const              { return _value->getShort(); }
     /// tries to convert value into an int.
-    int getInt() const                  { return value->getInt(); }
+    int getInt() const                  { return _value->getInt(); }
     /// tries to convert value into an long.
-    long getLong() const                { return value->getLong(); }
+    long getLong() const                { return _value->getLong(); }
     /// tries to convert value into an unsigned short.
-    unsigned short getUnsignedShort() const { return value->getUnsignedShort(); }
+    unsigned short getUnsignedShort() const { return _value->getUnsignedShort(); }
     /// tries to convert value into an unsigned.
-    unsigned getUnsigned() const        { return value->getUnsigned(); }
+    unsigned getUnsigned() const        { return _value->getUnsigned(); }
     /// tries to convert value into an unsigned long.
-    unsigned long getUnsignedLong() const { return value->getUnsignedLong(); }
+    unsigned long getUnsignedLong() const { return _value->getUnsignedLong(); }
     /// tries to convert value into an int32_t.
-    int32_t getInt32() const            { return value->getInt32(); }
+    int32_t getInt32() const            { return _value->getInt32(); }
     /// tries to convert value into an uint32_t.
-    uint32_t getUnsigned32() const      { return value->getUnsigned32(); }
+    uint32_t getUnsigned32() const      { return _value->getUnsigned32(); }
     /// tries to convert value into an int64_t.
-    int64_t getInt64() const            { return value->getInt64(); }
+    int64_t getInt64() const            { return _value->getInt64(); }
     /// tries to convert value into an uint64_t.
-    uint64_t getUnsigned64() const      { return value->getUnsigned64(); }
+    uint64_t getUnsigned64() const      { return _value->getUnsigned64(); }
     /// tries to convert value into a Decimal.
-    Decimal getDecimal() const          { return value->getDecimal(); }
+    Decimal getDecimal() const          { return _value->getDecimal(); }
     /// tries to convert value into an float.
-    float getFloat() const              { return value->getFloat(); }
+    float getFloat() const              { return _value->getFloat(); }
     /// tries to convert value into an double.
-    double getDouble() const            { return value->getDouble(); }
+    double getDouble() const            { return _value->getDouble(); }
     /// returns the first character of the text-representation.
-    char getChar() const                { return value->getChar(); }
+    char getChar() const                { return _value->getChar(); }
     /// returns the value as a string.
     std::string getString() const
-      { std::string ret; value->getString(ret); return ret; }
+      { std::string ret; _value->getString(ret); return ret; }
     /// fills the passed string with the value.
     /// this might be slightly more efficient than just returning a new
     /// string since one copy is saved.
     void getString(std::string& ret) const
-      { value->getString(ret); }
+      { _value->getString(ret); }
     /// returns the value as a unicode string.
     cxxtools::String getUString() const
-      { cxxtools::String ret; value->getUString(ret); return ret; }
+      { cxxtools::String ret; _value->getUString(ret); return ret; }
     void getUString(cxxtools::String& ret) const
-      { value->getUString(ret); }
+      { _value->getUString(ret); }
     /// Returns the value as a blob.
     /// This is more or less an alias to getString just to stress, that
     /// the data is truly binary and not some text value.
     Blob getBlob() const
-      { Blob ret; value->getBlob(ret); return ret; }
+      { Blob ret; _value->getBlob(ret); return ret; }
     /// Returns the value as a blob.
     void getBlob(Blob& blob) const
-      { value->getBlob(blob); }
+      { _value->getBlob(blob); }
     /// returns the value as a Date.
-    Date getDate() const                { return value->getDate(); }
+    Date getDate() const                { return _value->getDate(); }
     /// returns the value as a Time.
-    Time getTime() const                { return value->getTime(); }
+    Time getTime() const                { return _value->getTime(); }
     /// returns the value as a Datetime.
-    Datetime getDatetime() const        { return value->getDatetime(); }
+    Datetime getDatetime() const        { return _value->getDatetime(); }
     //@}
 
     /**
@@ -144,9 +146,9 @@ public:
       { return *this >> ret; }
 
     /// Returns true, if this class is not connected to a actual statement.
-    bool operator!() const              { return !value; }
+    bool operator!() const              { return !_value; }
     ///  Returns the actual implementation-class.
-    const IValue* getImpl() const       { return &*value; }
+    std::shared_ptr<IValue> getImpl() const       { return _value; }
 };
 
 //@{

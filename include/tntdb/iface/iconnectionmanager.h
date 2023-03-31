@@ -49,7 +49,7 @@ class IConnectionManager
     IConnectionManager& operator=(const IConnectionManager&) = delete;
 
 public:
-    IConnectionManager() { }
+    IConnectionManager() = default;
     virtual ~IConnectionManager() { }
     virtual Connection connect(const std::string& url, const std::string& username, const std::string& password) = 0;
 };

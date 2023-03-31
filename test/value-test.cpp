@@ -35,81 +35,81 @@
 
 class ValueTest : public cxxtools::unit::TestSuite
 {
-    public:
-        ValueTest()
-            : cxxtools::unit::TestSuite("value")
+public:
+    ValueTest()
+        : cxxtools::unit::TestSuite("value")
+    {
+        registerMethod("testReadValue", *this, &ValueTest::testReadValue);
+        registerMethod("testTimespan", *this, &ValueTest::testTimespan);
+    }
+
+    void testReadValue()
+    {
+        tntdb::Value v;
+
         {
-            registerMethod("testReadValue", *this, &ValueTest::testReadValue);
-            registerMethod("testTimespan", *this, &ValueTest::testTimespan);
-        }
+            v = tntdb::Value(std::make_shared<tntdb::ValueImpl>("true"));
+            bool r = false;
+            v.get(r);
 
-        void testReadValue()
+            CXXTOOLS_UNIT_ASSERT_EQUALS(r, true);
+        }
         {
-            tntdb::Value v;
+            v = tntdb::Value(std::make_shared<tntdb::ValueImpl>("42"));
+            int r = 3;
+            v.get(r);
 
-            {
-                v = tntdb::Value(new tntdb::ValueImpl("true"));
-                bool r = false;
-                v.get(r);
-
-                CXXTOOLS_UNIT_ASSERT_EQUALS(r, true);
-            }
-            {
-                v = tntdb::Value(new tntdb::ValueImpl("42"));
-                int r = 3;
-                v.get(r);
-
-                CXXTOOLS_UNIT_ASSERT_EQUALS(r, 42);
-            }
+            CXXTOOLS_UNIT_ASSERT_EQUALS(r, 42);
         }
+    }
 
-        void testTimespan()
+    void testTimespan()
+    {
+        tntdb::Value v;
+
         {
-            tntdb::Value v;
+            v = tntdb::Value(std::make_shared<tntdb::ValueImpl>("15"));
+            cxxtools::Microseconds r;
+            v.get(r);
 
-            {
-                v = tntdb::Value(new tntdb::ValueImpl("15"));
-                cxxtools::Microseconds r;
-                v.get(r);
-
-                CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Microseconds(15));
-            }
-            {
-                v = tntdb::Value(new tntdb::ValueImpl("15"));
-                cxxtools::Milliseconds r;
-                v.get(r);
-
-                CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Milliseconds(15));
-            }
-            {
-                v = tntdb::Value(new tntdb::ValueImpl("15"));
-                cxxtools::Seconds r;
-                v.get(r);
-
-                CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Seconds(15));
-            }
-            {
-                v = tntdb::Value(new tntdb::ValueImpl("15"));
-                cxxtools::Minutes r;
-                v.get(r);
-
-                CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Minutes(15));
-            }
-            {
-                v = tntdb::Value(new tntdb::ValueImpl("15"));
-                cxxtools::Hours r;
-                v.get(r);
-
-                CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Hours(15));
-            }
-            {
-                v = tntdb::Value(new tntdb::ValueImpl("15"));
-                cxxtools::Days r;
-                v.get(r);
-
-                CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Days(15));
-            }
+            CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Microseconds(15));
         }
+        {
+            v = tntdb::Value(std::make_shared<tntdb::ValueImpl>("15"));
+            cxxtools::Milliseconds r;
+            v.get(r);
+
+            CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Milliseconds(15));
+        }
+        {
+            v = tntdb::Value(std::make_shared<tntdb::ValueImpl>("15"));
+            cxxtools::Seconds r;
+            v.get(r);
+
+            CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Seconds(15));
+        }
+        {
+            v = tntdb::Value(std::make_shared<tntdb::ValueImpl>("15"));
+            cxxtools::Minutes r;
+            v.get(r);
+
+            CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Minutes(15));
+        }
+        {
+            v = tntdb::Value(std::make_shared<tntdb::ValueImpl>("15"));
+            cxxtools::Hours r;
+            v.get(r);
+
+            CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Hours(15));
+        }
+        {
+            v = tntdb::Value(std::make_shared<tntdb::ValueImpl>("15"));
+            cxxtools::Days r;
+            v.get(r);
+
+            CXXTOOLS_UNIT_ASSERT_EQUALS(r, cxxtools::Days(15));
+        }
+    }
 };
 
 cxxtools::unit::RegisterTest<ValueTest> register_ValueTest;

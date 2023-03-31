@@ -55,12 +55,10 @@ public:
     class const_iterator;
 
     Result()  { }
-    Result(const std::shared_ptr<IResult>& res)
-      : result(res)
-      { }
-    explicit Result(IResult* res)
-      : result(res)
-      { }
+
+    explicit Result(const std::shared_ptr<IResult>& res)
+        : result(res)
+        { }
 
     /**
      * Returns the row_num'ths row of the resultset.

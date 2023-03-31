@@ -40,18 +40,17 @@ class Statement;
 
 class Cursor : public ICursor
 {
-    Statement* statement;
-    sqlite3_stmt* stmt;
+    friend class Statement;
+
+    Statement& _statement;
+    sqlite3_stmt* _stmt;
 
 public:
-    Cursor(Statement* statement, sqlite3_stmt* stmt);
+    Cursor(Statement& statement, sqlite3_stmt* stmt);
     ~Cursor();
 
     // method for ICursor
     Row fetch();
-
-    // specific methods of sqlite-driver
-    sqlite3_stmt* getStmt() const   { return stmt; }
 };
 }
 }

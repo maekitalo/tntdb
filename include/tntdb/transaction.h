@@ -33,52 +33,53 @@
 
 namespace tntdb
 {
-  /** The class Transaction monitors the state of a transaction on a database connection
+/** The class Transaction monitors the state of a transaction on a database connection
 
-      The constructor by default starts a transaction on the database. The transaction state
-      is held in the class. The destructor rolls back the transaction if it isn't explicitely
-      commited or rolled back.
-   */
-  class Transaction
-  {
-      Connection db;
-      bool active;
+    The constructor by default starts a transaction on the database. The transaction state
+    is held in the class. The destructor rolls back the transaction if it isn't explicitely
+    commited or rolled back.
+ */
+class Transaction
+{
+    IConnection& _db;
+    bool _active;
 
-      Transaction(const Transaction&) { }
-      Transaction& operator=(const Transaction&) { return *this; }
+    Transaction(const Transaction&) = delete;
+    Transaction& operator=(const Transaction&) = delete;
 
-    public:
-      /// Create a %Transaction object
-      Transaction(const Connection& db_, bool starttransaction = true);
+public:
+    explicit Transaction(IConnection& db, bool starttransaction = true);
 
-      /// Roll back transaction if still active
-      ~Transaction();
+    /// Create a %Transaction object
+    explicit Transaction(const Connection& db, bool starttransaction = true)
+        : Transaction(*db.getImpl(), starttransaction)
+        { }
 
-      const Connection& getConnection() const { return db; }
-      Connection& getConnection()             { return db; }
+    /// Roll back transaction if still active
+    ~Transaction();
 
-      /// Start a new transaction. If there is an active transaction, it is rolled back first
-      void begin();
+    /// Start a new transaction. If there is an active transaction, it is rolled back first
+    void begin();
 
-      /** Commit the current transaction.
-      
-          If there is no active transaction, nothing is done. The transaction state is reset.
-       */
-      void commit();
+    /** Commit the current transaction.
+    
+        If there is no active transaction, nothing is done. The transaction state is reset.
+     */
+    void commit();
 
-      /** Roll back the current transaction
+    /** Roll back the current transaction
 
-          If there is no active transaction, nothing is done. The transaction state is reset.
-       */
-      void rollback();
+        If there is no active transaction, nothing is done. The transaction state is reset.
+     */
+    void rollback();
 
-      /** Lock the specified table
+    /** Lock the specified table
 
-          Locks are released when the transaction is committed or rolled back
-          either explicitly or implicitly by the destructor.
-       */
-      void lockTable(const std::string& tableName, bool exclusive = true);
-  };
+        Locks are released when the transaction is committed or rolled back
+        either explicitly or implicitly by the destructor.
+     */
+    void lockTable(const std::string& tableName, bool exclusive = true);
+};
 }
 
 #endif // TNTDB_TRANSACTION_H

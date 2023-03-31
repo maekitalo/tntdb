@@ -49,7 +49,7 @@ class IValue
     IValue& operator=(const IValue&) = delete;
 
 protected:
-    IValue() { }
+    IValue() = default;
 
 public:
     virtual bool isNull() const = 0;

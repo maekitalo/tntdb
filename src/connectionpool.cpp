@@ -44,7 +44,7 @@ Connection ConnectionPool::connect()
 
     log_debug("current pool size " << getCurrentSize() << " max " << getMaxSpare());
 
-    Connection c;
+    std::shared_ptr<IConnection> c;
     while (!_connectionPool.empty()
         && !_connectionPool.back()->ping())
     {
@@ -54,15 +54,15 @@ Connection ConnectionPool::connect()
 
     if (_connectionPool.empty())
     {
-        c = tntdb::connect(_url, _username, _password);
+        c = tntdb::connect(_url, _username, _password).getImpl();
     }
     else
     {
-        c = _connectionPool.back();
+        c = std::move(_connectionPool.back());
         _connectionPool.pop_back();
     }
-
-    return std::shared_ptr<IConnection>(new PoolConnection(c.getImpl(), *this));
+    
+    return Connection(std::make_shared<PoolConnection>(std::move(c), *this));
 }
 
 void ConnectionPool::put(std::shared_ptr<IConnection>& conn)

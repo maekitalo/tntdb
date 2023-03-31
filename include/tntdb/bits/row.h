@@ -57,9 +57,6 @@ public:
     explicit Row(const std::shared_ptr<IRow>& row)
       : _row(row)
       { }
-    explicit Row(IRow* row)
-      : _row(row)
-      { }
 
     /// Returns the number of columns of this _row.
     unsigned size() const   { return _row->size(); }

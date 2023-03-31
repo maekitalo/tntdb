@@ -33,7 +33,7 @@ log_define("tntdb.statement.iterator")
 
 namespace tntdb
 {
-Statement::const_iterator::const_iterator(ICursor* cursor_)
+Statement::const_iterator::const_iterator(std::shared_ptr<ICursor> cursor_)
   : cursor(cursor_)
 {
     if (cursor_)
@@ -42,7 +42,7 @@ Statement::const_iterator::const_iterator(ICursor* cursor_)
         current = cursor_->fetch();
         if (!current)
         {
-            cursor = 0;
+            cursor = nullptr;
             log_finer("no row fetched");
         }
     }

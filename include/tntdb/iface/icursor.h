@@ -39,7 +39,7 @@ class ICursor
     ICursor& operator=(const ICursor&) = delete;
 
 protected:
-    ICursor()   { }
+    ICursor() = default;
 
 public:
     virtual Row fetch() = 0;

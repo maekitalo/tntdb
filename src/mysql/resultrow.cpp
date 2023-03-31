@@ -36,47 +36,46 @@ log_define("tntdb.mysql.resultrow")
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    ResultRow::ResultRow(const tntdb::Result& result_, MYSQL_RES* res,
-      MYSQL_ROW row_)
-      : result(result_),
-        row(row_)
-    {
-      log_debug("mysql_fetch_lengths");
-      lengths = ::mysql_fetch_lengths(res);
+namespace mysql
+{
+ResultRow::ResultRow(MYSQL_RES* res, MYSQL_ROW row_, unsigned field_count_)
+    : row(row_),
+      field_count(field_count_)
+{
+    log_debug("mysql_fetch_lengths");
+    lengths = ::mysql_fetch_lengths(res);
 
-      log_debug("mysql_fetch_fields");
-      fields = ::mysql_fetch_fields(res);
-    }
+    log_debug("mysql_fetch_fields");
+    fields = ::mysql_fetch_fields(res);
+}
 
-    unsigned ResultRow::size() const
-    {
-      return result.getFieldCount();
-    }
+unsigned ResultRow::size() const
+{
+    return field_count;
+}
 
-    Value ResultRow::getValueByNumber(size_type field_num) const
-    {
-      return Value(new RowValue(result, row, field_num, lengths[field_num]));
-    }
+Value ResultRow::getValueByNumber(size_type field_num) const
+{
+    return Value(std::make_shared<RowValue>(row, field_num, lengths[field_num]));
+}
 
-    Value ResultRow::getValueByName(const std::string& field_name) const
-    {
-      size_type field_num;
-      for (field_num = 0; field_num < size(); ++field_num)
+Value ResultRow::getValueByName(const std::string& field_name) const
+{
+    size_type field_num;
+    for (field_num = 0; field_num < size(); ++field_num)
         if (fields[field_num].name == field_name)
-          break;
+             break;
 
-      if (field_num >= size())
+    if (field_num >= size())
         throw FieldNotFound(field_name);
 
-      return getValueByNumber(field_num);
-    }
+    return getValueByNumber(field_num);
+}
 
-    std::string ResultRow::getColumnName(size_type field_num) const
-    {
-      return fields[field_num].name;
-    }
+std::string ResultRow::getColumnName(size_type field_num) const
+{
+    return fields[field_num].name;
+}
 
-  }
+}
 }

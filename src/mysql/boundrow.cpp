@@ -33,38 +33,38 @@
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    BoundRow::size_type BoundRow::size() const
-    {
-      return BindValues::getSize();
-    }
+namespace mysql
+{
+BoundRow::size_type BoundRow::size() const
+{
+    return BindValues::getSize();
+}
 
-    Value BoundRow::getValueByNumber(size_type field_num) const
-    {
-      // TODO eliminate creation of BoundValue, by preallocating them.
-      // We can maintain a vector<BoundValue> and prevent dynamic deallocation
-      // of elements by overriding BoundValue::release
-      return Value(new BoundValue(const_cast<IRow*>(static_cast<const IRow*>(this)), getMysqlBind()[field_num]));
-    }
+Value BoundRow::getValueByNumber(size_type field_num) const
+{
+    // TODO eliminate creation of BoundValue, by preallocating them.
+    // We can maintain a vector<BoundValue> and prevent dynamic deallocation
+    // of elements by overriding BoundValue::release
+    return Value(std::make_shared<BoundValue>(const_cast<IRow*>(static_cast<const IRow*>(this)), getMysqlBind()[field_num]));
+}
 
-    Value BoundRow::getValueByName(const std::string& field_name) const
-    {
-      size_type field_num;
-      for (field_num = 0; field_num < size(); ++field_num)
+Value BoundRow::getValueByName(const std::string& field_name) const
+{
+    size_type field_num;
+    for (field_num = 0; field_num < size(); ++field_num)
         if (getName(field_num) == field_name)
-          break;
+            break;
 
-      if (field_num >= size())
+    if (field_num >= size())
         throw FieldNotFound(field_name);
 
-      return getValueByNumber(field_num);
-    }
+    return getValueByNumber(field_num);
+}
 
-    std::string BoundRow::getColumnName(size_type field_num) const
-    {
-      return getName(field_num);
-    }
+std::string BoundRow::getColumnName(size_type field_num) const
+{
+    return getName(field_num);
+}
 
-  }
+}
 }

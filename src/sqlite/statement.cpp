@@ -50,33 +50,44 @@ namespace tntdb
 {
 namespace sqlite
 {
-Statement::Statement(Connection* conn_, const std::string& query_)
-  : stmt(0),
-    stmtInUse(0),
-    conn(conn_),
-    query(query_),
-    needReset(false)
+Statement::Statement(Connection& conn, const std::string& query)
+: _stmt(0),
+  _stmtInUse(0),
+  _conn(conn),
+  _query(query),
+  _needReset(false)
 {
 }
 
 Statement::~Statement()
 {
-    if (stmt)
+    for (auto& c: _activeCursors)
     {
-        log_debug("sqlite3_finalize(" << stmt << ')');
-        ::sqlite3_finalize(stmt);
+        log_debug("sqlite3_finalize(" << c->_stmt << ')');
+        ::sqlite3_finalize(c->_stmt);
+        if (_stmt == c->_stmt)
+            _stmt = nullptr;
+        if (_stmtInUse == c->_stmt)
+            _stmtInUse = nullptr;
+        c->_stmt = nullptr;
     }
 
-    if (stmtInUse && stmtInUse != stmt)
+    if (_stmt)
     {
-        log_debug("sqlite3_finalize(" << stmtInUse << ')');
-        ::sqlite3_finalize(stmtInUse);
+        log_debug("sqlite3_finalize(" << _stmt << ')');
+        ::sqlite3_finalize(_stmt);
+    }
+
+    if (_stmtInUse && _stmtInUse != _stmt)
+    {
+        log_debug("sqlite3_finalize(" << _stmtInUse << ')');
+        ::sqlite3_finalize(_stmtInUse);
     }
 }
 
 sqlite3_stmt* Statement::getBindStmt()
 {
-    if (stmt == 0)
+    if (_stmt == 0)
     {
         // hostvars don't need to be parsed, because sqlite accepts the hostvar-
         // syntax of tntdb (:vvv)
@@ -84,60 +95,74 @@ sqlite3_stmt* Statement::getBindStmt()
         // prepare statement
         const char* tzTail;
 #ifdef HAVE_SQLITE3_PREPARE_V2
-        log_debug("sqlite3_prepare_v2(" << conn->getSqlite3() << ", \"" << query
-          << "\", " << &stmt << ", " << &tzTail << ')');
-        int ret = ::sqlite3_prepare_v2(conn->getSqlite3(), query.data(), query.size(), &stmt, &tzTail);
+        log_debug("sqlite3_prepare_v2(" << _conn.getSqlite3() << ", \"" << _query
+          << "\", " << &_stmt << ", " << &tzTail << ')');
+        int ret = ::sqlite3_prepare_v2(_conn.getSqlite3(), _query.data(), _query.size(), &_stmt, &tzTail);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_prepare_v2", conn->getSqlite3(), ret);
+            throw Execerror("sqlite3_prepare_v2", _conn.getSqlite3(), ret);
 #else
-        log_debug("sqlite3_prepare(" << conn->getSqlite3() << ", \"" << query
-          << "\", " << &stmt << ", " << &tzTail << ')');
-        int ret = ::sqlite3_prepare(conn->getSqlite3(), query.data(), query.size(), &stmt, &tzTail);
+        log_debug("sqlite3_prepare(" << _conn.getSqlite3() << ", \"" << _query
+          << "\", " << &_stmt << ", " << &tzTail << ')');
+        int ret = ::sqlite3_prepare(_conn.getSqlite3(), _query.data(), _query.size(), &_stmt, &tzTail);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_prepare", conn->getSqlite3(), ret);
+            throw Execerror("sqlite3_prepare", _conn.getSqlite3(), ret);
 #endif
 
-        log_debug("sqlite3_stmt = " << stmt);
+        log_debug("sqlite3_stmt = " << _stmt);
 
-        if (stmtInUse)
+        if (_stmtInUse)
         {
-            // get bindings from stmtInUse
-            log_debug("sqlite3_transfer_bindings(" << stmtInUse << ", " << stmt << ')');
-            ret = ::sqlite3_transfer_bindings(stmtInUse, stmt);
+            // get bindings from _stmtInUse
+            log_debug("sqlite3_transfer_bindings(" << _stmtInUse << ", " << _stmt << ')');
+            ret = ::sqlite3_transfer_bindings(_stmtInUse, _stmt);
             if (ret != SQLITE_OK)
             {
-                log_debug("sqlite3_finalize(" << stmt << ')');
-                ::sqlite3_finalize(stmt);
-                stmt = 0;
-                throw Execerror("sqlite3_finalize", stmtInUse, ret);
+                log_debug("sqlite3_finalize(" << _stmt << ')');
+                ::sqlite3_finalize(_stmt);
+                _stmt = 0;
+                throw Execerror("sqlite3_finalize", _stmtInUse, ret);
             }
         }
     }
-    else if (needReset)
+    else if (_needReset)
         reset();
 
-    return stmt;
+    return _stmt;
 }
 
-void Statement::putback(sqlite3_stmt* stmt_)
+void Statement::putback(Cursor* cursor)
 {
-    if (stmt == 0)
+    if (!cursor->_stmt)
+        return;
+
+    if (_stmt == 0)
     {
-        stmt = stmt_; // thank you - we can use it
-        if (stmtInUse == stmt_)
-            stmtInUse = 0; // it is not in use any more
-        needReset = true;
+        _stmt = cursor->_stmt; // thank you - we can use it
+        if (_stmtInUse == cursor->_stmt)
+            _stmtInUse = 0; // it is not in use any more
+        _needReset = true;
     }
     else
     {
         // we have already a new statement-handle - destroy the old one
-        log_debug("sqlite3_finalize(" << stmt_ << ')');
-        ::sqlite3_finalize(stmt_);
+        log_debug("sqlite3_finalize(" << cursor->_stmt << ')');
+        ::sqlite3_finalize(cursor->_stmt);
 
-        if (stmtInUse == stmt_)
-            stmtInUse = 0;
+        if (_stmtInUse == cursor->_stmt)
+            _stmtInUse = 0;
+    }
+
+    cursor->_stmt = nullptr;
+
+    for (auto it = _activeCursors.begin(); it != _activeCursors.end(); ++it)
+    {
+        if (*it == cursor)
+        {
+            _activeCursors.erase(it);
+            break;
+        }
     }
 }
 
@@ -145,8 +170,8 @@ int Statement::getBindIndex(const std::string& col)
 {
     getBindStmt();
 
-    log_debug("sqlite3_bind_parameter_index(" << stmt << ", :" << col  << ')');
-    int idx = ::sqlite3_bind_parameter_index(stmt, (':' + col).c_str());
+    log_debug("sqlite3_bind_parameter_index(" << _stmt << ", :" << col  << ')');
+    int idx = ::sqlite3_bind_parameter_index(_stmt, (':' + col).c_str());
     if (idx == 0)
         log_warn("hostvariable :" << col << " not found");
     return idx;
@@ -154,17 +179,17 @@ int Statement::getBindIndex(const std::string& col)
 
 void Statement::reset()
 {
-    if (stmt)
+    if (_stmt)
     {
-        if (needReset)
+        if (_needReset)
         {
-            log_debug("sqlite3_reset(" << stmt << ')');
-            int ret = ::sqlite3_reset(stmt);
+            log_debug("sqlite3_reset(" << _stmt << ')');
+            int ret = ::sqlite3_reset(_stmt);
 
             if (ret != SQLITE_OK)
-                throw Execerror("sqlite3_reset", stmt, ret);
+                throw Execerror("sqlite3_reset", _stmt, ret);
 
-            needReset = false;
+            _needReset = false;
         }
     }
     else
@@ -174,12 +199,12 @@ void Statement::reset()
 void Statement::clear()
 {
     getBindStmt();
-    int count = ::sqlite3_bind_parameter_count(stmt);
+    int count = ::sqlite3_bind_parameter_count(_stmt);
     for (int i = 0; i < count; ++i)
     {
-        int ret = ::sqlite3_bind_null(stmt, i + 1);
+        int ret = ::sqlite3_bind_null(_stmt, i + 1);
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_bind_null", stmt, ret);
+            throw Execerror("sqlite3_bind_null", _stmt, ret);
     }
 }
 
@@ -191,11 +216,11 @@ void Statement::setNull(const std::string& col)
     {
         reset();
 
-        log_debug("sqlite3_bind_null(" << stmt << ", " << idx << ')');
-        int ret = ::sqlite3_bind_null(stmt, idx);
+        log_debug("sqlite3_bind_null(" << _stmt << ", " << idx << ')');
+        int ret = ::sqlite3_bind_null(_stmt, idx);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_bind_null", stmt, ret);
+            throw Execerror("sqlite3_bind_null", _stmt, ret);
     }
 }
 
@@ -217,11 +242,11 @@ void Statement::setInt(const std::string& col, int data)
     {
         reset();
 
-        log_debug("sqlite3_bind_int(" << stmt << ", " << idx << ')');
-        int ret = ::sqlite3_bind_int(stmt, idx, data);
+        log_debug("sqlite3_bind_int(" << _stmt << ", " << idx << ')');
+        int ret = ::sqlite3_bind_int(_stmt, idx, data);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_bind_int", stmt, ret);
+            throw Execerror("sqlite3_bind_int", _stmt, ret);
     }
 }
 
@@ -233,11 +258,11 @@ void Statement::setLong(const std::string& col, long data)
     {
         reset();
 
-        log_debug("sqlite3_bind_int64(" << stmt << ", " << idx << ')');
-        int ret = ::sqlite3_bind_int64(stmt, idx, data);
+        log_debug("sqlite3_bind_int64(" << _stmt << ", " << idx << ')');
+        int ret = ::sqlite3_bind_int64(_stmt, idx, data);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_bind_int", stmt, ret);
+            throw Execerror("sqlite3_bind_int", _stmt, ret);
     }
 }
 
@@ -295,11 +320,11 @@ void Statement::setInt64(const std::string& col, int64_t data)
     {
         reset();
 
-        log_debug("sqlite3_bind_int64(" << stmt << ", " << idx << ')');
-        int ret = ::sqlite3_bind_int64(stmt, idx, data);
+        log_debug("sqlite3_bind_int64(" << _stmt << ", " << idx << ')');
+        int ret = ::sqlite3_bind_int64(_stmt, idx, data);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_bind_int64", stmt, ret);
+            throw Execerror("sqlite3_bind_int64", _stmt, ret);
     }
 }
 
@@ -336,11 +361,11 @@ void Statement::setDouble(const std::string& col, double data)
     {
         reset();
 
-        log_debug("sqlite3_bind_double(" << stmt << ", " << idx << ')');
-        int ret = ::sqlite3_bind_double(stmt, idx, data);
+        log_debug("sqlite3_bind_double(" << _stmt << ", " << idx << ')');
+        int ret = ::sqlite3_bind_double(_stmt, idx, data);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_bind_double", stmt, ret);
+            throw Execerror("sqlite3_bind_double", _stmt, ret);
     }
 }
 
@@ -352,12 +377,12 @@ void Statement::setChar(const std::string& col, char data)
     {
         reset();
 
-        log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
+        log_debug("sqlite3_bind_text(" << _stmt << ", " << idx << ", " << data
           << ", 1, SQLITE_TRANSIENT)");
-        int ret = ::sqlite3_bind_text(stmt, idx, &data, 1, SQLITE_TRANSIENT);
+        int ret = ::sqlite3_bind_text(_stmt, idx, &data, 1, SQLITE_TRANSIENT);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_bind_text", stmt, ret);
+            throw Execerror("sqlite3_bind_text", _stmt, ret);
     }
 }
 
@@ -369,12 +394,12 @@ void Statement::setString(const std::string& col, const std::string& data)
     {
         reset();
 
-        log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
+        log_debug("sqlite3_bind_text(" << _stmt << ", " << idx << ", " << data
           << ", " << data.size() << ", SQLITE_TRANSIENT)");
-        int ret = ::sqlite3_bind_text(stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
+        int ret = ::sqlite3_bind_text(_stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_bind_text", stmt, ret);
+            throw Execerror("sqlite3_bind_text", _stmt, ret);
     }
 }
 
@@ -386,12 +411,12 @@ void Statement::setBlob(const std::string& col, const Blob& data)
     {
         reset();
 
-        log_debug("sqlite3_bind_blob(" << stmt << ", " << idx << ", data, "
+        log_debug("sqlite3_bind_blob(" << _stmt << ", " << idx << ", data, "
             << data.size() << ", SQLITE_TRANSIENT)");
-        int ret = ::sqlite3_bind_blob(stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
+        int ret = ::sqlite3_bind_blob(_stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
 
         if (ret != SQLITE_OK)
-            throw Execerror("sqlite3_bind_blob", stmt, ret);
+            throw Execerror("sqlite3_bind_blob", _stmt, ret);
     }
 }
 
@@ -413,18 +438,18 @@ void Statement::setDatetime(const std::string& col, const Datetime& data)
 Statement::size_type Statement::execute()
 {
     reset();
-    needReset = true;
+    _needReset = true;
 
-    log_debug("sqlite3_step(" << stmt << ')');
-    int ret = sqlite3_step(stmt);
+    log_debug("sqlite3_step(" << _stmt << ')');
+    int ret = sqlite3_step(_stmt);
 
     if (ret != SQLITE_DONE && ret != SQLITE_ROW)
     {
         log_debug("sqlite3_step failed with return code " << ret);
-        throw Execerror("sqlite3_step", stmt, ret);
+        throw Execerror("sqlite3_step", _stmt, ret);
     }
 
-    int n = ::sqlite3_changes(::sqlite3_db_handle(stmt));
+    int n = ::sqlite3_changes(::sqlite3_db_handle(_stmt));
 
     reset();
 
@@ -434,119 +459,118 @@ Statement::size_type Statement::execute()
 Result Statement::select()
 {
     reset();
-    needReset = true;
+    _needReset = true;
 
-    ResultImpl* r = new ResultImpl();
-    Result result(r);
+    std::shared_ptr<ResultImpl> result = std::make_shared<ResultImpl>();
     int ret;
     do
     {
-        log_debug("sqlite3_step(" << stmt << ')');
-        ret = sqlite3_step(stmt);
+        log_debug("sqlite3_step(" << _stmt << ')');
+        ret = sqlite3_step(_stmt);
 
         if (ret == SQLITE_ROW)
         {
-            log_debug("sqlite3_column_count(" << stmt << ')');
-            int count = ::sqlite3_column_count(stmt);
-            RowImpl* row = new RowImpl();
-            r->add(Row(row));
+            log_debug("sqlite3_column_count(" << _stmt << ')');
+            int count = ::sqlite3_column_count(_stmt);
+            std::shared_ptr<RowImpl> row = std::make_shared<RowImpl>();
             for (int i = 0; i < count; ++i)
             {
-                log_debug("sqlite3_column_bytes(" << stmt << ", " << i << ')');
-                int n = sqlite3_column_bytes(stmt, i);
+                log_debug("sqlite3_column_bytes(" << _stmt << ", " << i << ')');
+                int n = sqlite3_column_bytes(_stmt, i);
 
                 const void* txt = 0;
 
                 if (n > 0)
                 {
-                    log_debug("sqlite3_column_blob(" << stmt << ", " << i << ')');
-                    txt = sqlite3_column_blob(stmt, i);
+                    log_debug("sqlite3_column_blob(" << _stmt << ", " << i << ')');
+                    txt = sqlite3_column_blob(_stmt, i);
                 }
 
-                Value v;
+                std::shared_ptr<ValueImpl> v;
                 if (txt)
-                    v = Value(new ValueImpl(
-                    std::string(static_cast<const char*>(txt), n)));
+                    v = std::make_shared<ValueImpl>(
+                    std::string(static_cast<const char*>(txt), n));
 
-                log_debug("sqlite3_column_name(" << stmt << ", " << i << ')');
-                const char* name = sqlite3_column_name(stmt, i);
+                log_debug("sqlite3_column_name(" << _stmt << ", " << i << ')');
+                const char* name = sqlite3_column_name(_stmt, i);
                 if (name == 0)
                     throw std::bad_alloc();
 
-                row->add(name, v);
+                row->add(name, Value(v));
             }
+
+            result->add(Row(row));
         }
         else if (ret != SQLITE_DONE)
         {
             log_debug("sqlite3_step failed with return code " << ret);
-            throw Execerror("sqlite3_step", stmt, ret);
+            throw Execerror("sqlite3_step", _stmt, ret);
         }
 
     } while (ret == SQLITE_ROW);
 
-    return result;
+    return Result(result);
 }
 
 Row Statement::selectRow()
 {
     reset();
-    needReset = true;
+    _needReset = true;
 
-    log_debug("sqlite3_step(" << stmt << ')');
-    int ret = sqlite3_step(stmt);
+    log_debug("sqlite3_step(" << _stmt << ')');
+    int ret = sqlite3_step(_stmt);
 
     if (ret == SQLITE_DONE)
         throw NotFound();
     else if (ret == SQLITE_ROW)
     {
-        log_debug("sqlite3_column_count(" << stmt << ')');
-        int count = ::sqlite3_column_count(stmt);
-        RowImpl* r = new RowImpl();
-        Row row(r);
+        log_debug("sqlite3_column_count(" << _stmt << ')');
+        int count = ::sqlite3_column_count(_stmt);
+        std::shared_ptr<RowImpl> row = std::make_shared<RowImpl>();
         for (int i = 0; i < count; ++i)
         {
-            log_debug("sqlite3_column_bytes(" << stmt << ", " << i << ')');
-            int n = sqlite3_column_bytes(stmt, i);
+            log_debug("sqlite3_column_bytes(" << _stmt << ", " << i << ')');
+            int n = sqlite3_column_bytes(_stmt, i);
 
             const void* txt = 0;
 
             if (n > 0)
             {
-                log_debug("sqlite3_column_blob(" << stmt << ", " << i << ')');
-                txt = sqlite3_column_blob(stmt, i);
+                log_debug("sqlite3_column_blob(" << _stmt << ", " << i << ')');
+                txt = sqlite3_column_blob(_stmt, i);
             }
 
-            Value v;
+            std::shared_ptr<ValueImpl> v;
             if (txt)
-                v = Value(new ValueImpl(
-                    std::string(static_cast<const char*>(txt), n)));
+                v = std::make_shared<ValueImpl>(
+                    std::string(static_cast<const char*>(txt), n));
 
-            log_debug("sqlite3_column_name(" << stmt << ", " << i << ')');
-            const char* name = sqlite3_column_name(stmt, i);
+            log_debug("sqlite3_column_name(" << _stmt << ", " << i << ')');
+            const char* name = sqlite3_column_name(_stmt, i);
             if (name == 0)
                 throw std::bad_alloc();
 
-            r->add(name, v);
+            row->add(name, Value(v));
         }
 
         reset();
-        return row;
+        return Row(row);
     }
     else
     {
         reset();
         log_debug("sqlite3_step failed with return code " << ret);
-        throw Execerror("sqlite3_step", stmt, ret);
+        throw Execerror("sqlite3_step", _stmt, ret);
     }
 }
 
 Value Statement::selectValue()
 {
     reset();
-    needReset = true;
+    _needReset = true;
 
-    log_debug("sqlite3_step(" << stmt << ')');
-    int ret = sqlite3_step(stmt);
+    log_debug("sqlite3_step(" << _stmt << ')');
+    int ret = sqlite3_step(_stmt);
 
     if (ret == SQLITE_DONE)
     {
@@ -555,43 +579,45 @@ Value Statement::selectValue()
     }
     else if (ret == SQLITE_ROW)
     {
-        log_debug("sqlite3_column_count(" << stmt << ')');
-        int count = ::sqlite3_column_count(stmt);
+        log_debug("sqlite3_column_count(" << _stmt << ')');
+        int count = ::sqlite3_column_count(_stmt);
         if (count == 0)
             throw NotFound();
 
-        log_debug("sqlite3_column_bytes(" << stmt << ", 0)");
-        int n = sqlite3_column_bytes(stmt, 0);
+        log_debug("sqlite3_column_bytes(" << _stmt << ", 0)");
+        int n = sqlite3_column_bytes(_stmt, 0);
 
         const void* txt = 0;
 
         if (n > 0)
         {
-            log_debug("sqlite3_column_blob(" << stmt << ", 0)");
-            txt = sqlite3_column_blob(stmt, 0);
+            log_debug("sqlite3_column_blob(" << _stmt << ", 0)");
+            txt = sqlite3_column_blob(_stmt, 0);
         }
 
-        Value v;
+        std::shared_ptr<ValueImpl> v;
         if (txt)
-            v = Value(new ValueImpl(
-                std::string(static_cast<const char*>(txt), n)));
+            v = std::make_shared<ValueImpl>(
+                std::string(static_cast<const char*>(txt), n));
 
         reset();
-        return v;
+        return Value(v);
     }
     else
     {
         reset();
         log_debug("sqlite3_step failed with return code " << ret);
-        throw Execerror("sqlite3_step", stmt, ret);
+        throw Execerror("sqlite3_step", _stmt, ret);
     }
 }
 
-ICursor* Statement::createCursor(unsigned fetchsize)
+std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)
 {
-    stmtInUse = getBindStmt();
-    stmt = 0;
-    return new Cursor(this, stmtInUse);
+    _stmtInUse = getBindStmt();
+    _stmt = 0;
+    auto c = std::make_shared<Cursor>(*this, _stmtInUse);
+    _activeCursors.emplace_back(c.get());
+    return c;
 }
 
 }

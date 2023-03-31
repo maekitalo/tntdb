@@ -32,22 +32,21 @@
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    Row RowContainer::getRow(size_type tup_num) const
-    {
-      IRow* p = &*rows[tup_num];
-      return Row(p);
-    }
+namespace mysql
+{
+Row RowContainer::getRow(size_type tup_num) const
+{
+    return Row(rows[tup_num]);
+}
 
-    RowContainer::size_type RowContainer::size() const
-    {
-      return rows.size();
-    }
+RowContainer::size_type RowContainer::size() const
+{
+    return rows.size();
+}
 
-    RowContainer::size_type RowContainer::getFieldCount() const
-    {
-      return rows.empty() ? 0 : (*rows.begin())->size();
-    }
-  }
+RowContainer::size_type RowContainer::getFieldCount() const
+{
+    return rows.empty() ? 0 : (*rows.begin())->size();
+}
+}
 }

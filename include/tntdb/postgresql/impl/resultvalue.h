@@ -30,54 +30,51 @@
 #define TNTDB_POSTGRESQL_IMPL_RESULTVALUE_H
 
 #include <tntdb/iface/ivalue.h>
-#include <tntdb/postgresql/impl/resultrow.h>
 #include <tntdb/bits/row.h>
 #include <libpq-fe.h>
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    class ResultValue : public IValue
-    {
-        tntdb::Row tntdbRow; // keeps a reference to the row
-        ResultRow* row; // redundant type-safe pointer to tntdbRow
-                        // (tntdbRow.getImpl() == row)
-        int tup_num;
+namespace postgresql
+{
+class ResultRow;
 
-      public:
-        ResultValue(ResultRow* row_, int tup_num_)
-          : tntdbRow(row_),
-            row(row_),
-            tup_num(tup_num_)
-        { }
+class ResultValue : public IValue
+{
+    const ResultRow& _row;
+    int _tup_num;
 
-        virtual bool isNull() const;
-        virtual bool getBool() const;
-        virtual short getShort() const;
-        virtual int getInt() const;
-        virtual long getLong() const;
-        virtual unsigned short getUnsignedShort() const;
-        virtual unsigned getUnsigned() const;
-        virtual unsigned long getUnsignedLong() const;
-        virtual int32_t getInt32() const;
-        virtual uint32_t getUnsigned32() const;
-        virtual int64_t getInt64() const;
-        virtual uint64_t getUnsigned64() const;
-        virtual Decimal getDecimal() const;
-        virtual float getFloat() const;
-        virtual double getDouble() const;
-        virtual char getChar() const;
-        virtual void getString(std::string& ret) const;
-        virtual void getBlob(Blob& ret) const;
-        virtual Date getDate() const;
-        virtual Time getTime() const;
-        virtual Datetime getDatetime() const;
+public:
+    ResultValue(const ResultRow& row, int tup_num)
+      : _row(row),
+        _tup_num(tup_num)
+    { }
 
-        std::string getString() const    { std::string ret; getString(ret); return ret; }
-        PGresult* getPGresult() const    { return row->getPGresult(); }
-    };
-  }
+    virtual bool isNull() const;
+    virtual bool getBool() const;
+    virtual short getShort() const;
+    virtual int getInt() const;
+    virtual long getLong() const;
+    virtual unsigned short getUnsignedShort() const;
+    virtual unsigned getUnsigned() const;
+    virtual unsigned long getUnsignedLong() const;
+    virtual int32_t getInt32() const;
+    virtual uint32_t getUnsigned32() const;
+    virtual int64_t getInt64() const;
+    virtual uint64_t getUnsigned64() const;
+    virtual Decimal getDecimal() const;
+    virtual float getFloat() const;
+    virtual double getDouble() const;
+    virtual char getChar() const;
+    virtual void getString(std::string& ret) const;
+    virtual void getBlob(Blob& ret) const;
+    virtual Date getDate() const;
+    virtual Time getTime() const;
+    virtual Datetime getDatetime() const;
+
+    std::string getString() const    { std::string ret; getString(ret); return ret; }
+};
+}
 }
 
 #endif // TNTDB_POSTGRESQL_IMPL_RESULTVALUE_H

@@ -41,211 +41,210 @@ log_define("tntdb.replicate.statement")
 
 namespace tntdb
 {
-  namespace replicate
-  {
-    Statement::Statement(Connection* conn_, const std::string& query, const std::string& limit, const std::string& offset)
-      : conn(conn_)
+namespace replicate
+{
+Statement::Statement(Connection& conn, const std::string& query, const std::string& limit, const std::string& offset)
+  : _conn(conn)
+{
+    // check if it a select statement
+    // a select statement need to be prepared only on the first connection
+
+    // skip white space first
+    const char* p = query.c_str();
+    while (*p && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r'))
+      ++p;
+
+    if (strncasecmp(p, "select", 6) == 0)
     {
-      // check if it a select statement
-      // a select statement need to be prepared only on the first connection
-
-      // skip white space first
-      const char* p = query.c_str();
-      while (*p && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r'))
-        ++p;
-
-      if (strncasecmp(p, "select", 6) == 0)
-      {
         log_debug("select statement detected - prepare on first connection only");
         if (limit.empty() && offset.empty())
-          statements.push_back(conn->connections.begin()->prepare(query));
+            statements.push_back(_conn.connections.begin()->prepare(query));
         else
-          statements.push_back(conn->connections.begin()->prepareWithLimit(query, limit, offset));
-      }
-      else
-      {
-        log_debug("non-select statement detected - prepare on all " << conn->connections.size() << " connections");
-        for (Connection::Connections::iterator it = conn->connections.begin(); it != conn->connections.end(); ++it)
-          statements.push_back(it->prepare(query));
-      }
+            statements.push_back(_conn.connections.begin()->prepareWithLimit(query, limit, offset));
     }
-
-    void Statement::clear()
+    else
     {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+        log_debug("non-select statement detected - prepare on all " << _conn.connections.size() << " connections");
+        for (Connection::Connections::iterator it = _conn.connections.begin(); it != _conn.connections.end(); ++it)
+            statements.push_back(it->prepare(query));
+    }
+}
+
+void Statement::clear()
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->clear();
-    }
+}
 
-    void Statement::setNull(const std::string& col)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setNull(const std::string& col)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setNull(col);
-    }
+}
 
-    void Statement::setBool(const std::string& col, bool data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setBool(const std::string& col, bool data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setBool(col, data);
-    }
+}
 
-    void Statement::setShort(const std::string& col, short data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setShort(const std::string& col, short data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setShort(col, data);
-    }
+}
 
-    void Statement::setInt(const std::string& col, int data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setInt(const std::string& col, int data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setInt(col, data);
-    }
+}
 
-    void Statement::setLong(const std::string& col, long data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setLong(const std::string& col, long data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setLong(col, data);
-    }
+}
 
-    void Statement::setUnsignedShort(const std::string& col, unsigned short data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setUnsignedShort(const std::string& col, unsigned short data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setUnsignedShort(col, data);
-    }
+}
 
-    void Statement::setUnsigned(const std::string& col, unsigned data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setUnsigned(const std::string& col, unsigned data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setUnsigned(col, data);
-    }
+}
 
-    void Statement::setUnsignedLong(const std::string& col, unsigned long data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setUnsignedLong(const std::string& col, unsigned long data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setUnsignedLong(col, data);
-    }
+}
 
-    void Statement::setInt32(const std::string& col, int32_t data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setInt32(const std::string& col, int32_t data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setInt32(col, data);
-    }
+}
 
-    void Statement::setUnsigned32(const std::string& col, uint32_t data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setUnsigned32(const std::string& col, uint32_t data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setUnsigned32(col, data);
-    }
+}
 
-    void Statement::setInt64(const std::string& col, int64_t data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setInt64(const std::string& col, int64_t data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setInt64(col, data);
-    }
+}
 
-    void Statement::setUnsigned64(const std::string& col, uint64_t data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setUnsigned64(const std::string& col, uint64_t data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setUnsigned64(col, data);
-    }
+}
 
-    void Statement::setDecimal(const std::string& col, const Decimal& data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setDecimal(const std::string& col, const Decimal& data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setDecimal(col, data);
-    }
+}
 
-    void Statement::setFloat(const std::string& col, float data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setFloat(const std::string& col, float data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setFloat(col, data);
-    }
+}
 
-    void Statement::setDouble(const std::string& col, double data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setDouble(const std::string& col, double data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setDouble(col, data);
-    }
+}
 
-    void Statement::setChar(const std::string& col, char data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setChar(const std::string& col, char data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setChar(col, data);
-    }
+}
 
-    void Statement::setString(const std::string& col, const std::string& data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setString(const std::string& col, const std::string& data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setString(col, data);
-    }
+}
 
-    void Statement::setBlob(const std::string& col, const Blob& data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setBlob(const std::string& col, const Blob& data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setBlob(col, data);
-    }
+}
 
-    void Statement::setDate(const std::string& col, const Date& data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setDate(const std::string& col, const Date& data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setDate(col, data);
-    }
+}
 
-    void Statement::setTime(const std::string& col, const Time& data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setTime(const std::string& col, const Time& data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setTime(col, data);
-    }
+}
 
-    void Statement::setDatetime(const std::string& col, const Datetime& data)
-    {
-      for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
+void Statement::setDatetime(const std::string& col, const Datetime& data)
+{
+    for (Statements::iterator it = statements.begin(); it != statements.end(); ++it)
         it->setDatetime(col, data);
-    }
+}
 
-    Statement::size_type Statement::execute()
+Statement::size_type Statement::execute()
+{
+    Transaction transaction(_conn);
+
+    Statement::size_type ret = statements[0].execute();
+
+    for (Statements::size_type n = 1; n < statements.size(); ++n)
     {
-      tntdb::Connection c(conn);
-      Transaction transaction(c);
-
-      Statement::size_type ret = statements[0].execute();
-
-      for (Statements::size_type n = 1; n < statements.size(); ++n)
-      {
         try
         {
-          statements[n].execute();
+            statements[n].execute();
         }
         catch (const tntdb::Error& e)
         {
-          std::ostringstream msg;
-          msg << "replication failed on " << (n + 1) << ". connection: " << e.what();
-          throw tntdb::Error(msg.str());
+            std::ostringstream msg;
+            msg << "replication failed on " << (n + 1) << ". connection: " << e.what();
+            throw tntdb::Error(msg.str());
         }
-      }
-
-      transaction.commit();
-      return ret;
     }
 
-    tntdb::Result Statement::select()
-    {
-      return statements.begin()->select();
-    }
+    transaction.commit();
+    return ret;
+}
 
-    tntdb::Row Statement::selectRow()
-    {
-      return statements.begin()->selectRow();
-    }
+tntdb::Result Statement::select()
+{
+    return statements.begin()->select();
+}
 
-    tntdb::Value Statement::selectValue()
-    {
-      return statements.begin()->selectValue();
-    }
+tntdb::Row Statement::selectRow()
+{
+    return statements.begin()->selectRow();
+}
 
-    ICursor* Statement::createCursor(unsigned fetchsize)
-    {
-      return statements.begin()->getImpl()->createCursor(fetchsize);
-    }
+tntdb::Value Statement::selectValue()
+{
+    return statements.begin()->selectValue();
+}
 
-  }
+std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)
+{
+    return statements.begin()->getImpl()->createCursor(fetchsize);
+}
+
+}
 }

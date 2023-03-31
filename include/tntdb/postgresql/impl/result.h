@@ -35,24 +35,23 @@
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    class Result : public IResult
-    {
-        tntdb::Connection conn;
-        PGresult* result;
+namespace postgresql
+{
+class Result : public IResult
+{
+    PGresult* result;
 
-      public:
-        Result(const tntdb::Connection& conn, PGresult* result);
-        ~Result();
+public:
+    Result(PGresult* result);
+    ~Result();
 
-        PGresult* getPGresult() const  { return result; }
+    PGresult* getPGresult() const  { return result; }
 
-        Row getRow(size_type tup_num) const;
-        size_type size() const;
-        size_type getFieldCount() const;
-    };
-  }
+    Row getRow(size_type tup_num) const;
+    size_type size() const;
+    size_type getFieldCount() const;
+};
+}
 }
 
 #endif // TNTDB_POSTGRESQL_IMPL_RESULT_H
