@@ -40,6 +40,7 @@ class ICursor
 
 protected:
     ICursor() = default;
+    virtual ~ICursor() = default;
 
 public:
     virtual Row fetch() = 0;

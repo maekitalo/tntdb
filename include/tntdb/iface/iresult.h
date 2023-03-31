@@ -41,6 +41,7 @@ class IResult
 
 protected:
     IResult() = default;
+    virtual ~IResult() = default;
 
 public:
     typedef unsigned size_type;

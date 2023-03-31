@@ -50,7 +50,7 @@ class IConnectionManager
 
 public:
     IConnectionManager() = default;
-    virtual ~IConnectionManager() { }
+    virtual ~IConnectionManager() = default;
     virtual Connection connect(const std::string& url, const std::string& username, const std::string& password) = 0;
 };
 }
