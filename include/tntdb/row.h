@@ -36,13 +36,13 @@
 
 namespace tntdb
 {
-  /// C++11 style _begin_ function for tntdb::Row.
-  inline Row::const_iterator begin(const Row& stmt)
-  { return stmt.begin(); }
+/// C++11 style _begin_ function for tntdb::Row.
+inline Row::const_iterator begin(const Row& stmt)
+{ return stmt.begin(); }
 
-  /// C++11 style _end_ function for tntdb::Row.
-  inline Row::const_iterator end(const Row& stmt)
-  { return stmt.end(); }
+/// C++11 style _end_ function for tntdb::Row.
+inline Row::const_iterator end(const Row& stmt)
+{ return stmt.end(); }
 
 }
 

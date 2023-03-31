@@ -35,105 +35,105 @@
 
 namespace tntdb
 {
-  /// This class holds a date and a time
-  class Datetime
-  {
-    private:
-      unsigned short _year;
-      unsigned short _month;
-      unsigned short _day;
-      unsigned short _hour;
-      unsigned short _minute;
-      unsigned short _second;
-      unsigned short _millis;
+/// This class holds a date and a time
+class Datetime
+{
+private:
+    unsigned short _year;
+    unsigned short _month;
+    unsigned short _day;
+    unsigned short _hour;
+    unsigned short _minute;
+    unsigned short _second;
+    unsigned short _millis;
 
-    public:
-      /// Create a Datetime object with empty values
-      Datetime()
-        : _year(0),
-          _month(0),
-          _day(0),
-          _hour(0),
-          _minute(0),
-          _second(0),
-          _millis(0)
-          { }
+public:
+    /// Create a Datetime object with empty values
+    Datetime()
+      : _year(0),
+        _month(0),
+        _day(0),
+        _hour(0),
+        _minute(0),
+        _second(0),
+        _millis(0)
+        { }
 
-      /// Create a Datetime object with the values from the given Date and Time objects
-      Datetime(const Date& date, const Time& time)
-        : _year(date.getYear()),
-          _month(date.getMonth()),
-          _day(date.getDay()),
-          _hour(time.getHour()),
-          _minute(time.getMinute()),
-          _second(time.getSecond()),
-          _millis(time.getMillis())
-          { }
+    /// Create a Datetime object with the values from the given Date and Time objects
+    Datetime(const Date& date, const Time& time)
+      : _year(date.getYear()),
+        _month(date.getMonth()),
+        _day(date.getDay()),
+        _hour(time.getHour()),
+        _minute(time.getMinute()),
+        _second(time.getSecond()),
+        _millis(time.getMillis())
+        { }
 
-      /** Create a Datetime object with the given values
+    /** Create a Datetime object with the given values
 
-          No range checks are done.
-       */
-      Datetime(unsigned short year,
-               unsigned short month,
-               unsigned short day,
-               unsigned short hour,
-               unsigned short minute,
-               unsigned short second,
-               unsigned short millis = 0)
-        : _year(year),
-          _month(month),
-          _day(day),
-          _hour(hour),
-          _minute(minute),
-          _second(second),
-          _millis(millis)
-          { }
+        No range checks are done.
+     */
+    Datetime(unsigned short year,
+             unsigned short month,
+             unsigned short day,
+             unsigned short hour,
+             unsigned short minute,
+             unsigned short second,
+             unsigned short millis = 0)
+      : _year(year),
+        _month(month),
+        _day(day),
+        _hour(hour),
+        _minute(minute),
+        _second(second),
+        _millis(millis)
+        { }
 
-      static Datetime localtime();
-      static Datetime gmtime();
+    static Datetime localtime();
+    static Datetime gmtime();
 
-      /// Get the year part of the Datetime
-      unsigned short getYear() const   { return _year; }
-      /// Get the month part of the Datetime
-      unsigned short getMonth() const  { return _month; }
-      /// Get the day part of the Datetime
-      unsigned short getDay() const    { return _day; }
-      /// Get the hour part of the Datetime
-      unsigned short getHour() const   { return _hour; }
-      /// Get the minute part of the Datetime
-      unsigned short getMinute() const { return _minute; }
-      /// Get the second part of the Datetime
-      unsigned short getSecond() const { return _second; }
-      /// Get the millisecond part of the Datetime
-      unsigned short getMillis() const { return _millis; }
+    /// Get the year part of the Datetime
+    unsigned short getYear() const   { return _year; }
+    /// Get the month part of the Datetime
+    unsigned short getMonth() const  { return _month; }
+    /// Get the day part of the Datetime
+    unsigned short getDay() const    { return _day; }
+    /// Get the hour part of the Datetime
+    unsigned short getHour() const   { return _hour; }
+    /// Get the minute part of the Datetime
+    unsigned short getMinute() const { return _minute; }
+    /// Get the second part of the Datetime
+    unsigned short getSecond() const { return _second; }
+    /// Get the millisecond part of the Datetime
+    unsigned short getMillis() const { return _millis; }
 
-      Date getDate() const  { return Date(_year, _month, _day); }
-      Time getTime() const  { return Time(_hour, _minute, _second, _millis); }
+    Date getDate() const  { return Date(_year, _month, _day); }
+    Time getTime() const  { return Time(_hour, _minute, _second, _millis); }
 
-      bool isNull() const  { return _month == 0; }
+    bool isNull() const  { return _month == 0; }
 
-      /// Get the date in ISO format (yyyy-mm-dd hh:mm:ss.hhh)
-      std::string getIso() const;
+    /// Get the date in ISO format (yyyy-mm-dd hh:mm:ss.hhh)
+    std::string getIso() const;
 
-      /** Construct a Datetime object from the given ISO datetime string
+    /** Construct a Datetime object from the given ISO datetime string
 
-          If the string is not in ISO format, an exception of type tntdb::TypeError is thrown.
-       */
-      static Datetime fromIso(const std::string& s);
+        If the string is not in ISO format, an exception of type tntdb::TypeError is thrown.
+     */
+    static Datetime fromIso(const std::string& s);
 
-      /** Set the date and the time
+    /** Set the date and the time
 
-          No range checks are done.
-       */
-      void set(unsigned short year,
-               unsigned short month,
-               unsigned short day,
-               unsigned short hour,
-               unsigned short minute,
-               unsigned short second,
-               unsigned short millis = 0)
-      {
+        No range checks are done.
+     */
+    void set(unsigned short year,
+             unsigned short month,
+             unsigned short day,
+             unsigned short hour,
+             unsigned short minute,
+             unsigned short second,
+             unsigned short millis = 0)
+    {
         _year = year;
         _month = month;
         _day = day;
@@ -141,10 +141,10 @@ namespace tntdb
         _minute = minute;
         _second = second;
         _millis = millis;
-      }
+    }
 
-      bool operator== (const Datetime& dt) const
-      {
+    bool operator== (const Datetime& dt) const
+    {
         return _year == dt._year
           && _month  == dt._month
           && _day    == dt._day
@@ -152,13 +152,13 @@ namespace tntdb
           && _minute == dt._minute
           && _second == dt._second
           && _millis == dt._millis;
-      }
+    }
 
-      bool operator!= (const Datetime& dt) const
-        { return !operator==(dt); }
+    bool operator!= (const Datetime& dt) const
+      { return !operator==(dt); }
 
-      bool operator< (const Datetime& dt) const
-      {
+    bool operator< (const Datetime& dt) const
+    {
         return _year < dt._year   ? true
           : _year    > dt._year   ? false
           : _month   < dt._month  ? true
@@ -172,17 +172,17 @@ namespace tntdb
           : _second  < dt._second ? true
           : _second  > dt._second ? false
           : _millis  < dt._millis;
-      }
+    }
 
-      bool operator> (const Datetime& dt) const
-        { return dt < *this; }
+    bool operator> (const Datetime& dt) const
+      { return dt < *this; }
 
-      bool operator<= (const Datetime& dt) const
-        { return !(*this > dt); }
+    bool operator<= (const Datetime& dt) const
+      { return !(*this > dt); }
 
-      bool operator>= (const Datetime& dt) const
-        { return !(*this < dt); }
-  };
+    bool operator>= (const Datetime& dt) const
+      { return !(*this < dt); }
+};
 }
 
 #endif // TNTDB_DATETIME_H

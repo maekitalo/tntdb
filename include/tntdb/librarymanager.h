@@ -37,19 +37,19 @@
 
 namespace tntdb
 {
-  class LibraryManager
-  {
-      cxxtools::Library lib;
-      IConnectionManager* connectionManager;
+class LibraryManager
+{
+    cxxtools::Library lib;
+    IConnectionManager* connectionManager;
 
-    public:
-      LibraryManager()
-        : connectionManager(0)
-        { }
-      LibraryManager(const std::string& libname);
-      Connection connect(const std::string& url, const std::string& username, const std::string& password)
-        { return connectionManager->connect(url, username, password); }
-  };
+public:
+    LibraryManager()
+      : connectionManager(0)
+      { }
+    LibraryManager(const std::string& libname);
+    Connection connect(const std::string& url, const std::string& username, const std::string& password)
+      { return connectionManager->connect(url, username, password); }
+};
 }
 
 #endif // TNTDB_LIBRARYMANAGER_H
