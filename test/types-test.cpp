@@ -38,85 +38,147 @@
 
 log_define("tntdb.unit.types")
 
-#define BEGIN_TEST(T, col)                           \
-      const std::string colName = col;               \
-      bool isNotNull = false;                        \
-      tntdb::Statement::const_iterator cursor;       \
-      tntdb::Statement ins = conn.prepare(           \
-        "insert into tntdbtest(" col  ") values(:" col ")"); \
-      tntdb::Statement sel = conn.prepare(           \
-        "select " col " from tntdbtest");            \
-      tntdb::Value dbvalue;                          \
-      T res;
+template <typename T>
+class TypesTester
+{
+    std::string _colName;
+    tntdb::Statement _del;
+    tntdb::Statement _ins;
+    tntdb::Statement _sel;
 
-#define TEST(val)                                    \
-      del.execute();                                 \
-      ins.set(colName, val).execute();               \
-      dbvalue = sel.selectValue();                   \
-      isNotNull = dbvalue.get(res);                  \
-      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);         \
-      isNotNull = sel.select()[0][0].get(res);       \
-      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);         \
-      cursor = sel.begin(4);                         \
-      CXXTOOLS_UNIT_ASSERT(cursor != sel.end());     \
-      isNotNull = (*cursor)[0].get(res);             \
-      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT_EQUALS(val, res);
+public:
+    explicit TypesTester(tntdb::Connection conn, const std::string& colName)
+        : _colName(colName),
+          _del(conn.prepare("delete from tntdbtest")),
+          _ins(conn.prepare("insert into tntdbtest(" + _colName + ") values(:" + _colName + ")")),
+          _sel(conn.prepare("select " + _colName + " from tntdbtest"))
+    { }
 
-#define TESTEQ(val)                                  \
-      del.execute();                                 \
-      ins.set(colName, val).execute();               \
-      dbvalue = sel.selectValue();                   \
-      isNotNull = dbvalue.get(res);                  \
-      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT(val == res);              \
-      isNotNull = sel.select()[0][0].get(res);       \
-      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT(val == res);              \
-      cursor = sel.begin(4);                         \
-      CXXTOOLS_UNIT_ASSERT(cursor != sel.end());     \
-      isNotNull = (*cursor)[0].get(res);             \
-      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT(val == res);
+    void test(const T& val)
+    {
+        _del.execute();
+        _ins.set(_colName, val)
+            .execute();
 
-#define TESTFLOAT(val)                               \
-      del.execute();                                 \
-      ins.set(colName, val).execute();               \
-      dbvalue = sel.selectValue();                   \
-      isNotNull = dbvalue.get(res);                  \
-      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT(val / res >= .9999 && val / res <= 1.0001); \
-      isNotNull = sel.select()[0][0].get(res);       \
-      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT(val / res >= .9999 && val / res <= 1.0001); \
-      cursor = sel.begin(4);                         \
-      CXXTOOLS_UNIT_ASSERT(cursor != sel.end());     \
-      isNotNull = (*cursor)[0].get(res);             \
-      CXXTOOLS_UNIT_ASSERT(isNotNull);               \
-      CXXTOOLS_UNIT_ASSERT(val == res);
+        T result;
+        bool isNotNull;
 
-#define TESTDT(val)                                  \
-      del.execute();                                 \
-      ins.set(colName, val).execute();               \
-      dbvalue = sel.selectValue();                   \
-      isNotNull = dbvalue.get(res);                  \
-      if (isNotNull)                                 \
-      {                                              \
-        CXXTOOLS_UNIT_ASSERT(!res.isNull());         \
-        CXXTOOLS_UNIT_ASSERT_EQUALS(val.getIso(), res.getIso()); \
-      }                                              \
-      else                                           \
-        CXXTOOLS_UNIT_ASSERT(val.isNull());          \
-      isNotNull = sel.select()[0][0].get(res);       \
-      if (isNotNull)                                 \
-      {                                              \
-        CXXTOOLS_UNIT_ASSERT(!res.isNull());         \
-        CXXTOOLS_UNIT_ASSERT_EQUALS(val.getIso(), res.getIso()); \
-      }                                              \
-      else                                           \
-        CXXTOOLS_UNIT_ASSERT(val.isNull());
+        // read using selectValue
+        auto dbvalue = _sel.selectValue();
+        isNotNull = dbvalue.get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(val, result);
+
+        // read from result
+        isNotNull = _sel.select()[0][0].get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(val, result);
+
+        // read using cursor
+        auto cursor = _sel.begin(4);
+        CXXTOOLS_UNIT_ASSERT(cursor != _sel.end());
+        isNotNull = (*cursor)[0].get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(val, result);
+    }
+
+    void testNoEq(const T& val)
+    {
+        _del.execute();
+        _ins.set(_colName, val)
+            .execute();
+
+        T result;
+        bool isNotNull;
+
+        // read using selectValue
+        auto dbvalue = _sel.selectValue();
+        isNotNull = dbvalue.get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(val == result);
+
+        // read from result
+        isNotNull = _sel.select()[0][0].get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(val == result);
+
+        // read using cursor
+        auto cursor = _sel.begin(4);
+        CXXTOOLS_UNIT_ASSERT(cursor != _sel.end());
+        isNotNull = (*cursor)[0].get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(val == result);
+    }
+
+    void testFloat(T val)
+    {
+        _del.execute();
+        _ins.set(_colName, val)
+            .execute();
+
+        T result;
+        bool isNotNull;
+
+        auto dbvalue = _sel.selectValue();
+        isNotNull = dbvalue.get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(val / result >= .9999 && val / result <= 1.0001);
+        isNotNull = _sel.select()[0][0].get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(val / result >= .9999 && val / result <= 1.0001);
+        auto cursor = _sel.begin(4);
+        CXXTOOLS_UNIT_ASSERT(cursor != _sel.end());
+        isNotNull = (*cursor)[0].get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(val, result);
+    }
+
+    void testDt(const T& val)
+    {
+        _del.execute();
+        _ins.set(_colName, val)
+            .execute();
+
+        T result;
+        bool isNotNull;
+
+        auto dbvalue = _sel.selectValue();
+        isNotNull = dbvalue.get(result);
+        if (isNotNull)
+        {
+            CXXTOOLS_UNIT_ASSERT(!result.isNull());
+            CXXTOOLS_UNIT_ASSERT_EQUALS(val.getIso(), result.getIso());
+        }
+        else
+            CXXTOOLS_UNIT_ASSERT(val.isNull());
+
+        isNotNull = _sel.select()[0][0].get(result);
+        if (isNotNull)
+        {
+            CXXTOOLS_UNIT_ASSERT(!result.isNull());
+            CXXTOOLS_UNIT_ASSERT_EQUALS(val.getIso(), result.getIso());
+        }
+        else
+            CXXTOOLS_UNIT_ASSERT(val.isNull());
+    }
+
+    void testNan()
+    {
+        T val = std::numeric_limits<T>::quiet_NaN();
+
+        _del.execute();
+        _ins.set(_colName, val)
+            .execute();
+
+        T result;
+        bool isNotNull;
+
+        auto dbvalue = _sel.selectValue();
+        isNotNull = dbvalue.get(result);
+        CXXTOOLS_UNIT_ASSERT(isNotNull);
+        CXXTOOLS_UNIT_ASSERT(result != result);
+    }
+};
 
 class TntdbTypesTest : public cxxtools::unit::TestSuite
 {
@@ -287,187 +349,173 @@ public:
 
     void testBool()
     {
-        BEGIN_TEST(bool, "boolcol");
-        TEST(true);
-        TEST(false);
+        TypesTester<bool> tester(conn, "boolcol");
+        tester.test(true);
+        tester.test(false);
     }
 
     void testShort()
     {
-        BEGIN_TEST(short, "shortcol");
-        TEST(static_cast<short>(42));
-        TEST(static_cast<short>(-123));
-        TEST(std::numeric_limits<short>::max());
-        TEST(std::numeric_limits<short>::min());
+        TypesTester<short> tester(conn, "shortcol");
+        tester.test(42);
+        tester.test(-123);
+        tester.test(std::numeric_limits<short>::max());
+        tester.test(std::numeric_limits<short>::min());
     }
 
     void testInt()
     {
-        BEGIN_TEST(int, "intcol");
-        TEST(static_cast<int>(42));
-        TEST(static_cast<int>(-123));
-        TEST(std::numeric_limits<int>::max());
-        TEST(std::numeric_limits<int>::min());
+        TypesTester<int> tester(conn, "intcol");
+        tester.test(42);
+        tester.test(-123);
+        tester.test(std::numeric_limits<int>::max());
+        tester.test(std::numeric_limits<int>::min());
     }
 
     void testLong()
     {
-        BEGIN_TEST(long, "longcol");
-        TEST(static_cast<long>(42));
-        TEST(static_cast<long>(-123));
-        TEST(std::numeric_limits<long>::max());
-        TEST(std::numeric_limits<long>::min());
+        TypesTester<long> tester(conn, "longcol");
+        tester.test(42);
+        tester.test(-123);
+        tester.test(std::numeric_limits<long>::max());
+        tester.test(std::numeric_limits<long>::min());
     }
 
     void testUnsignedShort()
     {
-        BEGIN_TEST(unsigned short, "unsignedshortcol");
-        TEST(static_cast<unsigned short>(42));
-        TEST(std::numeric_limits<unsigned short>::max());
-        TEST(std::numeric_limits<unsigned short>::min());
+        TypesTester<unsigned short> tester(conn, "unsignedshortcol");
+        tester.test(42);
+        tester.test(std::numeric_limits<unsigned short>::max());
+        tester.test(std::numeric_limits<unsigned short>::min());
     }
 
     void testUnsigned()
     {
-        BEGIN_TEST(unsigned, "unsignedcol");
-        TEST(static_cast<unsigned>(42));
-        TEST(std::numeric_limits<unsigned>::max());
-        TEST(std::numeric_limits<unsigned>::min());
+        TypesTester<unsigned> tester(conn, "unsignedcol");
+        tester.test(42);
+        tester.test(std::numeric_limits<unsigned>::max());
+        tester.test(std::numeric_limits<unsigned>::min());
     }
 
     void testUnsignedLong()
     {
-        BEGIN_TEST(unsigned long, "unsignedlongcol");
-        TEST(static_cast<unsigned long>(42));
-        TEST(std::numeric_limits<unsigned long>::max());
-        TEST(std::numeric_limits<unsigned long>::min());
+        TypesTester<unsigned long> tester(conn, "unsignedlongcol");
+        tester.test(42);
+        tester.test(std::numeric_limits<unsigned long>::max());
+        tester.test(std::numeric_limits<unsigned long>::min());
     }
 
     void testInt32()
     {
-        BEGIN_TEST(int32_t, "int32col");
-        TEST(static_cast<int32_t>(42));
-        TEST(static_cast<int32_t>(-123));
-        TEST(std::numeric_limits<int32_t>::max());
-        TEST(std::numeric_limits<int32_t>::min());
+        TypesTester<int32_t> tester(conn, "int32col");
+        tester.test(42);
+        tester.test(-123);
+        tester.test(std::numeric_limits<int32_t>::max());
+        tester.test(std::numeric_limits<int32_t>::min());
     }
 
     void testUint32()
     {
-        BEGIN_TEST(uint32_t, "uint32col");
-        TEST(static_cast<uint32_t>(42));
-        TEST(std::numeric_limits<uint32_t>::max());
-        TEST(std::numeric_limits<uint32_t>::min());
+        TypesTester<uint32_t> tester(conn, "uint32col");
+        tester.test(42);
+        tester.test(std::numeric_limits<uint32_t>::max());
+        tester.test(std::numeric_limits<uint32_t>::min());
     }
 
     void testInt64()
     {
-        BEGIN_TEST(int64_t, "int64col");
-        TEST(static_cast<int64_t>(42));
-        TEST(static_cast<int64_t>(-123));
-        TEST(std::numeric_limits<int64_t>::max());
-        TEST(std::numeric_limits<int64_t>::min());
+        TypesTester<int64_t> tester(conn, "int64col");
+        tester.test(42);
+        tester.test(-123);
+        tester.test(std::numeric_limits<int64_t>::max());
+        tester.test(std::numeric_limits<int64_t>::min());
     }
 
     void testUint64()
     {
-        BEGIN_TEST(uint64_t, "uint64col");
-        TEST(static_cast<uint64_t>(42));
-        TEST(std::numeric_limits<uint64_t>::max());
-        TEST(std::numeric_limits<uint64_t>::min());
+        TypesTester<uint64_t> tester(conn, "uint64col");
+        tester.test(42);
+        tester.test(std::numeric_limits<uint64_t>::max());
+        tester.test(std::numeric_limits<uint64_t>::min());
     }
 
     void testDecimal()
     {
-        BEGIN_TEST(tntdb::Decimal, "decimalcol");
-        TEST(tntdb::Decimal(456, 8));
-        TEST(tntdb::Decimal(456, -4));
-        TEST(tntdb::Decimal(-456, 8));
+        TypesTester<tntdb::Decimal> tester(conn, "decimalcol");
+        tester.test(tntdb::Decimal(456, 8));
+        tester.test(tntdb::Decimal(456, -4));
+        tester.test(tntdb::Decimal(-456, 8));
     }
 
     void testFloat()
     {
-        BEGIN_TEST(float, "floatcol");
-        TESTFLOAT(static_cast<float>(42));
-        TESTFLOAT(static_cast<float>(-123));
-        TESTFLOAT(std::numeric_limits<float>::max() * .999999);
-        TESTFLOAT(std::numeric_limits<float>::min() * 1.00001);
-        TEST(std::numeric_limits<double>::infinity());
-        TEST(-std::numeric_limits<double>::infinity());
+        TypesTester<float> tester(conn, "floatcol");
+        tester.testFloat(static_cast<float>(42));
+        tester.testFloat(static_cast<float>(-123));
+        tester.testFloat(std::numeric_limits<float>::max() * .999999);
+        tester.testFloat(std::numeric_limits<float>::min() * 1.00001);
+        tester.test(std::numeric_limits<double>::infinity());
+        tester.test(-std::numeric_limits<double>::infinity());
     }
 
     void testFloatFromDecimal()
     {
-        BEGIN_TEST(float, "decimalcol");
-        TESTFLOAT(static_cast<float>(42));
-        TESTFLOAT(static_cast<float>(-123));
+        TypesTester<float> tester(conn, "floatcol");
+        tester.testFloat(static_cast<float>(42));
+        tester.testFloat(static_cast<float>(-123));
     }
 
     void testDouble()
     {
-        BEGIN_TEST(double, "doublecol");
-        TESTFLOAT(static_cast<double>(42));
-        TESTFLOAT(static_cast<double>(-123));
-        TESTFLOAT(std::numeric_limits<double>::max() * .999999);
-        TESTFLOAT(std::numeric_limits<double>::min() * 1.00001);
-        TEST(std::numeric_limits<double>::infinity());
-        TEST(-std::numeric_limits<double>::infinity());
+        TypesTester<double> tester(conn, "doublecol");
+        tester.testFloat(static_cast<double>(42));
+        tester.testFloat(static_cast<double>(-123));
+        tester.testFloat(std::numeric_limits<double>::max() * .999999);
+        tester.testFloat(std::numeric_limits<double>::min() * 1.00001);
+        tester.test(std::numeric_limits<double>::infinity());
+        tester.test(-std::numeric_limits<double>::infinity());
     }
 
     void testChar()
     {
-        BEGIN_TEST(char, "charcol");
-        TEST('A');
-        TEST('Z');
-        TEST('\n');
+        TypesTester<char> tester(conn, "charcol");
+        tester.test('A');
+        tester.test('Z');
+        tester.test('\n');
     }
 
     void testString()
     {
-        BEGIN_TEST(std::string, "stringcol");
-        TEST(std::string("Hello\n"));
-        TEST(std::string("M\xc3\xa4kitalo"));
+        TypesTester<std::string> tester(conn, "stringcol");
+        tester.test(std::string("Hello\n"));
+        tester.test(std::string("M\xc3\xa4kitalo"));
     }
 
     void testBlob()
     {
-        BEGIN_TEST(tntdb::Blob, "blobcol");
-        tntdb::Blob val = tntdb::Blob("\0\1\2\3\0xff", 5);
-        del.execute();
-        ins.set(colName, val).execute();
-        dbvalue = sel.selectValue();
-        isNotNull = dbvalue.get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT(val == res);
-        isNotNull = sel.select()[0][0].get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT(val == res);
-        cursor = sel.begin(4);
-        CXXTOOLS_UNIT_ASSERT(cursor != sel.end());
-        isNotNull = (*cursor)[0].get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT(val == res);
+        TypesTester<tntdb::Blob> tester(conn, "blobcol");
+        tester.testNoEq(tntdb::Blob("\0\1\2\3\0xff", 5));
     }
 
     void testDate()
     {
-        BEGIN_TEST(tntdb::Date, "datecol");
-        TESTDT(tntdb::Date(2010, 2, 15));
-        TESTDT(tntdb::Date());
+        TypesTester<tntdb::Date> tester(conn, "datecol");
+        tester.testDt(tntdb::Date(2010, 2, 15));
+        tester.testDt(tntdb::Date());
     }
 
     void testTime()
     {
-        BEGIN_TEST(tntdb::Time, "timecol");
-        TESTDT(tntdb::Time(20, 9, 31, 12));
-        TESTDT(tntdb::Time());
+        TypesTester<tntdb::Time> tester(conn, "timecol");
+        tester.testDt(tntdb::Time(20, 9, 31, 12));
+        tester.testDt(tntdb::Time());
     }
 
     void testDatetime()
     {
-        BEGIN_TEST(tntdb::Datetime, "datetimecol");
-        TESTDT(tntdb::Datetime(2010, 2, 15, 20, 9, 31, 12));
-        TESTDT(tntdb::Datetime());
+        TypesTester<tntdb::Datetime> tester(conn, "datetimecol");
+        tester.testDt(tntdb::Datetime(2010, 2, 15, 20, 9, 31, 12));
+        tester.testDt(tntdb::Datetime());
     }
 
     void testSequence()
@@ -494,26 +542,14 @@ public:
 
     void testFloatNan()
     {
-        BEGIN_TEST(float, "floatcol");
-        float n = std::numeric_limits<float>::quiet_NaN();
-        del.execute();
-        ins.set("floatcol", n).execute();
-        dbvalue = sel.selectValue();
-        isNotNull = dbvalue.get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT(res != res);
+        TypesTester<float> tester(conn, "floatcol");
+        tester.testNan();
     }
 
     void testDoubleNan()
     {
-        BEGIN_TEST(double, "doublecol");
-        double n = std::numeric_limits<double>::quiet_NaN();
-        del.execute();
-        ins.set("doublecol", n).execute();
-        dbvalue = sel.selectValue();
-        isNotNull = dbvalue.get(res);
-        CXXTOOLS_UNIT_ASSERT(isNotNull);
-        CXXTOOLS_UNIT_ASSERT(res != res);
+        TypesTester<double> tester(conn, "doublecol");
+        tester.testNan();
     }
 
 };
