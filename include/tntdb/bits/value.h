@@ -36,6 +36,10 @@
 #include <tntdb/decimal.h>
 #include <tntdb/blob.h>
 #include <memory>
+#if __cplusplus >= 201703L
+#include <optional>
+#endif
+
 
 namespace tntdb
 {
@@ -307,6 +311,23 @@ inline bool operator>> (const Value& value, Datetime& out)
     out = value.getDatetime();
     return true;
 }
+
+#if __cplusplus >= 201703L
+template <typename T>
+bool operator>> (const Value& value, std::optional<T>& out)
+{
+    if (value.isNull())
+    {
+        out.reset();
+        return false;
+    }
+
+    out = T();
+    value >> *out;
+    return true;
+}
+#endif
+
 //@}
 
 }
