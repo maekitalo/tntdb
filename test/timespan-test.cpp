@@ -27,84 +27,60 @@
  */
 
 
-#include <cxxtools/unit/testsuite.h>
+#include "testbase.h"
 #include <cxxtools/unit/registertest.h>
 #include <cxxtools/log.h>
-#include <tntdb/connect.h>
 #include <tntdb/statement.h>
 #include <tntdb/value.h>
 #include <tntdb/cxxtools/timespan.h>
 
 log_define("tntdb.unit.timespan")
 
-class TntdbTimespanTest : public cxxtools::unit::TestSuite
+class TntdbTimespanTest : public TntdbTestBase
 {
-    tntdb::Connection conn;
-    tntdb::Statement del;
-
-  public:
+public:
     TntdbTimespanTest()
-      : cxxtools::unit::TestSuite("timespan")
+      : TntdbTestBase("timespan")
     {
-      registerMethod("testTimespan", *this, &TntdbTimespanTest::testTimespan);
-    }
-
-    void setUp()
-    {
-      if (!conn)
-      {
-        const char* dburl = getenv("TNTDBURL");
-        if (!dburl)
-          dburl = "sqlite:test.db";
-
-        log_info("testing with dburl=" << dburl);
-
-        conn = tntdb::connect(dburl);
-        del = conn.prepare("delete from tntdbtest");
-      }
-    }
-
-    void tearDown()
-    {
-      del.execute();
+        registerMethod("testTimespan", *this, &TntdbTimespanTest::testTimespan);
     }
 
     void testTimespan()
     {
-      tntdb::Statement ins = conn.prepare(
-        "insert into tntdbtest(intcol, doublecol, unsignedcol) values(:ts1, :ts2, :ts3)");
-      ins.set("ts1", cxxtools::Milliseconds(2000))
-         .set("ts2", cxxtools::Seconds(3.5))
-         .set("ts3", cxxtools::Days(2))
-         .execute();
+        tntdb::Statement ins = conn.prepare(
+            "insert into tntdbtest(intcol, doublecol, unsignedcol) values(:ts1, :ts2, :ts3)");
+        ins.set("ts1", cxxtools::Milliseconds(2000))
+           .set("ts2", cxxtools::Seconds(3.5))
+           .set("ts3", cxxtools::Days(2))
+           .execute();
 
-      tntdb::Statement sel = conn.prepare(
-        "select intcol, doublecol, unsignedcol from tntdbtest");
-      tntdb::Row row = sel.selectRow();
+        tntdb::Statement sel = conn.prepare(
+            "select intcol, doublecol, unsignedcol from tntdbtest");
+        tntdb::Row row = sel.selectRow();
 
-      cxxtools::Milliseconds ts1;
-      cxxtools::Seconds ts2;
-      cxxtools::Days ts3;
+        cxxtools::Milliseconds ts1;
+        cxxtools::Seconds ts2;
+        cxxtools::Days ts3;
 
-      row.get(ts1)
-         .get(ts2)
-         .get(ts3);
+        row.get(ts1)
+           .get(ts2)
+           .get(ts3);
 
-      CXXTOOLS_UNIT_ASSERT_EQUALS(ts1, cxxtools::Milliseconds(2000));
-      CXXTOOLS_UNIT_ASSERT_EQUALS(ts2, cxxtools::Seconds(3.5));
-      CXXTOOLS_UNIT_ASSERT_EQUALS(ts3, cxxtools::Days(2));
+        CXXTOOLS_UNIT_ASSERT_EQUALS(ts1, cxxtools::Milliseconds(2000));
+        CXXTOOLS_UNIT_ASSERT_EQUALS(ts2, cxxtools::Seconds(3.5));
+        CXXTOOLS_UNIT_ASSERT_EQUALS(ts3, cxxtools::Days(2));
 
-      int v1;
-      double v2;
-      unsigned v3;
+        int v1;
+        double v2;
+        unsigned v3;
 
-      row.get(v1)
-         .get(v2)
-         .get(v3);
+        row.get(v1)
+           .get(v2)
+           .get(v3);
 
-      CXXTOOLS_UNIT_ASSERT_EQUALS(v1, 2000);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(v2, 3.5);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(v3, 2);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(v1, 2000);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(v2, 3.5);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(v3, 2);
 
     }
 

@@ -27,11 +27,10 @@
  */
 
 
-#include <cxxtools/unit/testsuite.h>
+#include "testbase.h"
 #include <cxxtools/unit/registertest.h>
 #include <cxxtools/log.h>
 #include <stdlib.h>
-#include <tntdb/connect.h>
 #include <tntdb/transaction.h>
 #include <tntdb/statement.h>
 #include <tntdb/row.h>
@@ -39,14 +38,12 @@
 
 log_define("tntdb.unit.base")
 
-class TntdbBaseTest : public cxxtools::unit::TestSuite
+class TntdbBaseTest : public TntdbTestBase
 {
-    tntdb::Connection conn;
-    tntdb::Statement del;
 
 public:
     TntdbBaseTest()
-      : cxxtools::unit::TestSuite("base")
+      : TntdbTestBase("base")
     {
         registerMethod("testSelectValue", *this, &TntdbBaseTest::testSelectValue);
         registerMethod("testSelectRow", *this, &TntdbBaseTest::testSelectRow);
@@ -63,27 +60,6 @@ public:
         registerMethod("testTransaction", *this, &TntdbBaseTest::testTransaction);
         registerMethod("testLimit", *this, &TntdbBaseTest::testLimit);
         registerMethod("testLimitOffset", *this, &TntdbBaseTest::testLimitOffset);
-    }
-
-    void setUp()
-    {
-        if (!conn)
-        {
-            const char* dburl = getenv("TNTDBURL");
-            if (!dburl)
-              dburl = "sqlite:test.db";
-
-            log_info("testing with dburl=" << dburl);
-
-            conn = tntdb::connect(dburl);
-            del = conn.prepare("delete from tntdbtest");
-            del.execute();
-        }
-    }
-
-    void tearDown()
-    {
-        del.execute();
     }
 
     void testSelectValue()
