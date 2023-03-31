@@ -36,85 +36,67 @@ log_define("tntdb.oracle.cursor")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    Cursor::Cursor(Statement* stmt_, unsigned fetchsize_)
-      : stmt(stmt_),
-        fetchsize(fetchsize_),
-        srow(0),
-        rowcount(0)
+namespace oracle
+{
+Cursor::Cursor(Statement& stmt, unsigned fetchsize)
+  : _conn(stmt.getConnection()),
+    _fetchsize(fetchsize),
+    _row(0),
+    _rowcount(0)
+{
+    log_debug("execute statement " << stmt.getHandle());
+    sword ret = OCIStmtExecute(_conn.getSvcCtxHandle(),
+        stmt.getHandle(), _conn.getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
+    _conn.checkError(ret, "OCIStmtExecute");
+
+    auto mr = std::make_shared<MultiRow>(stmt, _fetchsize);
+    _row = std::make_shared<SingleRow>(mr, 0);
+
+    _stmtp = stmt.getHandle();
+}
+
+tntdb::Row Cursor::fetch()
+{
+    if (_rowcount > 0 && _row->row() < _rowcount - 1)
     {
-      log_debug("execute statement " << stmt->getHandle());
-      sword ret = OCIStmtExecute(stmt->getConnection()->getSvcCtxHandle(),
-        stmt->getHandle(), stmt->getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
-      stmt->checkError(ret, "OCIStmtExecute");
-
-      MultiRow::Ptr mr = new MultiRow(stmt.getPointer(), fetchsize);
-      srow = new SingleRow(mr, 0);
-      row = tntdb::Row(srow);
-
-      stmtp = stmt->getHandle();
-      stmt->stmtp = 0;
+        log_finer("increase row counter to " << (_row->row() + 1));
+        _row->row(_row->row()+1);
+        return tntdb::Row(_row);
     }
 
-    Cursor::~Cursor()
+    if (_rowcount > 0 && _rowcount < _fetchsize)
     {
-      if (stmtp)
-      {
-        if (stmt->stmtp)
-        {
-          log_debug("release statement handle " << stmtp);
-          sword ret = OCIHandleFree(stmtp, OCI_HTYPE_STMT);
-          if (ret != OCI_SUCCESS)
-            log_error("OCIHandleFree(" << stmtp << " OCI_HTYPE_STMT) failed");
-        }
-        else
-        {
-          stmt->stmtp = stmtp;
-        }
-      }
+        log_finer("last fetch returned " << _rowcount << " rows but " << _fetchsize << " was expected - finish cursor");
+        _row = 0;
+        return tntdb::Row();
     }
 
-    tntdb::Row Cursor::fetch()
+    if (_rowcount == 0 || _rowcount >= _row->row())
     {
-      if (rowcount > 0 && srow->row() < rowcount - 1)
-      {
-        log_finer("increase row counter to " << (srow->row() + 1));
-        srow->row(srow->row()+1);
-      }
-      else if (rowcount > 0 && rowcount < fetchsize)
-      {
-        log_finer("last fetch returned " << rowcount << " rows but " << fetchsize << " was expected - finish cursor");
-        row = tntdb::Row();
-        srow = 0;
-      }
-      else if (rowcount == 0 || rowcount >= srow->row())
-      {
-        log_debug("OCIStmtFetch(" << stmtp << ')');
-        sword ret = OCIStmtFetch(stmtp, stmt->getErrorHandle(), fetchsize,
+        log_debug("OCIStmtFetch(" << _stmtp << ')');
+        sword ret = OCIStmtFetch(_stmtp, _conn.getErrorHandle(), _fetchsize,
             OCI_FETCH_NEXT, OCI_DEFAULT);
 
         if (ret != OCI_NO_DATA && ret != OCI_SUCCESS)
-          stmt->checkError(ret, "OCIStmtFetch");
+            _conn.checkError(ret, "OCIStmtFetch");
 
         // get number of rows fetched
-        ret = OCIAttrGet(stmtp, OCI_HTYPE_STMT, &rowcount,
-          0, OCI_ATTR_ROWS_FETCHED, stmt->getErrorHandle());
-        stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_ROWS_FETCHED)");
-        log_debug(rowcount << " rows fetched");
+        ret = OCIAttrGet(_stmtp, OCI_HTYPE_STMT, &_rowcount,
+            0, OCI_ATTR_ROWS_FETCHED, _conn.getErrorHandle());
+        _conn.checkError(ret, "OCIAttrGet(OCI_ATTR_ROWS_FETCHED)");
+        log_debug(_rowcount << " rows fetched");
 
-        if (rowcount == 0)
+        if (_rowcount == 0)
         {
-          row = tntdb::Row();
-          srow = 0;
+            _row = 0;
+            return tntdb::Row();
         }
         else
         {
-          srow->row(0);
+            _row->row(0);
+            return tntdb::Row(_row);
         }
-      }
-
-      return row;
     }
-  }
+}
+}
 }

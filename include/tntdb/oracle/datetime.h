@@ -32,58 +32,57 @@
 #include <tntdb/datetime.h>
 #include <tntdb/date.h>
 #include <tntdb/time.h>
-#include <cxxtools/smartptr.h>
 #include <tntdb/oracle/connection.h>
 #include <oci.h>
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class Datetime
+namespace oracle
+{
+class Datetime
+{
+    Connection* conn;
+    OCIDateTime* datetime;
+    bool release;
+
+    // low-level wrappers
+    void ociDescriptorAlloc();
+    void ociDescriptorFree();
+    void ociConstruct(sb2 year, ub1 month, ub1 day, ub1 hour, ub1 min, ub1 sec, ub4 fsec);
+    void ociAssign(OCIDateTime* src);
+    void ociGetDate(sb2 &year, ub1 &month, ub1 &day) const;
+    void ociGetTime(ub1 &hour, ub1 &min, ub1 &sec, ub4 &fsec) const;
+
+public:
+    Datetime() : datetime(0), release(false) { }
+    Datetime(Connection* conn, OCIDateTime* datetime, bool release = false);
+    Datetime(Connection* conn, const tntdb::Datetime& s);
+    Datetime(Connection* conn, const tntdb::Date& s);
+    Datetime(Connection* conn, const tntdb::Time& s);
+
+    Datetime(const Datetime& src);
+    Datetime& operator= (const Datetime& src);
+
+    void assign(Connection* conn, const tntdb::Datetime& s);
+    void assign(Connection* conn, const tntdb::Date& s);
+    void assign(Connection* conn, const tntdb::Time& s);
+
+    OCIDateTime*& getReference(Connection* conn);
+
+    ~Datetime()
     {
-        Connection* conn;
-        OCIDateTime* datetime;
-        bool release;
-
-        // low-level wrappers
-        void ociDescriptorAlloc();
-        void ociDescriptorFree();
-        void ociConstruct(sb2 year, ub1 month, ub1 day, ub1 hour, ub1 min, ub1 sec, ub4 fsec);
-        void ociAssign(OCIDateTime* src);
-        void ociGetDate(sb2 &year, ub1 &month, ub1 &day) const;
-        void ociGetTime(ub1 &hour, ub1 &min, ub1 &sec, ub4 &fsec) const;
-
-      public:
-        Datetime() : datetime(0), release(false) { }
-        Datetime(Connection* conn, OCIDateTime* datetime, bool release = false);
-        Datetime(Connection* conn, const tntdb::Datetime& s);
-        Datetime(Connection* conn, const tntdb::Date& s);
-        Datetime(Connection* conn, const tntdb::Time& s);
-
-        Datetime(const Datetime& src);
-        Datetime& operator= (const Datetime& src);
-
-        void assign(Connection* conn, const tntdb::Datetime& s);
-        void assign(Connection* conn, const tntdb::Date& s);
-        void assign(Connection* conn, const tntdb::Time& s);
-
-        OCIDateTime*& getReference(Connection* conn);
-
-        ~Datetime()
-        {
-          if (release && datetime)
+        if (release && datetime)
             ociDescriptorFree();
-        }
+    }
 
-        tntdb::Date     getDate() const;
-        tntdb::Datetime getDatetime() const;
-        tntdb::Time     getTime() const;
+    tntdb::Date     getDate() const;
+    tntdb::Datetime getDatetime() const;
+    tntdb::Time     getTime() const;
 
-        OCIDateTime*& getHandle()        { return datetime; }
-    };
+    OCIDateTime*& getHandle()        { return datetime; }
+};
 
-  }
+}
 }
 
 #endif // TNTDB_ORACLE_DATETIME_H

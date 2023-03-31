@@ -36,99 +36,97 @@ log_define("tntdb.oracle.result")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    Result::Result(Statement* stmt)
+namespace oracle
+{
+Result::Result(Statement& stmt)
+{
+    sword ret;
+
+    log_debug("execute select-statement " << stmt.getHandle());
+
+    ret = OCIStmtExecute(stmt.getConnection().getSvcCtxHandle(),
+        stmt.getHandle(), stmt.getConnection().getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
+    stmt.getConnection().checkError(ret, "OCIStmtExecute");
+
+    log_debug("select-statement " << stmt.getHandle() << " executed");
+
+    // get columncount
+    ret = OCIAttrGet(stmt.getHandle(), OCI_HTYPE_STMT, &_columncount,
+        0, OCI_ATTR_PARAM_COUNT, stmt.getConnection().getErrorHandle());
+    stmt.getConnection().checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
+
+    log_debug("define row");
+    auto row = std::make_shared<Row>(stmt, _columncount);
+
+    log_debug("fetch results");
+    while ((ret = OCIStmtFetch(stmt.getHandle(), stmt.getConnection().getErrorHandle(), 1,
+        OCI_FETCH_NEXT, OCI_DEFAULT)) == OCI_SUCCESS)
     {
-      sword ret;
-
-      log_debug("execute select-statement " << stmt->getHandle());
-
-      ret = OCIStmtExecute(stmt->getConnection()->getSvcCtxHandle(),
-        stmt->getHandle(), stmt->getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
-      stmt->checkError(ret, "OCIStmtExecute");
-
-      log_debug("select-statement " << stmt->getHandle() << " executed");
-
-      // get columncount
-      ret = OCIAttrGet(stmt->getHandle(), OCI_HTYPE_STMT, &columncount,
-        0, OCI_ATTR_PARAM_COUNT, stmt->getErrorHandle());
-      stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
-
-      log_debug("define row");
-      tntdb::Row row(new oracle::Row(stmt, columncount));
-
-      log_debug("fetch results");
-      while ((ret = OCIStmtFetch(stmt->getHandle(), stmt->getErrorHandle(), 1,
-          OCI_FETCH_NEXT, OCI_DEFAULT)) == OCI_SUCCESS)
-      {
-        rows.push_back(row);
-        row = tntdb::Row(new oracle::Row(stmt, columncount));
-      }
-
-      if (ret != OCI_NO_DATA)
-        stmt->checkError(ret, "OCIStmtFetch");
+        _rows.emplace_back(row);
+        row = std::make_shared<Row>(stmt, _columncount);
     }
 
-    Result::Result(Statement* stmt, unsigned fetchsize)
+    if (ret != OCI_NO_DATA)
+        stmt.getConnection().checkError(ret, "OCIStmtFetch");
+}
+
+Result::Result(Statement& stmt, unsigned fetchsize)
+{
+    sword ret;
+
+    log_debug("execute select-statement " << stmt.getHandle());
+
+    ret = OCIStmtExecute(stmt.getConnection().getSvcCtxHandle(),
+        stmt.getHandle(), stmt.getConnection().getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
+    stmt.getConnection().checkError(ret, "OCIStmtExecute");
+
+    log_debug("select-statement " << stmt.getHandle() << " executed");
+
+    // get columncount
+    ret = OCIAttrGet(stmt.getHandle(), OCI_HTYPE_STMT, &_columncount,
+        0, OCI_ATTR_PARAM_COUNT, stmt.getConnection().getErrorHandle());
+    stmt.getConnection().checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
+
+    log_debug("define multirow");
+    auto mr = std::make_shared<MultiRow>(stmt, fetchsize, _columncount);
+
+    log_debug("fetch results");
+    while ((ret = OCIStmtFetch(stmt.getHandle(), stmt.getConnection().getErrorHandle(), fetchsize,
+        OCI_FETCH_NEXT, OCI_DEFAULT)) != OCI_ERROR)
     {
-      sword ret;
-
-      log_debug("execute select-statement " << stmt->getHandle());
-
-      ret = OCIStmtExecute(stmt->getConnection()->getSvcCtxHandle(),
-        stmt->getHandle(), stmt->getErrorHandle(), 0, 0, 0, 0, OCI_DEFAULT);
-      stmt->checkError(ret, "OCIStmtExecute");
-
-      log_debug("select-statement " << stmt->getHandle() << " executed");
-
-      // get columncount
-      ret = OCIAttrGet(stmt->getHandle(), OCI_HTYPE_STMT, &columncount,
-        0, OCI_ATTR_PARAM_COUNT, stmt->getErrorHandle());
-      stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
-
-      log_debug("define multirow");
-      MultiRow::Ptr mr = new MultiRow(stmt, fetchsize, columncount);
-
-      log_debug("fetch results");
-      while ((ret = OCIStmtFetch(stmt->getHandle(), stmt->getErrorHandle(), fetchsize,
-          OCI_FETCH_NEXT, OCI_DEFAULT)) != OCI_ERROR)
-      {
         // get number of rows fetched
         ub4 rowsFetched;
-        sword ret = OCIAttrGet(stmt->getHandle(), OCI_HTYPE_STMT, &rowsFetched,
-          0, OCI_ATTR_ROWS_FETCHED, stmt->getErrorHandle());
-        stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_ROWS_FETCHED)");
+        sword ret = OCIAttrGet(stmt.getHandle(), OCI_HTYPE_STMT, &rowsFetched,
+            0, OCI_ATTR_ROWS_FETCHED, stmt.getConnection().getErrorHandle());
+        stmt.getConnection().checkError(ret, "OCIAttrGet(OCI_ATTR_ROWS_FETCHED)");
 
         for (unsigned n = 0; n < rowsFetched; ++n)
-        {
-          rows.push_back(tntdb::Row(new SingleRow(mr, n)));
-        }
+            _rows.emplace_back(std::make_shared<SingleRow>(mr, n));
 
         if (rowsFetched < fetchsize)
-          return;
+            return;
 
-        mr = new MultiRow(stmt, fetchsize, columncount);
-      }
-
-      if (ret != OCI_NO_DATA && ret != OCI_SUCCESS)
-        stmt->checkError(ret, "OCIStmtFetch");
+        mr = std::make_shared<MultiRow>(stmt, fetchsize, _columncount);
     }
 
-    tntdb::Row Result::getRow(size_type tup_num) const
-    {
-      return rows.at(tup_num);
-    }
+    if (ret != OCI_NO_DATA && ret != OCI_SUCCESS)
+        stmt.getConnection().checkError(ret, "OCIStmtFetch");
+}
 
-    Result::size_type Result::size() const
-    {
-      return rows.size();
-    }
+tntdb::Row Result::getRow(size_type tup_num) const
+{
+    return tntdb::Row(_rows.at(tup_num));
+}
 
-    Result::size_type Result::getFieldCount() const
-    {
-      return columncount;
-    }
+Result::size_type Result::size() const
+{
+    return _rows.size();
+}
 
-  }
+Result::size_type Result::getFieldCount() const
+{
+    return _columncount;
+}
+
+}
 }

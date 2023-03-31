@@ -29,33 +29,32 @@
 #ifndef TNTDB_ORACLE_STRING_H
 #define TNTDB_ORACLE_STRING_H
 
-#include <cxxtools/smartptr.h>
 #include <tntdb/oracle/connection.h>
 #include <oci.h>
 
 namespace tntdb
 {
-    namespace oracle
-    {
-        class String
-        {
-            Connection* conn;
-            OCIString* handle;
+namespace oracle
+{
+class String
+{
+    Connection* conn;
+    OCIString* handle;
 
-        public:
-            String() : handle(0) { }
+public:
+    String() : handle(0) { }
 
-            void assign(Connection* conn, const std::string& s);
-            void assign(Connection* conn, char ch)
-                { assign(conn, std::string(1, ch)); }
+    void assign(Connection* conn, const std::string& s);
+    void assign(Connection* conn, char ch)
+        { assign(conn, std::string(1, ch)); }
 
-            const char* data() const;
-            ub4 size() const;
+    const char* data() const;
+    ub4 size() const;
 
-            OCIString*& getHandle()        { return handle; }
-        };
+    OCIString*& getHandle()        { return handle; }
+};
 
-    }
+}
 }
 
 #endif // TNTDB_ORACLE_DATETIME_H

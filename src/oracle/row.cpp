@@ -36,63 +36,59 @@ log_define("tntdb.oracle.row")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    Row::Row(Statement* stmt)
-    {
-      ub4 columncount;
+namespace oracle
+{
+Row::Row(Statement& stmt)
+{
+    ub4 columncount;
 
-      sword ret = OCIAttrGet(stmt->getHandle(), OCI_HTYPE_STMT, &columncount,
-        0, OCI_ATTR_PARAM_COUNT, stmt->getErrorHandle());
-      stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
+    sword ret = OCIAttrGet(stmt.getHandle(), OCI_HTYPE_STMT, &columncount,
+        0, OCI_ATTR_PARAM_COUNT, stmt.getConnection().getErrorHandle());
+    stmt.getConnection().checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
 
-      log_debug("define " << columncount << " parameters");
-      values.reserve(columncount);
-      for (ub4 pos = 0; pos < columncount; ++pos)
-        values.push_back(tntdb::Value(new tntdb::oracle::Value(stmt, pos)));
-    }
+    log_debug("define " << columncount << " parameters");
+    _values.reserve(columncount);
+    for (ub4 pos = 0; pos < columncount; ++pos)
+        _values.emplace_back(std::make_shared<Value>(stmt, pos));
+}
 
-    Row::Row(Statement* stmt, unsigned columncount)
-    {
-      log_debug("define " << columncount << " parameters");
-      values.reserve(columncount);
-      for (ub4 pos = 0; pos < columncount; ++pos)
-        values.push_back(tntdb::Value(new tntdb::oracle::Value(stmt, pos)));
-    }
+Row::Row(Statement& stmt, unsigned columncount)
+{
+    log_debug("define " << columncount << " parameters");
+    _values.reserve(columncount);
+    for (ub4 pos = 0; pos < columncount; ++pos)
+        _values.emplace_back(std::make_shared<Value>(stmt, pos));
+}
 
-    Row::size_type Row::size() const
-    {
-      return values.size();
-    }
+Row::size_type Row::size() const
+{
+    return _values.size();
+}
 
-    tntdb::Value Row::getValueByNumber(size_type field_num) const
-    {
-      return values.at(field_num);
-    }
+tntdb::Value Row::getValueByNumber(size_type field_num) const
+{
+    return tntdb::Value(_values.at(field_num));
+}
 
-    tntdb::Value Row::getValueByName(const std::string& field_name) const
-    {
-      std::string field_name_upper;
-      field_name_upper.reserve(field_name.size());
-      for (std::string::const_iterator it = field_name.begin();
+tntdb::Value Row::getValueByName(const std::string& field_name) const
+{
+    std::string field_name_upper;
+    field_name_upper.reserve(field_name.size());
+    for (std::string::const_iterator it = field_name.begin();
         it != field_name.end(); ++it)
-          field_name_upper += std::toupper(*it);
+        field_name_upper += std::toupper(*it);
 
-      Values::const_iterator it;
-      for (it = values.begin(); it != values.end(); ++it)
-        if (static_cast<const Value*>(it->getImpl())->getColumnName() == field_name_upper)
-          break;
+    for (const auto& v: _values)
+        if (v->getColumnName() == field_name_upper)
+            return tntdb::Value(v);
 
-      if (it == values.end())
-        throw FieldNotFound(field_name);
+    throw FieldNotFound(field_name);
+}
 
-      return *it;
-    }
+std::string Row::getColumnName(size_type field_num) const
+{
+    return _values[field_num]->getColumnName();
+}
 
-    std::string Row::getColumnName(size_type field_num) const
-    {
-      return static_cast<const Value*>(values[field_num].getImpl())->getColumnName();
-    }
-
-  }
+}
 }

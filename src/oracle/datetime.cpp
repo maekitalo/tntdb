@@ -33,235 +33,235 @@ log_define("tntdb.oracle.datetime")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    // oci-wrappers
+namespace oracle
+{
+// oci-wrappers
 
-    void Datetime::ociDescriptorAlloc()
+void Datetime::ociDescriptorAlloc()
+{
+    log_debug("OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP)");
+    sword ret = OCIDescriptorAlloc(conn->getEnvHandle(),
+      reinterpret_cast<void**>(&datetime), OCI_DTYPE_TIMESTAMP, 0, 0);
+    conn->checkError(ret, "OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP)");
+}
+
+void Datetime::ociDescriptorFree()
+{
+    log_debug("OCIDescriptorFree(" << datetime << ", OCI_DTYPE_TIMESTAMP)");
+    OCIDescriptorFree(datetime, OCI_DTYPE_TIMESTAMP);
+}
+
+void Datetime::ociConstruct(sb2 year, ub1 month, ub1 day, ub1 hour, ub1 min, ub1 sec, ub4 fsec)
+{
+    log_debug("OCIDateTimeConstruct(" << conn->getEnvHandle() << ')');
+    sword ret = OCIDateTimeConstruct(conn->getEnvHandle(), conn->getErrorHandle(),
+      datetime, year, month, day, hour, min, sec, fsec * 1000000, 0, 0);
+    conn->checkError(ret, "OCIDateTimeConstruct");
+}
+
+void Datetime::ociAssign(OCIDateTime* src)
+{
+    log_debug("OCIDateTimeAssign");
+    sword ret = OCIDateTimeAssign(conn->getEnvHandle(),
+      conn->getErrorHandle(), src, datetime);
+    conn->checkError(ret, "OCIDateTimeAssign");
+}
+
+void Datetime::ociGetDate(sb2 &year, ub1 &month, ub1 &day) const
+{
+    log_debug("OCIDateTimeGetDate(" << datetime << ')');
+    sword ret = OCIDateTimeGetDate(conn->getEnvHandle(),
+      conn->getErrorHandle(), datetime, &year, &month, &day);
+    conn->checkError(ret, "OCIDateTimeGetDate");
+}
+
+void Datetime::ociGetTime(ub1 &hour, ub1 &min, ub1 &sec, ub4 &fsec) const
+{
+    log_debug("OCIDateTimeGetTime(" << datetime << ')');
+    sword ret = OCIDateTimeGetTime(conn->getEnvHandle(), conn->getErrorHandle(),
+      datetime, &hour, &min, &sec, &fsec);
+    conn->checkError(ret, "OCIDateTimeGetTime");
+}
+
+// ctors, dtors, ...
+//
+Datetime::Datetime(Connection* conn_, OCIDateTime* datetime_, bool release_)
+  : conn(conn_),
+    datetime(datetime_),
+    release(release_)
+{ }
+
+Datetime::Datetime(Connection* conn_, const tntdb::Datetime& s)
+  : conn(conn_), datetime(0), release(true)
+{
+    log_debug("create oracle::Datetime from tntdb::Datetime");
+
+    ociDescriptorAlloc();
+    ociConstruct(s.getYear(), s.getMonth(), s.getDay(),
+      s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
+}
+
+Datetime::Datetime(Connection* conn_, const tntdb::Date& s)
+  : conn(conn_), datetime(0), release(true)
+{
+    log_debug("create oracle::Datetime from tntdb::Date");
+
+    ociDescriptorAlloc();
+    ociConstruct(s.getYear(), s.getMonth(), s.getDay(), 0, 0, 0, 0);
+}
+
+Datetime::Datetime(Connection* conn_, const tntdb::Time& s)
+  : conn(conn_), datetime(0), release(true)
+{
+    log_debug("create oracle::Datetime from tntdb::Time");
+
+    ociDescriptorAlloc();
+    ociConstruct(1, 1, 1,
+      s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
+}
+
+Datetime::Datetime(const Datetime& src)
+  : conn(src.conn), datetime(0), release(true)
+{
+    log_debug("copy oracle::Datetime");
+
+    if (src.datetime)
     {
-      log_debug("OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP)");
-      sword ret = OCIDescriptorAlloc(conn->getEnvHandle(),
-        reinterpret_cast<void**>(&datetime), OCI_DTYPE_TIMESTAMP, 0, 0);
-      conn->checkError(ret, "OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP)");
-    }
-
-    void Datetime::ociDescriptorFree()
-    {
-      log_debug("OCIDescriptorFree(" << datetime << ", OCI_DTYPE_TIMESTAMP)");
-      OCIDescriptorFree(datetime, OCI_DTYPE_TIMESTAMP);
-    }
-
-    void Datetime::ociConstruct(sb2 year, ub1 month, ub1 day, ub1 hour, ub1 min, ub1 sec, ub4 fsec)
-    {
-      log_debug("OCIDateTimeConstruct(" << conn->getEnvHandle() << ')');
-      sword ret = OCIDateTimeConstruct(conn->getEnvHandle(), conn->getErrorHandle(),
-        datetime, year, month, day, hour, min, sec, fsec * 1000000, 0, 0);
-      conn->checkError(ret, "OCIDateTimeConstruct");
-    }
-
-    void Datetime::ociAssign(OCIDateTime* src)
-    {
-      log_debug("OCIDateTimeAssign");
-      sword ret = OCIDateTimeAssign(conn->getEnvHandle(),
-        conn->getErrorHandle(), src, datetime);
-      conn->checkError(ret, "OCIDateTimeAssign");
-    }
-
-    void Datetime::ociGetDate(sb2 &year, ub1 &month, ub1 &day) const
-    {
-      log_debug("OCIDateTimeGetDate(" << datetime << ')');
-      sword ret = OCIDateTimeGetDate(conn->getEnvHandle(),
-        conn->getErrorHandle(), datetime, &year, &month, &day);
-      conn->checkError(ret, "OCIDateTimeGetDate");
-    }
-
-    void Datetime::ociGetTime(ub1 &hour, ub1 &min, ub1 &sec, ub4 &fsec) const
-    {
-      log_debug("OCIDateTimeGetTime(" << datetime << ')');
-      sword ret = OCIDateTimeGetTime(conn->getEnvHandle(), conn->getErrorHandle(),
-        datetime, &hour, &min, &sec, &fsec);
-      conn->checkError(ret, "OCIDateTimeGetTime");
-    }
-
-    // ctors, dtors, ...
-    //
-    Datetime::Datetime(Connection* conn_, OCIDateTime* datetime_, bool release_)
-      : conn(conn_),
-        datetime(datetime_),
-        release(release_)
-    { }
-
-    Datetime::Datetime(Connection* conn_, const tntdb::Datetime& s)
-      : conn(conn_), datetime(0), release(true)
-    {
-      log_debug("create oracle::Datetime from tntdb::Datetime");
-
-      ociDescriptorAlloc();
-      ociConstruct(s.getYear(), s.getMonth(), s.getDay(),
-        s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
-    }
-
-    Datetime::Datetime(Connection* conn_, const tntdb::Date& s)
-      : conn(conn_), datetime(0), release(true)
-    {
-      log_debug("create oracle::Datetime from tntdb::Date");
-
-      ociDescriptorAlloc();
-      ociConstruct(s.getYear(), s.getMonth(), s.getDay(), 0, 0, 0, 0);
-    }
-
-    Datetime::Datetime(Connection* conn_, const tntdb::Time& s)
-      : conn(conn_), datetime(0), release(true)
-    {
-      log_debug("create oracle::Datetime from tntdb::Time");
-
-      ociDescriptorAlloc();
-      ociConstruct(1, 1, 1,
-        s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
-    }
-
-    Datetime::Datetime(const Datetime& src)
-      : conn(src.conn), datetime(0), release(true)
-    {
-      log_debug("copy oracle::Datetime");
-
-      if (src.datetime)
-      {
         ociDescriptorAlloc();
         ociAssign(src.datetime);
-      }
     }
+}
 
-    Datetime& Datetime::operator= (const Datetime& src)
+Datetime& Datetime::operator= (const Datetime& src)
+{
+    log_debug("assign oracle::Datetime");
+
+    conn = src.conn;
+
+    if (src.datetime)
     {
-      log_debug("assign oracle::Datetime");
-
-      conn = src.conn;
-
-      if (src.datetime)
-      {
         if (datetime == 0 || !release)
         {
-          // we have no handle or don't own it - create new one
-          log_debug("allocate new descriptor");
-          ociDescriptorAlloc();
-          release = true;
+            // we have no handle or don't own it - create new one
+            log_debug("allocate new descriptor");
+            ociDescriptorAlloc();
+            release = true;
         }
 
         ociAssign(src.datetime);
-      }
-      else if (datetime)
-      {
+    }
+    else if (datetime)
+    {
         if (release)
         {
-          // free
-          log_debug("release old descriptor");
-          ociDescriptorFree();
+            // free
+            log_debug("release old descriptor");
+            ociDescriptorFree();
         }
 
         datetime = 0;
-      }
-
-      return *this;
     }
 
-    void Datetime::assign(Connection* conn_, const tntdb::Datetime& s)
+    return *this;
+}
+
+void Datetime::assign(Connection* conn_, const tntdb::Datetime& s)
+{
+    log_debug("assign tntdb::Datetime");
+
+    conn = conn_;
+
+    if (datetime == 0 || !release)
     {
-      log_debug("assign tntdb::Datetime");
-
-      conn = conn_;
-
-      if (datetime == 0 || !release)
-      {
         // we have no handle or don't own it - create new one
         log_debug("allocate new descriptor");
         ociDescriptorAlloc();
         release = true;
-      }
-
-      ociConstruct(s.getYear(), s.getMonth(), s.getDay(),
-        s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
     }
 
-    void Datetime::assign(Connection* conn_, const tntdb::Date& s)
+    ociConstruct(s.getYear(), s.getMonth(), s.getDay(),
+      s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
+}
+
+void Datetime::assign(Connection* conn_, const tntdb::Date& s)
+{
+    log_debug("assign tntdb::Date");
+
+    conn = conn_;
+
+    if (datetime == 0 || !release)
     {
-      log_debug("assign tntdb::Date");
-
-      conn = conn_;
-
-      if (datetime == 0 || !release)
-      {
         // we have no handle or don't own it - create new one
         log_debug("allocate new descriptor");
         ociDescriptorAlloc();
         release = true;
-      }
-
-      ociConstruct(s.getYear(), s.getMonth(), s.getDay(), 0, 0, 0, 0);
     }
 
-    void Datetime::assign(Connection* conn_, const tntdb::Time& s)
+    ociConstruct(s.getYear(), s.getMonth(), s.getDay(), 0, 0, 0, 0);
+}
+
+void Datetime::assign(Connection* conn_, const tntdb::Time& s)
+{
+    log_debug("assign tntdb::Time");
+
+    conn = conn_;
+
+    if (datetime == 0 || !release)
     {
-      log_debug("assign tntdb::Time");
-
-      conn = conn_;
-
-      if (datetime == 0 || !release)
-      {
         // we have no handle or don't own it - create new one
         log_debug("allocate new descriptor");
         ociDescriptorAlloc();
         release = true;
-      }
-
-      ociConstruct(1, 1, 1,
-        s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
     }
 
-    // getters
+    ociConstruct(1, 1, 1,
+      s.getHour(), s.getMinute(), s.getSecond(), s.getMillis());
+}
 
-    OCIDateTime*& Datetime::getReference(Connection* conn_)
+// getters
+
+OCIDateTime*& Datetime::getReference(Connection* conn_)
+{
+    if (datetime == 0)
     {
-      if (datetime == 0)
-      {
         conn = conn_;
         release = true;
         ociDescriptorAlloc();
-      }
-      return datetime;
     }
+    return datetime;
+}
 
-    tntdb::Date Datetime::getDate() const
-    {
-      sb2 year;
-      ub1 month, day;
+tntdb::Date Datetime::getDate() const
+{
+    sb2 year;
+    ub1 month, day;
 
-      ociGetDate(year, month, day);
+    ociGetDate(year, month, day);
 
-      return tntdb::Date(year, month, day);
-    }
+    return tntdb::Date(year, month, day);
+}
 
-    tntdb::Datetime Datetime::getDatetime() const
-    {
-      sb2 year;
-      ub1 month, day, hour, min, sec;
-      ub4 fsec;
+tntdb::Datetime Datetime::getDatetime() const
+{
+    sb2 year;
+    ub1 month, day, hour, min, sec;
+    ub4 fsec;
 
-      ociGetDate(year, month, day);
-      ociGetTime(hour, min, sec, fsec);
+    ociGetDate(year, month, day);
+    ociGetTime(hour, min, sec, fsec);
 
-      return tntdb::Datetime(year, month, day, hour, min, sec, fsec / 1000000);
-    }
+    return tntdb::Datetime(year, month, day, hour, min, sec, fsec / 1000000);
+}
 
-    tntdb::Time Datetime::getTime() const
-    {
-      ub1 hour, min, sec;
-      ub4 fsec;
+tntdb::Time Datetime::getTime() const
+{
+    ub1 hour, min, sec;
+    ub4 fsec;
 
-      ociGetTime(hour, min, sec, fsec);
+    ociGetTime(hour, min, sec, fsec);
 
-      return tntdb::Time(hour, min, sec, fsec / 1000000);
-    }
+    return tntdb::Time(hour, min, sec, fsec / 1000000);
+}
 
-  }
+}
 }

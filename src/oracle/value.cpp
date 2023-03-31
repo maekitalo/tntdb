@@ -40,576 +40,572 @@ log_define("tntdb.oracle.value")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    namespace
+namespace oracle
+{
+namespace
+{
+    template <typename T>
+    T getValue(const std::string& s, const char* tname)
     {
-      template <typename T>
-      T getValue(const std::string& s, const char* tname)
-      {
         std::istringstream in(s);
         T ret;
         in >> ret;
         if (!in)
         {
-          std::ostringstream msg;
-          msg << "can't convert \"" << s << "\" to " << tname;
-          throw TypeError(msg.str());
+            std::ostringstream msg;
+            msg << "can't convert \"" << s << "\" to " << tname;
+            throw TypeError(msg.str());
         }
         return ret;
-      }
+    }
 
-      template <typename T, typename I>
-      T getValueFloat(I from, I to, const char* tname)
-      {
+    template <typename T, typename I>
+    T getValueFloat(I from, I to, const char* tname)
+    {
         // This is a stupid workaround for converting decimal comma into decimal point
         // It should be actually done in OCI
         std::string o;
         o.reserve(to - from);
         std::replace_copy(from, to, std::back_inserter(o), ',', '.');
         return getValue<T>(o, tname);
-      }
+    }
 
-      template <typename T>
-      std::string toString(T v)
-      {
+    template <typename T>
+    std::string toString(T v)
+    {
         std::ostringstream ret;
         ret << v;
         return ret.str();
-      }
+    }
 
-      template <>
-      std::string toString(float v)
-      {
-        std::ostringstream ret;
-        ret.precision(24);
-        ret << v;
-        return ret.str();
-      }
-
-      template <>
-      std::string toString(double v)
-      {
+    template <>
+    std::string toString(float v)
+    {
         std::ostringstream ret;
         ret.precision(24);
         ret << v;
         return ret.str();
-      }
+    }
 
-      template <>
-      std::string toString(Decimal v)
-      {
+    template <>
+    std::string toString(double v)
+    {
         std::ostringstream ret;
         ret.precision(24);
         ret << v;
         return ret.str();
-      }
+    }
 
-      template <typename IntType>
-      IntType round(double d)
-      {
+    template <>
+    std::string toString(Decimal v)
+    {
+        std::ostringstream ret;
+        ret.precision(24);
+        ret << v;
+        return ret.str();
+    }
+
+    template <typename IntType>
+    IntType round(double d)
+    {
         if (d > std::numeric_limits<IntType>::max() + .5 || d < std::numeric_limits<IntType>::min() - .5)
         {
-          log_warn("overflow when trying to read integer from float " << d);
-          throw std::overflow_error("overflow when trying to read integer from float");
+            log_warn("overflow when trying to read integer from float " << d);
+            throw std::overflow_error("overflow when trying to read integer from float");
         }
 
         return static_cast<IntType>(d >= 0 ? d + .5 : d - .5);
-      }
-
     }
 
-    Value::Value(Statement* stmt, ub4 pos)
-    {
-      sword ret;
+}
 
-      /* get parameter-info */
-      log_debug("OCIParamGet(" << static_cast<void*>(stmt->getHandle()) << ')');
-      ret = OCIParamGet(stmt->getHandle(), OCI_HTYPE_STMT,
-        stmt->getErrorHandle(),
+Value::Value(Statement& stmt, ub4 pos)
+    : errhp(stmt.getConnection().getErrorHandle())
+{
+    sword ret;
+
+    /* get parameter-info */
+    log_debug("OCIParamGet(" << static_cast<void*>(stmt.getHandle()) << ')');
+    ret = OCIParamGet(stmt.getHandle(), OCI_HTYPE_STMT, errhp,
         reinterpret_cast<void**>(&paramp), pos + 1);
-      stmt->checkError(ret, "OCIParamGet");
+    stmt.getConnection().checkError(ret, "OCIParamGet");
 
-      init(stmt, paramp, pos);
+    init(stmt, paramp, pos);
 
-      OCIDescriptorFree(paramp, OCI_DTYPE_PARAM);
-      paramp = 0;
-    }
+    OCIDescriptorFree(paramp, OCI_DTYPE_PARAM);
+    paramp = 0;
+}
 
-    Value::Value(Statement* stmt, OCIParam* paramp, ub4 pos)
+Value::Value(Statement& stmt, OCIParam* paramp, ub4 pos)
+    : errhp(stmt.getConnection().getErrorHandle())
+{
+    init(stmt, paramp, pos);
+}
+
+void Value::init(Statement& stmt, OCIParam* paramp, ub4 pos)
+{
+    sword ret;
+
+    /* retrieve column name */
+    ub4 col_name_len = 0;
+    text* col_name = 0;
+    ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &col_name, &col_name_len, OCI_ATTR_NAME, errhp);
+
+    stmt.getConnection().checkError(ret, "OCIAttrGet(OCI_ATTR_NAME)");
+    colName.assign(reinterpret_cast<const char*>(col_name), col_name_len);
+
+    /* retrieve the data type attribute */
+    ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &type, 0, OCI_ATTR_DATA_TYPE, errhp);
+    stmt.getConnection().checkError(ret, "OCIAttrGet(OCI_ATTR_DATA_TYPE)");
+
+    ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &len, 0, OCI_ATTR_DATA_SIZE, errhp);
+    stmt.getConnection().checkError(ret, "OCIAttrGet(OCI_ATTR_DATA_SIZE)");
+
+    log_debug("column name=\"" << colName << "\" type=" << type << " size=" << len);
+
+    /* define outputvariable */
+    switch (type)
     {
-      init(stmt, paramp, pos);
-    }
-
-    void Value::init(Statement* stmt, OCIParam* paramp, ub4 pos)
-    {
-      sword ret;
-
-      errhp = stmt->getErrorHandle();
-
-      /* retrieve column name */
-      ub4 col_name_len = 0;
-      text* col_name = 0;
-      ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &col_name, &col_name_len,
-        OCI_ATTR_NAME, stmt->getErrorHandle());
-
-      stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_NAME)");
-      colName.assign(reinterpret_cast<const char*>(col_name), col_name_len);
-
-      /* retrieve the data type attribute */
-      ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &type, 0, OCI_ATTR_DATA_TYPE,
-        stmt->getErrorHandle());
-      stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_DATA_TYPE)");
-
-      ret = OCIAttrGet(paramp, OCI_DTYPE_PARAM, &len, 0, OCI_ATTR_DATA_SIZE,
-        stmt->getErrorHandle());
-      stmt->checkError(ret, "OCIAttrGet(OCI_ATTR_DATA_SIZE)");
-
-      log_debug("column name=\"" << colName << "\" type=" << type << " size=" << len);
-
-      /* define outputvariable */
-      switch (type)
-      {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          log_debug("OCIDefineByPos(SQLT_TIMESTAMP)");
-          ret = OCIDefineByPos(stmt->getHandle(), &defp,
-            stmt->getErrorHandle(), pos + 1, &datetime.getReference(stmt->getConnection()),
+            log_debug("OCIDefineByPos(SQLT_TIMESTAMP)");
+            ret = OCIDefineByPos(stmt.getHandle(), &defp,
+            errhp, pos + 1, &datetime.getReference(&stmt.getConnection()),
             sizeof(OCIDateTime*), SQLT_TIMESTAMP, &nullind, &len, 0, OCI_DEFAULT);
-          break;
+            break;
 
         case SQLT_INT:
-          log_debug("OCIDefineByPos(SQLT_INT)");
-          ret = OCIDefineByPos(stmt->getHandle(), &defp,
-            stmt->getErrorHandle(), pos + 1, &longValue,
+            log_debug("OCIDefineByPos(SQLT_INT)");
+            ret = OCIDefineByPos(stmt.getHandle(), &defp,
+            errhp, pos + 1, &longValue,
             sizeof(longValue), SQLT_INT, &nullind, &len, 0, OCI_DEFAULT);
-          break;
+            break;
 
         case SQLT_UIN:
-          log_debug("OCIDefineByPos(SQLT_UIN)");
-          ret = OCIDefineByPos(stmt->getHandle(), &defp,
-            stmt->getErrorHandle(), pos + 1, &uint32Value,
+            log_debug("OCIDefineByPos(SQLT_UIN)");
+            ret = OCIDefineByPos(stmt.getHandle(), &defp,
+            errhp, pos + 1, &uint32Value,
             sizeof(uint32Value), SQLT_UIN, &nullind, &len, 0, OCI_DEFAULT);
-          break;
+            break;
 
         case SQLT_FLT:
-          log_debug("OCIDefineByPos(SQLT_FLT)");
-          ret = OCIDefineByPos(stmt->getHandle(), &defp,
-            stmt->getErrorHandle(), pos + 1, &doubleValue,
+            log_debug("OCIDefineByPos(SQLT_FLT)");
+            ret = OCIDefineByPos(stmt.getHandle(), &defp,
+            errhp, pos + 1, &doubleValue,
             sizeof(doubleValue), SQLT_FLT, &nullind, &len, 0, OCI_DEFAULT);
-          break;
+            break;
 
         case SQLT_NUM:
         case SQLT_VNU:
-          log_debug("OCIDefineByPos(SQLT_VNU)");
-          ret = OCIDefineByPos(stmt->getHandle(), &defp,
-            stmt->getErrorHandle(), pos + 1, number.getHandle(),
+            log_debug("OCIDefineByPos(SQLT_VNU)");
+            ret = OCIDefineByPos(stmt.getHandle(), &defp,
+            errhp, pos + 1, number.getHandle(),
             OCI_NUMBER_SIZE, SQLT_VNU, &nullind, &len, 0, OCI_DEFAULT);
-          break;
+            break;
 
         case SQLT_BLOB:
-          log_debug("OCIDefineByPos(SQLT_LOB)");
-          ret = OCIDefineByPos(stmt->getHandle(), &defp,
-            stmt->getErrorHandle(), pos + 1, &blob.getHandle(stmt->getConnection()),
+            log_debug("OCIDefineByPos(SQLT_LOB)");
+            ret = OCIDefineByPos(stmt.getHandle(), &defp,
+            errhp, pos + 1, &blob.getHandle(&stmt.getConnection()),
             0, SQLT_BLOB, &nullind, &len, 0, OCI_DEFAULT);
-          break;
+            break;
 
         default:
-          log_debug("OCIDefineByPos(SQLT_AFC)");
-          data.resize(len + 16);
-          ret = OCIDefineByPos(stmt->getHandle(), &defp,
-            stmt->getErrorHandle(), pos + 1, &data[0],
+            log_debug("OCIDefineByPos(SQLT_AFC)");
+            data.resize(len + 16);
+            ret = OCIDefineByPos(stmt.getHandle(), &defp,
+            errhp, pos + 1, &data[0],
             len + 16, SQLT_AFC, &nullind, &len, 0, OCI_DEFAULT);
-          break;
-      }
-      stmt->checkError(ret, "OCIDefineByPos");
+            break;
     }
+    stmt.getConnection().checkError(ret, "OCIDefineByPos");
+}
 
-    Value::~Value()
-    {
-      if (defp)
+Value::~Value()
+{
+    if (defp)
         OCIHandleFree(defp, OCI_HTYPE_DEFINE);
-      if (paramp)
+    if (paramp)
         OCIDescriptorFree(paramp, OCI_DTYPE_PARAM);
-    }
+}
 
-    bool Value::isNull() const
-    {
-      return nullind != 0;
-    }
+bool Value::isNull() const
+{
+    return nullind != 0;
+}
 
-    bool Value::getBool() const
-    {
-      if (isNull())
+bool Value::getBool() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
-          return longValue != 0;
+            return longValue != 0;
 
         case SQLT_UIN:
-          return uint32Value != 0;
+            return uint32Value != 0;
 
         case SQLT_FLT:
-          return doubleValue != 0;
+            return doubleValue != 0;
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return !number.getDecimal(errhp).isZero();
+            return !number.getDecimal(errhp).isZero();
 
         default:
-          return data[0] == 't' || data[0] == 'T'
+            return data[0] == 't' || data[0] == 'T'
               || data[0] == 'y' || data[0] == 'Y'
               || data[0] == '1';
 
-      }
     }
+}
 
-    short Value::getShort() const
-    {
-      if (isNull())
+short Value::getShort() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<short>(longValue);
+            return static_cast<short>(longValue);
 
         case SQLT_FLT:
-          return round<short>(doubleValue);
+            return round<short>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getInteger<short>();
+            return number.getDecimal(errhp).getInteger<short>();
 
         default:
-          return getValue<short>(std::string(&data[0], len), "int");
-      }
+            return getValue<short>(std::string(&data[0], len), "int");
     }
+}
 
-    int Value::getInt() const
-    {
-      if (isNull())
+int Value::getInt() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<int>(longValue);
+            return static_cast<int>(longValue);
 
         case SQLT_FLT:
-          return round<int>(doubleValue);
+            return round<int>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getInteger<int>();
+            return number.getDecimal(errhp).getInteger<int>();
 
         default:
-          return getValue<int>(std::string(&data[0], len), "int");
-      }
+            return getValue<int>(std::string(&data[0], len), "int");
     }
+}
 
-    long Value::getLong() const
-    {
-      if (isNull())
+long Value::getLong() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<long>(longValue);
+            return static_cast<long>(longValue);
 
         case SQLT_FLT:
-          return round<long>(doubleValue);
+            return round<long>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getInteger<long>();
+            return number.getDecimal(errhp).getInteger<long>();
 
         default:
-          return getValue<long>(std::string(&data[0], len), "long");
-      }
+            return getValue<long>(std::string(&data[0], len), "long");
     }
+}
 
-    int32_t Value::getInt32() const
-    {
-      return getInt();
-    }
+int32_t Value::getInt32() const
+{
+    return getInt();
+}
 
-    unsigned short Value::getUnsignedShort() const
-    {
-      if (isNull())
+unsigned short Value::getUnsignedShort() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<unsigned short>(longValue);
+            return static_cast<unsigned short>(longValue);
 
         case SQLT_FLT:
-          return round<unsigned short>(doubleValue);
+            return round<unsigned short>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getInteger<unsigned short>();
+            return number.getDecimal(errhp).getInteger<unsigned short>();
 
         default:
-          return getValue<unsigned>(std::string(&data[0], len), "unsigned");
-      }
+            return getValue<unsigned>(std::string(&data[0], len), "unsigned");
     }
+}
 
-    unsigned Value::getUnsigned() const
-    {
-      if (isNull())
+unsigned Value::getUnsigned() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<unsigned>(longValue);
+            return static_cast<unsigned>(longValue);
 
         case SQLT_FLT:
-          return round<unsigned>(doubleValue);
+            return round<unsigned>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getInteger<unsigned>();
+            return number.getDecimal(errhp).getInteger<unsigned>();
 
         default:
-          return getValue<unsigned>(std::string(&data[0], len), "unsigned");
-      }
+            return getValue<unsigned>(std::string(&data[0], len), "unsigned");
     }
+}
 
-    unsigned long Value::getUnsignedLong() const
-    {
-      if (isNull())
+unsigned long Value::getUnsignedLong() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<unsigned long>(longValue);
+            return static_cast<unsigned long>(longValue);
 
         case SQLT_FLT:
-          return round<unsigned long>(doubleValue);
+            return round<unsigned long>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getInteger<unsigned long>();
+            return number.getDecimal(errhp).getInteger<unsigned long>();
 
         default:
-          return getValue<unsigned long>(std::string(&data[0], len), "unsigned long");
-      }
+            return getValue<unsigned long>(std::string(&data[0], len), "unsigned long");
     }
+}
 
-    uint32_t Value::getUnsigned32() const
-    {
-      return getUnsigned();
-    }
+uint32_t Value::getUnsigned32() const
+{
+    return getUnsigned();
+}
 
-    int64_t Value::getInt64() const
-    {
-      if (isNull())
+int64_t Value::getInt64() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<int64_t>(longValue);
+            return static_cast<int64_t>(longValue);
 
         case SQLT_FLT:
-          return round<int64_t>(doubleValue);
+            return round<int64_t>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getInteger<int64_t>();
+            return number.getDecimal(errhp).getInteger<int64_t>();
 
         default:
-          return getValue<int64_t>(std::string(&data[0], len), "int64_t");
-      }
+            return getValue<int64_t>(std::string(&data[0], len), "int64_t");
     }
+}
 
-    uint64_t Value::getUnsigned64() const
-    {
-      if (isNull())
+uint64_t Value::getUnsigned64() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<uint64_t>(longValue);
+            return static_cast<uint64_t>(longValue);
 
         case SQLT_FLT:
-          return round<uint64_t>(doubleValue);
+            return round<uint64_t>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getInteger<uint64_t>();
+            return number.getDecimal(errhp).getInteger<uint64_t>();
 
         default:
-          return getValue<uint64_t>(std::string(&data[0], len), "uint64_t");
-      }
+            return getValue<uint64_t>(std::string(&data[0], len), "uint64_t");
     }
+}
 
-    Decimal Value::getDecimal() const
-    {
-      if (isNull())
+Decimal Value::getDecimal() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return Decimal(longValue, 0);
+            return Decimal(longValue, 0);
 
         case SQLT_FLT:
-          return Decimal(doubleValue);
+            return Decimal(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp);
+            return number.getDecimal(errhp);
 
         default:
-          return Decimal(std::string(&data[0], len));
-      }
+            return Decimal(std::string(&data[0], len));
     }
+}
 
-    float Value::getFloat() const
-    {
-      if (isNull())
+float Value::getFloat() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<float>(longValue);
+            return static_cast<float>(longValue);
 
         case SQLT_FLT:
-          return round<float>(doubleValue);
+            return round<float>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getDouble();
+            return number.getDecimal(errhp).getDouble();
 
         default:
-          return getValueFloat<float>(data.begin(), data.begin() + len, "float");
-      }
+            return getValueFloat<float>(data.begin(), data.begin() + len, "float");
     }
+}
 
-    double Value::getDouble() const
-    {
-      if (isNull())
+double Value::getDouble() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_INT:
         case SQLT_UIN:
-          return static_cast<double>(longValue);
+            return static_cast<double>(longValue);
 
         case SQLT_FLT:
-          return static_cast<double>(doubleValue);
+            return static_cast<double>(doubleValue);
 
         case SQLT_NUM:
         case SQLT_VNU:
-          return number.getDecimal(errhp).getDouble();
+            return number.getDecimal(errhp).getDouble();
 
         default:
-          return getValueFloat<double>(data.begin(), data.begin() + len, "double");
-      }
+            return getValueFloat<double>(data.begin(), data.begin() + len, "double");
     }
+}
 
-    char Value::getChar() const
-    {
-      if (isNull())
+char Value::getChar() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
@@ -619,58 +615,58 @@ namespace tntdb
         case SQLT_FLT:
         case SQLT_NUM:
         case SQLT_VNU:
-          throw TypeError();
+            throw TypeError();
 
         default:
-          return data[0];
-      }
+            return data[0];
     }
+}
 
-    void Value::getString(std::string& ret) const
-    {
-      log_debug("Value::getString with type=" << type << " name=" << colName
-        << " size=" << len);
+void Value::getString(std::string& ret) const
+{
+    log_debug("Value::getString with type=" << type << " name=" << colName
+      << " size=" << len);
 
-      if (type != SQLT_AFC && type != SQLT_CHR && isNull())
+    if (type != SQLT_AFC && type != SQLT_CHR && isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          ret = datetime.getDatetime().getIso();
-          break;
+            ret = datetime.getDatetime().getIso();
+            break;
 
         case SQLT_INT:
         case SQLT_UIN:
-          ret = toString(longValue);
-          break;
+            ret = toString(longValue);
+            break;
 
         case SQLT_FLT:
-          ret = toString(doubleValue);
-          break;
+            ret = toString(doubleValue);
+            break;
 
         case SQLT_NUM:
         case SQLT_VNU:
-          ret = number.getDecimal(errhp).toString();
-          break;
+            ret = number.getDecimal(errhp).toString();
+            break;
 
         default:
-          ret.assign(&data[0], len > 0 ? len : 0);
-      }
+            ret.assign(&data[0], len > 0 ? len : 0);
     }
+}
 
-    void Value::getBlob(tntdb::Blob& ret) const
-    {
-      log_debug("get blob from type " << type);
+void Value::getBlob(tntdb::Blob& ret) const
+{
+    log_debug("get blob from type " << type);
 
-      if (isNull())
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
@@ -680,70 +676,70 @@ namespace tntdb
         case SQLT_FLT:
         case SQLT_NUM:
         case SQLT_VNU:
-          throw TypeError();
+            throw TypeError();
 
         case SQLT_BLOB:
-          blob.getData(ret);
-          break;
+            blob.getData(ret);
+            break;
 
         default:
-          ret.assign(&data[0], len > 0 ? len - 1 : 0);
-      }
+            ret.assign(&data[0], len > 0 ? len - 1 : 0);
     }
+}
 
-    Date Value::getDate() const
-    {
-      if (isNull())
+Date Value::getDate() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          return datetime.getDate();
+            return datetime.getDate();
 
         default:
-          throw TypeError();
-      }
+            throw TypeError();
     }
+}
 
-    Time Value::getTime() const
-    {
-      if (isNull())
+Time Value::getTime() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          return datetime.getTime();
+            return datetime.getTime();
 
         default:
-          throw TypeError();
-      }
+            throw TypeError();
     }
+}
 
-    tntdb::Datetime Value::getDatetime() const
-    {
-      if (isNull())
+tntdb::Datetime Value::getDatetime() const
+{
+    if (isNull())
         throw NullValue();
 
-      switch (type)
-      {
+    switch (type)
+    {
         case SQLT_DAT:
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-          return datetime.getDatetime();
+            return datetime.getDatetime();
 
         default:
-          throw TypeError();
-      }
+            throw TypeError();
     }
+}
 
-  }
+}
 }

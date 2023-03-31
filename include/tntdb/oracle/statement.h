@@ -43,108 +43,106 @@
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class Connection;
-    class Cursor;
+namespace oracle
+{
+class Connection;
+class Cursor;
 
-    class Statement : public IStatement
+class Statement : public IStatement
+{
+    friend class Cursor;
+
+    Connection& _conn;
+    std::string _query;
+    OCIStmt* _stmtp;
+
+    class Bind
     {
-        friend class Cursor;
+    public:
+        OCIBind* ptr;
+        std::vector<char> data;
+        sb2 indicator;
+        String string;
+        Datetime datetime;
+        //Blob blob;
+        Number number;
 
-        Connection* conn;
-        std::string query;
-        OCIStmt* stmtp;
+        const char* boundPtr;
+        int boundType;
+        unsigned boundLength;
 
-        class Bind : public cxxtools::RefCounted
+        Bind()
+          : ptr(0),
+            indicator(0),
+            boundPtr(0),
+            boundType(0),
+            boundLength(0)
+          { }
+
+        void setData(const std::string& value)
         {
-          public:
-            OCIBind* ptr;
-            std::vector<char> data;
-            sb2 indicator;
-            String string;
-            Datetime datetime;
-            Blob blob;
-            Number number;
+            data.resize(value.size());
+            value.copy(&data[0], value.size());
+        }
 
-            const char* boundPtr;
-            int boundType;
-            unsigned boundLength;
+        void setData(const char* value, unsigned size)
+        {
+            data.resize(size);
+            memcpy(&data[0], value, size);
+        }
 
-            Bind()
-              : ptr(0),
-                indicator(0),
-                boundPtr(0),
-                boundType(0),
-                boundLength(0)
-              { }
-            void setData(const std::string& value)
-            {
-              data.resize(value.size());
-              value.copy(&data[0], value.size());
-            }
-            void setData(const char* value, unsigned size)
-            {
-              data.resize(size);
-              memcpy(&data[0], value, size);
-            }
-            void setNull(bool sw = true)
-            {
-              indicator = sw ? -1 : 0;
-            }
-        };
-
-        typedef std::map<std::string, cxxtools::SmartPtr<Bind> > BindMapType;
-        BindMapType bindMap;
-
-        Bind* getBindPtr(const std::string& col);
-        Bind& getBind(const std::string& col)   { return *getBindPtr(col); }
-
-      public:
-        /** convenience method */
-        void checkError(sword ret, const char* function = 0) const
-          { conn->checkError(ret, function); }
-
-        Statement(Connection* conn, const std::string& query);
-        ~Statement();
-
-        // methods of IStatement
-
-        void clear();
-        void setNull(const std::string& col);
-        void setBool(const std::string& col, bool data);
-        void setShort(const std::string& col, short data);
-        void setInt(const std::string& col, int data);
-        void setLong(const std::string& col, long data);
-        void setUnsignedShort(const std::string& col, unsigned short data);
-        void setUnsigned(const std::string& col, unsigned data);
-        void setUnsignedLong(const std::string& col, unsigned long data);
-        void setInt32(const std::string& col, int32_t data);
-        void setUnsigned32(const std::string& col, uint32_t data);
-        void setInt64(const std::string& col, int64_t data);
-        void setUnsigned64(const std::string& col, uint64_t data);
-        void setDecimal(const std::string& col, const Decimal& data);
-        void setFloat(const std::string& col, float data);
-        void setDouble(const std::string& col, double data);
-        void setChar(const std::string& col, char data);
-        void setString(const std::string& col, const std::string& data);
-        void setBlob(const std::string& col, const tntdb::Blob& data);
-        void setDate(const std::string& col, const Date& data);
-        void setTime(const std::string& col, const Time& data);
-        void setDatetime(const std::string& col, const tntdb::Datetime& data);
-
-        size_type execute();
-        tntdb::Result select();
-        tntdb::Row selectRow();
-        tntdb::Value selectValue();
-        ICursor* createCursor(unsigned fetchsize);
-
-        // getter
-        Connection* getConnection() const     { return conn; }
-        OCIStmt* getHandle();
-        OCIError* getErrorHandle() const      { return conn->getErrorHandle(); }
+        void setNull(bool sw = true)
+        {
+            indicator = sw ? -1 : 0;
+        }
     };
-  }
+
+    typedef std::map<std::string, std::shared_ptr<Bind>> BindMapType;
+    BindMapType bindMap;
+
+    std::shared_ptr<Bind> getBindPtr(const std::string& col);
+    Bind& getBind(const std::string& col)   { return *getBindPtr(col); }
+
+public:
+    Statement(Connection& _conn, const std::string& _query);
+    ~Statement();
+
+    // methods of IStatement
+
+    void clear();
+    void setNull(const std::string& col);
+    void setBool(const std::string& col, bool data);
+    void setShort(const std::string& col, short data);
+    void setInt(const std::string& col, int data);
+    void setLong(const std::string& col, long data);
+    void setUnsignedShort(const std::string& col, unsigned short data);
+    void setUnsigned(const std::string& col, unsigned data);
+    void setUnsignedLong(const std::string& col, unsigned long data);
+    void setInt32(const std::string& col, int32_t data);
+    void setUnsigned32(const std::string& col, uint32_t data);
+    void setInt64(const std::string& col, int64_t data);
+    void setUnsigned64(const std::string& col, uint64_t data);
+    void setDecimal(const std::string& col, const Decimal& data);
+    void setFloat(const std::string& col, float data);
+    void setDouble(const std::string& col, double data);
+    void setChar(const std::string& col, char data);
+    void setString(const std::string& col, const std::string& data);
+    void setBlob(const std::string& col, const tntdb::Blob& data);
+    void setDate(const std::string& col, const Date& data);
+    void setTime(const std::string& col, const Time& data);
+    void setDatetime(const std::string& col, const tntdb::Datetime& data);
+
+    size_type execute();
+    tntdb::Result select();
+    tntdb::Row selectRow();
+    tntdb::Value selectValue();
+    std::shared_ptr<ICursor> createCursor(unsigned fetchsize);
+
+    // getter
+    Connection& getConnection() const     { return _conn; }
+    OCIStmt* getHandle();
+};
+}
 }
 
 #endif // TNTDB_ORACLE_SQLSTATEMENT_H

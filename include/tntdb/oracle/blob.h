@@ -33,47 +33,46 @@
 #include <tntdb/date.h>
 #include <tntdb/time.h>
 #include <tntdb/blob.h>
-#include <cxxtools/smartptr.h>
 #include <tntdb/oracle/connection.h>
 #include <oci.h>
+#include <memory>
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class Blob
+namespace oracle
+{
+class Blob
+{
+    Connection* _conn;
+    OCILobLocator* _lob;
+    bool _release;
+
+    // low-level wrappers
+    void ociDescriptorAlloc();
+    void ociDescriptorFree();
+
+    Blob(const Blob&) = delete;
+    Blob& operator=(const Blob&) = delete;
+
+public:
+    Blob() : _lob(0), _release(false) { }
+    Blob(Connection& conn, OCILobLocator* lob, bool release = false);
+    Blob(Connection& conn, const char* data, ub4 count);
+
+    ~Blob()
     {
-        Connection* conn;
-        OCILobLocator* lob;
-        bool release;
-
-        // low-level wrappers
-        void ociDescriptorAlloc();
-        void ociDescriptorFree();
-
-        Blob(const Blob&) { }
-        Blob& operator=(const Blob&) { return *this; }
-
-      public:
-        Blob() : lob(0), release(false) { }
-        Blob(Connection* conn, OCILobLocator* lob, bool release = false);
-        Blob(Connection* conn, const char* data, ub4 count);
-
-        ~Blob()
-        {
-          if (release && lob)
+        if (_release && _lob)
             ociDescriptorFree();
-        }
+    }
 
-        void allocateHandle();
-        void setData(Connection* conn, const char* data, ub4 count);
-        void getData(tntdb::Blob& ret) const;
+    void allocateHandle();
+    void setData(Connection* conn, const char* data, ub4 count);
+    void getData(tntdb::Blob& ret) const;
 
-        OCILobLocator*& getHandle(Connection* conn);
-    };
+    OCILobLocator*& getHandle(Connection* conn);
+};
 
-  }
+}
 }
 
 #endif // TNTDB_ORACLE_BLOB_H
-

@@ -31,35 +31,32 @@
 
 #include <tntdb/iface/icursor.h>
 #include <tntdb/row.h>
-#include <cxxtools/smartptr.h>
 #include <oci.h>
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class Statement;
-    class SingleRow;
+namespace oracle
+{
+class Statement;
+class SingleRow;
+class Connection;
 
-    class Cursor : public ICursor
-    {
-        cxxtools::SmartPtr<Statement> stmt;
-        OCIStmt* stmtp;
-        tntdb::Row row;
+class Cursor : public ICursor
+{
+    Connection& _conn;
+    OCIStmt* _stmtp;
 
-        unsigned fetchsize;
-        SingleRow* srow;
-        ub4 rowcount;
+    unsigned _fetchsize;
+    std::shared_ptr<SingleRow> _row;
+    ub4 _rowcount;
 
-      public:
-        Cursor(Statement* stmt, unsigned fetchsize);
-        ~Cursor();
+public:
+    Cursor(Statement& stmt, unsigned fetchsize);
 
-        // method for ICursor
-        tntdb::Row fetch();
-    };
-  }
+    // method for ICursor
+    tntdb::Row fetch();
+};
+}
 }
 
 #endif // TNTDB_ORACLE_CURSOR_H
-

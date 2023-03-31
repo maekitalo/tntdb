@@ -35,27 +35,27 @@
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class SingleRow : public IRow
-    {
-        MultiRow::Ptr _mr;
-        unsigned _row;
-        typedef std::vector<SingleValue::Ptr> Values;
-        Values _values;
+namespace oracle
+{
+class SingleRow : public IRow
+{
+    std::shared_ptr<MultiRow> _mr;
+    unsigned _row;
+    typedef std::vector<std::shared_ptr<SingleValue>> Values;
+    Values _values;
 
-      public:
-        SingleRow(MultiRow::Ptr mr, unsigned row);
+public:
+    SingleRow(std::shared_ptr<MultiRow> mr, unsigned row);
 
-        unsigned row() const  { return _row; }
-        void row(unsigned r);
+    unsigned row() const  { return _row; }
+    void row(unsigned r);
 
-        virtual size_type size() const;
-        virtual tntdb::Value getValueByNumber(size_type field_num) const;
-        virtual tntdb::Value getValueByName(const std::string& field_name) const;
-        virtual std::string getColumnName(size_type field_num) const;
-    };
-  }
+    virtual size_type size() const;
+    virtual tntdb::Value getValueByNumber(size_type field_num) const;
+    virtual tntdb::Value getValueByName(const std::string& field_name) const;
+    virtual std::string getColumnName(size_type field_num) const;
+};
+}
 }
 
 #endif // TNTDB_ORACLE_SINGLEROW_H
