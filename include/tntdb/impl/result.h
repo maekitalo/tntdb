@@ -35,30 +35,30 @@
 
 namespace tntdb
 {
-  class ResultImpl : public IResult
-  {
-    public:
-      typedef std::vector<Row> data_type;
+class ResultImpl : public IResult
+{
+public:
+    typedef std::vector<Row> data_type;
 
-    private:
-      data_type data;
+private:
+    data_type data;
 
-    public:
-      ResultImpl()
-      { }
+public:
+    ResultImpl()
+    { }
 
-      explicit ResultImpl(const data_type& data_)
-        : data(data_)
-      { }
+    explicit ResultImpl(const data_type& data_)
+      : data(data_)
+    { }
 
-      // methods from IResult
-      virtual Row getRow(size_type tup_num) const;
-      virtual size_type size() const;
-      virtual size_type getFieldCount() const;
+    // methods from IResult
+    virtual Row getRow(size_type tup_num) const;
+    virtual size_type size() const;
+    virtual size_type getFieldCount() const;
 
-      // specific methods
-      void add(const Row& row)   { data.push_back(row); }
-  };
+    // specific methods
+    void add(const Row& row)   { data.push_back(row); }
+};
 }
 
 #endif // TNTDB_IMPL_RESULT_H

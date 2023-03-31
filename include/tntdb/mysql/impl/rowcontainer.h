@@ -32,25 +32,24 @@
 #include <tntdb/iface/iresult.h>
 #include <tntdb/iface/irow.h>
 #include <vector>
-#include <cxxtools/smartptr.h>
+#include <memory>
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    class RowContainer : public IResult
-    {
-        std::vector<cxxtools::SmartPtr<IRow> > rows;
+namespace mysql
+{
+class RowContainer : public IResult
+{
+    std::vector<std::shared_ptr<IRow>> rows;
 
-      public:
-        void addRow(IRow* row)  { rows.push_back(row); }
+public:
+    void addRow(std::shared_ptr<IRow> row)  { rows.emplace_back(row); }
 
-        Row getRow(size_type tup_num) const;
-        size_type size() const;
-        size_type getFieldCount() const;
-    };
-  }
+    Row getRow(size_type tup_num) const;
+    size_type size() const;
+    size_type getFieldCount() const;
+};
+}
 }
 
 #endif // TNTDB_MYSQL_IMPL_ROWCONTAINER_H
-

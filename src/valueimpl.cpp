@@ -39,181 +39,181 @@
 
 namespace
 {
-  bool isTrue(char ch)
-  {
+bool isTrue(char ch)
+{
     return ch == 't' || ch == 'T' || ch == 'y' || ch == 'Y' || ch == '1';
-  }
+}
 
-  template <typename T>
-  T getValue(const std::string& s, const char* tname)
-  {
+template <typename T>
+T getValue(const std::string& s, const char* tname)
+{
     try
     {
-        return cxxtools::convert<T>(s);
+            return cxxtools::convert<T>(s);
     }
     catch (const cxxtools::ConversionError&)
     {
-      std::ostringstream msg;
-      msg << "can't convert \"" << s << "\" to " << tname;
-      throw tntdb::TypeError(msg.str());
+        std::ostringstream msg;
+        msg << "can't convert \"" << s << "\" to " << tname;
+        throw tntdb::TypeError(msg.str());
     }
-  }
+}
 
 }
 
 namespace tntdb
 {
-  bool ValueImpl::isNull() const
-  {
+bool ValueImpl::isNull() const
+{
     return null;
-  }
+}
 
-  bool ValueImpl::getBool() const
-  {
+bool ValueImpl::getBool() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return !data.empty()
         && isTrue(data.at(0));
-  }
+}
 
-  short ValueImpl::getShort() const
-  {
+short ValueImpl::getShort() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<short>(data, "short");
-  }
+}
 
-  int ValueImpl::getInt() const
-  {
+int ValueImpl::getInt() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<int>(data, "int");
-  }
+}
 
-  long ValueImpl::getLong() const
-  {
+long ValueImpl::getLong() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<long>(data, "long");
-  }
+}
 
-  unsigned short ValueImpl::getUnsignedShort() const
-  {
+unsigned short ValueImpl::getUnsignedShort() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<unsigned short>(data, "unsigned short");
-  }
+}
 
-  unsigned ValueImpl::getUnsigned() const
-  {
+unsigned ValueImpl::getUnsigned() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<unsigned>(data, "unsigned");
-  }
+}
 
-  unsigned long ValueImpl::getUnsignedLong() const
-  {
+unsigned long ValueImpl::getUnsignedLong() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<unsigned long>(data, "unsigned long");
-  }
+}
 
-  int32_t ValueImpl::getInt32() const
-  {
+int32_t ValueImpl::getInt32() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<int32_t>(data, "int32_t");
-  }
+}
 
-  uint32_t ValueImpl::getUnsigned32() const
-  {
+uint32_t ValueImpl::getUnsigned32() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<uint32_t>(data, "uint32_t");
-  }
+}
 
-  int64_t ValueImpl::getInt64() const
-  {
+int64_t ValueImpl::getInt64() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<int64_t>(data, "int64_t");
-  }
+}
 
-  uint64_t ValueImpl::getUnsigned64() const
-  {
+uint64_t ValueImpl::getUnsigned64() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<uint64_t>(data, "uint64_t");
-  }
+}
 
-  Decimal ValueImpl::getDecimal() const
-  {
+Decimal ValueImpl::getDecimal() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<Decimal>(data, "Decimal");
-  }
+}
 
-  float ValueImpl::getFloat() const
-  {
+float ValueImpl::getFloat() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<float>(data, "float");
-  }
+}
 
-  double ValueImpl::getDouble() const
-  {
+double ValueImpl::getDouble() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return getValue<double>(data, "double");
-  }
+}
 
-  char ValueImpl::getChar() const
-  {
+char ValueImpl::getChar() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return data.at(0);
-  }
+}
 
-  void ValueImpl::getString(std::string& ret) const
-  {
+void ValueImpl::getString(std::string& ret) const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     ret.assign(data);
-  }
+}
 
-  void ValueImpl::getBlob(Blob& ret) const
-  {
+void ValueImpl::getBlob(Blob& ret) const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     ret.assign(data.data(), data.size());
-  }
+}
 
-  Date ValueImpl::getDate() const
-  {
+Date ValueImpl::getDate() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return Date::fromIso(data);
-  }
+}
 
-  Time ValueImpl::getTime() const
-  {
+Time ValueImpl::getTime() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return Time::fromIso(data);
-  }
+}
 
-  Datetime ValueImpl::getDatetime() const
-  {
+Datetime ValueImpl::getDatetime() const
+{
     if (null)
-      throw NullValue();
+        throw NullValue();
     return Datetime::fromIso(data);
-  }
+}
 
-  void IValue::getUString(cxxtools::String& ret) const
-  {
+void IValue::getUString(cxxtools::String& ret) const
+{
     std::string r;
     getString(r);
     ret = cxxtools::Utf8Codec::decode(r);
-  }
+}
 
 }

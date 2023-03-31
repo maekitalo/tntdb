@@ -29,23 +29,27 @@
 #ifndef TNTDB_IFACE_IRESULT_H
 #define TNTDB_IFACE_IRESULT_H
 
-#include <cxxtools/refcounted.h>
-
 namespace tntdb
 {
-  class Row;
+class Row;
 
-  /// common inteface for resultset
-  class IResult : public cxxtools::RefCounted
-  {
-    public:
-      typedef unsigned size_type;
-      typedef Row value_type;
+/// common inteface for resultset
+class IResult
+{
+    IResult(const IResult&) = delete;
+    IResult& operator=(const IResult&) = delete;
 
-      virtual Row getRow(size_type tup_num) const = 0;
-      virtual size_type size() const = 0;
-      virtual size_type getFieldCount() const = 0;
-  };
+protected:
+    IResult() { }
+
+public:
+    typedef unsigned size_type;
+    typedef Row value_type;
+
+    virtual Row getRow(size_type tup_num) const = 0;
+    virtual size_type size() const = 0;
+    virtual size_type getFieldCount() const = 0;
+};
 }
 
 #endif // TNTDB_IFACE_IRESULT_H

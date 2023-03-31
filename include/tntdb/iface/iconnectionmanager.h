@@ -41,18 +41,18 @@
 
 namespace tntdb
 {
-  class Connection;
+class Connection;
 
-  class IConnectionManager
-  {
-      IConnectionManager(const IConnectionManager&) { }
-      IConnectionManager& operator=(const IConnectionManager&) { return *this; }
+class IConnectionManager
+{
+    IConnectionManager(const IConnectionManager&) = delete;
+    IConnectionManager& operator=(const IConnectionManager&) = delete;
 
-    public:
-      IConnectionManager() { }
-      virtual ~IConnectionManager() { }
-      virtual Connection connect(const std::string& url, const std::string& username, const std::string& password) = 0;
-  };
+public:
+    IConnectionManager() { }
+    virtual ~IConnectionManager() { }
+    virtual Connection connect(const std::string& url, const std::string& username, const std::string& password) = 0;
+};
 }
 
 #endif // TNTDB_IFACE_ICONNECTIONMANAGER_H

@@ -37,116 +37,114 @@ log_define("tntdb.poolconnection")
 
 namespace tntdb
 {
-  PoolConnection::PoolConnection(ConnectionPool::PoolObjectType connection_)
-    : connection(connection_),
-      inTransaction(false),
-      drop(false)
-  {
-    log_debug("PoolConnection " << this << " for connection " << connection->getImpl());
-  }
+PoolConnection::PoolConnection(std::shared_ptr<IConnection>&& connection, ConnectionPool& connectionPool)
+    : _connectionPool(connectionPool),
+      _connection(connection),
+      _inTransaction(false),
+      _drop(false)
+{
+    log_debug("PoolConnection " << this << " for connection " << _connection);
+}
 
-  PoolConnection::~PoolConnection()
-  {
+PoolConnection::~PoolConnection()
+{
     // don't put the connection back to the free pool, when there is a
-    // pending transaction
-    if (inTransaction || drop)
-    {
-      log_debug("don't reuse connection " << connection->getImpl());
-      connection.release();
-    }
-    else
-      log_debug("reuse connection " << connection->getImpl());
-  }
+    // pending transaction or something unusual has happened
+    if (_inTransaction || _drop)
+        log_debug("don't reuse connection " << _connection);
+   else
+       _connectionPool.put(_connection);
+}
 
-  void PoolConnection::beginTransaction()
-  {
-    connection->beginTransaction();
-    inTransaction = true;
-  }
+void PoolConnection::beginTransaction()
+{
+    _connection->beginTransaction();
+    _inTransaction = true;
+}
 
-  void PoolConnection::commitTransaction()
-  {
-    connection->commitTransaction();
-    inTransaction = false;
-  }
+void PoolConnection::commitTransaction()
+{
+    _connection->commitTransaction();
+    _inTransaction = false;
+}
 
-  void PoolConnection::rollbackTransaction()
-  {
-    connection->rollbackTransaction();
-    inTransaction = false;
+void PoolConnection::rollbackTransaction()
+{
+    _connection->rollbackTransaction();
+    _inTransaction = false;
 
     // When a rollback has been done, this may be a indication, that something
     // weird has happened, so we do not reuse that connection.
 
-    drop = true;
-  }
+    _drop = true;
+}
 
-  PoolConnection::size_type PoolConnection::execute(const std::string& query)
-  {
-    return connection->execute(query);
-  }
+PoolConnection::size_type PoolConnection::execute(const std::string& query)
+{
+    return _connection->execute(query);
+}
 
-  Result PoolConnection::select(const std::string& query)
-  {
-    return connection->select(query);
-  }
+Result PoolConnection::select(const std::string& query)
+{
+    return _connection->select(query);
+}
 
-  Row PoolConnection::selectRow(const std::string& query)
-  {
-    return connection->selectRow(query);
-  }
+Row PoolConnection::selectRow(const std::string& query)
+{
+    return _connection->selectRow(query);
+}
 
-  Value PoolConnection::selectValue(const std::string& query)
-  {
-    return connection->selectValue(query);
-  }
+Value PoolConnection::selectValue(const std::string& query)
+{
+    return _connection->selectValue(query);
+}
 
-  Statement PoolConnection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
-  {
-    return connection->prepareWithLimit(query, limit, offset);
-  }
+Statement PoolConnection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+{
+    return _connection->prepareWithLimit(query, limit, offset);
+}
 
-  Statement PoolConnection::prepare(const std::string& query)
-  {
-    return connection->prepare(query);
-  }
+Statement PoolConnection::prepare(const std::string& query)
+{
+    return _connection->prepare(query);
+}
 
-  Statement PoolConnection::prepareCached(const std::string& query, const std::string& key)
-  {
-    return connection->prepareCached(query, key);
-  }
+Statement PoolConnection::prepareCached(const std::string& query, const std::string& key)
+{
+    return _connection->prepareCached(query, key);
+}
 
-  Statement PoolConnection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
-  {
-    return connection->prepareCachedWithLimit(query, limit, offset, key);
-  }
+Statement PoolConnection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
+{
+    return _connection->prepareCachedWithLimit(query, limit, offset, key);
+}
 
-  void PoolConnection::clearStatementCache()
-  {
-    return connection->clearStatementCache();
-  }
+void PoolConnection::clearStatementCache()
+{
+    return _connection->clearStatementCache();
+}
 
-  bool PoolConnection::clearStatementCache(const std::string& key)
-  {
-    return connection->clearStatementCache(key);
-  }
+bool PoolConnection::clearStatementCache(const std::string& key)
+{
+    return _connection->clearStatementCache(key);
+}
 
-  bool PoolConnection::ping()
-  {
-    bool ok = connection->ping();
+bool PoolConnection::ping()
+{
+    bool ok = _connection->ping();
     if (!ok)
-      drop = true;
+        _drop = true;
     return ok;
-  }
+}
 
-  long PoolConnection::lastInsertId(const std::string& name)
-  {
-    return connection->lastInsertId(name);
-  }
+long PoolConnection::lastInsertId(const std::string& name)
+{
+    return _connection->lastInsertId(name);
+}
 
-  void PoolConnection::lockTable(const std::string& tablename, bool exclusive)
-  {
-    connection->getImpl()->lockTable(tablename, exclusive);
-  }
+void PoolConnection::lockTable(const std::string& tablename, bool exclusive)
+{
+    _connection->lockTable(tablename, exclusive);
+}
 
 }

@@ -43,68 +43,71 @@ namespace tntdb
     in Blob objects. The non-virtual interface consists of a pointer to the
     blob-data and its size. The implementor has to override three virtual methods,
     IBlob::assign, IBlob::create and IBlob::destroy. The main purpose of these
-    methods is to customize memory allocation of blob-data, aswell as the shared
+    methods is to customize memory allocation of blob-data, as well as the shared
     implementation class derived from IBlob. A default implementation, called
     BlobImpl, is provided, that uses new/delete and the implementation class.
 */
-class IBlob : public cxxtools::AtomicRefCounted
+class IBlob
 {
-    public:
-        /** @brief Destructor
-        */
-        virtual ~IBlob();
+    IBlob(const IBlob&) = delete;
+    IBlob& operator=(const IBlob&) = delete;
 
-        /** @brief Assign data of a given length
+public:
+    /** @brief Destructor
+    */
+    virtual ~IBlob();
 
-            The \a len bytes of the data pointed to by \a data are copied
-            to this blob.
-        */
-        virtual void assign(const char* data, std::size_t len) = 0;
+    /** @brief Assign data of a given length
 
-        /** @brief Makes sure, the buffer has at least \a len bytes.
-        */
-        virtual char* reserve(std::size_t len, bool shrink) = 0;
+        The \a len bytes of the data pointed to by \a data are copied
+        to this blob.
+    */
+    virtual void assign(const char* data, std::size_t len) = 0;
 
-        /** @brief Create a value implementation
+    /** @brief Makes sure, the buffer has at least \a len bytes.
+    */
+    virtual char* reserve(std::size_t len, bool shrink) = 0;
 
-            Returns a pointer to a implementation class derived from IBlob.
-            IBlob::destroy must be implemented accordingly to destroy this
-            instance.
-        */
-        virtual IBlob* create() const = 0;
+    /** @brief Create a value implementation
 
-        /** @brief Destroy a value implementation
+        Returns a pointer to a implementation class derived from IBlob.
+        IBlob::destroy must be implemented accordingly to destroy this
+        instance.
+    */
+    virtual IBlob* create() const = 0;
 
-            Destroys an instance previously created by the IBlob::create.
-        */
-        virtual void destroy() = 0;
+    /** @brief Destroy a value implementation
 
-        /** @brief Returns the size of the blob-data.
-        */
-        std::size_t size() const
-        { return _size; }
+        Destroys an instance previously created by the IBlob::create.
+    */
+    virtual void destroy() = 0;
 
-        /** @brief Returns a pointer to the blob-data or 0 if the blob is empty
-        */
-        const char* data() const
-        { return _data; }
+    /** @brief Returns the size of the blob-data.
+    */
+    std::size_t size() const
+    { return _size; }
 
-        /** @brief Returns true if the two instances contain the same data
-        */
-        bool operator==(const IBlob& other) const
-        {
-            return _size == other._size &&
-                ( std::strncmp(_data, other._data, _size) == 0 );
-        }
+    /** @brief Returns a pointer to the blob-data or 0 if the blob is empty
+    */
+    const char* data() const
+    { return _data; }
 
-    protected:
-        IBlob()
-        : _data(0)
-        , _size(0)
-        { }
+    /** @brief Returns true if the two instances contain the same data
+    */
+    bool operator==(const IBlob& other) const
+    {
+        return _size == other._size &&
+            ( std::strncmp(_data, other._data, _size) == 0 );
+    }
 
-        char* _data;
-        std::size_t _size;
+protected:
+    IBlob()
+    : _data(0)
+    , _size(0)
+    { }
+
+    char* _data;
+    std::size_t _size;
 };
 
 }

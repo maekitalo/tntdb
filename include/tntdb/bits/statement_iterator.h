@@ -36,66 +36,66 @@
 
 namespace tntdb
 {
-  class RowReader;
+class RowReader;
 
-  /**
-   * This class represents a database-cursor.
-   */
-  class Statement::const_iterator
-      : public std::iterator<std::forward_iterator_tag, Row>
-  {
-      Row current;
-      cxxtools::SmartPtr<ICursor> cursor;
+/**
+ * This class represents a database-cursor.
+ */
+class Statement::const_iterator
+    : public std::iterator<std::forward_iterator_tag, Row>
+{
+    Row current;
+    std::shared_ptr<ICursor> cursor;
 
-    public:
-      explicit const_iterator(ICursor* cursor_ = 0);
+public:
+    explicit const_iterator(ICursor* cursor_ = 0);
 
-      /**
-       * Returns true, when the cursor points to the same iteration as the
-       * passed iterator.
-       */
-      bool operator== (const const_iterator& c) const
-        { return cursor == c.cursor; }
-      /**
-       * Returns true, when the cursor does not point to the same iteration as
-       * the passed iterator.
-       */
-      bool operator!= (const const_iterator& c) const
-        { return cursor != c.cursor; }
+    /**
+     * Returns true, when the cursor points to the same iteration as the
+     * passed iterator.
+     */
+    bool operator== (const const_iterator& c) const
+      { return cursor == c.cursor; }
+    /**
+     * Returns true, when the cursor does not point to the same iteration as
+     * the passed iterator.
+     */
+    bool operator!= (const const_iterator& c) const
+      { return cursor != c.cursor; }
 
-      /**
-       * Fetches the next row. If no rows are available, the cursor is closed
-       * and removed from this class.
-       */
-      const_iterator& operator++();
-      const_iterator operator++(int);
+    /**
+     * Fetches the next row. If no rows are available, the cursor is closed
+     * and removed from this class.
+     */
+    const_iterator& operator++();
+    const_iterator operator++(int);
 
-      /**
-       * Returns the current tntdb::Row-object.
-       */
-      const Row& operator* () const   { return current; }
-      /**
-       * This operator makes the const_iterator look like a pointer.
-       */
-      const Row* operator-> () const  { return &current; }
+    /**
+     * Returns the current tntdb::Row-object.
+     */
+    const Row& operator* () const   { return current; }
+    /**
+     * This operator makes the const_iterator look like a pointer.
+     */
+    const Row* operator-> () const  { return &current; }
 
-      /// Instantiates a tntdb::RowReader and fetches the value of the first column.
-      template <typename T>
-      RowReader get(T& ret) const;
+    /// Instantiates a tntdb::RowReader and fetches the value of the first column.
+    template <typename T>
+    RowReader get(T& ret) const;
 
-      /// Instantiates a tntdb::RowReader and fetches the value of the first column and sets the null indicator.
-      template <typename T>
-      RowReader get(T& ret, bool& nullInd) const;
+    /// Instantiates a tntdb::RowReader and fetches the value of the first column and sets the null indicator.
+    template <typename T>
+    RowReader get(T& ret, bool& nullInd) const;
 
-      /**
-       * Returns the actual implementation-class.
-       */
-      const ICursor* getImpl() const  { return &*cursor; }
-  };
+    /**
+     * Returns the actual implementation-class.
+     */
+    const ICursor* getImpl() const  { return &*cursor; }
+};
 
-  /// Alternative name for the statement iterator.
-  /// It may be easier to write and read.
-  typedef Statement::const_iterator Cursor;
+/// Alternative name for the statement iterator.
+/// It may be easier to write and read.
+typedef Statement::const_iterator Cursor;
 }
 
 #endif // TNTDB_BITS_STATEMENT_ITERATOR_H

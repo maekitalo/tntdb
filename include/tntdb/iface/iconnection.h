@@ -29,57 +29,62 @@
 #ifndef TNTDB_IFACE_ICONNECTION_H
 #define TNTDB_IFACE_ICONNECTION_H
 
-#include <cxxtools/refcounted.h>
-#include <cxxtools/smartptr.h>
 #include <string>
+#include <memory>
 #include <map>
 
 namespace tntdb
 {
-  class Result;
-  class Row;
-  class Value;
-  class Statement;
-  class IStatement;
+class Result;
+class Row;
+class Value;
+class Statement;
+class IStatement;
 
-  class IConnection : public cxxtools::RefCounted
-  {
-    public:
-      typedef unsigned size_type;
+class IConnection
+{
+    IConnection(const IConnection&) = delete;
+    IConnection& operator=(const IConnection&) = delete;
 
-      virtual void beginTransaction() = 0;
-      virtual void commitTransaction() = 0;
-      virtual void rollbackTransaction() = 0;
+protected:
+    IConnection() { }
 
-      virtual size_type execute(const std::string& query) = 0;
-      virtual Result select(const std::string& query) = 0;
-      virtual Row selectRow(const std::string& query) = 0;
-      virtual Value selectValue(const std::string& query) = 0;
-      virtual Statement prepare(const std::string& query) = 0;
-      virtual Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset) = 0;
-      virtual Statement prepareCached(const std::string& query, const std::string& key) = 0;
-      virtual Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key) = 0;
-      virtual void clearStatementCache() = 0;
-      virtual bool clearStatementCache(const std::string& key) = 0;
-      virtual bool ping() = 0;
-      virtual long lastInsertId(const std::string& name) = 0;
-      virtual void lockTable(const std::string& tablename, bool exclusive) = 0;
+public:
+    typedef unsigned size_type;
 
-      // helper function, which replaces '%u' with username and '%p' with password in url
-      static std::string url(const std::string& url, const std::string& username, const std::string& password);
-  };
+    virtual void beginTransaction() = 0;
+    virtual void commitTransaction() = 0;
+    virtual void rollbackTransaction() = 0;
 
-  class IStmtCacheConnection : public IConnection
-  {
-      typedef std::map<std::string, cxxtools::SmartPtr<IStatement> > stmtCacheType;
-      stmtCacheType stmtCache;
+    virtual size_type execute(const std::string& query) = 0;
+    virtual Result select(const std::string& query) = 0;
+    virtual Row selectRow(const std::string& query) = 0;
+    virtual Value selectValue(const std::string& query) = 0;
+    virtual Statement prepare(const std::string& query) = 0;
+    virtual Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset) = 0;
+    virtual Statement prepareCached(const std::string& query, const std::string& key) = 0;
+    virtual Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key) = 0;
+    virtual void clearStatementCache() = 0;
+    virtual bool clearStatementCache(const std::string& key) = 0;
+    virtual bool ping() = 0;
+    virtual long lastInsertId(const std::string& name) = 0;
+    virtual void lockTable(const std::string& tablename, bool exclusive) = 0;
 
-    public:
-      virtual Statement prepareCached(const std::string& query, const std::string& key);
-      virtual Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key);
-      virtual void clearStatementCache();
-      virtual bool clearStatementCache(const std::string& key);
-  };
+    // helper function, which replaces '%u' with username and '%p' with password in url
+    static std::string url(const std::string& url, const std::string& username, const std::string& password);
+};
+
+class IStmtCacheConnection : public IConnection
+{
+    typedef std::map<std::string, std::shared_ptr<IStatement> > stmtCacheType;
+    stmtCacheType _stmtCache;
+
+public:
+    virtual Statement prepareCached(const std::string& query, const std::string& key);
+    virtual Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key);
+    virtual void clearStatementCache();
+    virtual bool clearStatementCache(const std::string& key);
+};
 }
 
 #endif // TNTDB_IFACE_ICONNECTION_H

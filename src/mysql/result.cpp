@@ -37,52 +37,51 @@ log_define("tntdb.mysql.result")
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    Result::Result(const tntdb::Connection& c, MYSQL* m, MYSQL_RES* r)
-      : conn(c),
-        mysql(m),
-        result(r)
-    {
-      log_debug("mysql-result " << r);
+namespace mysql
+{
+Result::Result(MYSQL* m, MYSQL_RES* r)
+  : mysql(m),
+    result(r)
+{
+    log_debug("mysql-result " << r);
 
-      log_debug("mysql_field_count");
-      field_count = ::mysql_field_count(m);
-    }
+    log_debug("mysql_field_count");
+    field_count = ::mysql_field_count(m);
+}
 
-    Result::~Result()
+Result::~Result()
+{
+    if (result)
     {
-      if (result)
-      {
         log_debug("mysql_free_result(" << result << ')');
         ::mysql_free_result(result);
-      }
     }
+}
 
-    Row Result::getRow(size_type tup_num) const
-    {
-      log_debug("mysql_data_seek(" << tup_num << ')');
-      ::mysql_data_seek(result, tup_num);
+Row Result::getRow(size_type tup_num) const
+{
+    log_debug("mysql_data_seek(" << tup_num << ')');
+    ::mysql_data_seek(result, tup_num);
 
-      log_debug("mysql_fetch_row");
-      MYSQL_ROW row = ::mysql_fetch_row(result);
-      if (row == 0)
-        throw MysqlError("mysql_fetch_row", mysql);
+    log_debug("mysql_fetch_row");
+    MYSQL_ROW row = ::mysql_fetch_row(result);
+    if (row == 0)
+      throw MysqlError("mysql_fetch_row", mysql);
 
-      const IResult* resc = this;
-      IResult* res = const_cast<IResult*>(resc);
-      return Row(new ResultRow(tntdb::Result(res), result, row));
-    }
+    const IResult* resc = this;
+    IResult* res = const_cast<IResult*>(resc);
+    return Row(new ResultRow(tntdb::Result(res), result, row));
+}
 
-    Result::size_type Result::size() const
-    {
-      log_debug("mysql_num_rows");
-      return ::mysql_num_rows(result);
-    }
+Result::size_type Result::size() const
+{
+    log_debug("mysql_num_rows");
+    return ::mysql_num_rows(result);
+}
 
-    Result::size_type Result::getFieldCount() const
-    {
-      return field_count;
-    }
-  }
+Result::size_type Result::getFieldCount() const
+{
+    return field_count;
+}
+}
 }

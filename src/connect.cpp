@@ -40,91 +40,91 @@ log_define("tntdb.connect")
 
 namespace tntdb
 {
-  typedef std::map<std::string, LibraryManager> librariesType;
-  static librariesType libraries;
-  static cxxtools::Mutex mutex;
+typedef std::map<std::string, LibraryManager> librariesType;
+static librariesType libraries;
+static std::mutex mutex;
 
-  Connection connect(const std::string& url, const std::string& username, const std::string& password)
-  {
+Connection connect(const std::string& url, const std::string& username, const std::string& password)
+{
     log_debug("connect(\"" << url << "\", \"" << username << "\", password)");
 
     std::string::size_type n = url.find(':');
     if (n == std::string::npos)
-      throw Error("invalid dburl \"" + url + '"');
+        throw Error("invalid dburl \"" + url + '"');
 
     std::string driverName =  url.substr(0, n);
 
     std::string libraryUrl = url.substr(n + 1);
     log_debug("driver \"" << driverName << "\" url=\"" << libraryUrl << '"');
 
-    cxxtools::MutexLock lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
 
     // lookup library-manager
     LibraryManager libraryManager;
     librariesType::const_iterator it = libraries.find(driverName);
     if (it == libraries.end())
     {
-      libraryManager = LibraryManager(driverName);
-      libraries[driverName] = libraryManager;
+        libraryManager = LibraryManager(driverName);
+        libraries[driverName] = libraryManager;
     }
     else
-      libraryManager = it->second;
+        libraryManager = it->second;
 
     lock.unlock();
 
     return libraryManager.connect(libraryUrl, username, password);
-  }
+}
 
-  Connection connect(const std::string& url)
-  {
-      return connect(url, std::string(), std::string());
-  }
+Connection connect(const std::string& url)
+{
+    return connect(url, std::string(), std::string());
+}
 
-  static ConnectionPools connectionPools;
+static ConnectionPools connectionPools;
 
-  unsigned cachedConnections()
-  {
-      return connectionPools.getCurrentSize();
-  }
+unsigned cachedConnections()
+{
+    return connectionPools.getCurrentSize();
+}
 
-  unsigned cachedConnections(const std::string& url, const std::string& username, const std::string& password)
-  {
-      return connectionPools.getCurrentSize(url, username, password);
-  }
+unsigned cachedConnections(const std::string& url, const std::string& username, const std::string& password)
+{
+    return connectionPools.getCurrentSize(url, username, password);
+}
 
-  unsigned cachedConnections(const std::string& url)
-  {
-      return connectionPools.getCurrentSize(url, std::string(), std::string());
-  }
+unsigned cachedConnections(const std::string& url)
+{
+    return connectionPools.getCurrentSize(url, std::string(), std::string());
+}
 
-  Connection connectCached(const std::string& url, const std::string& username, const std::string& password)
-  {
+Connection connectCached(const std::string& url, const std::string& username, const std::string& password)
+{
     log_debug("connectCached(\"" << url << "\", \"" << username << "\", password)");
     return connectionPools.connect(url, username, password);
-  }
+}
 
-  Connection connectCached(const std::string& url)
-  {
-      return connectCached(url, std::string(), std::string());
-  }
+Connection connectCached(const std::string& url)
+{
+    return connectCached(url, std::string(), std::string());
+}
 
-  unsigned dropCached(unsigned keep)
-  {
-    return connectionPools.drop(keep);
-  }
+void dropCached(unsigned keep)
+{
+    connectionPools.drop(keep);
+}
 
-  unsigned dropCached(const std::string& url, const std::string& username, const std::string& password, unsigned keep)
-  {
-    return connectionPools.drop(url, username, password, keep);
-  }
+void dropCached(const std::string& url, const std::string& username, const std::string& password, unsigned keep)
+{
+    connectionPools.drop(url, username, password, keep);
+}
 
-  void setMaxPoolSize(unsigned max)
-  {
-    connectionPools.setMaximumSize(max);
-  }
+void setMaxPoolSize(unsigned max)
+{
+    connectionPools.setMaxSpare(max);
+}
 
-  unsigned getMaxPoolSize()
-  {
+unsigned getMaxPoolSize()
+{
     return connectionPools.getMaximumSize();
-  }
+}
 }
