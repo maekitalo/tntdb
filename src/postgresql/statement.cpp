@@ -29,6 +29,8 @@
 #include <tntdb/postgresql/impl/statement.h>
 #include <tntdb/postgresql/impl/connection.h>
 #include <tntdb/postgresql/impl/result.h>
+#include <tntdb/postgresql/impl/resultrow.h>
+#include <tntdb/postgresql/impl/resultvalue.h>
 #include <tntdb/postgresql/impl/cursor.h>
 #include <tntdb/postgresql/error.h>
 #include <tntdb/bits/result.h>
@@ -483,22 +485,22 @@ tntdb::Result Statement::select()
 
 tntdb::Row Statement::selectRow()
 {
-    tntdb::Result result = select();
+    auto result = std::make_shared<Result>(execPrepared());
 
-    if (result.size() <= 0)
+    if (result->size() <= 0)
         throw NotFound();
 
-    return result[0];
+    return Row(std::make_shared<ResultRow>(result, 0));
 }
 
 tntdb::Value Statement::selectValue()
 {
-    tntdb::Result result = select();
+    auto result = std::make_shared<Result>(execPrepared());
 
-    if (result.size() <= 0)
+    if (result->size() <= 0)
         throw NotFound();
 
-    return result[0][0];
+    return Value(std::make_shared<ResultValue>(result, *result, 0, 0));
 }
 
 std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)

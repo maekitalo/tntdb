@@ -38,17 +38,18 @@ namespace tntdb
 namespace postgresql
 {
 class ResultRow;
+class Result;
 
 class ResultValue : public IValue
 {
-    const ResultRow& _row;
+    std::shared_ptr<Result> _resultref;
+    const Result& _result;
+    unsigned _rownumber;
     int _tup_num;
 
 public:
-    ResultValue(const ResultRow& row, int tup_num)
-      : _row(row),
-        _tup_num(tup_num)
-    { }
+    ResultValue(const std::shared_ptr<Result>& resultref, const Result& result, unsigned rownumber, int tup_num);
+    ResultValue(const Result& result, unsigned rownumber, int tup_num);
 
     virtual bool isNull() const;
     virtual bool getBool() const;

@@ -40,14 +40,10 @@ class Statement;
 
 class Cursor : public ICursor
 {
-    friend class Statement;
-
-    Statement& _statement;
     sqlite3_stmt* _stmt;
 
 public:
-    Cursor(Statement& statement, sqlite3_stmt* stmt);
-    ~Cursor();
+    explicit Cursor(sqlite3_stmt* stmt);
 
     // method for ICursor
     Row fetch();
@@ -56,4 +52,3 @@ public:
 }
 
 #endif // TNTDB_SQLITE_IMPL_CURSOR_H
-

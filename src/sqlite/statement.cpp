@@ -52,7 +52,6 @@ namespace sqlite
 {
 Statement::Statement(Connection& conn, const std::string& query)
 : _stmt(0),
-  _stmtInUse(0),
   _conn(conn),
   _query(query),
   _needReset(false)
@@ -61,27 +60,10 @@ Statement::Statement(Connection& conn, const std::string& query)
 
 Statement::~Statement()
 {
-    for (auto& c: _activeCursors)
-    {
-        log_debug("sqlite3_finalize(" << c->_stmt << ')');
-        ::sqlite3_finalize(c->_stmt);
-        if (_stmt == c->_stmt)
-            _stmt = nullptr;
-        if (_stmtInUse == c->_stmt)
-            _stmtInUse = nullptr;
-        c->_stmt = nullptr;
-    }
-
     if (_stmt)
     {
         log_debug("sqlite3_finalize(" << _stmt << ')');
         ::sqlite3_finalize(_stmt);
-    }
-
-    if (_stmtInUse && _stmtInUse != _stmt)
-    {
-        log_debug("sqlite3_finalize(" << _stmtInUse << ')');
-        ::sqlite3_finalize(_stmtInUse);
     }
 }
 
@@ -111,59 +93,11 @@ sqlite3_stmt* Statement::getBindStmt()
 #endif
 
         log_debug("sqlite3_stmt = " << _stmt);
-
-        if (_stmtInUse)
-        {
-            // get bindings from _stmtInUse
-            log_debug("sqlite3_transfer_bindings(" << _stmtInUse << ", " << _stmt << ')');
-            ret = ::sqlite3_transfer_bindings(_stmtInUse, _stmt);
-            if (ret != SQLITE_OK)
-            {
-                log_debug("sqlite3_finalize(" << _stmt << ')');
-                ::sqlite3_finalize(_stmt);
-                _stmt = 0;
-                throw Execerror("sqlite3_finalize", _stmtInUse, ret);
-            }
-        }
     }
     else if (_needReset)
         reset();
 
     return _stmt;
-}
-
-void Statement::putback(Cursor* cursor)
-{
-    if (!cursor->_stmt)
-        return;
-
-    if (_stmt == 0)
-    {
-        _stmt = cursor->_stmt; // thank you - we can use it
-        if (_stmtInUse == cursor->_stmt)
-            _stmtInUse = 0; // it is not in use any more
-        _needReset = true;
-    }
-    else
-    {
-        // we have already a new statement-handle - destroy the old one
-        log_debug("sqlite3_finalize(" << cursor->_stmt << ')');
-        ::sqlite3_finalize(cursor->_stmt);
-
-        if (_stmtInUse == cursor->_stmt)
-            _stmtInUse = 0;
-    }
-
-    cursor->_stmt = nullptr;
-
-    for (auto it = _activeCursors.begin(); it != _activeCursors.end(); ++it)
-    {
-        if (*it == cursor)
-        {
-            _activeCursors.erase(it);
-            break;
-        }
-    }
 }
 
 int Statement::getBindIndex(const std::string& col)
@@ -613,11 +547,7 @@ Value Statement::selectValue()
 
 std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)
 {
-    _stmtInUse = getBindStmt();
-    _stmt = 0;
-    auto c = std::make_shared<Cursor>(*this, _stmtInUse);
-    _activeCursors.emplace_back(c.get());
-    return c;
+    return std::make_shared<Cursor>(getBindStmt());
 }
 
 }

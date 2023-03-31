@@ -38,26 +38,16 @@ namespace tntdb
 {
 namespace sqlite
 {
-Cursor::Cursor(Statement& statement, sqlite3_stmt* stmt)
-  : _statement(statement),
-    _stmt(stmt)
+Cursor::Cursor(sqlite3_stmt* stmt)
+  : _stmt(stmt)
 { }
-
-Cursor::~Cursor()
-{
-    if (_stmt)
-        _statement.putback(this);
-}
 
 Row Cursor::fetch()
 {
     log_debug("sqlite3_step(" << _stmt << ')');
     int ret = ::sqlite3_step(_stmt);
     if (ret == SQLITE_DONE)
-    {
-        _statement.putback(this);
         return Row();
-    }
     else if (ret != SQLITE_ROW)
         throw Execerror("sqlite3_step", _stmt, ret);
 

@@ -39,13 +39,13 @@ namespace postgresql
 {
 class Result : public IResult
 {
-    PGresult* result;
+    PGresult* _result;
 
 public:
-    Result(PGresult* result);
+    explicit Result(PGresult* result);
     ~Result();
 
-    PGresult* getPGresult() const  { return result; }
+    PGresult* getPGresult() const  { return _result; }
 
     Row getRow(size_type tup_num) const;
     size_type size() const;

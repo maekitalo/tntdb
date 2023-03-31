@@ -358,7 +358,7 @@ Value Connection::selectValue(const std::string& query)
 
 tntdb::Statement Connection::prepare(const std::string& query)
 {
-    return tntdb::Statement(std::make_shared<Statement>(this, &mysql, query));
+    return tntdb::Statement(std::make_shared<Statement>(*this, &mysql, query));
 }
 
 tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)

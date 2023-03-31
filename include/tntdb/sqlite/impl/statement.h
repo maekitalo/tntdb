@@ -31,7 +31,6 @@
 
 #include <tntdb/iface/istatement.h>
 #include <sqlite3.h>
-#include <vector>
 
 namespace tntdb
 {
@@ -43,11 +42,8 @@ class Cursor;
 class Statement : public IStatement
 {
     sqlite3_stmt* _stmt;
-    sqlite3_stmt* _stmtInUse;
     Connection& _conn;
     std::string _query;
-
-    std::vector<Cursor*> _activeCursors;
 
     sqlite3_stmt* getBindStmt();
     int getBindIndex(const std::string& col);
@@ -92,11 +88,8 @@ public:
 
     // specific methods of sqlite-driver
     sqlite3_stmt* getStmt() const   { return _stmt; }
-
-    void putback(Cursor* cursor);
 };
 }
 }
 
 #endif // TNTDB_SQLITE_IMPL_SQLSTATEMENT_H
-

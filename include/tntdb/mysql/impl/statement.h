@@ -45,7 +45,7 @@ class Statement : public IStatement
 {
     typedef std::multimap<std::string, unsigned> hostvarMapType;
 
-    Connection* conn;
+    Connection& conn;
     std::string query;
     BindValues inVars;
     hostvarMapType hostvarMap;
@@ -59,7 +59,7 @@ class Statement : public IStatement
     std::shared_ptr<IRow> fetchRow();
 
 public:
-    Statement(Connection* conn, MYSQL* mysql,
+    Statement(Connection& conn, MYSQL* mysql,
       const std::string& query);
     ~Statement();
 
@@ -96,16 +96,8 @@ public:
 
     // specfic methods
 
-    /// getStmt returns a MYSQL_STMT. The caller is responsable to close
-    /// the statement. If this class has already prepared a statement,
-    /// this is returned and removed from this class.
     MYSQL_STMT* getStmt();
     void execute(MYSQL_STMT* stmt, unsigned fetchsize);
-
-    /// Statement-handles retrieved by getStmt can be offered for reuse
-    /// with this method. Ownership is transfered back to this class.
-    /// If there is already a statement, the offered statement is closed.
-    void putback(MYSQL_STMT* stmt);
 
     MYSQL_FIELD* getFields();
     unsigned getFieldCount();
