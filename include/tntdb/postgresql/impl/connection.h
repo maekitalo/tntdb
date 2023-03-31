@@ -59,7 +59,7 @@ namespace postgresql
 class Result;
 
 /// Implements a connection to a PostgreSQL database.
-class Connection : public IStmtCacheConnection
+class Connection : public IConnection
 {
     PGconn* conn;
     tntdb::Statement currvalStmt;

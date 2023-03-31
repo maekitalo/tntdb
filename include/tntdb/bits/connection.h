@@ -34,6 +34,12 @@
 #include <string>
 #include <memory>
 
+#if __cplusplus >= 201403L
+#define DEPRECATED [[deprecated]]
+#else
+#define DEPRECATED
+#endif
+
 namespace tntdb
 {
 class Result;
@@ -139,8 +145,9 @@ public:
 
         When called again with the same query, the cached object is returned
      */
+    DEPRECATED
     Statement prepareCached(const std::string& query)
-      { return prepareCached(query, query); }
+      { return prepare(query); }
 
     /** Create a new Statement object with the given query and caching key
 
@@ -150,33 +157,40 @@ public:
         Be aware though that when using this, you have to ensure the same
         key won't be used twice.
      */
-    Statement prepareCached(const std::string& query, const std::string& key);
+    DEPRECATED
+    Statement prepareCached(const std::string& query, const std::string&)
+      { return prepare(query); }
 
     /** Create a new Statement object with the given query added by a range limitation.
 
         This is like `prepareWithLimit` but the prepared statement cache is used.
      */
+    DEPRECATED
     Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string())
-      { return prepareCachedWithLimit(query, limit, offset, query); }
+      { return prepareWithLimit(query, limit, offset); }
 
     /** Create a new Statement object with the given query added by a range limitation.
 
         This is like `prepareWithLimit` but the prepared statement cache is
         used. Like in `prepareCached` an optional key can be used.
      */
+    DEPRECATED
     Statement prepareCachedWithLimit(const std::string& query, const
-    std::string& limit, const std::string& offset, const std::string& key);
+    std::string& limit, const std::string& offset, const std::string& key)
+      { return prepareWithLimit(query, limit, offset); }
 
     /// Clear the Statement cache used from prepareCached()
+    DEPRECATED
     void clearStatementCache()
-      { _conn->clearStatementCache(); }
+      { }
 
     /** Remove a query from the statement cache
 
         The return value is true if the given key was found in the cache, false otherwise.
      */
+    DEPRECATED
     bool clearStatementCache(const std::string& key)
-      { return _conn->clearStatementCache(key); }
+      { return true; }
 
     /// Check whether the connection is alive
     bool ping()                        { return _conn->ping(); }

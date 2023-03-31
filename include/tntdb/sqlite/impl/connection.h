@@ -57,7 +57,7 @@ namespace tntdb
 namespace sqlite
 {
 /// Implements a connection to a Sqlite3 database file.
-class Connection : public IStmtCacheConnection
+class Connection : public IConnection
 {
     sqlite3* db;
     unsigned transactionActive;

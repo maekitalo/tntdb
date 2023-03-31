@@ -454,8 +454,8 @@ public:
         tester.testFloat(static_cast<float>(-123));
         tester.testFloat(std::numeric_limits<float>::max() * .999999);
         tester.testFloat(std::numeric_limits<float>::min() * 1.00001);
-        tester.test(std::numeric_limits<double>::infinity());
-        tester.test(-std::numeric_limits<double>::infinity());
+        tester.test(std::numeric_limits<float>::infinity());
+        tester.test(-std::numeric_limits<float>::infinity());
     }
 
     void testFloatFromDecimal()

@@ -244,8 +244,6 @@ Connection::~Connection()
 {
     if (initialized)
     {
-        clearStatementCache();
-
         if (!lockTablesQuery.empty())
         {
             log_debug("mysql_query(\"UNLOCK TABLES\")");

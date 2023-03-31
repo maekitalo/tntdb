@@ -39,7 +39,7 @@ namespace replicate
 {
 class Statement;
 
-class Connection : public IStmtCacheConnection
+class Connection : public IConnection
 {
     friend class Statement;
 
@@ -49,7 +49,6 @@ class Connection : public IStmtCacheConnection
 
 public:
     Connection(const std::string& url, const std::string& username, const std::string& password);
-    ~Connection();
 
     void beginTransaction();
     void commitTransaction();

@@ -56,10 +56,6 @@ public:
     virtual Value selectValue(const std::string& query);
     virtual Statement prepare(const std::string& query);
     virtual Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
-    virtual Statement prepareCached(const std::string& query, const std::string& key);
-    virtual Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key);
-    virtual void clearStatementCache();
-    virtual bool clearStatementCache(const std::string& key);
     virtual bool ping();
     virtual long lastInsertId(const std::string& name);
     virtual void lockTable(const std::string& tablename, bool exclusive);

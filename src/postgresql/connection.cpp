@@ -65,7 +65,6 @@ Connection::~Connection()
 {
     if (conn)
     {
-        clearStatementCache();
         currvalStmt = tntdb::Statement();
         lastvalStmt = tntdb::Statement();
 
