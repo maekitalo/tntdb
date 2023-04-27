@@ -9,6 +9,9 @@ dist_noinst_DATA = \
 noinst_PROGRAMS = \
 	tntdb-test
 
+noinst_HEADERS = \
+    testbase.h
+
 tntdb_test_SOURCES = \
 	testbase.cpp \
 	base-test.cpp \
