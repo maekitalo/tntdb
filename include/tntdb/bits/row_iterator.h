@@ -35,11 +35,15 @@
 namespace tntdb
 {
 class Row::const_iterator
-  : public std::iterator<std::random_access_iterator_tag, Value>
 {
 public:
-    typedef const value_type& const_reference;
-    typedef const value_type* const_pointer;
+    using iterator_category = std::random_access_iterator_tag;
+    using difference_type = int;
+    using value_type = Value;
+    using pointer = value_type*;
+    using reference = value_type&;
+    using const_pointer = const value_type*;
+    using const_reference = const value_type&;
 
 private:
     const IRow* _row;

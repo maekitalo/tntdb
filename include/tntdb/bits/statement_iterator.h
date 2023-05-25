@@ -32,7 +32,6 @@
 #include <tntdb/iface/icursor.h>
 #include <tntdb/bits/row.h>
 #include <tntdb/bits/statement.h>
-#include <iterator>
 
 namespace tntdb
 {
@@ -42,12 +41,19 @@ class RowReader;
  * This class represents a database-cursor.
  */
 class Statement::const_iterator
-    : public std::iterator<std::forward_iterator_tag, Row>
 {
     Row current;
     std::shared_ptr<ICursor> cursor;
 
 public:
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = int;
+    using value_type = Row;
+    using pointer = value_type*;
+    using reference = value_type&;
+    using const_pointer = const value_type*;
+    using const_reference = const value_type&;
+
     const_iterator() { }
     explicit const_iterator(std::shared_ptr<ICursor> cursor_);
 
