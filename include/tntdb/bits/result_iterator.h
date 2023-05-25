@@ -40,7 +40,6 @@ namespace tntdb
  * This implements a constant iterator to a result-set.
  */
 class Result::const_iterator
-  : public std::iterator<std::random_access_iterator_tag, Row>
 {
 public:
     using iterator_category = std::random_access_iterator_tag;
