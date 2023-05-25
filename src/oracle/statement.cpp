@@ -145,7 +145,7 @@ void Statement::setShort(const std::string& col, short data)
     log_debug("OCIStmt(" << getHandle() << ").setShort(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
-    b.setData(reinterpret_cast<char*>(&data), sizeof(int));
+    b.setData(reinterpret_cast<char*>(&data), sizeof(short));
 
     if (b.boundPtr != &b.data[0] || b.boundType != SQLT_INT || b.boundLength != sizeof(short))
     {
