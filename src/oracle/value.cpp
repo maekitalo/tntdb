@@ -563,7 +563,7 @@ float Value::getFloat() const
 
         case SQLT_NUM:
         case SQLT_VNU:
-            return number.getDecimal(errhp).getDouble();
+            return number.getFloat(errhp);
 
         default:
             return getValueFloat<float>(data.begin(), data.begin() + len, "float");
@@ -592,7 +592,7 @@ double Value::getDouble() const
 
         case SQLT_NUM:
         case SQLT_VNU:
-            return number.getDecimal(errhp).getDouble();
+            return number.getDouble(errhp);
 
         default:
             return getValueFloat<double>(data.begin(), data.begin() + len, "double");

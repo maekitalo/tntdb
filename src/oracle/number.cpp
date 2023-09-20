@@ -99,7 +99,6 @@ Number::Number(const Decimal &decimal, OCIError* errhp)
     setDecimal(decimal, errhp);
 }
 
-
 Decimal Number::getDecimal(const OCINumber* handle, OCIError* errhp)
 {
     // there may be strange values in the database, where OCINumberToText fails with OCI-22065
@@ -135,6 +134,30 @@ Decimal Number::getDecimal(const OCINumber* handle, OCIError* errhp)
     log_debug("OCINumberToText => \"" << buffer << '"');
 
     return Decimal(std::string(buffer));
+}
+
+float Number::getFloat(const OCINumber* handle, OCIError* errhp)
+{
+    float value;
+    sword ret = OCINumberToReal(errhp, handle, sizeof(float), &value);
+
+    error::checkError(errhp, ret, "OCINumberToText");
+
+    log_debug("OCINumberToReal => value: " << value);
+
+    return value;
+}
+
+double Number::getDouble(const OCINumber* handle, OCIError* errhp)
+{
+    double value;
+    sword ret = OCINumberToReal(errhp, handle, sizeof(double), &value);
+
+    error::checkError(errhp, ret, "OCINumberToText");
+
+    log_debug("OCINumberToReal => value: " << value);
+
+    return value;
 }
 }
 }
