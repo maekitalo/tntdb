@@ -34,18 +34,21 @@
 
 namespace tntdb
 {
-  namespace oracle
-  {
+namespace oracle
+{
     class Error : public tntdb::Error
     {
-      public:
+    public:
         explicit Error(OCIError* errhp, const char* function = 0);
         explicit Error(const std::string& msg, const char* function = 0);
+
+        static std::string errorMessage(const std::string& str, const char* function = 0);
+        static std::string errorMessage(OCIError* errhp, const char* function = 0);
     };
 
     class InvalidHandle : public Error
     {
-      public:
+    public:
         explicit InvalidHandle(const char* function = 0)
           : Error("OCI_INVALID_HANDLE", function)
           { }
@@ -53,7 +56,7 @@ namespace tntdb
 
     class StillExecuting : public Error
     {
-      public:
+    public:
         explicit StillExecuting(const char* function = 0)
           : Error("OCI_STILL_EXECUTING", function)
           { }
@@ -61,7 +64,7 @@ namespace tntdb
 
     class ErrorContinue : public Error
     {
-      public:
+    public:
         explicit ErrorContinue(const char* function = 0)
           : Error("OCI_CONTINUE", function)
           { }
@@ -69,9 +72,9 @@ namespace tntdb
 
     namespace error
     {
-      void checkError(OCIError* errhp, sword ret, const char* function);
+        void checkError(OCIError* errhp, sword ret, const char* function);
     }
-  }
+}
 }
 
 #endif // TNTDB_ORACLE_ERROR_H
