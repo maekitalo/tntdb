@@ -107,7 +107,7 @@ Decimal Number::getDecimal(const OCINumber* handle, OCIError* errhp)
     long double ld;
     sword ret = OCINumberToReal(errhp, handle, sizeof(long double), &ld);
 
-    error::checkError(errhp, ret, "OCINumberToText");
+    error::checkError(errhp, ret, "OCINumberToReal");
 
     log_debug("OCINumberToReal => value: " << ld << " isnan: " << std::isnan(ld));
     if (std::isnan(ld))
@@ -141,7 +141,7 @@ float Number::getFloat(const OCINumber* handle, OCIError* errhp)
     float value;
     sword ret = OCINumberToReal(errhp, handle, sizeof(float), &value);
 
-    error::checkError(errhp, ret, "OCINumberToText");
+    error::checkError(errhp, ret, "OCINumberToReal");
 
     log_debug("OCINumberToReal => value: " << value);
 
@@ -153,7 +153,7 @@ double Number::getDouble(const OCINumber* handle, OCIError* errhp)
     double value;
     sword ret = OCINumberToReal(errhp, handle, sizeof(double), &value);
 
-    error::checkError(errhp, ret, "OCINumberToText");
+    error::checkError(errhp, ret, "OCINumberToReal");
 
     log_debug("OCINumberToReal => value: " << value);
 
