@@ -71,6 +71,8 @@ Error::Error(const std::string& msg, const char* function)
   : tntdb::Error(errorMessage(msg, function))
 { }
 
+namespace error
+{
 void checkError(OCIError* errhp, sword ret, const char* function)
 {
     switch (ret)
@@ -105,6 +107,7 @@ void checkError(OCIError* errhp, sword ret, const char* function)
             log_error("OCI_CONTINUE");
             throw ErrorContinue(function);
     }
+}
 }
 
 }
