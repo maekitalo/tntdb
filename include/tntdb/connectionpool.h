@@ -52,6 +52,9 @@ class ConnectionPool
     unsigned _maxSpare;
     void put(std::shared_ptr<IConnection>& conn);
 
+    ConnectionPool(const ConnectionPool&) = delete;
+    ConnectionPool& operator=(const ConnectionPool&) = delete;
+
 public:
     explicit ConnectionPool(const std::string& url, const std::string& username, const std::string& password, unsigned maxSpare = 0)
         : _url(url),
@@ -72,8 +75,8 @@ public:
 
 class ConnectionPools
 {
-    ConnectionPools(const ConnectionPools&) { }
-    ConnectionPools& operator=(const ConnectionPools&) { return *this; }
+    ConnectionPools(const ConnectionPools&) = default;
+    ConnectionPools& operator=(const ConnectionPools&) = default;
 
 public:
     struct ConnectionParameter

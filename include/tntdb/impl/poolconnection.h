@@ -36,7 +36,7 @@ namespace tntdb
 {
 class PoolConnection : public IConnection
 {
-    ConnectionPool _connectionPool;
+    ConnectionPool& _connectionPool;
 
     std::shared_ptr<IConnection> _connection;
     bool _inTransaction;
