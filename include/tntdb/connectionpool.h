@@ -47,6 +47,7 @@ class ConnectionPool
     std::string _url;
     std::string _username;
     std::string _password;
+    mutable std::mutex _mutex;
 
     std::vector<std::shared_ptr<IConnection>> _connectionPool;
     unsigned _maxSpare;

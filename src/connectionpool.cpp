@@ -44,6 +44,8 @@ Connection ConnectionPool::connect()
 
     log_debug("current pool size " << getCurrentSize() << " max " << getMaxSpare());
 
+    std::lock_guard<std::mutex> lock(_mutex);
+
     std::shared_ptr<IConnection> c;
     while (!_connectionPool.empty()
         && !_connectionPool.back()->ping())
@@ -67,6 +69,8 @@ Connection ConnectionPool::connect()
 
 void ConnectionPool::put(std::shared_ptr<IConnection>& conn)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
+
     if (_maxSpare == 0 || _connectionPool.size() < _maxSpare)
         _connectionPool.emplace_back(conn);
     else
@@ -75,12 +79,16 @@ void ConnectionPool::put(std::shared_ptr<IConnection>& conn)
 
 void ConnectionPool::drop(unsigned keep)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
+
     if (_connectionPool.size() > keep)
         _connectionPool.resize(keep);
 }
 
 void ConnectionPool::setMaxSpare(unsigned m)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
+
     _maxSpare = m;
     if (_connectionPool.size() > _maxSpare)
         _connectionPool.resize(_maxSpare);
