@@ -35,232 +35,265 @@
 
 namespace
 {
-  bool nearBy(long double v1, long double v2, long double e = 1e-6)
-  {
-    long double q = v1 / v2;
-    return q > 1 - e && q < 1 + e;
-  }
+    class AlmostEqual
+    {
+        long double _value;
+    public:
+        AlmostEqual(long double value)
+            : _value(value)
+            { }
+
+        bool almostEqual(long double value, long double e = 1e-6) const
+        {
+            long double q = _value / value;
+            return q > 1 - e && q < 1 + e;
+        }
+
+        long double value() const
+        { return _value; }
+    };
+
+    bool operator== (long double v1, const AlmostEqual& v2)
+    { return v2.almostEqual(v1); }
+
+    std::ostream& operator<< (std::ostream& out, const AlmostEqual& value)
+    { return out << value.value(); }
 }
 
 class TntdbDecimalTest : public cxxtools::unit::TestSuite
 {
-  public:
+public:
     TntdbDecimalTest()
       : cxxtools::unit::TestSuite("decimal")
     {
-      registerMethod("testDouble", *this, &TntdbDecimalTest::testDouble);
-      registerMethod("testFromString", *this, &TntdbDecimalTest::testFromString);
-      registerMethod("testToString", *this, &TntdbDecimalTest::testToString);
-      registerMethod("testInt", *this, &TntdbDecimalTest::testInt);
-      registerMethod("testIntExp", *this, &TntdbDecimalTest::testIntExp);
-      registerMethod("testCompare", *this, &TntdbDecimalTest::testCompare);
+        registerMethod("testDouble", *this, &TntdbDecimalTest::testDouble);
+        registerMethod("testFromString", *this, &TntdbDecimalTest::testFromString);
+        registerMethod("testToString", *this, &TntdbDecimalTest::testToString);
+        registerMethod("testInt", *this, &TntdbDecimalTest::testInt);
+        registerMethod("testIntExp", *this, &TntdbDecimalTest::testIntExp);
+        registerMethod("testCompare", *this, &TntdbDecimalTest::testCompare);
     }
 
     void testDouble()
     {
-      tntdb::Decimal d;
+        tntdb::Decimal d;
 
-      d = tntdb::Decimal(45.6);
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), 45.6));
+        d = tntdb::Decimal(0);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 0);
 
-      d = tntdb::Decimal(-3.14);
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), -3.14));
+        d = tntdb::Decimal(1);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
 
-      d = tntdb::Decimal(5e97);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 5e97);
+        d = tntdb::Decimal(45.6);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(45.6));
 
-      d = tntdb::Decimal(-123e-154);
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), -123e-154));
+        d = tntdb::Decimal(-3.14);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(-3.14));
 
-      d = tntdb::Decimal(std::numeric_limits<double>::max());
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), std::numeric_limits<double>::max()));
+        d = tntdb::Decimal(5e97);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(5e97));
 
-      d = tntdb::Decimal(std::numeric_limits<double>::min());
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), std::numeric_limits<double>::min()));
+        d = tntdb::Decimal(-123e-154);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(-123e-154));
 
-      d = tntdb::Decimal(std::numeric_limits<double>::infinity());
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), std::numeric_limits<double>::infinity());
+        d = tntdb::Decimal(0.1847951);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(0.184795099999999989));
 
-      d = tntdb::Decimal(-std::numeric_limits<double>::infinity());
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), -std::numeric_limits<double>::infinity());
+        d = tntdb::Decimal(0.01847951);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(0.0184795099999999989));
+
+        d = tntdb::Decimal(0.001847951);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(0.00184795099999999989));
+
+        d = tntdb::Decimal(std::numeric_limits<double>::max());
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(std::numeric_limits<double>::max()));
+
+        d = tntdb::Decimal(std::numeric_limits<double>::min());
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(std::numeric_limits<double>::min()));
+
+        d = tntdb::Decimal(std::numeric_limits<double>::infinity());
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), std::numeric_limits<double>::infinity());
+
+        d = tntdb::Decimal(-std::numeric_limits<double>::infinity());
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), -std::numeric_limits<double>::infinity());
 
     }
 
     void testFromString()
     {
-      tntdb::Decimal d;
+        tntdb::Decimal d;
 
-      d = tntdb::Decimal("45.6");
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), 45.6));
+        d = tntdb::Decimal("45.6");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(45.6));
 
-      d = tntdb::Decimal("-3.14");
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), -3.14));
+        d = tntdb::Decimal("-3.14");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(-3.14));
 
-      d = tntdb::Decimal("5e97");
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), 5e97));
+        d = tntdb::Decimal("5e97");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(5e97));
 
-      d = tntdb::Decimal("-123e-154");
-      CXXTOOLS_UNIT_ASSERT(nearBy(d.getDouble(), -123e-154));
+        d = tntdb::Decimal("-123e-154");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), AlmostEqual(-123e-154));
 
-      d = tntdb::Decimal("12345678901234567890");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringFix(), "12345678901234567890");
+        d = tntdb::Decimal("12345678901234567890");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringFix(), "12345678901234567890");
 
-      d = tntdb::Decimal("inf");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), std::numeric_limits<double>::infinity());
+        d = tntdb::Decimal("inf");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), std::numeric_limits<double>::infinity());
 
-      d = tntdb::Decimal("-inf");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), -std::numeric_limits<double>::infinity());
+        d = tntdb::Decimal("-inf");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), -std::numeric_limits<double>::infinity());
 
-      d = tntdb::Decimal("nan");
-      CXXTOOLS_UNIT_ASSERT(d.getDouble() != d.getDouble());
+        d = tntdb::Decimal("nan");
+        CXXTOOLS_UNIT_ASSERT(d.getDouble() != d.getDouble());
 
-      d = tntdb::Decimal("  1.00000000000000000000000000000000000000E+00  ");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+        d = tntdb::Decimal("  1.00000000000000000000000000000000000000E+00  ");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
 
-      d = tntdb::Decimal("  1  ");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+        d = tntdb::Decimal("  1  ");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
 
-      d = tntdb::Decimal("  1.0  ");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+        d = tntdb::Decimal("  1.0  ");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
 
-      d = tntdb::Decimal("  1e0  ");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+        d = tntdb::Decimal("  1e0  ");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
 
-      d = tntdb::Decimal("  0.1e1  ");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
+        d = tntdb::Decimal("  0.1e1  ");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 1);
 
-      d = tntdb::Decimal("  .00000000000000000000000000000000000000E+00");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 0);
+        d = tntdb::Decimal("  .00000000000000000000000000000000000000E+00");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 0);
 
-      d = tntdb::Decimal("0");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 0);
+        d = tntdb::Decimal("0");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.getDouble(), 0);
 
     }
 
     void testToString()
     {
-      tntdb::Decimal d;
+        tntdb::Decimal d;
 
-      d = tntdb::Decimal("45.6");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "45.6");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "4.56e1");
+        d = tntdb::Decimal("45.6");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "45.6");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "4.56e1");
 
-      d = tntdb::Decimal("-3.14");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "-3.14");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "-3.14e0");
+        d = tntdb::Decimal("-3.14");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "-3.14");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "-3.14e0");
 
-      d = tntdb::Decimal("5e97");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "5e97");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "5e97");
+        d = tntdb::Decimal("5e97");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "5e97");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "5e97");
 
-      d = tntdb::Decimal("-123e-154");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "-1.23e-152");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "-1.23e-152");
+        d = tntdb::Decimal("-123e-154");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "-1.23e-152");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "-1.23e-152");
 
-      d = tntdb::Decimal("12345678901234567890");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringFix(), "12345678901234567890");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "1.234567890123456789e19");
+        d = tntdb::Decimal("12345678901234567890");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringFix(), "12345678901234567890");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "1.234567890123456789e19");
 
-      d = tntdb::Decimal("1e23");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringFix(), "100000000000000000000000");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "1e23");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "1e23");
+        d = tntdb::Decimal("1e23");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringFix(), "100000000000000000000000");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "1e23");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "1e23");
 
-      d = tntdb::Decimal("-3e-23");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringFix(), "-0.00000000000000000000003");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "-3e-23");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "-3e-23");
+        d = tntdb::Decimal("-3e-23");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringFix(), "-0.00000000000000000000003");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toStringSci(), "-3e-23");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "-3e-23");
 
-      d = tntdb::Decimal("inf");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "inf");
+        d = tntdb::Decimal("inf");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "inf");
 
-      d = tntdb::Decimal("-inf");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "-inf");
+        d = tntdb::Decimal("-inf");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "-inf");
 
-      d = tntdb::Decimal("nan");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "nan");
+        d = tntdb::Decimal("nan");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(d.toString(), "nan");
 
     }
 
     void testInt()
     {
-      tntdb::Decimal d;
-      long l;
+        tntdb::Decimal d;
+        long l;
 
-      d = tntdb::Decimal(100, 0);
-      l = d.getInteger<long>();
-      CXXTOOLS_UNIT_ASSERT_EQUALS(l, 100l);
+        d = tntdb::Decimal(100, 0);
+        l = d.getInteger<long>();
+        CXXTOOLS_UNIT_ASSERT_EQUALS(l, 100l);
 
-      d = tntdb::Decimal(45, 3);
-      l = d.getInteger<long>();
-      CXXTOOLS_UNIT_ASSERT_EQUALS(l, 45000l);
+        d = tntdb::Decimal(45, 3);
+        l = d.getInteger<long>();
+        CXXTOOLS_UNIT_ASSERT_EQUALS(l, 45000l);
 
-      d = tntdb::Decimal(std::numeric_limits<long>::max(), 0);
-      l = d.getInteger<long>();
-      CXXTOOLS_UNIT_ASSERT_EQUALS(l, std::numeric_limits<long>::max());
+        d = tntdb::Decimal(std::numeric_limits<long>::max(), 0);
+        l = d.getInteger<long>();
+        CXXTOOLS_UNIT_ASSERT_EQUALS(l, std::numeric_limits<long>::max());
 
-      d = tntdb::Decimal(std::numeric_limits<long>::min(), 0);
-      l = d.getInteger<long>();
-      CXXTOOLS_UNIT_ASSERT_EQUALS(l, std::numeric_limits<long>::min());
+        d = tntdb::Decimal(std::numeric_limits<long>::min(), 0);
+        l = d.getInteger<long>();
+        CXXTOOLS_UNIT_ASSERT_EQUALS(l, std::numeric_limits<long>::min());
 
-      d = tntdb::Decimal(-100, 0);
-      l = d.getInteger<long>();
-      CXXTOOLS_UNIT_ASSERT_EQUALS(l, -100l);
+        d = tntdb::Decimal(-100, 0);
+        l = d.getInteger<long>();
+        CXXTOOLS_UNIT_ASSERT_EQUALS(l, -100l);
 
     }
 
     void testIntExp()
     {
-      tntdb::Decimal d("453000");
-      long l = d.getInteger<long>(-3);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(l, 453);
+        tntdb::Decimal d("453000");
+        long l = d.getInteger<long>(-3);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(l, 453);
 
-      d = tntdb::Decimal("45.6");
-      l = d.getInteger<long>(1);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(l, 456);
+        d = tntdb::Decimal("45.6");
+        l = d.getInteger<long>(1);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(l, 456);
 
-      d = tntdb::Decimal("-78.334");
-      l = d.getInteger<long>(4);
-      CXXTOOLS_UNIT_ASSERT_EQUALS(l, -783340);
+        d = tntdb::Decimal("-78.334");
+        l = d.getInteger<long>(4);
+        CXXTOOLS_UNIT_ASSERT_EQUALS(l, -783340);
 
     }
 
     void testCompare()
     {
-      tntdb::Decimal d0(45, 3);
-      tntdb::Decimal d1(450, 2);
-      tntdb::Decimal d2(449, 2);
-      tntdb::Decimal d3(-449, 2);
-      tntdb::Decimal d4(451, 2);
+        tntdb::Decimal d0(45, 3);
+        tntdb::Decimal d1(450, 2);
+        tntdb::Decimal d2(449, 2);
+        tntdb::Decimal d3(-449, 2);
+        tntdb::Decimal d4(451, 2);
 
-      CXXTOOLS_UNIT_ASSERT(d0 == d1);
+        CXXTOOLS_UNIT_ASSERT(d0 == d1);
 
-      CXXTOOLS_UNIT_ASSERT(d0 != d2);
-      CXXTOOLS_UNIT_ASSERT(d1 != d2);
-      CXXTOOLS_UNIT_ASSERT(d3 != d0);
-      CXXTOOLS_UNIT_ASSERT(d3 != d1);
-      CXXTOOLS_UNIT_ASSERT(d3 != d2);
+        CXXTOOLS_UNIT_ASSERT(d0 != d2);
+        CXXTOOLS_UNIT_ASSERT(d1 != d2);
+        CXXTOOLS_UNIT_ASSERT(d3 != d0);
+        CXXTOOLS_UNIT_ASSERT(d3 != d1);
+        CXXTOOLS_UNIT_ASSERT(d3 != d2);
 
-      CXXTOOLS_UNIT_ASSERT(d2 < d0);
-      CXXTOOLS_UNIT_ASSERT(d2 < d1);
-      CXXTOOLS_UNIT_ASSERT(d3 < d0);
-      CXXTOOLS_UNIT_ASSERT(d3 < d1);
-      CXXTOOLS_UNIT_ASSERT(d3 < d2);
-      CXXTOOLS_UNIT_ASSERT(d2 < d4);
+        CXXTOOLS_UNIT_ASSERT(d2 < d0);
+        CXXTOOLS_UNIT_ASSERT(d2 < d1);
+        CXXTOOLS_UNIT_ASSERT(d3 < d0);
+        CXXTOOLS_UNIT_ASSERT(d3 < d1);
+        CXXTOOLS_UNIT_ASSERT(d3 < d2);
+        CXXTOOLS_UNIT_ASSERT(d2 < d4);
 
-      CXXTOOLS_UNIT_ASSERT(d0 > d2);
-      CXXTOOLS_UNIT_ASSERT(d1 > d2);
-      CXXTOOLS_UNIT_ASSERT(d0 > d3);
-      CXXTOOLS_UNIT_ASSERT(d1 > d3);
-      CXXTOOLS_UNIT_ASSERT(d2 > d3);
+        CXXTOOLS_UNIT_ASSERT(d0 > d2);
+        CXXTOOLS_UNIT_ASSERT(d1 > d2);
+        CXXTOOLS_UNIT_ASSERT(d0 > d3);
+        CXXTOOLS_UNIT_ASSERT(d1 > d3);
+        CXXTOOLS_UNIT_ASSERT(d2 > d3);
 
-      CXXTOOLS_UNIT_ASSERT(d2 <= d0);
-      CXXTOOLS_UNIT_ASSERT(d0 <= d1);
-      CXXTOOLS_UNIT_ASSERT(d2 <= d1);
+        CXXTOOLS_UNIT_ASSERT(d2 <= d0);
+        CXXTOOLS_UNIT_ASSERT(d0 <= d1);
+        CXXTOOLS_UNIT_ASSERT(d2 <= d1);
 
-      CXXTOOLS_UNIT_ASSERT(d0 >= d2);
-      CXXTOOLS_UNIT_ASSERT(d0 >= d1);
-      CXXTOOLS_UNIT_ASSERT(d1 >= d2);
+        CXXTOOLS_UNIT_ASSERT(d0 >= d2);
+        CXXTOOLS_UNIT_ASSERT(d0 >= d1);
+        CXXTOOLS_UNIT_ASSERT(d1 >= d2);
     }
 
 };
