@@ -32,30 +32,30 @@
 
 namespace tntdb
 {
-  namespace sqlite
-  {
-    unsigned StmtRow::size() const
-    {
-      return static_cast<unsigned>(::sqlite3_column_count(stmt));
-    }
+namespace sqlite
+{
+unsigned StmtRow::size() const
+{
+    return static_cast<unsigned>(::sqlite3_column_count(stmt));
+}
 
-    Value StmtRow::getValueByNumber(size_type field_num) const
-    {
-      return Value(new StmtValue(stmt, field_num));
-    }
+Value StmtRow::getValueByNumber(size_type field_num) const
+{
+    return Value(std::make_shared<StmtValue>(stmt, field_num));
+}
 
-    Value StmtRow::getValueByName(const std::string& field_name) const
-    {
-      return Value(new StmtValue(stmt, field_name));
-    }
+Value StmtRow::getValueByName(const std::string& field_name) const
+{
+    return Value(std::make_shared<StmtValue>(stmt, field_name));
+}
 
-    std::string StmtRow::getColumnName(size_type field_num) const
-    {
-      const char* name = sqlite3_column_name(stmt, field_num);
-      if (name == 0)
+std::string StmtRow::getColumnName(size_type field_num) const
+{
+    const char* name = sqlite3_column_name(stmt, field_num);
+    if (name == 0)
         throw std::bad_alloc();
-      return name;
-    }
+    return name;
+}
 
-  }
+}
 }

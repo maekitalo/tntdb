@@ -42,140 +42,124 @@ log_define("tntdb.sqlite.connection")
 
 namespace tntdb
 {
-  namespace sqlite
-  {
-    Connection::Connection(const char* conninfo)
-      : transactionActive(0)
-    {
-      log_debug("sqlite3_open(\"" << conninfo << "\")");
-      int errcode = ::sqlite3_open(conninfo, &db);
+namespace sqlite
+{
+Connection::Connection(const char* conninfo)
+  : transactionActive(0)
+{
+    log_debug("sqlite3_open(\"" << conninfo << "\")");
+    int errcode = ::sqlite3_open(conninfo, &db);
 
-      if (db == 0)
+    if (db == 0)
         throw Execerror("sqlite3_open", db, errcode);
 
-      log_debug("sqlite3 = " << db);
+    log_debug("sqlite3 = " << db);
 
-      log_debug("sqlite3_busy_timeout(\"" << db << "\", 60000)");
-      errcode = ::sqlite3_busy_timeout(db, 60000);
-      if (errcode != SQLITE_OK)
+    log_debug("sqlite3_busy_timeout(\"" << db << "\", 60000)");
+    errcode = ::sqlite3_busy_timeout(db, 60000);
+    if (errcode != SQLITE_OK)
         throw Execerror("sqlite3_busy_timeout", db, errcode);
-    }
+}
 
-    Connection::~Connection()
+Connection::~Connection()
+{
+    if (db)
     {
-      if (db)
-      {
-        clearStatementCache();
-
         log_debug("sqlite3_close(" << db << ")");
         ::sqlite3_close(db);
-      }
     }
+}
 
-    void Connection::beginTransaction()
-    {
-      if (transactionActive == 0)
+void Connection::beginTransaction()
+{
+    if (transactionActive == 0)
         execute("BEGIN IMMEDIATE TRANSACTION");
-      ++transactionActive;
-    }
+    ++transactionActive;
+}
 
-    void Connection::commitTransaction()
-    {
-      if (transactionActive == 0 || --transactionActive == 0)
-      {
-        // Statement handles are invalidated at transaction end, therefore we
-        // release all cached statements here.
-        // The problem still remains since the application might preserve a
-        // statement handle, which can't be released here.
-        clearStatementCache();
+void Connection::commitTransaction()
+{
+    if (transactionActive == 0 || --transactionActive == 0)
         execute("COMMIT TRANSACTION");
-      }
-    }
+}
 
-    void Connection::rollbackTransaction()
-    {
-      if (transactionActive == 0 || --transactionActive == 0)
-      {
-        // Statement handles are invalidated at transaction end, therefore we
-        // release all cached statements here.
-        // The problem still remains since the application might preserve a
-        // statement handle, which can't be released here.
-        clearStatementCache();
+void Connection::rollbackTransaction()
+{
+    if (transactionActive == 0 || --transactionActive == 0)
         execute("ROLLBACK TRANSACTION");
-      }
-    }
+}
 
-    Connection::size_type Connection::execute(const std::string& query)
-    {
-      char* errmsg;
+Connection::size_type Connection::execute(const std::string& query)
+{
+    char* errmsg;
 
-      log_debug("sqlite3_exec(" << db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
+    log_debug("sqlite3_exec(" << db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
 
-      int ret = ::sqlite3_exec(db, query.c_str(), 0, 0, &errmsg);
+    int ret = ::sqlite3_exec(db, query.c_str(), 0, 0, &errmsg);
 
-      log_debug("sqlite3_exec ret=" << ret);
+    log_debug("sqlite3_exec ret=" << ret);
 
-      if (ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
         throw Execerror("sqlite3_exec", ret, errmsg, true);
 
-      return ::sqlite3_changes(db);
-    }
+    return ::sqlite3_changes(db);
+}
 
-    tntdb::Result Connection::select(const std::string& query)
+tntdb::Result Connection::select(const std::string& query)
+{
+    return prepare(query).select();
+}
+
+tntdb::Row Connection::selectRow(const std::string& query)
+{
+    return prepare(query).selectRow();
+}
+
+tntdb::Value Connection::selectValue(const std::string& query)
+{
+    return prepare(query).selectValue();
+}
+
+tntdb::Statement Connection::prepare(const std::string& query)
+{
+    log_debug("prepare(\"" << query << "\")");
+    return tntdb::Statement(std::make_shared<Statement>(*this, query));
+}
+
+tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+{
+    std::string q = query;
+
+    if (!limit.empty())
     {
-      return prepare(query).select();
-    }
-
-    tntdb::Row Connection::selectRow(const std::string& query)
-    {
-      return prepare(query).selectRow();
-    }
-
-    tntdb::Value Connection::selectValue(const std::string& query)
-    {
-      return prepare(query).selectValue();
-    }
-
-    tntdb::Statement Connection::prepare(const std::string& query)
-    {
-      log_debug("prepare(\"" << query << "\")");
-      return tntdb::Statement(new Statement(this, query));
-    }
-
-    tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
-    {
-      std::string q = query;
-
-      if (!limit.empty())
-      {
         q += " limit :";
         q += limit;
-      }
+    }
 
-      if (!offset.empty())
-      {
+    if (!offset.empty())
+    {
         q += " offset :";
         q += offset;
-      }
-
-      return prepare(q);
     }
 
-    bool Connection::ping()
-    {
-      return db != 0;
-    }
+    return prepare(q);
+}
 
-    long Connection::lastInsertId(const std::string& name)
-    {
-      return static_cast<int>(sqlite3_last_insert_rowid(db));
-    }
+bool Connection::ping()
+{
+    return db != 0;
+}
 
-    void Connection::lockTable(const std::string& tablename, bool exclusive)
-    {
-      // nothing to do - the database is locked by the exclusive transaction
-      // already
-    }
+long Connection::lastInsertId(const std::string& name)
+{
+    return static_cast<int>(sqlite3_last_insert_rowid(db));
+}
 
-  }
+void Connection::lockTable(const std::string& tablename, bool exclusive)
+{
+    // nothing to do - the database is locked by the exclusive transaction
+    // already
+}
+
+}
 }

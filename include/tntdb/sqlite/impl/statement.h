@@ -34,65 +34,62 @@
 
 namespace tntdb
 {
-  namespace sqlite
-  {
-    class Connection;
+namespace sqlite
+{
+class Connection;
+class Cursor;
 
-    class Statement : public IStatement
-    {
-        sqlite3_stmt* stmt;
-        sqlite3_stmt* stmtInUse;
-        Connection* conn;
-        const std::string query;
+class Statement : public IStatement
+{
+    sqlite3_stmt* _stmt;
+    Connection& _conn;
+    std::string _query;
 
-        sqlite3_stmt* getBindStmt();
-        int getBindIndex(const std::string& col);
+    sqlite3_stmt* getBindStmt();
+    int getBindIndex(const std::string& col);
 
-        bool needReset;
-        void reset();
+    bool _needReset;
+    void reset();
 
-      public:
-        Statement(Connection* conn, const std::string& query);
-        ~Statement();
+public:
+    Statement(Connection& conn, const std::string& query);
+    ~Statement();
 
-        // methods of IStatement
+    // methods of IStatement
 
-        virtual void clear();
-        virtual void setNull(const std::string& col);
-        virtual void setBool(const std::string& col, bool data);
-        virtual void setShort(const std::string& col, short data);
-        virtual void setInt(const std::string& col, int data);
-        virtual void setLong(const std::string& col, long data);
-        virtual void setUnsignedShort(const std::string& col, unsigned short data);
-        virtual void setUnsigned(const std::string& col, unsigned data);
-        virtual void setUnsignedLong(const std::string& col, unsigned long data);
-        virtual void setInt32(const std::string& col, int32_t data);
-        virtual void setUnsigned32(const std::string& col, uint32_t data);
-        virtual void setInt64(const std::string& col, int64_t data);
-        virtual void setUnsigned64(const std::string& col, uint64_t data);
-        virtual void setDecimal(const std::string& col, const Decimal& data);
-        virtual void setFloat(const std::string& col, float data);
-        virtual void setDouble(const std::string& col, double data);
-        virtual void setChar(const std::string& col, char data);
-        virtual void setString(const std::string& col, const std::string& data);
-        virtual void setBlob(const std::string& col, const Blob& data);
-        virtual void setDate(const std::string& col, const Date& data);
-        virtual void setTime(const std::string& col, const Time& data);
-        virtual void setDatetime(const std::string& col, const Datetime& data);
+    virtual void clear();
+    virtual void setNull(const std::string& col);
+    virtual void setBool(const std::string& col, bool data);
+    virtual void setShort(const std::string& col, short data);
+    virtual void setInt(const std::string& col, int data);
+    virtual void setLong(const std::string& col, long data);
+    virtual void setUnsignedShort(const std::string& col, unsigned short data);
+    virtual void setUnsigned(const std::string& col, unsigned data);
+    virtual void setUnsignedLong(const std::string& col, unsigned long data);
+    virtual void setInt32(const std::string& col, int32_t data);
+    virtual void setUnsigned32(const std::string& col, uint32_t data);
+    virtual void setInt64(const std::string& col, int64_t data);
+    virtual void setUnsigned64(const std::string& col, uint64_t data);
+    virtual void setDecimal(const std::string& col, const Decimal& data);
+    virtual void setFloat(const std::string& col, float data);
+    virtual void setDouble(const std::string& col, double data);
+    virtual void setChar(const std::string& col, char data);
+    virtual void setString(const std::string& col, const std::string& data);
+    virtual void setBlob(const std::string& col, const Blob& data);
+    virtual void setDate(const std::string& col, const Date& data);
+    virtual void setTime(const std::string& col, const Time& data);
+    virtual void setDatetime(const std::string& col, const Datetime& data);
 
-        virtual size_type execute();
-        virtual tntdb::Result select();
-        virtual tntdb::Row selectRow();
-        virtual tntdb::Value selectValue();
-        virtual ICursor* createCursor(unsigned fetchsize);
+    virtual size_type execute();
+    virtual tntdb::Result select();
+    virtual tntdb::Row selectRow();
+    virtual tntdb::Value selectValue();
+    virtual std::shared_ptr<ICursor> createCursor(unsigned fetchsize);
 
-        // specific methods of sqlite-driver
-        sqlite3_stmt* getStmt() const   { return stmt; }
-
-        void putback(sqlite3_stmt* stmt);
-    };
-  }
+    // specific methods of sqlite-driver
+    sqlite3_stmt* getStmt() const   { return _stmt; }
+};
+}
 }
 
 #endif // TNTDB_SQLITE_IMPL_SQLSTATEMENT_H
-

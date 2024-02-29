@@ -34,72 +34,75 @@
 
 namespace tntdb
 {
-  /**
+/**
 
-   This namespace contains the implementation of the Mysql driver for tntdb.
+ This namespace contains the implementation of the Mysql driver for tntdb.
 
-   The driver makes it possible to access a Mysql database using tntdb.
+ The driver makes it possible to access a Mysql database using tntdb.
 
-   To get a connection to a Mysql database, the dburl to the tntdb::connect function
-   must start with "mysql:".
+ To get a connection to a Mysql database, the dburl to the tntdb::connect function
+ must start with "mysql:".
 
-   The remaining is a list of name value pairs separated by semicolon. The names and
-   values are separated by '='. The value may be quoted by single or double quotes.
-   Quote characters inside quoted values may be escaped using a backspace. If the value
-   contains itself a backspace character, it must be doubled. Indeed each character
-   prefixed with backspace is kept as is into the value.
+ The remaining is a list of name value pairs separated by semicolon. The names and
+ values are separated by '='. The value may be quoted by single or double quotes.
+ Quote characters inside quoted values may be escaped using a backspace. If the value
+ contains itself a backspace character, it must be doubled. Indeed each character
+ prefixed with backspace is kept as is into the value.
 
-   A typical connection with a Mysql driver looks like that:
+ A typical connection with a Mysql driver looks like that:
 
-   @code
-     tntdb::Connection conn = tntdb::connect("mysql:db=DS2;user=web;passwd='foo\\'bar");
-   @endcode
+ @code
+   tntdb::Connection conn = tntdb::connect("mysql:db=DS2;user=web;passwd='foo\\'bar");
+ @endcode
 
-   Here the username is "web" and the password is "foo'bar". Note that the backslash
-   itself must be doubled in C++ code since the compiler processes the backspace first.
+ Here the username is "web" and the password is "foo'bar". Note that the backslash
+ itself must be doubled in C++ code since the compiler processes the backspace first.
 
-   */
+ */
 
-  namespace mysql
-  {
-    /// Implements a connection to a Mysql database.
-    class Connection : public IStmtCacheConnection
-    {
-        MYSQL mysql;
-        bool initialized;
-        unsigned transactionActive;
-        std::string lockTablesQuery;
+namespace mysql
+{
+class Result;
 
-        void open(const char* app, const char* host,
-          const char* user, const char* passwd,
-          const char* db, unsigned int port,
-          const char* unix_socket, unsigned long client_flag);
+/// Implements a connection to a Mysql database.
+class Connection : public IConnection
+{
+    MYSQL mysql;
+    bool initialized;
+    unsigned transactionActive;
+    std::string lockTablesQuery;
 
-      public:
-        Connection(const std::string& conn, const std::string& username, const std::string& password);
-        Connection(const char* app, const char* host,
-          const char* user, const char* passwd,
-          const char* db, unsigned int port = 3306,
-          const char* unix_socket = 0, unsigned long client_flag = 0);
-        ~Connection();
+    void open(const char* app, const char* host,
+      const char* user, const char* passwd,
+      const char* db, unsigned int port,
+      const char* unix_socket, unsigned long client_flag);
+    std::shared_ptr<Result> myselect(const std::string& query);
 
-        MYSQL* getHandle()         { return &mysql; }
+public:
+    Connection(const std::string& conn, const std::string& username, const std::string& password);
+    Connection(const char* app, const char* host,
+      const char* user, const char* passwd,
+      const char* db, unsigned int port = 3306,
+      const char* unix_socket = 0, unsigned long client_flag = 0);
+    ~Connection();
 
-        void beginTransaction();
-        void commitTransaction();
-        void rollbackTransaction();
+    MYSQL* getHandle()         { return &mysql; }
 
-        size_type execute(const std::string& query);
-        tntdb::Result select(const std::string& query);
-        tntdb::Row selectRow(const std::string& query);
-        tntdb::Value selectValue(const std::string& query);
-        tntdb::Statement prepare(const std::string& query);
-        tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
-        bool ping();
-        long lastInsertId(const std::string& name);
-        void lockTable(const std::string& tablename, bool exclusive);
-    };
-  }
+    void beginTransaction();
+    void commitTransaction();
+    void rollbackTransaction();
+
+    size_type execute(const std::string& query);
+    tntdb::Result select(const std::string& query);
+    tntdb::Row selectRow(const std::string& query);
+    tntdb::Value selectValue(const std::string& query);
+    tntdb::Statement prepare(const std::string& query);
+    tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
+    bool ping();
+    long lastInsertId(const std::string& name);
+    void lockTable(const std::string& tablename, bool exclusive);
+};
+}
 }
 
 #endif // TNTDB_MYSQL_IMPL_CONNECTION_H

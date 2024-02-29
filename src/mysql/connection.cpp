@@ -28,6 +28,8 @@
 
 #include <tntdb/mysql/impl/connection.h>
 #include <tntdb/mysql/impl/result.h>
+#include <tntdb/mysql/impl/resultrow.h>
+#include <tntdb/mysql/impl/rowvalue.h>
 #include <tntdb/mysql/impl/statement.h>
 #include <tntdb/result.h>
 #include <tntdb/statement.h>
@@ -40,69 +42,69 @@ log_define("tntdb.mysql.connection")
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    namespace
+namespace mysql
+{
+namespace
+{
+    std::string str(const char* s)
     {
-      std::string str(const char* s)
-      {
         return s && *s ? std::string("\"") + s + '"'
                        : std::string("null");
-      }
-      const char* zstr(const char* s)
-      { return s && s[0] ? s : 0; }
     }
+    const char* zstr(const char* s)
+    { return s && s[0] ? s : 0; }
+}
 
-    void Connection::open(const char* app, const char* host, const char* user,
-      const char* passwd, const char* db, unsigned int port,
-      const char* unix_socket, unsigned long client_flag)
-    {
-      log_debug("mysql_real_connect(MYSQL, "
-        << str(app) << ", "
-        << str(host) << ", "
-        << str(user) << ", "
-        << str(passwd) << ", "
-        << str(db) << ", "
-        << port << ", "
-        << str(unix_socket) << ", "
-        << client_flag << ')');
+void Connection::open(const char* app, const char* host, const char* user,
+    const char* passwd, const char* db, unsigned int port,
+    const char* unix_socket, unsigned long client_flag)
+{
+    log_debug("mysql_real_connect(MYSQL, "
+      << str(app) << ", "
+      << str(host) << ", "
+      << str(user) << ", "
+      << str(passwd) << ", "
+      << str(db) << ", "
+      << port << ", "
+      << str(unix_socket) << ", "
+      << client_flag << ')');
 
-      if (::mysql_init(&mysql) == 0)
+    if (::mysql_init(&mysql) == 0)
         throw std::runtime_error("cannot initalize mysql");
-      initialized = true;
+    initialized = true;
 
-      if (::mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, app && app[0] ? app : "tntdb") != 0)
+    if (::mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, app && app[0] ? app : "tntdb") != 0)
         throw MysqlError("mysql_options", &mysql);
 
-      if (!::mysql_real_connect(&mysql, zstr(host), zstr(user), zstr(passwd),
+    if (!::mysql_real_connect(&mysql, zstr(host), zstr(user), zstr(passwd),
                                 zstr(db), port, zstr(unix_socket), client_flag))
         throw MysqlError("mysql_real_connect", &mysql);
-    }
+}
 
-    Connection::Connection(const char* app, const char* host, const char* user,
-      const char* passwd, const char* db, unsigned int port,
-      const char* unix_socket, unsigned long client_flag)
-      : initialized(false),
-        transactionActive(0)
-    {
-      open(app, host, user, passwd, db, port, unix_socket, client_flag);
-    }
+Connection::Connection(const char* app, const char* host, const char* user,
+    const char* passwd, const char* db, unsigned int port,
+    const char* unix_socket, unsigned long client_flag)
+  : initialized(false),
+    transactionActive(0)
+{
+    open(app, host, user, passwd, db, port, unix_socket, client_flag);
+}
 
-    Connection::Connection(const std::string& conn, const std::string& username_, const std::string& password_)
-      : initialized(false),
-        transactionActive(0)
-    {
-      log_debug("Connection::Connection(\"" << conn << "\", \"" << username_ << "\", password)");
-      std::string app;
-      std::string host;
-      std::string user = username_;
-      std::string passwd = password_;
-      std::string db;
-      unsigned int port = 3306;
-      std::string unix_socket;
-      unsigned long client_flag = 0;
+Connection::Connection(const std::string& conn, const std::string& username_, const std::string& password_)
+  : initialized(false),
+    transactionActive(0)
+{
+    log_debug("Connection::Connection(\"" << conn << "\", \"" << username_ << "\", password)");
+    std::string app;
+    std::string host;
+    std::string user = username_;
+    std::string passwd = password_;
+    std::string db;
+    unsigned int port = 3306;
+    std::string unix_socket;
+    unsigned long client_flag = 0;
 
-      enum state_type {
+    enum state_type {
         state_key,
         state_value,
         state_value_esc,
@@ -111,301 +113,304 @@ namespace tntdb
         state_qvalue_esc,
         state_port,
         state_flag
-      } state = state_key;
+    } state = state_key;
 
-      std::string key;
-      std::string* value;
-      char quote = '\0';
+    std::string key;
+    std::string* value;
+    char quote = '\0';
 
-      for (std::string::const_iterator p = conn.begin(); p != conn.end(); ++p)
-      {
+    for (std::string::const_iterator p = conn.begin(); p != conn.end(); ++p)
+    {
         switch (state)
         {
-          case state_key:
-            if (*p == '=')
-            {
-              if (key == "port")
+            case state_key:
+                if (*p == '=')
               {
-                port = 0;
-                key.clear();
-                state = state_port;
+                    if (key == "port")
+                  {
+                        port = 0;
+                        key.clear();
+                        state = state_port;
+                  }
+                    else if (key == "flags")
+                  {
+                        key.clear();
+                        state = state_flag;
+                  }
+                    else
+                  {
+                        if (key == "app")
+                        value = &app;
+                        else if (key == "host")
+                        value = &host;
+                        else if (key == "user")
+                        value = &user;
+                        else if (key == "passwd" || key == "password")
+                      {
+                            log_warn("password set in dburl");
+                            value = &passwd;
+                      }
+                        else if (key == "db" || key == "dbname" || key == "database")
+                        value = &db;
+                        else if (key == "unix_socket")
+                        value = &unix_socket;
+                        else
+                        throw std::runtime_error("invalid key \"" + key
+                          + "\" in connectionstring \"" + conn + '"');
+
+                        if (!value->empty())
+                        throw std::runtime_error("value already set for key \"" + key
+                          + "\" in connectionstring \"" + conn + '"');
+
+                        key.clear();
+                        value->clear();
+                        state = state_value;
+                  }
               }
-              else if (key == "flags")
-              {
-                key.clear();
-                state = state_flag;
-              }
-              else
-              {
-                if (key == "app")
-                  value = &app;
-                else if (key == "host")
-                  value = &host;
-                else if (key == "user")
-                  value = &user;
-                else if (key == "passwd" || key == "password")
-                {
-                  log_warn("password set in dburl");
-                  value = &passwd;
-                }
-                else if (key == "db" || key == "dbname" || key == "database")
-                  value = &db;
-                else if (key == "unix_socket")
-                  value = &unix_socket;
+                else if (key.empty() && std::isspace(*p))
+                ;
                 else
-                  throw std::runtime_error("invalid key \"" + key
-                    + "\" in connectionstring \"" + conn + '"');
+                key += *p;
+                break;
 
-                if (!value->empty())
-                  throw std::runtime_error("value already set for key \"" + key
-                    + "\" in connectionstring \"" + conn + '"');
-
-                key.clear();
-                value->clear();
-                state = state_value;
+            case state_value:
+                if (*p == ';' || std::isspace(*p))
+                state = state_key;
+                else if (*p == '\\')
+                state = state_value_esc;
+                else if (value->empty() && (*p == '\'' || *p == '"'))
+              {
+                    quote = *p;
+                    state = state_qvalue;
               }
-            }
-            else if (key.empty() && std::isspace(*p))
-              ;
-            else
-              key += *p;
-            break;
+                else
+                *value += *p;
+                break;
 
-          case state_value:
-            if (*p == ';' || std::isspace(*p))
-              state = state_key;
-            else if (*p == '\\')
-              state = state_value_esc;
-            else if (value->empty() && (*p == '\'' || *p == '"'))
-            {
-              quote = *p;
-              state = state_qvalue;
-            }
-            else
+            case state_value_esc:
               *value += *p;
-            break;
+                state = state_value;
+                break;
 
-          case state_value_esc:
-            *value += *p;
-            state = state_value;
-            break;
+            case state_qvalue:
+                if (*p == quote)
+                state = state_key;
+                else if (*p == '\\')
+                state = state_qvalue_esc;
+                else
+                *value += *p;
+                break;
 
-          case state_qvalue:
-            if (*p == quote)
-              state = state_key;
-            else if (*p == '\\')
-              state = state_qvalue_esc;
-            else
+            case state_qvaluee:
+                if (*p == ';' || std::isspace(*p))
+                state = state_key;
+                else
+                throw std::runtime_error(std::string("delimiter expected in connectionstring ") + conn);
+                break;
+
+            case state_qvalue_esc:
               *value += *p;
-            break;
+                state = state_qvalue;
+                break;
 
-          case state_qvaluee:
-            if (*p == ';' || std::isspace(*p))
-              state = state_key;
-            else
-              throw std::runtime_error(std::string("delimiter expected in connectionstring ") + conn);
-            break;
+            case state_port:
+                if (*p == ';' || std::isspace(*p))
+                state = state_key;
+                else if (std::isdigit(*p))
+                port = port * 10 + (*p - '0');
+                else
+                throw std::runtime_error(
+                    std::string("invalid port in connectionstring ") + conn);
+                break;
 
-          case state_qvalue_esc:
-            *value += *p;
-            state = state_qvalue;
-            break;
-
-          case state_port:
-            if (*p == ';' || std::isspace(*p))
-              state = state_key;
-            else if (std::isdigit(*p))
-              port = port * 10 + (*p - '0');
-            else
-              throw std::runtime_error(
-                std::string("invalid port in connectionstring ") + conn);
-            break;
-
-          case state_flag:
-            if (*p == ';' || std::isspace(*p))
-              state = state_key;
-            else if (std::isdigit(*p))
-              client_flag = client_flag * 10 + (*p - '0');
-            else
-              throw std::runtime_error(
-                std::string("invalid flag in connectionstring ") + conn);
-            break;
+            case state_flag:
+                if (*p == ';' || std::isspace(*p))
+                state = state_key;
+                else if (std::isdigit(*p))
+                client_flag = client_flag * 10 + (*p - '0');
+                else
+                throw std::runtime_error(
+                    std::string("invalid flag in connectionstring ") + conn);
+                break;
         }
-      }
-
-      if (state == state_key && !key.empty())
-        throw std::runtime_error(std::string("invalid connectionstring ") + conn);
-
-      open(app.c_str(), host.c_str(), user.c_str(), passwd.c_str(), db.c_str(),
-        port, unix_socket.c_str(), client_flag);
     }
 
-    Connection::~Connection()
-    {
-      if (initialized)
-      {
-        clearStatementCache();
+    if (state == state_key && !key.empty())
+        throw std::runtime_error(std::string("invalid connectionstring ") + conn);
 
+    open(app.c_str(), host.c_str(), user.c_str(), passwd.c_str(), db.c_str(),
+        port, unix_socket.c_str(), client_flag);
+}
+
+Connection::~Connection()
+{
+    if (initialized)
+    {
         if (!lockTablesQuery.empty())
         {
-          log_debug("mysql_query(\"UNLOCK TABLES\")");
-          if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
-            log_warn(MysqlError("mysql_query", &mysql).what());
+            log_debug("mysql_query(\"UNLOCK TABLES\")");
+            if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
+                log_warn(MysqlError("mysql_query", &mysql).what());
         }
 
         log_debug("mysql_close(" << &mysql << ')');
         ::mysql_close(&mysql);
-      }
     }
+}
 
-    void Connection::beginTransaction()
+void Connection::beginTransaction()
+{
+    if (transactionActive == 0)
     {
-      if (transactionActive == 0)
-      {
         log_debug("mysql_autocomit(" << &mysql << ", " << 0 << ')');
         if (::mysql_autocommit(&mysql, 0) != 0)
-          throw MysqlError("mysql_autocommit", &mysql);
-      }
-
-      ++transactionActive;
+            throw MysqlError("mysql_autocommit", &mysql);
     }
 
-    void Connection::commitTransaction()
+    ++transactionActive;
+}
+
+void Connection::commitTransaction()
+{
+    if (transactionActive == 0 || --transactionActive == 0)
     {
-      if (transactionActive == 0 || --transactionActive == 0)
-      {
         log_debug("mysql_commit(" << &mysql << ')');
         if (::mysql_commit(&mysql) != 0)
-          throw MysqlError("mysql_commit", &mysql);
+            throw MysqlError("mysql_commit", &mysql);
 
         if (!lockTablesQuery.empty())
         {
-          log_debug("mysql_query(\"UNLOCK TABLES\")");
-          if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
-            throw MysqlError("mysql_query", &mysql);
-          lockTablesQuery.clear();
+            log_debug("mysql_query(\"UNLOCK TABLES\")");
+            if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
+                throw MysqlError("mysql_query", &mysql);
+            lockTablesQuery.clear();
         }
 
         log_debug("mysql_autocomit(" << &mysql << ", " << 1 << ')');
         if (::mysql_autocommit(&mysql, 1) != 0)
-          throw MysqlError("mysql_autocommit", &mysql);
+            throw MysqlError("mysql_autocommit", &mysql);
 
-      }
     }
+}
 
-    void Connection::rollbackTransaction()
+void Connection::rollbackTransaction()
+{
+    if (transactionActive == 0 || --transactionActive == 0)
     {
-      if (transactionActive == 0 || --transactionActive == 0)
-      {
         log_debug("mysql_rollback(" << &mysql << ')');
         if (::mysql_rollback(&mysql) != 0)
-          throw MysqlError("mysql_rollback", &mysql);
+            throw MysqlError("mysql_rollback", &mysql);
 
         if (!lockTablesQuery.empty())
         {
-          log_debug("mysql_query(\"UNLOCK TABLES\")");
-          if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
-            throw MysqlError("mysql_query", &mysql);
-          lockTablesQuery.clear();
+            log_debug("mysql_query(\"UNLOCK TABLES\")");
+            if (::mysql_query(&mysql, "UNLOCK TABLES") != 0)
+                throw MysqlError("mysql_query", &mysql);
+            lockTablesQuery.clear();
         }
 
         log_debug("mysql_autocommit(" << &mysql << ", " << 1 << ')');
         if (::mysql_autocommit(&mysql, 1) != 0)
-          throw MysqlError("mysql_autocommit", &mysql);
+            throw MysqlError("mysql_autocommit", &mysql);
 
-      }
     }
+}
 
-    Connection::size_type Connection::execute(const std::string& query)
-    {
-      log_debug("mysql_query(\"" << query << "\")");
-      if (::mysql_query(&mysql, query.c_str()) != 0)
+Connection::size_type Connection::execute(const std::string& query)
+{
+    log_debug("mysql_query(\"" << query << "\")");
+    if (::mysql_query(&mysql, query.c_str()) != 0)
         throw MysqlError("mysql_query", &mysql);
 
-      log_debug("mysql_affected_rows(" << &mysql << ')');
-      return ::mysql_affected_rows(&mysql);
-    }
+    log_debug("mysql_affected_rows(" << &mysql << ')');
+    return ::mysql_affected_rows(&mysql);
+}
 
-    tntdb::Result Connection::select(const std::string& query)
-    {
-      execute(query);
+std::shared_ptr<Result> Connection::myselect(const std::string& query)
+{
+    execute(query);
 
-      log_debug("mysql_store_result(" << &mysql << ')');
-      MYSQL_RES* res = ::mysql_store_result(&mysql);
-      if (res == 0)
+    log_debug("mysql_store_result(" << &mysql << ')');
+    MYSQL_RES* res = ::mysql_store_result(&mysql);
+    if (res == 0)
         throw MysqlError("mysql_store_result", &mysql);
 
-      return tntdb::Result(new Result(tntdb::Connection(this), &mysql, res));
-    }
+    return std::make_shared<Result>(&mysql, res);
+}
 
-    Row Connection::selectRow(const std::string& query)
-    {
-      tntdb::Result result = select(query);
-      if (result.empty())
+tntdb::Result Connection::select(const std::string& query)
+{
+    return tntdb::Result(myselect(query));
+}
+
+Row Connection::selectRow(const std::string& query)
+{
+    auto result = myselect(query);
+    if (result->size() == 0)
         throw NotFound();
 
-      return result.getRow(0);
-    }
+    return tntdb::Row(result->getMysqlRow(0));
+}
 
-    Value Connection::selectValue(const std::string& query)
-    {
-      Row t = selectRow(query);
-      if (t.empty())
+Value Connection::selectValue(const std::string& query)
+{
+    auto result = myselect(query);
+    if (result->size() == 0)
         throw NotFound();
 
-      return t.getValue(0);
-    }
+    return tntdb::Value(ResultRow::getMysqlValue(result->getMysqlRow(0), 0));
+}
 
-    tntdb::Statement Connection::prepare(const std::string& query)
+tntdb::Statement Connection::prepare(const std::string& query)
+{
+    return tntdb::Statement(std::make_shared<Statement>(*this, &mysql, query));
+}
+
+tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+{
+    std::string q = query;
+
+    if (!limit.empty())
     {
-      return tntdb::Statement(new Statement(this, &mysql, query));
-    }
-
-    tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
-    {
-      std::string q = query;
-
-      if (!limit.empty())
-      {
         q += " limit :";
         q += limit;
-      }
+    }
 
-      if (!offset.empty())
-      {
+    if (!offset.empty())
+    {
         q += " offset :";
         q += offset;
-      }
-
-      return prepare(q);
     }
 
-    bool Connection::ping()
-    {
-      int ret = ::mysql_ping(&mysql);
-      log_debug("mysql_ping() => " << ret);
-      return ret == 0;
-    }
+    return prepare(q);
+}
 
-    long Connection::lastInsertId(const std::string& name)
-    {
-      return static_cast<long>(::mysql_insert_id(&mysql));
-    }
+bool Connection::ping()
+{
+    int ret = ::mysql_ping(&mysql);
+    log_debug("mysql_ping() => " << ret);
+    return ret == 0;
+}
 
-    void Connection::lockTable(const std::string& tablename, bool exclusive)
-    {
-      if (lockTablesQuery.empty())
+long Connection::lastInsertId(const std::string& name)
+{
+    return static_cast<long>(::mysql_insert_id(&mysql));
+}
+
+void Connection::lockTable(const std::string& tablename, bool exclusive)
+{
+    if (lockTablesQuery.empty())
         lockTablesQuery = "LOCK TABLES ";
-      else
+    else
         lockTablesQuery += ", ";
 
-      lockTablesQuery += tablename;
-      lockTablesQuery += exclusive ? " WRITE" : " READ";
+    lockTablesQuery += tablename;
+    lockTablesQuery += exclusive ? " WRITE" : " READ";
 
-      log_debug("mysql_query(\"" << lockTablesQuery << "\")");
-      if (::mysql_query(&mysql, lockTablesQuery.c_str()) != 0)
+    log_debug("mysql_query(\"" << lockTablesQuery << "\")");
+    if (::mysql_query(&mysql, lockTablesQuery.c_str()) != 0)
         throw MysqlError("mysql_query", &mysql);
-    }
+}
 
-  }
+}
 }

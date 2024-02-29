@@ -34,97 +34,83 @@ log_define("tntdb.oracle.blob")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    // oci-wrappers
+namespace oracle
+{
+// oci-wrappers
 
-    void Blob::ociDescriptorAlloc()
-    {
-      log_debug("OCIDescriptorAlloc(OCI_DTYPE_LOB)");
-      sword ret = OCIDescriptorAlloc(conn->getEnvHandle(),
-        reinterpret_cast<void**>(&lob), OCI_DTYPE_LOB, 0, 0);
-      conn->checkError(ret, "OCIDescriptorAlloc(OCI_DTYPE_LOB)");
-    }
+void Blob::ociDescriptorAlloc()
+{
+    log_debug("OCIDescriptorAlloc(OCI_DTYPE_LOB)");
+    sword ret = OCIDescriptorAlloc(_conn->getEnvHandle(),
+        reinterpret_cast<void**>(&_lob), OCI_DTYPE_LOB, 0, 0);
+    _conn->checkError(ret, "OCIDescriptorAlloc(OCI_DTYPE_LOB)");
+}
 
-    void Blob::ociDescriptorFree()
-    {
-      log_debug("OCIDescriptorFree(" << lob << ", OCI_DTYPE_LOB)");
-      OCIDescriptorFree(lob, OCI_DTYPE_LOB);
-    }
+void Blob::ociDescriptorFree()
+{
+    log_debug("OCIDescriptorFree(" << _lob << ", OCI_DTYPE_LOB)");
+    OCIDescriptorFree(_lob, OCI_DTYPE_LOB);
+}
 
-    // ctors, dtors, ...
-    //
-    Blob::Blob(Connection* conn_, OCILobLocator* lob_, bool release_)
-      : conn(conn_),
-        lob(lob_),
-        release(release_)
-    { }
+// ctors, dtors, ...
+//
+Blob::Blob(Connection& conn, OCILobLocator* lob, bool release)
+  : _conn(&conn),
+    _lob(lob),
+    _release(release)
+{ }
 
-    Blob::Blob(Connection* conn_, const char* data, ub4 count)
-      : conn(conn_), lob(0), release(true)
-    {
-      log_debug("create oracle::Blob from data; size=" << count);
+Blob::Blob(Connection& conn, const char* data, ub4 count)
+  : _conn(&conn), _lob(0), _release(true)
+{
+    log_debug("create oracle::Blob from data; size=" << count);
 
-      ociDescriptorAlloc();
+    ociDescriptorAlloc();
 
-      log_debug("OCILobWrite");
-      sword ret = OCILobWrite(conn->getSvcCtxHandle(), conn->getErrorHandle(),
-        lob, &count, 0, const_cast<char*>(data), count, OCI_ONE_PIECE,
+    log_debug("OCILobWrite");
+    sword ret = OCILobWrite(_conn->getSvcCtxHandle(), _conn->getErrorHandle(),
+        _lob, &count, 0, const_cast<char*>(data), count, OCI_ONE_PIECE,
         0, 0, 0, 0);
-      conn->checkError(ret, "OCILobWrite");
-    }
+    _conn->checkError(ret, "OCILobWrite");
+}
 
-    void Blob::setData(Connection* conn_, const char* data, ub4 count)
-    {
-      conn = conn_;
+void Blob::getData(tntdb::Blob& blob) const
+{
+    log_debug("OCILobGetLength");
+    ub4 len;
+    sword ret = OCILobGetLength(_conn->getSvcCtxHandle(), _conn->getErrorHandle(),
+        _lob, &len);
+    _conn->checkError(ret, "OCILobGetLength");
+    log_debug("len=" << len);
 
-      if (lob == 0)
+    log_debug("OCILobOpen");
+    ret = OCILobOpen(_conn->getSvcCtxHandle(), _conn->getErrorHandle(),
+        _lob, OCI_LOB_READONLY);
+    _conn->checkError(ret, "OCILobOpen");
+
+    char* buffer = blob.reserve(len, true);
+    memset(buffer, '\0', len);
+
+    ub4 amt = len;
+    log_debug("OCILobRead");
+    ret = OCILobRead(_conn->getSvcCtxHandle(), _conn->getErrorHandle(),
+        _lob, &amt, 1, buffer, len, 0, 0, 0, SQLCS_IMPLICIT);
+    _conn->checkError(ret, "OCILobRead");
+
+    log_debug("OCILobClose");
+    ret = OCILobClose(_conn->getSvcCtxHandle(), _conn->getErrorHandle(),
+        _lob);
+    _conn->checkError(ret, "OCILobClose");
+}
+
+OCILobLocator*& Blob::getHandle(Connection* conn)
+{
+    _conn = conn;
+    if (_lob == 0)
         ociDescriptorAlloc();
 
-      log_debug("OCILobWrite");
-      sword ret = OCILobWrite(conn->getSvcCtxHandle(), conn->getErrorHandle(),
-        lob, &count, 0, const_cast<char*>(data), count, OCI_ONE_PIECE,
-        0, 0, 0, 0);
-      conn->checkError(ret, "OCILobWrite");
-    }
+    return _lob;
+}
 
-    void Blob::getData(tntdb::Blob& blob) const
-    {
-      log_debug("OCILobGetLength");
-      ub4 len;
-      sword ret = OCILobGetLength(conn->getSvcCtxHandle(), conn->getErrorHandle(),
-        lob, &len);
-      conn->checkError(ret, "OCILobGetLength");
-      log_debug("len=" << len);
-
-      log_debug("OCILobOpen");
-      ret = OCILobOpen(conn->getSvcCtxHandle(), conn->getErrorHandle(),
-        lob, OCI_LOB_READONLY);
-      conn->checkError(ret, "OCILobOpen");
-
-      char* buffer = blob.reserve(len, true);
-      memset(buffer, '\0', len);
-
-      ub4 amt = len;
-      log_debug("OCILobRead");
-      ret = OCILobRead(conn->getSvcCtxHandle(), conn->getErrorHandle(),
-        lob, &amt, 1, buffer, len, 0, 0, 0, SQLCS_IMPLICIT);
-      conn->checkError(ret, "OCILobRead");
-
-      log_debug("OCILobClose");
-      ret = OCILobClose(conn->getSvcCtxHandle(), conn->getErrorHandle(),
-        lob);
-      conn->checkError(ret, "OCILobClose");
-    }
-
-    OCILobLocator*& Blob::getHandle(Connection* conn_)
-    {
-      conn = conn_;
-      if (lob == 0)
-        ociDescriptorAlloc();
-
-      return lob;
-    }
-
-  }
+}
 }

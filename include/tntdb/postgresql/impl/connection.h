@@ -36,72 +36,75 @@
 
 namespace tntdb
 {
-  /**
+/**
 
-   This namespace contains the implementation of the PostgreSQL driver for tntdb.
+This namespace contains the implementation of the PostgreSQL driver for tntdb.
 
-   The driver makes it possible to access a PostgreSQL database using tntdb.
+The driver makes it possible to access a PostgreSQL database using tntdb.
 
-   To get a connection to a PostgreSQL database, the dburl to the tntdb::connect
-   function must start with "postgresql:". The remaining string is passed to the
-   `PQconnectdb` function of libpq.
+To get a connection to a PostgreSQL database, the dburl to the tntdb::connect
+function must start with "postgresql:". The remaining string is passed to the
+`PQconnectdb` function of libpq.
 
-   A typical connection with a PostgreSQL driver looks like that:
+A typical connection with a PostgreSQL driver looks like that:
 
-   @code
-     tntdb::Connection conn = tntdb::connect("postgresql:host=localhost port=5432 dbname=mydb user=foo password=bar");
-   @endcode
+@code
+ tntdb::Connection conn = tntdb::connect("postgresql:host=localhost port=5432 dbname=mydb user=foo password=bar");
+@endcode
 
-   */
+*/
 
-  namespace postgresql
-  {
-    /// Implements a connection to a PostgreSQL database.
-    class Connection : public IStmtCacheConnection
-    {
-        PGconn* conn;
-        tntdb::Statement currvalStmt;
-        tntdb::Statement lastvalStmt;
-        unsigned transactionActive;
-        unsigned stmtCounter;
-        std::vector<std::string> stmtsToDeallocate;
+namespace postgresql
+{
+class Result;
 
-      public:
-        Connection(const std::string& url, const std::string& username, const std::string& password);
-        ~Connection();
+/// Implements a connection to a PostgreSQL database.
+class Connection : public IConnection
+{
+    PGconn* conn;
+    tntdb::Statement currvalStmt;
+    tntdb::Statement lastvalStmt;
+    unsigned transactionActive;
+    unsigned stmtCounter;
+    std::vector<std::string> stmtsToDeallocate;
+    std::shared_ptr<Result> pgselect(const std::string& query);
 
-        void beginTransaction();
-        void commitTransaction();
-        void rollbackTransaction();
+public:
+    Connection(const std::string& url, const std::string& username, const std::string& password);
+    ~Connection();
 
-        size_type execute(const std::string& query);
-        tntdb::Result select(const std::string& query);
-        tntdb::Row selectRow(const std::string& query);
-        tntdb::Value selectValue(const std::string& query);
-        tntdb::Statement prepare(const std::string& query);
-        tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
-        bool ping();
-        long lastInsertId(const std::string& name);
-        void lockTable(const std::string& tablename, bool exclusive);
+    void beginTransaction();
+    void commitTransaction();
+    void rollbackTransaction();
 
-        PGconn* getPGConn() const      { return conn; }
-        unsigned getNextStmtNumber()   { return ++stmtCounter; }
-        void deallocateStatement(const std::string& stmtName);
-        void deallocateStatements();
-    };
+    size_type execute(const std::string& query);
+    tntdb::Result select(const std::string& query);
+    tntdb::Row selectRow(const std::string& query);
+    tntdb::Value selectValue(const std::string& query);
+    tntdb::Statement prepare(const std::string& query);
+    tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
+    bool ping();
+    long lastInsertId(const std::string& name);
+    void lockTable(const std::string& tablename, bool exclusive);
 
-    /// @cond internal
-    inline bool isError(const PGresult* res)
-    {
-      ExecStatusType status = PQresultStatus(res);
-      return status != PGRES_COMMAND_OK
-          && status != PGRES_TUPLES_OK
-          && status != PGRES_COPY_OUT
-          && status != PGRES_COPY_IN;
-    }
-    /// @endcond internal
+    PGconn* getPGConn() const      { return conn; }
+    unsigned getNextStmtNumber()   { return ++stmtCounter; }
+    void deallocateStatement(const std::string& stmtName);
+    void deallocateStatements();
+};
 
-  }
+/// @cond internal
+inline bool isError(const PGresult* res)
+{
+  ExecStatusType status = PQresultStatus(res);
+  return status != PGRES_COMMAND_OK
+      && status != PGRES_TUPLES_OK
+      && status != PGRES_COPY_OUT
+      && status != PGRES_COPY_IN;
+}
+/// @endcond internal
+
+}
 }
 
 #endif // TNTDB_POSTGRESQL_IMPL_CONNECTION_H

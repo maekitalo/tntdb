@@ -30,29 +30,31 @@
 #define TNTDB_ORACLE_ROW_H
 
 #include <tntdb/iface/irow.h>
-#include <tntdb/value.h>
 #include <tntdb/oracle/statement.h>
 #include <vector>
+#include <memory>
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class Row : public IRow
-    {
-        typedef std::vector<tntdb::Value> Values;
-        Values values;
+namespace oracle
+{
+class Value;
 
-      public:
-        explicit Row(Statement* stmt);
-        Row(Statement* stmt, unsigned columncount);
+class Row : public IRow
+{
+    typedef std::vector<std::shared_ptr<Value>> Values;
+    Values _values;
 
-        virtual size_type size() const;
-        virtual tntdb::Value getValueByNumber(size_type field_num) const;
-        virtual tntdb::Value getValueByName(const std::string& field_name) const;
-        virtual std::string getColumnName(size_type field_num) const;
-    };
-  }
+public:
+    explicit Row(Statement& stmt);
+    Row(Statement& stmt, unsigned columncount);
+
+    virtual size_type size() const;
+    virtual tntdb::Value getValueByNumber(size_type field_num) const;
+    virtual tntdb::Value getValueByName(const std::string& field_name) const;
+    virtual std::string getColumnName(size_type field_num) const;
+};
+}
 }
 
 #endif // TNTDB_ORACLE_ROW_H

@@ -28,6 +28,8 @@
 
 #include <tntdb/postgresql/impl/connection.h>
 #include <tntdb/postgresql/impl/result.h>
+#include <tntdb/postgresql/impl/resultrow.h>
+#include <tntdb/postgresql/impl/resultvalue.h>
 #include <tntdb/postgresql/impl/statement.h>
 #include <tntdb/postgresql/error.h>
 #include <tntdb/result.h>
@@ -41,253 +43,258 @@ log_define("tntdb.postgresql.connection")
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    Connection::Connection(const std::string& url_, const std::string& username, const std::string& password)
-      : transactionActive(0),
-        stmtCounter(0)
-    {
-      log_debug("PQconnectdb(\"" << url_ << "\")");
+namespace postgresql
+{
+Connection::Connection(const std::string& url_, const std::string& username, const std::string& password)
+  : transactionActive(0),
+    stmtCounter(0)
+{
+    log_debug("PQconnectdb(\"" << url_ << "\")");
 
-      conn = PQconnectdb(url(url_, username, password).c_str());
-      if (conn == 0)
+    conn = PQconnectdb(url(url_, username, password).c_str());
+    if (conn == 0)
         throw std::bad_alloc();
 
-      if (PQstatus(conn) == CONNECTION_BAD )
+    if (PQstatus(conn) == CONNECTION_BAD )
         throw PgConnError("PQconnectdb", conn);
 
-      log_debug("connected to postgresql backend process " << PQbackendPID(conn));
-    }
+    log_debug("connected to postgresql backend process " << PQbackendPID(conn));
+}
 
-    Connection::~Connection()
+Connection::~Connection()
+{
+    if (conn)
     {
-      if (conn)
-      {
-        clearStatementCache();
         currvalStmt = tntdb::Statement();
         lastvalStmt = tntdb::Statement();
 
         log_debug("PQfinish(" << conn << ")");
         PQfinish(conn);
-      }
     }
+}
 
-    void Connection::beginTransaction()
-    {
-      if (transactionActive == 0)
+void Connection::beginTransaction()
+{
+    if (transactionActive == 0)
         execute("BEGIN");
-      ++transactionActive;
-    }
+    ++transactionActive;
+}
 
-    void Connection::commitTransaction()
+void Connection::commitTransaction()
+{
+    if (transactionActive == 0 || --transactionActive == 0)
     {
-      if (transactionActive == 0 || --transactionActive == 0)
-      {
         execute("COMMIT");
         deallocateStatements();
-      }
     }
+}
 
-    void Connection::rollbackTransaction()
+void Connection::rollbackTransaction()
+{
+    if (transactionActive == 0 || --transactionActive == 0)
     {
-      if (transactionActive == 0 || --transactionActive == 0)
-      {
         execute("ROLLBACK");
         deallocateStatements();
-      }
     }
+}
 
-    Connection::size_type Connection::execute(const std::string& query)
+Connection::size_type Connection::execute(const std::string& query)
+{
+    log_debug("execute(\"" << query << "\")");
+
+    log_debug("PQexec(" << conn << ", \"" << query << "\")");
+    PGresult* result = PQexec(conn, query.c_str());
+    log_debug("PGresult=" << static_cast<void*>(result));
+    if (isError(result))
     {
-      log_debug("execute(\"" << query << "\")");
-
-      log_debug("PQexec(" << conn << ", \"" << query << "\")");
-      PGresult* result = PQexec(conn, query.c_str());
-      if (isError(result))
-      {
         log_error(PQresultErrorMessage(result));
         throw PgSqlError(query, "PQexec", result, true);
-      }
-
-      std::string t = PQcmdTuples(result);
-      Connection::size_type ret = t.empty() ? 0
-                                            : cxxtools::convert<Connection::size_type>(t);
-
-      log_debug("PQclear(" << result << ')');
-      PQclear(result);
-
-      return ret;
     }
 
-    tntdb::Result Connection::select(const std::string& query)
-    {
-      log_debug("select(\"" << query << "\")");
+    std::string t = PQcmdTuples(result);
+    Connection::size_type ret = t.empty() ? 0
+                                          : cxxtools::convert<Connection::size_type>(t);
 
-      log_debug("PQexec(" << conn << ", \"" << query << "\")");
-      PGresult* result = PQexec(conn, query.c_str());
-      if (isError(result))
-      {
+    log_debug("PQclear(" << result << ')');
+    PQclear(result);
+
+    return ret;
+}
+
+std::shared_ptr<Result> Connection::pgselect(const std::string& query)
+{
+    log_debug("PQexec(" << conn << ", \"" << query << "\")");
+    PGresult* result = PQexec(conn, query.c_str());
+    log_debug("PGresult=" << static_cast<void*>(result));
+    if (isError(result))
+    {
         log_error(PQresultErrorMessage(result));
         throw PgSqlError(query, "PQexec", result, true);
-      }
-
-      return tntdb::Result(new Result(tntdb::Connection(this), result));
     }
 
-    Row Connection::selectRow(const std::string& query)
-    {
-      log_debug("selectRow(\"" << query << "\")");
-      tntdb::Result result = select(query);
-      if (result.empty())
+    return std::make_shared<Result>(result);
+}
+
+tntdb::Result Connection::select(const std::string& query)
+{
+    return tntdb::Result(pgselect(query));
+}
+
+Row Connection::selectRow(const std::string& query)
+{
+    log_debug("selectRow(\"" << query << "\")");
+    auto result = pgselect(query);
+    if (result->size() == 0)
         throw NotFound();
 
-      return result.getRow(0);
-    }
+    return Row(std::make_shared<ResultRow>(result, 0));
+}
 
-    Value Connection::selectValue(const std::string& query)
-    {
-      log_debug("selectValue(\"" << query << "\")");
-      Row t = selectRow(query);
-      if (t.empty())
+Value Connection::selectValue(const std::string& query)
+{
+    log_debug("selectValue(\"" << query << "\")");
+    auto result = pgselect(query);
+    if (result->size() == 0)
         throw NotFound();
 
-      return t.getValue(0);
-    }
+    return Value(std::make_shared<ResultValue>(result, *result, 0, 0));
+}
 
-    tntdb::Statement Connection::prepare(const std::string& query)
+tntdb::Statement Connection::prepare(const std::string& query)
+{
+    log_debug("prepare(\"" << query << "\")");
+    return tntdb::Statement(std::make_shared<Statement>(this, query));
+}
+
+tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+{
+    std::string q = query;
+
+    if (!limit.empty())
     {
-      log_debug("prepare(\"" << query << "\")");
-      return tntdb::Statement(new Statement(this, query));
-    }
-
-    tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
-    {
-      std::string q = query;
-
-      if (!limit.empty())
-      {
         q += " limit :";
         q += limit;
-      }
-
-      if (!offset.empty())
-      {
-        q += " offset :";
-        q += offset;
-      }
-
-      return prepare(q);
     }
 
-    bool Connection::ping()
+    if (!offset.empty())
     {
-      log_debug("ping()");
+        q += " offset :";
+        q += offset;
+    }
 
-      if (PQsendQuery(conn, "select 1") == 0)
-      {
+    return prepare(q);
+}
+
+bool Connection::ping()
+{
+    log_debug("ping()");
+
+    if (PQsendQuery(conn, "select 1") == 0)
+    {
         log_debug("failed to send statement \"select 1\" to database in Connection::ping()");
         return false;
-      }
+    }
 
-      while (true)
-      {
+    while (true)
+    {
         struct pollfd fd;
         fd.fd = PQsocket(conn);
         fd.events = POLLIN;
         log_debug("wait for input on fd " << fd.fd);
         if (::poll(&fd, 1, 10000) != 1)
         {
-          log_debug("no data received in Connection::ping()");
-          return false;
+            log_debug("no data received in Connection::ping()");
+            return false;
         }
 
         log_debug("consumeInput");
         if (PQconsumeInput(conn) == 0)
         {
-          log_debug("PQconsumeInput failed in Connection::ping()");
-          return false;
+            log_debug("PQconsumeInput failed in Connection::ping()");
+            return false;
         }
 
         log_debug("check PQisBusy");
         while (PQisBusy(conn) == 0)
         {
-          log_debug("PQgetResult");
-          PGresult* result = PQgetResult(conn);
+            log_debug("PQgetResult");
+            PGresult* result = PQgetResult(conn);
 
-          log_debug("PQgetResult => " << static_cast<void*>(result));
-          if (result == 0)
-            return true;
+            log_debug("PQgetResult => " << static_cast<void*>(result));
+            if (result == 0)
+                return true;
 
-          log_debug("PQfree");
-          PQclear(result);
+            log_debug("PQfree");
+            PQclear(result);
         }
-      }
     }
+}
 
-    long Connection::lastInsertId(const std::string& name)
+long Connection::lastInsertId(const std::string& name)
+{
+    long ret = 0;
+
+    if (name.empty())
     {
-      long ret = 0;
-
-      if (name.empty())
-      {
         if (!lastvalStmt)
-          lastvalStmt = prepare("select lastval()");
+            lastvalStmt = prepare("select lastval()");
 
         lastvalStmt
           .selectValue()
           .get(ret);
-      }
-      else
-      {
+    }
+    else
+    {
         if (!currvalStmt)
-          currvalStmt = prepare("select currval(:name)");
+            currvalStmt = prepare("select currval(:name)");
 
         currvalStmt.set("name", name)
           .selectValue()
           .get(ret);
 
-      }
-
-      return ret;
     }
 
-    void Connection::deallocateStatement(const std::string& stmtName)
-    {
-      // Delay deallocation since a postgresql fail to execute anything including
-      // deallocate statements when a failed transaction is active.
+    return ret;
+}
 
-      stmtsToDeallocate.push_back(stmtName);
-      if (transactionActive == 0)
+void Connection::deallocateStatement(const std::string& stmtName)
+{
+    // Delay deallocation since a postgresql fail to execute anything including
+    // deallocate statements when a failed transaction is active.
+
+    stmtsToDeallocate.push_back(stmtName);
+    if (transactionActive == 0)
         deallocateStatements();
-    }
+}
 
-    void Connection::deallocateStatements()
+void Connection::deallocateStatements()
+{
+    for (std::vector<std::string>::size_type n = 0; n < stmtsToDeallocate.size(); ++n)
     {
-      for (std::vector<std::string>::size_type n = 0; n < stmtsToDeallocate.size(); ++n)
-      {
         std::string sql = "DEALLOCATE " + stmtsToDeallocate[n];
 
         log_debug("PQexec(" << getPGConn() << ", \"" << sql << "\")");
         PGresult* result = PQexec(getPGConn(), sql.c_str());
+        log_debug("PGresult=" << static_cast<void*>(result));
 
         if (isError(result))
-          log_error("error deallocating statement: " << PQresultErrorMessage(result));
+            log_error("error deallocating statement: " << PQresultErrorMessage(result));
 
         log_debug("PQclear(" << result << ')');
         PQclear(result);
-      }
-
-      stmtsToDeallocate.clear();
     }
 
-    void Connection::lockTable(const std::string& tablename, bool exclusive)
-    {
-      std::string query = "LOCK TABLE ";
-      query += tablename;
-      query += exclusive ? " IN ACCESS EXCLUSIVE MODE" : " IN SHARE MODE";
+    stmtsToDeallocate.clear();
+}
 
-      tntdb::Statement lockStmt = prepare(query);
-      lockStmt.execute();
-    }
-  }
+void Connection::lockTable(const std::string& tablename, bool exclusive)
+{
+    std::string query = "LOCK TABLE ";
+    query += tablename;
+    query += exclusive ? " IN ACCESS EXCLUSIVE MODE" : " IN SHARE MODE";
+
+    tntdb::Statement lockStmt = prepare(query);
+    lockStmt.execute();
+}
+}
 }

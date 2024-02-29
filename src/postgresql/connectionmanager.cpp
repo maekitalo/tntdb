@@ -32,13 +32,13 @@
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    tntdb::Connection ConnectionManager::connect(const std::string& url, const std::string& username, const std::string& password)
-    {
-      return tntdb::Connection(new Connection(url, username, password));
-    }
-  }
+namespace postgresql
+{
+tntdb::Connection ConnectionManager::connect(const std::string& url, const std::string& username, const std::string& password)
+{
+      return tntdb::Connection(std::make_shared<Connection>(url, username, password));
+}
+}
 }
 
 TNTDB_CONNECTIONMANAGER_DEFINE(postgresql)

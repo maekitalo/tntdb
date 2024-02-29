@@ -35,149 +35,147 @@ log_define("tntdb.connectionpool")
 
 namespace tntdb
 {
-  ////////////////////////////////////////////////////////////////////////
-  // Connector
-  //
-  Connection* ConnectionPool::Connector::operator() ()
-  {
-    log_debug("create new connection for url \"" << url << "\" user \"" << username << '"');
-    return new Connection(tntdb::connect(url, username, password));
-  }
-
-  ////////////////////////////////////////////////////////////////////////
-  // ConnectionPool
-  //
-  Connection ConnectionPool::connect()
-  {
+////////////////////////////////////////////////////////////////////////
+// ConnectionPool
+//
+Connection ConnectionPool::connect()
+{
     log_debug("ConnectionPool::connect()");
 
-    log_debug("current pool size " << getCurrentSize() << " max " << getMaximumSize());
+    log_debug("current pool size " << getCurrentSize() << " max " << getMaxSpare());
 
-    unsigned max = getCurrentSize() * 2;
+    std::lock_guard<std::mutex> lock(_mutex);
 
-    for (unsigned n = 0; n < max; ++n)
+    std::shared_ptr<IConnection> c;
+    while (!_connectionPool.empty()
+        && !_connectionPool.back()->ping())
     {
-      Connection conn(new PoolConnection(pool.get()));
-
-      if (conn.ping())
-        return conn;
-
-      // a pool-connection don't put itself back into the pool after a failed ping
-      log_warn("drop dead connection from pool");
+        log_warn("drop dead connection from pool");
+        _connectionPool.pop_back();
     }
 
-    return Connection(new PoolConnection(pool.get()));
-  }
+    if (_connectionPool.empty())
+    {
+        c = tntdb::connect(_url, _username, _password).getImpl();
+    }
+    else
+    {
+        c = std::move(_connectionPool.back());
+        _connectionPool.pop_back();
+    }
+    
+    return Connection(std::make_shared<PoolConnection>(std::move(c), *this));
+}
 
-  unsigned ConnectionPool::drop(unsigned keep)
-  {
-      unsigned size = pool.size();
-      pool.drop(keep);
-      return size - pool.size();
-  }
+void ConnectionPool::put(std::shared_ptr<IConnection>& conn)
+{
+    std::lock_guard<std::mutex> lock(_mutex);
 
-  ////////////////////////////////////////////////////////////////////////
-  // ConnectionPools
-  //
-  ConnectionPools::~ConnectionPools()
-  {
-    cxxtools::MutexLock lock(mutex);
-    for (PoolsType::iterator it = pools.begin(); it != pools.end(); ++it)
-      delete it->second;
-  }
+    if (_maxSpare == 0 || _connectionPool.size() < _maxSpare)
+        _connectionPool.emplace_back(conn);
+    else
+        log_debug("don't reuse connection " << conn << " max spare " << _maxSpare << " reached");
+}
 
-  Connection ConnectionPools::connect(const std::string& url, const std::string& username, const std::string& password)
-  {
+void ConnectionPool::drop(unsigned keep)
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    if (_connectionPool.size() > keep)
+        _connectionPool.resize(keep);
+}
+
+void ConnectionPool::setMaxSpare(unsigned m)
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    _maxSpare = m;
+    if (_connectionPool.size() > _maxSpare)
+        _connectionPool.resize(_maxSpare);
+}
+
+////////////////////////////////////////////////////////////////////////
+// ConnectionPools
+//
+Connection ConnectionPools::connect(const std::string& url, const std::string& username, const std::string& password)
+{
     log_debug("ConnectionPools::connect(\"" << url << "\", \"" << username << "\", password)");
 
     PoolsType::iterator it;
 
     {
-      cxxtools::MutexLock lock(mutex);
-      it = pools.find(ConnectionParameter(url, username, password));
-      if (it == pools.end())
-      {
-        log_debug("create pool for url \"" << url << "\" user \"" << username << "\" with " << maxcount << " connections");
-        PoolType* pool = new PoolType(url, username, password, maxcount);
-        it = pools.insert(PoolsType::value_type(ConnectionParameter(url, username, password), pool)).first;
-      }
-      else
-        log_debug("pool for url \"" << url << "\" found");
+        std::lock_guard<std::mutex> lock(_mutex);
+        it = _pools.find(ConnectionParameter(url, username, password));
+        if (it == _pools.end())
+        {
+            log_debug("create pool for url \"" << url << "\" user \"" << username << "\" with " << _maxcount << " connections");
+            PoolType* pool = new PoolType(url, username, password, _maxcount);
+            it = _pools.emplace(ConnectionParameter(url, username, password), pool).first;
+        }
+        else
+            log_debug("pool for url \"" << url << "\" found");
     }
 
     log_debug("current pool size " << it->second->getCurrentSize());
     return it->second->connect();
-  }
+}
 
-  unsigned ConnectionPools::drop(unsigned keep)
-  {
+void ConnectionPools::drop(unsigned keep)
+{
     log_debug("drop(" << keep << ')');
 
-    cxxtools::MutexLock lock(mutex);
-    unsigned dropcount = 0;
-    for (PoolsType::iterator it = pools.begin(); it != pools.end(); ++it)
-    {
-      log_debug("pool url \"" << it->first.url << "\" username \"" << it->first.username << "\"; current size " << it->second->getCurrentSize());
-      dropcount += it->second->drop();
-      log_debug("connections released " << it->second->getCurrentSize() << " kept");
-    }
+    std::lock_guard<std::mutex> lock(_mutex);
+    for (auto& p: _pools)
+        p.second->drop(keep);
+}
 
-    return dropcount;
-  }
-
-  unsigned ConnectionPools::drop(const std::string& url, const std::string& username, const std::string& password, unsigned keep)
-  {
+void ConnectionPools::drop(const std::string& url, const std::string& username, const std::string& password, unsigned keep)
+{
     log_debug("drop(\"" << url << "\", \"" << username << "\", password, " << keep << ')');
 
-    cxxtools::MutexLock lock(mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
 
-    unsigned dropcount = 0;
-
-    PoolsType::iterator it = pools.find(ConnectionParameter(url, username, password));
-    if (it != pools.end())
+    PoolsType::iterator it = _pools.find(ConnectionParameter(url, username, password));
+    if (it == _pools.end())
     {
-      log_debug("pool \"" << url << "\" found; current size " << it->second->getCurrentSize());
-      dropcount = it->second->drop(keep);
-      log_debug(dropcount << " connections released " << it->second->getCurrentSize() << " kept");
-
-      if (it->second->getCurrentSize() == 0)
-      {
-        log_debug("delete connectionpool for url \"" << url << "\", username \"" << username << '"');
-        delete it->second;
-        pools.erase(it);
-      }
+        log_debug("pool for url \"" << url << "\" username \"" << username << "\" not found");
     }
     else
-      log_debug("pool for url \"" << url << "\" username \"" << username << "\" not found");
+    {
+        it->second->drop(keep);
+        if (it->second->getCurrentSize() == 0)
+        {
+            log_debug("delete connectionpool for url \"" << url << "\", username \"" << username << '"');
+            _pools.erase(it);
+        }
+    }
+}
 
-    return dropcount;
-  }
+unsigned ConnectionPools::getCurrentSize(const std::string& url, const std::string& username, const std::string& password) const
+{
+    std::lock_guard<std::mutex> lock(_mutex);
 
-  unsigned ConnectionPools::getCurrentSize(const std::string& url, const std::string& username, const std::string& password) const
-  {
-    cxxtools::MutexLock lock(mutex);
-
-    PoolsType::const_iterator it = pools.find(ConnectionParameter(url, username, password));
-    return it == pools.end() ? 0
+    auto it = _pools.find(ConnectionParameter(url, username, password));
+    return it == _pools.end() ? 0
                              : it->second->getCurrentSize();
-  }
+}
 
-  unsigned ConnectionPools::getCurrentSize() const
-  {
-    cxxtools::MutexLock lock(mutex);
+unsigned ConnectionPools::getCurrentSize() const
+{
+    std::lock_guard<std::mutex> lock(_mutex);
 
     unsigned size = 0;
-    for (PoolsType::const_iterator it = pools.begin(); it != pools.end(); ++it)
+    for (auto it = _pools.begin(); it != _pools.end(); ++it)
         size += it->second->getCurrentSize();
 
     return size;
-  }
+}
 
-  void ConnectionPools::setMaximumSize(unsigned m)
-  {
-    cxxtools::MutexLock lock(mutex);
-    maxcount = m;
-    for (PoolsType::const_iterator it = pools.begin(); it != pools.end(); ++it)
-      it->second->setMaximumSize(m);
-  }
+void ConnectionPools::setMaxSpare(unsigned m)
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+    _maxcount = m;
+    for (auto it = _pools.begin(); it != _pools.end(); ++it)
+        it->second->setMaxSpare(m);
+}
 }

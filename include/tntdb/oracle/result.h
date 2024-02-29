@@ -30,30 +30,33 @@
 #define TNTDB_ORACLE_RESULT_H
 
 #include <tntdb/iface/iresult.h>
-#include <tntdb/row.h>
-#include <vector>
 #include <oci.h>
+#include <vector>
+#include <memory>
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class Statement;
+class IRow;
 
-    class Result : public IResult
-    {
-        ub4 columncount;
-        std::vector<tntdb::Row> rows;
+namespace oracle
+{
+class Row;
+class Statement;
 
-      public:
-        Result(oracle::Statement* conn);
-        Result(oracle::Statement* conn, unsigned fetchsize);
+class Result : public IResult
+{
+    ub4 _columncount;
+    std::vector<std::shared_ptr<IRow>> _rows;
 
-        Row getRow(size_type tup_num) const;
-        size_type size() const;
-        size_type getFieldCount() const;
-    };
-  }
+public:
+    explicit Result(Statement& stmt);
+    Result(Statement& stmt, unsigned fetchsize);
+
+    tntdb::Row getRow(size_type tup_num) const;
+    size_type size() const;
+    size_type getFieldCount() const;
+};
+}
 }
 
 #endif // TNTDB_ORACLE_RESULT_H

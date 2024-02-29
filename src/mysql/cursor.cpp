@@ -38,72 +38,73 @@ log_define("tntdb.mysql.cursor")
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    Cursor::Cursor(Statement* statement, unsigned fetchsize)
-      : row(new BoundRow(statement->getFieldCount())),
-        mysqlStatement(statement),
-        stmt(statement->getStmt())
+namespace mysql
+{
+Cursor::Cursor(Statement& statement, unsigned fetchsize)
+  : _row(std::make_shared<BoundRow>(statement.getFieldCount())),
+    _fields(statement.getFields()),
+    _stmt(statement.createStmt())
+{
+    unsigned field_count = _row->getSize();
+
+    for (unsigned n = 0; n < field_count; ++n)
     {
-      MYSQL_FIELD* fields = statement->getFields();
-      unsigned field_count = row->getSize();
+        if (_fields[n].length > 0x10000)
+            // do not allocate buffers > 64k - use mysql_stmt_fetch_column instead later
+            _fields[n].length = 0x10000;
 
-      for (unsigned n = 0; n < field_count; ++n)
-      {
-        if (fields[n].length > 0x10000)
-          // do not allocate buffers > 64k - use mysql_stmt_fetch_column instead later
-          fields[n].length = 0x10000;
-
-        row->initOutBuffer(n, fields[n]);
-      }
-
-      log_debug("mysql_stmt_bind_result");
-      if (mysql_stmt_bind_result(stmt, row->getMysqlBind()) != 0)
-        throw MysqlStmtError("mysql_stmt_bind_result", stmt);
-
-      statement->execute(stmt, fetchsize);
+        _row->initOutBuffer(n, _fields[n]);
     }
 
-    Cursor::~Cursor()
+    log_debug("mysql_stmt_bind_result");
+    if (mysql_stmt_bind_result(_stmt, _row->getMysqlBind()) != 0)
+        throw MysqlStmtError("mysql_stmt_bind_result", _stmt);
+
+    statement.execute(_stmt, fetchsize);
+}
+
+Cursor::~Cursor()
+{
+    if (_stmt)
     {
-      if (stmt)
-        mysqlStatement->putback(stmt);
+        log_debug("mysql_stmt_close(" << _stmt << ')');
+        ::mysql_stmt_close(_stmt);
     }
+}
 
-    Row Cursor::fetch()
+Row Cursor::fetch()
+{
+    log_debug("mysql_stmt_fetch(" << _stmt << ')');
+    int ret = mysql_stmt_fetch(_stmt);
+
+    if (ret == MYSQL_DATA_TRUNCATED)
     {
-      log_debug("mysql_stmt_fetch(" << stmt << ')');
-      int ret = mysql_stmt_fetch(stmt);
-
-      if (ret == MYSQL_DATA_TRUNCATED)
-      {
         // fetch column data where truncated
-        MYSQL_FIELD* fields = mysqlStatement->getFields();
-        for (unsigned n = 0; n < row->getSize(); ++n)
+        for (unsigned n = 0; n < _row->getSize(); ++n)
         {
-          if (*row->getMysqlBind()[n].length > row->getMysqlBind()[n].buffer_length)
-          {
-            // actual length was longer than buffer_length, so this column is truncated
-            fields[n].length = *row->getMysqlBind()[n].length;
-            row->initOutBuffer(n, fields[n]);
+            if (*_row->getMysqlBind()[n].length > _row->getMysqlBind()[n].buffer_length)
+            {
+                // actual length was longer than buffer_length, so this column is truncated
+                _fields[n].length = *_row->getMysqlBind()[n].length;
+                _row->initOutBuffer(n, _fields[n]);
 
-            log_debug("mysql_stmt_fetch_column(" << stmt << ", BIND, " << n
-                << ", 0) with " << fields[n].length << " bytes");
-            if (mysql_stmt_fetch_column(stmt, row->getMysqlBind() + n, n, 0) != 0)
-              throw MysqlStmtError("mysql_stmt_fetch_column", stmt);
-          }
+                log_debug("mysql_stmt_fetch_column(" << _stmt << ", BIND, " << n
+                    << ", 0) with " << _fields[n].length << " bytes");
+                if (mysql_stmt_fetch_column(_stmt, _row->getMysqlBind() + n, n, 0) != 0)
+                    throw MysqlStmtError("mysql_stmt_fetch_column", _stmt);
+            }
         }
-      }
-      else if (ret == MYSQL_NO_DATA)
-      {
-        log_debug("MYSQL_NO_DATA");
-        row = 0;
-        return Row();
-      }
-      else if (ret == 1)
-        throw MysqlStmtError("mysql_stmt_fetch", stmt);
-
-      return Row(&*row);
     }
-  }
+    else if (ret == MYSQL_NO_DATA)
+    {
+        log_debug("MYSQL_NO_DATA");
+        _row = 0;
+        return Row();
+    }
+    else if (ret == 1)
+        throw MysqlStmtError("mysql_stmt_fetch", _stmt);
+
+    return Row(_row);
+}
+}
 }

@@ -33,62 +33,62 @@
 
 namespace tntdb
 {
-    class Value;
-    class Row;
-    class Result;
-    class Statement;
+class Value;
+class Row;
+class Result;
+class Statement;
 
-    /** Makes tntdb::Value serializable in cxxtools serialization framework
-     */
-    void operator<<= (cxxtools::SerializationInfo& si, const Value& value);
+/** Makes tntdb::Value serializable in cxxtools serialization framework
+ */
+void operator<<= (cxxtools::SerializationInfo& si, const Value& value);
 
-    /** Makes tntdb::Row serializable in cxxtools serialization framework
-     */
-    void operator<<= (cxxtools::SerializationInfo& si, const Row& row);
+/** Makes tntdb::Row serializable in cxxtools serialization framework
+ */
+void operator<<= (cxxtools::SerializationInfo& si, const Row& row);
 
-    /** Makes tntdb::Result serializable in cxxtools serialization framework
-     */
-    void operator<<= (cxxtools::SerializationInfo& si, const Result& res);
+/** Makes tntdb::Result serializable in cxxtools serialization framework
+ */
+void operator<<= (cxxtools::SerializationInfo& si, const Result& res);
 
-    /** Makes tntdb::Statement serializable in cxxtools serialization framework
-     */
-    void operator<<= (cxxtools::SerializationInfo& si, const Statement& res);
+/** Makes tntdb::Statement serializable in cxxtools serialization framework
+ */
+void operator<<= (cxxtools::SerializationInfo& si, const Statement& res);
 
-    /** Serialize operator for tntdb::Statement.
-     */
-    void operator>>= (const cxxtools::SerializationInfo& si, Statement& stmt);
+/** Serialize operator for tntdb::Statement.
+ */
+void operator>>= (const cxxtools::SerializationInfo& si, Statement& stmt);
 
-    /** Serialize objects into tntdb::Statement.
-     *  This sets the placeholder variables in statement to the value of the
-     *  object to serialize.
-     *
-     *  Example:
-     *  /code
-     *    MyObject obj = ...;
-     *    stmt = db.prepare("insert into ...");
-     *    stmt <<= obj;   // this serializes MyObject into the statement
-     *                    // by using the serialization operator of MyObject
-     *                    // and setting the members in the statement one by one
-     *
-     *    stmt.execute();
-     *  /endcode
-     */
-    template <typename T>
-    Statement& operator<<= (Statement& stmt, const T& obj)
-    {
-        cxxtools::SerializationInfo si;
-        si <<= obj;
-        si >>= stmt;
-        return stmt;
-    }
+/** Serialize objects into tntdb::Statement.
+ *  This sets the placeholder variables in statement to the value of the
+ *  object to serialize.
+ *
+ *  Example:
+ *  /code
+ *    MyObject obj = ...;
+ *    stmt = db.prepare("insert into ...");
+ *    stmt <<= obj;   // this serializes MyObject into the statement
+ *                    // by using the serialization operator of MyObject
+ *                    // and setting the members in the statement one by one
+ *
+ *    stmt.execute();
+ *  /endcode
+ */
+template <typename T>
+Statement& operator<<= (Statement& stmt, const T& obj)
+{
+    cxxtools::SerializationInfo si;
+    si <<= obj;
+    si >>= stmt;
+    return stmt;
+}
 
-    template <typename T>
-    void operator>>= (const Row& row, T& obj)
-    {
-        cxxtools::SerializationInfo si;
-        si <<= row;
-        si >>= obj;
-    }
+template <typename T>
+void operator>>= (const Row& row, T& obj)
+{
+    cxxtools::SerializationInfo si;
+    si <<= row;
+    si >>= obj;
+}
 
 }
 

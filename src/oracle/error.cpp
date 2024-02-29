@@ -35,44 +35,80 @@ log_define("tntdb.oracle.error")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    namespace
+namespace oracle
+{
+std::string Error::errorMessage(OCIError* errhp, const char* function)
+{
+    int errcode;
+    char errbuf[512];
+    OCIErrorGet((dvoid*)errhp, (ub4)1, (text*)NULL, &errcode,
+                (unsigned char*)errbuf, (ub4)sizeof(errbuf), OCI_HTYPE_ERROR);
+
+    std::ostringstream msg;
+    msg << "oracle error " << errcode;
+    if (function)
+      msg << " in " << function;
+    msg << ": " << errbuf;
+    return msg.str();
+}
+
+std::string Error::errorMessage(const std::string& str, const char* function)
+{
+    std::string msg = str;
+    if (function)
     {
-      std::string errorMessage(OCIError* errhp, const char* function = 0)
-      {
-        int errcode;
-        char errbuf[512];
-        OCIErrorGet((dvoid*)errhp, (ub4)1, (text*)NULL, &errcode,
-                    (unsigned char*)errbuf, (ub4)sizeof(errbuf), OCI_HTYPE_ERROR);
-
-        std::ostringstream msg;
-        msg << "oracle error " << errcode;
-        if (function)
-          msg << " in " << function;
-        msg << ": " << errbuf;
-        return msg.str();
-      }
-
-      std::string errorMessage(const std::string& str, const char* function = 0)
-      {
-        std::string msg = str;
-        if (function)
-        {
-          msg += " in function ";
-          msg += function;
-        }
-        return msg;
-      }
-
+        msg += " in function ";
+        msg += function;
     }
+    return msg;
+}
 
-    Error::Error(OCIError* errhp, const char* function)
-      : tntdb::Error(errorMessage(errhp, function))
-    { }
+Error::Error(OCIError* errhp, const char* function)
+  : tntdb::Error(errorMessage(errhp, function))
+{ }
 
-    Error::Error(const std::string& msg, const char* function)
-      : tntdb::Error(errorMessage(msg, function))
-    { }
-  }
+Error::Error(const std::string& msg, const char* function)
+  : tntdb::Error(errorMessage(msg, function))
+{ }
+
+namespace error
+{
+void checkError(OCIError* errhp, sword ret, const char* function)
+{
+    switch (ret)
+    {
+        case OCI_SUCCESS:
+            break;
+
+        case OCI_SUCCESS_WITH_INFO:
+            log_warn(function << ": OCI_SUCCESS_WITH_INFO: " << Error::errorMessage(errhp, function));
+            break;
+
+        case OCI_NEED_DATA:
+            log_warn(function << ": OCI_NEED_DATA");
+            throw Error(errhp, function);
+
+        case OCI_NO_DATA:
+            log_debug(function << ": OCI_NO_DATA");
+            throw NotFound();
+
+        case OCI_ERROR:
+            throw Error(errhp, function);
+
+        case OCI_INVALID_HANDLE:
+            log_error("OCI_INVALID_HANDLE");
+            throw InvalidHandle(function);
+
+        case OCI_STILL_EXECUTING:
+            log_error("OCI_STILL_EXECUTING");
+            throw StillExecuting(function);
+
+        case OCI_CONTINUE:
+            log_error("OCI_CONTINUE");
+            throw ErrorContinue(function);
+    }
+}
+}
+
+}
 }

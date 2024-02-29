@@ -34,34 +34,32 @@
 
 namespace tntdb
 {
-  class PoolConnection : public IConnection
-  {
-      ConnectionPool::PoolObjectType connection;
-      bool inTransaction;
-      bool drop;
+class PoolConnection : public IConnection
+{
+    ConnectionPool& _connectionPool;
 
-    public:
-      PoolConnection(ConnectionPool::PoolObjectType connection);
-      ~PoolConnection();
+    std::shared_ptr<IConnection> _connection;
+    bool _inTransaction;
+    bool _drop;
 
-      virtual void beginTransaction();
-      virtual void commitTransaction();
-      virtual void rollbackTransaction();
+public:
+    explicit PoolConnection(std::shared_ptr<IConnection>&& connection, ConnectionPool& connectionPool);
+    ~PoolConnection();
 
-      virtual size_type execute(const std::string& query);
-      virtual Result select(const std::string& query);
-      virtual Row selectRow(const std::string& query);
-      virtual Value selectValue(const std::string& query);
-      virtual Statement prepare(const std::string& query);
-      virtual Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
-      virtual Statement prepareCached(const std::string& query, const std::string& key);
-      virtual Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key);
-      virtual void clearStatementCache();
-      virtual bool clearStatementCache(const std::string& key);
-      virtual bool ping();
-      virtual long lastInsertId(const std::string& name);
-      virtual void lockTable(const std::string& tablename, bool exclusive);
-  };
+    virtual void beginTransaction();
+    virtual void commitTransaction();
+    virtual void rollbackTransaction();
+
+    virtual size_type execute(const std::string& query);
+    virtual Result select(const std::string& query);
+    virtual Row selectRow(const std::string& query);
+    virtual Value selectValue(const std::string& query);
+    virtual Statement prepare(const std::string& query);
+    virtual Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
+    virtual bool ping();
+    virtual long lastInsertId(const std::string& name);
+    virtual void lockTable(const std::string& tablename, bool exclusive);
+};
 }
 
 #endif // TNTDB_IMPL_POOLCONNECTION_H

@@ -29,17 +29,22 @@
 #ifndef TNTDB_IFACE_ICURSOR_H
 #define TNTDB_IFACE_ICURSOR_H
 
-#include <cxxtools/refcounted.h>
-
 namespace tntdb
 {
-  class Row;
+class Row;
 
-  class ICursor : public cxxtools::RefCounted
-  {
-    public:
-      virtual Row fetch() = 0;
-  };
+class ICursor
+{
+    ICursor(const ICursor&) = delete;
+    ICursor& operator=(const ICursor&) = delete;
+
+protected:
+    ICursor() = default;
+    virtual ~ICursor() = default;
+
+public:
+    virtual Row fetch() = 0;
+};
 }
 
 #endif // TNTDB_IFACE_ICURSOR_H

@@ -36,155 +36,155 @@
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    bool RowValue::isNull() const
-    {
-      return row[col] == 0;
-    }
+namespace mysql
+{
+bool RowValue::isNull() const
+{
+    return _row[_col] == 0;
+}
 
-    bool RowValue::getBool() const
-    {
-      return row[col][0] == '1'
-          || row[col][0] == 'y'
-          || row[col][0] == 'Y'
-          || row[col][0] == 't'
-          || row[col][0] == 'T';
-    }
+bool RowValue::getBool() const
+{
+    return _row[_col][0] == '1'
+        || _row[_col][0] == 'y'
+        || _row[_col][0] == 'Y'
+        || _row[_col][0] == 't'
+        || _row[_col][0] == 'T';
+}
 
-    short RowValue::getShort() const
-    {
-      short ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+short RowValue::getShort() const
+{
+    short ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    int RowValue::getInt() const
-    {
-      int ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+int RowValue::getInt() const
+{
+    int ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    long RowValue::getLong() const
-    {
-      long ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+long RowValue::getLong() const
+{
+    long ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    unsigned short RowValue::getUnsignedShort() const
-    {
-      unsigned short ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+unsigned short RowValue::getUnsignedShort() const
+{
+    unsigned short ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    unsigned RowValue::getUnsigned() const
-    {
-      unsigned ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+unsigned RowValue::getUnsigned() const
+{
+    unsigned ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    unsigned long RowValue::getUnsignedLong() const
-    {
-      unsigned long ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+unsigned long RowValue::getUnsignedLong() const
+{
+    unsigned long ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    int32_t RowValue::getInt32() const
-    {
-      int32_t ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+int32_t RowValue::getInt32() const
+{
+    int32_t ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    uint32_t RowValue::getUnsigned32() const
-    {
-      uint32_t ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+uint32_t RowValue::getUnsigned32() const
+{
+    uint32_t ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    int64_t RowValue::getInt64() const
-    {
-      int64_t ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+int64_t RowValue::getInt64() const
+{
+    int64_t ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    uint64_t RowValue::getUnsigned64() const
-    {
-      uint64_t ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+uint64_t RowValue::getUnsigned64() const
+{
+    uint64_t ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    Decimal RowValue::getDecimal() const
-    {
-      Decimal ret;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+Decimal RowValue::getDecimal() const
+{
+    Decimal ret;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    float RowValue::getFloat() const
-    {
-      float ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+float RowValue::getFloat() const
+{
+    float ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    double RowValue::getDouble() const
-    {
-      double ret = 0;
-      std::istringstream v(getString());
-      v >> ret;
-      return ret;
-    }
+double RowValue::getDouble() const
+{
+    double ret = 0;
+    std::istringstream v(getString());
+    v >> ret;
+    return ret;
+}
 
-    char RowValue::getChar() const
-    {
-      return row[col][0];
-    }
+char RowValue::getChar() const
+{
+    return _row[_col][0];
+}
 
-    void RowValue::getString(std::string& ret) const
-    {
-      ret.assign(row[col], len);
-    }
+void RowValue::getString(std::string& ret) const
+{
+    ret.assign(_row[_col], _len);
+}
 
-    void RowValue::getBlob(Blob& ret) const
-    {
-      ret.assign(row[col], len);
-    }
+void RowValue::getBlob(Blob& ret) const
+{
+    ret.assign(_row[_col], _len);
+}
 
-    Date RowValue::getDate() const
-    {
-      return Date::fromIso(getString());
-    }
+Date RowValue::getDate() const
+{
+    return Date::fromIso(getString());
+}
 
-    Time RowValue::getTime() const
-    {
-      return Time::fromIso(getString());
-    }
+Time RowValue::getTime() const
+{
+    return Time::fromIso(getString());
+}
 
-    Datetime RowValue::getDatetime() const
-    {
-      return Datetime::fromIso(getString());
-    }
+Datetime RowValue::getDatetime() const
+{
+    return Datetime::fromIso(getString());
+}
 
-  }
+}
 }

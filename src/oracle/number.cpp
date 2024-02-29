@@ -30,92 +30,134 @@
 #include <tntdb/oracle/error.h>
 #include <cxxtools/log.h>
 #include <cstring>
+#include <cmath>
 
 log_define("tntdb.oracle.number")
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    Number::Number()
-    {
-      std::memset(ociNumber.OCINumberPart, 0, OCI_NUMBER_SIZE);
-    }
+namespace oracle
+{
+Number::Number()
+{
+    std::memset(ociNumber.OCINumberPart, 0, OCI_NUMBER_SIZE);
+}
 
-    void Number::setLong(long data, OCIError* errhp)
-    {
-      sword convRet = OCINumberFromInt(errhp,
+void Number::setLong(long data, OCIError* errhp)
+{
+    sword convRet = OCINumberFromInt(errhp,
         &data, sizeof(data), OCI_NUMBER_SIGNED,
         &ociNumber);
 
-      error::checkError(errhp, convRet, "OCINumberFromInt");
-    }
+    error::checkError(errhp, convRet, "OCINumberFromInt");
+}
 
-    void Number::setUnsignedLong(unsigned long data, OCIError* errhp)
-    {
-      sword convRet = OCINumberFromInt(errhp,
+void Number::setUnsignedLong(unsigned long data, OCIError* errhp)
+{
+    sword convRet = OCINumberFromInt(errhp,
         &data, sizeof(data), OCI_NUMBER_UNSIGNED,
         &ociNumber);
 
-      error::checkError(errhp, convRet, "OCINumberFromInt");
-    }
+    error::checkError(errhp, convRet, "OCINumberFromInt");
+}
 
-    void Number::setInt64(int64_t data, OCIError* errhp)
-    {
-      sword convRet = OCINumberFromInt(errhp,
+void Number::setInt64(int64_t data, OCIError* errhp)
+{
+    sword convRet = OCINumberFromInt(errhp,
         &data, sizeof(data), OCI_NUMBER_SIGNED,
         &ociNumber);
 
-      error::checkError(errhp, convRet, "OCINumberFromInt");
-    }
+    error::checkError(errhp, convRet, "OCINumberFromInt");
+}
 
-    void Number::setUnsigned64(uint64_t data, OCIError* errhp)
-    {
-      sword convRet = OCINumberFromInt(errhp,
+void Number::setUnsigned64(uint64_t data, OCIError* errhp)
+{
+    sword convRet = OCINumberFromInt(errhp,
         &data, sizeof(data), OCI_NUMBER_UNSIGNED,
         &ociNumber);
 
-      error::checkError(errhp, convRet, "OCINumberFromInt");
-    }
+    error::checkError(errhp, convRet, "OCINumberFromInt");
+}
 
-    void Number::setDecimal(const Decimal& decimal, OCIError* errhp)
-    {
-      std::string s = decimal.toStringSci();
-      static const text fmt[] = "9.99999999999999999999999999999999999999EEEE";
+void Number::setDecimal(const Decimal& decimal, OCIError* errhp)
+{
+    std::string s = decimal.toStringSci();
+    static const text fmt[] = "9.99999999999999999999999999999999999999EEEE";
 
-      log_debug("OCINumberFromText(\"" << s << "\")");
-      sword convRet = OCINumberFromText( errhp,
+    log_debug("OCINumberFromText(\"" << s << "\")");
+    sword convRet = OCINumberFromText( errhp,
         reinterpret_cast<const text*>(s.data()), s.size(),
         reinterpret_cast<const text*>(fmt), sizeof(fmt) - 1,
         reinterpret_cast<const text*>(""), 0,
         &ociNumber);
 
-      error::checkError(errhp, convRet, "OCINumberFromText");
-    }
+    error::checkError(errhp, convRet, "OCINumberFromText");
+}
 
-    Number::Number(const Decimal &decimal, OCIError* errhp)
-    {
-      setDecimal(decimal, errhp);
-    }
+Number::Number(const Decimal &decimal, OCIError* errhp)
+{
+    setDecimal(decimal, errhp);
+}
 
+Decimal Number::getDecimal(const OCINumber* handle, OCIError* errhp)
+{
+    // there may be strange values in the database, where OCINumberToText fails with OCI-22065
+    // as a workaround we use OCINumberToReal first to check, whether the number is nan or 0
 
-    Decimal Number::getDecimal(const OCINumber* handle, OCIError* errhp)
-    {
-      char buffer[64];
-      ub4 bufsize = sizeof(buffer);
+    long double ld;
+    sword ret = OCINumberToReal(errhp, handle, sizeof(long double), &ld);
 
-      log_debug("OCINumberToText(" << static_cast<const void*>(handle) << ", fmt, fmtsize, \"\", 0, " << bufsize << ", " << static_cast<void*>(buffer) << ')');
-      static const text fmt[] = "9.99999999999999999999999999999999999999EEEE";
-      sword convRet = OCINumberToText(errhp,
+    error::checkError(errhp, ret, "OCINumberToReal");
+
+    log_debug("OCINumberToReal => value: " << ld << " isnan: " << std::isnan(ld));
+    if (std::isnan(ld))
+        return Decimal::nan();
+
+    if (ld == 0.0)
+        return Decimal(0, 0);
+
+    // now use OCINumberToText to get the highest possible precision without minimized rounding errors
+
+    char buffer[64];
+    ub4 bufsize = sizeof(buffer);
+
+    log_debug("OCINumberToText(" << static_cast<const void*>(handle) << ", fmt, fmtsize, \"\", 0, " << bufsize << ", " << static_cast<void*>(buffer) << ')');
+    static const text fmt[] = "9.99999999999999999999999999999999999999999999999999999999EEEE";
+
+    sword convRet = OCINumberToText(errhp,
         const_cast<OCINumber*>(handle), fmt, sizeof(fmt) - 1,
         reinterpret_cast<const text*>(""), 0,
         &bufsize, reinterpret_cast<text*>(buffer));
 
-      error::checkError(errhp, convRet, "OCINumberToText");
+    error::checkError(errhp, convRet, "OCINumberToText");
 
-      log_debug("OCINumberToText => \"" << buffer << '"');
+    log_debug("OCINumberToText => \"" << buffer << '"');
 
-      return Decimal(std::string(buffer));
-    }
-  }
+    return Decimal(std::string(buffer));
+}
+
+float Number::getFloat(const OCINumber* handle, OCIError* errhp)
+{
+    float value;
+    sword ret = OCINumberToReal(errhp, handle, sizeof(float), &value);
+
+    error::checkError(errhp, ret, "OCINumberToReal");
+
+    log_debug("OCINumberToReal => value: " << value);
+
+    return value;
+}
+
+double Number::getDouble(const OCINumber* handle, OCIError* errhp)
+{
+    double value;
+    sword ret = OCINumberToReal(errhp, handle, sizeof(double), &value);
+
+    error::checkError(errhp, ret, "OCINumberToReal");
+
+    log_debug("OCINumberToReal => value: " << value);
+
+    return value;
+}
+}
 }

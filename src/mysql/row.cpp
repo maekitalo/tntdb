@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Tommi Maekitalo
+ * Copyright (C) 2023 Tommi Maekitalo
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,29 +27,31 @@
  */
 
 #include <tntdb/mysql/row.h>
-#include <tntdb/mysql/bits/resultrow.h>
-#include <tntdb/mysql/value.h>
 #include <cxxtools/log.h>
 
 log_define("tntdb.mysql.row")
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    Row::Row(const Result result_, MYSQL_RES* res, MYSQL_ROW row_)
-      : row(new ResultRow(result_, res, row_))
-    {
-    }
+namespace mysql
+{
+Row::Row(std::shared_ptr<IResult> result, MYSQL_ROW row, unsigned field_count)
+    : _result(result),
+      _row(row),
+      _field_count(field_count)
+{ }
 
-    Row::const_iterator Row::begin() const
-    {
-      return const_iterator(*this, 0);
-    }
+unsigned Row::size() const
+{
+    return _field_count;
+}
 
-    Row::const_iterator Row::end() const
-    {
-      return const_iterator(*this, size());
-    }
-  }
+Value Row::getValueByNumber(size_type field_num) const
+{
+    return Value(std::make_shared<RowValue>(_row, field_num, _lengths[field_num]));
+}
+
+Value Row::getValueByName(const std::string& field_name) const
+std::string Row::getColumnName(size_type field_num) const;
+}
 }

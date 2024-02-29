@@ -10,14 +10,16 @@ nobase_include_HEADERS = \
 	tntdb/bits/statement.h \
 	tntdb/bits/statement_iterator.h \
 	tntdb/bits/value.h \
-	tntdb/cxxtools/date.h \
-	tntdb/cxxtools/time.h \
-	tntdb/cxxtools/datetime.h \
-	tntdb/cxxtools/timespan.h \
 	tntdb/blob.h \
 	tntdb/connect.h \
 	tntdb/connection.h \
 	tntdb/connectionpool.h \
+	tntdb/cxxtools/bin.h \
+	tntdb/cxxtools/date.h \
+	tntdb/cxxtools/datetime.h \
+	tntdb/cxxtools/json.h \
+	tntdb/cxxtools/time.h \
+	tntdb/cxxtools/timespan.h \
 	tntdb/date.h \
 	tntdb/datetime.h \
 	tntdb/decimal.h \
@@ -96,6 +98,3 @@ nobase_noinst_HEADERS = \
 	tntdb/oracle/statement.h \
 	tntdb/oracle/string.h \
 	tntdb/oracle/value.h
-
-nobase_nodist_include_HEADERS = \
-    tntdb/config.h

@@ -35,25 +35,32 @@
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    /// Row of a result-set of type Result
-    class ResultRow : public IRow
-    {
-        Result result;
-        MYSQL_ROW row;
-        unsigned long* lengths;
-        MYSQL_FIELD* fields;
+namespace mysql
+{
+class Result;
+class RowValue;
 
-      public:
-        ResultRow(const tntdb::Result& result_, MYSQL_RES* res, MYSQL_ROW row_);
+/// Row of a result-set of type Result
+class ResultRow : public IRow
+{
+    std::shared_ptr<Result> _resultref;
+    MYSQL_ROW _row;
+    unsigned _field_count;
+    unsigned long* _lengths;
+    MYSQL_FIELD* _fields;
 
-        unsigned size() const;
-        Value getValueByNumber(size_type field_num) const;
-        Value getValueByName(const std::string& field_name) const;
-        std::string getColumnName(size_type field_num) const;
-    };
-  }
+public:
+    ResultRow(std::shared_ptr<Result> resultref, MYSQL_ROW row, unsigned field_count);
+    ResultRow(MYSQL_RES* res, MYSQL_ROW row, unsigned field_count);
+
+    static std::shared_ptr<RowValue> getMysqlValue(std::shared_ptr<ResultRow> result, size_type field_num);
+
+    unsigned size() const;
+    Value getValueByNumber(size_type field_num) const;
+    Value getValueByName(const std::string& field_name) const;
+    std::string getColumnName(size_type field_num) const;
+};
+}
 }
 
 #endif // TNTDB_MYSQL_IMPL_RESULTROW_H

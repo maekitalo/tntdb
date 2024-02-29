@@ -31,29 +31,29 @@
 
 #include <tntdb/iface/icursor.h>
 #include <tntdb/mysql/bindvalues.h>
-#include <cxxtools/smartptr.h>
+#include <memory>
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    class BoundRow;
-    class Statement;
+namespace mysql
+{
+class BoundRow;
+class Statement;
 
-    class Cursor : public ICursor
-    {
-        cxxtools::SmartPtr<BoundRow> row;
-        cxxtools::SmartPtr<Statement> mysqlStatement;
-        MYSQL_STMT* stmt;
+class Cursor : public ICursor
+{
+    std::shared_ptr<BoundRow> _row;
+    MYSQL_FIELD* _fields;
+    MYSQL_STMT* _stmt;
 
-      public:
-        Cursor(Statement* statement, unsigned fetchsize);
-        ~Cursor();
+public:
+    Cursor(Statement& statement, unsigned fetchsize);
+    ~Cursor();
 
-        // method for ICursor
-        Row fetch();
-    };
-  }
+    // method for ICursor
+    Row fetch();
+};
+}
 }
 
 #endif // TNTDB_MYSQL_IMPL_CURSOR_H

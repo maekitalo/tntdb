@@ -27,57 +27,33 @@
  */
 
 
-#include <cxxtools/unit/testsuite.h>
+#include "testbase.h"
 #include <cxxtools/unit/registertest.h>
 #include <cxxtools/log.h>
 #include <stdlib.h>
-#include <tntdb/connect.h>
 #include <tntdb/statement.h>
 #include <tntdb/row.h>
 #include <limits>
 
 log_define("tntdb.unit.colname")
 
-class TntdbColnameTest : public cxxtools::unit::TestSuite
+class TntdbColnameTest : public TntdbTestBase
 {
-    tntdb::Connection conn;
-    tntdb::Statement del;
-
-  public:
+public:
     TntdbColnameTest()
-      : cxxtools::unit::TestSuite("colname")
+      : TntdbTestBase("colname")
     {
-      registerMethod("testColname", *this, &TntdbColnameTest::testColname);
-    }
-
-    void setUp()
-    {
-      if (!conn)
-      {
-        const char* dburl = getenv("TNTDBURL");
-        if (!dburl)
-          dburl = "sqlite:test.db";
-
-        log_info("testing with dburl=" << dburl);
-
-        conn = tntdb::connect(dburl);
-        del = conn.prepare("delete from tntdbtest");
-      }
-    }
-
-    void tearDown()
-    {
-      del.execute();
+        registerMethod("testColname", *this, &TntdbColnameTest::testColname);
     }
 
     void testColname()
     {
-      conn.execute("insert into tntdbtest(intcol) values(4718)");
+        conn.execute("insert into tntdbtest(intcol) values(4718)");
 
-      tntdb::Row row = conn.selectRow("select intcol, intcol as foo from tntdbtest");
+        tntdb::Row row = conn.selectRow("select intcol, intcol as foo from tntdbtest");
 
-      CXXTOOLS_UNIT_ASSERT_EQUALS(row.getName(0), "intcol");
-      CXXTOOLS_UNIT_ASSERT_EQUALS(row.getName(1), "foo");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(row.getName(0), "intcol");
+        CXXTOOLS_UNIT_ASSERT_EQUALS(row.getName(1), "foo");
     }
 
 };

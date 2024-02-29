@@ -35,43 +35,43 @@
 
 namespace tntdb
 {
-  class RowImpl : public IRow
-  {
-    public:
-      struct ValueType
-      {
-        std::string name;
-        Value value;
+class RowImpl : public IRow
+{
+public:
+    struct ValueType
+    {
+      std::string name;
+      Value value;
 
-        ValueType()  { }
-        ValueType(const std::string& name_, const Value& value_)
-          : name(name_),
-            value(value_)
-            { }
-      };
+      ValueType()  { }
+      ValueType(const std::string& name_, const Value& value_)
+        : name(name_),
+          value(value_)
+          { }
+    };
 
-      typedef std::vector<ValueType> data_type;
+    typedef std::vector<ValueType> data_type;
 
-    private:
-      data_type data;
+private:
+    data_type data;
 
-    public:
-      RowImpl()
-        { }
+public:
+    RowImpl()
+      { }
 
-      explicit RowImpl(const data_type& data_)
-        : data(data_)
-        { }
+    explicit RowImpl(const data_type& data_)
+      : data(data_)
+      { }
 
-      // methods from IResult
-      virtual size_type size() const;
-      virtual Value getValueByNumber(size_type field_num) const;
-      virtual Value getValueByName(const std::string& field_name) const;
-      virtual std::string getColumnName(size_type field_num) const;
+    // methods from IResult
+    virtual size_type size() const;
+    virtual Value getValueByNumber(size_type field_num) const;
+    virtual Value getValueByName(const std::string& field_name) const;
+    virtual std::string getColumnName(size_type field_num) const;
 
-      // specific methods
-      void add(const std::string& field_name, const Value& value)   { data.push_back(ValueType(field_name, value)); }
-  };
+    // specific methods
+    void add(const std::string& field_name, const Value& value)   { data.push_back(ValueType(field_name, value)); }
+};
 }
 
 #endif // TNTDB_IMPL_ROW_H

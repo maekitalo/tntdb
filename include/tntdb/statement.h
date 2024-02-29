@@ -35,24 +35,24 @@
 
 namespace tntdb
 {
-  /// C++11 style _begin_ function for tntdb::Statement.
-  inline Statement::const_iterator begin(const Statement& stmt, unsigned fetchsize = 100)
-  { return stmt.begin(fetchsize); }
+/// C++11 style _begin_ function for tntdb::Statement.
+inline Statement::const_iterator begin(const Statement& stmt, unsigned fetchsize = 100)
+{ return stmt.begin(fetchsize); }
 
-  /// C++11 style _end_ function for tntdb::Statement.
-  inline Statement::const_iterator end(const Statement& stmt)
-  { return stmt.end(); }
+/// C++11 style _end_ function for tntdb::Statement.
+inline Statement::const_iterator end(const Statement& stmt)
+{ return stmt.end(); }
 
-  inline Statement::const_iterator Statement::end() const
-    { return const_iterator(); }
+inline Statement::const_iterator Statement::end() const
+{ return const_iterator(); }
 
-  template <typename T>
-  RowReader Statement::const_iterator::get(T& ret) const
-  { return RowReader(current).get(ret); }
+template <typename T>
+RowReader Statement::const_iterator::get(T& ret) const
+{ return RowReader(current).get(ret); }
 
-  template <typename T>
-  RowReader Statement::const_iterator::get(T& ret, bool& nullInd) const
-  { return RowReader(current).get(ret, nullInd); }
+template <typename T>
+RowReader Statement::const_iterator::get(T& ret, bool& nullInd) const
+{ return RowReader(current).get(ret, nullInd); }
 
 }
 

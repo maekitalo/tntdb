@@ -31,41 +31,69 @@
 
 namespace tntdb
 {
-    IBlob::~IBlob()
-    { }
-
-    void BlobImpl::assign(const char* data, std::size_t len)
+IBlob* BlobImpl::emptyInstance()
+{
+    class EmptyBlob : public IBlob
     {
-        reserve(len, false);
-        std::memcpy(_data, data, len);
-        _size = len;
-    }
-
-    char* BlobImpl::reserve(std::size_t len, bool shrink)
-    {
-        if (len == 0 && shrink)
+    public:
+        void assign(const char* data, std::size_t len) override
         {
-            delete[] _data;
-            _data = 0;
-            _size = 0;
-        }
-        else
-        {
-          if ((shrink && len != this->size()) || len > this->size())
-          {
-              delete[] _data;
-              _data = new char[len];
-          }
-          _size = len;
+            throw std::logic_error("cannot assign to empty blob");
         }
 
-        return _data;
+        char* reserve(std::size_t len, bool shrink)
+        {
+            throw std::logic_error("cannot resize empty blob");
+        }
+
+        IBlob* create() const
+        {
+            return new BlobImpl();
+        }
+
+        void destroy()
+        { }
+    };
+
+    static EmptyBlob empty;
+    return &empty;
+}
+
+IBlob::~IBlob()
+{ }
+
+void BlobImpl::assign(const char* data, std::size_t len)
+{
+    reserve(len, false);
+    std::memcpy(_data, data, len);
+    _size = len;
+}
+
+char* BlobImpl::reserve(std::size_t len, bool shrink)
+{
+    if (len == 0 && shrink)
+    {
+        delete[] _data;
+        _data = 0;
+        _size = 0;
+    }
+    else
+    {
+      if ((shrink && len != this->size()) || len > this->size())
+      {
+          delete[] _data;
+          _data = new char[len];
+      }
+      _size = len;
     }
 
-    IBlob* BlobImpl::create() const
-    { return new BlobImpl(); }
+    return _data;
+}
 
-    void BlobImpl::destroy()
-    { delete this; }
+IBlob* BlobImpl::create() const
+{ return new BlobImpl(); }
+
+void BlobImpl::destroy()
+{ delete this; }
 
 }

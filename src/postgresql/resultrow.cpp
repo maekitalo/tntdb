@@ -35,47 +35,51 @@
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    ResultRow::ResultRow(Result* result_, size_type rownumber_)
-      : tntdbResult(result_),
-        result(result_),
-        rownumber(rownumber_)
-    {
-    }
+namespace postgresql
+{
+ResultRow::ResultRow(const std::shared_ptr<Result>& resultref, size_type rownumber)
+    : _resultref(resultref),
+      _result(*resultref),
+      _rownumber(rownumber)
+{ }
 
-    unsigned ResultRow::size() const
-    {
-      return result->getFieldCount();
-    }
+ResultRow::ResultRow(const Result& result, size_type rownumber)
+    : _result(result),
+      _rownumber(rownumber)
+{ }
 
-    Value ResultRow::getValueByNumber(size_type field_num) const
-    {
-      return Value(new ResultValue(const_cast<ResultRow*>(this), field_num));
-    }
+unsigned ResultRow::size() const
+{
+    return _result.getFieldCount();
+}
 
-    Value ResultRow::getValueByName(const std::string& field_name) const
-    {
-      unsigned fc = result->getFieldCount();
-      unsigned n;
-      for (n = 0; n < fc; ++n)
+Value ResultRow::getValueByNumber(size_type field_num) const
+{
+    return Value(std::make_shared<ResultValue>(_resultref, _result, _rownumber, field_num));
+}
+
+Value ResultRow::getValueByName(const std::string& field_name) const
+{
+    unsigned fc = _result.getFieldCount();
+    unsigned n;
+    for (n = 0; n < fc; ++n)
         if (field_name == PQfname(getPGresult(), n))
-          break;
+            break;
 
-      if (n == fc)
+    if (n == fc)
         throw FieldNotFound(field_name);
 
-      return getValueByNumber(n);
-    }
+    return getValueByNumber(n);
+}
 
-    std::string ResultRow::getColumnName(size_type field_num) const
-    {
-        return PQfname(getPGresult(), field_num);
-    }
+std::string ResultRow::getColumnName(size_type field_num) const
+{
+    return PQfname(getPGresult(), field_num);
+}
 
-    PGresult* ResultRow::getPGresult() const
-    {
-      return result->getPGresult();
-    }
-  }
+PGresult* ResultRow::getPGresult() const
+{
+    return _result.getPGresult();
+}
+}
 }

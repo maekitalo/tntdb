@@ -36,39 +36,46 @@
 
 namespace tntdb
 {
-  class Date;
-  class Time;
-  class Datetime;
-  class Decimal;
-  class Blob;
+class Date;
+class Time;
+class Datetime;
+class Decimal;
+class Blob;
 
-  /// common inteface for resultvalues
-  class IValue : public cxxtools::RefCounted
-  {
-    public:
-      virtual bool isNull() const = 0;
-      virtual bool getBool() const = 0;
-      virtual short getShort() const = 0;
-      virtual int getInt() const = 0;
-      virtual long getLong() const = 0;
-      virtual unsigned getUnsigned() const = 0;
-      virtual unsigned short getUnsignedShort() const = 0;
-      virtual unsigned long getUnsignedLong() const = 0;
-      virtual int32_t getInt32() const = 0;
-      virtual uint32_t getUnsigned32() const = 0;
-      virtual int64_t getInt64() const = 0;
-      virtual uint64_t getUnsigned64() const = 0;
-      virtual Decimal getDecimal() const = 0;
-      virtual float getFloat() const = 0;
-      virtual double getDouble() const = 0;
-      virtual char getChar() const = 0;
-      virtual void getString(std::string& ret) const = 0;
-      virtual void getBlob(Blob& ret) const = 0;
-      virtual Date getDate() const = 0;
-      virtual Time getTime() const = 0;
-      virtual Datetime getDatetime() const = 0;
-      virtual void getUString(cxxtools::String& ret) const;
-  };
+/// common inteface for resultvalues
+class IValue
+{
+    IValue(const IValue&) = delete;
+    IValue& operator=(const IValue&) = delete;
+
+protected:
+    IValue() = default;
+    virtual ~IValue() = default;
+
+public:
+    virtual bool isNull() const = 0;
+    virtual bool getBool() const = 0;
+    virtual short getShort() const = 0;
+    virtual int getInt() const = 0;
+    virtual long getLong() const = 0;
+    virtual unsigned getUnsigned() const = 0;
+    virtual unsigned short getUnsignedShort() const = 0;
+    virtual unsigned long getUnsignedLong() const = 0;
+    virtual int32_t getInt32() const = 0;
+    virtual uint32_t getUnsigned32() const = 0;
+    virtual int64_t getInt64() const = 0;
+    virtual uint64_t getUnsigned64() const = 0;
+    virtual Decimal getDecimal() const = 0;
+    virtual float getFloat() const = 0;
+    virtual double getDouble() const = 0;
+    virtual char getChar() const = 0;
+    virtual void getString(std::string& ret) const = 0;
+    virtual void getBlob(Blob& ret) const = 0;
+    virtual Date getDate() const = 0;
+    virtual Time getTime() const = 0;
+    virtual Datetime getDatetime() const = 0;
+    virtual void getUString(cxxtools::String& ret) const;
+};
 }
 
 #endif // TNTDB_IFACE_IVALUE_H

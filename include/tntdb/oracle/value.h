@@ -38,61 +38,61 @@
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class Statement;
+namespace oracle
+{
+class Statement;
 
-    class Value : public IValue
-    {
-        OCIDefine* defp;
-        OCIParam* paramp;
-        OCIError* errhp;
-        ub2 len;
-        ub2 type;
-        ub2 nullind;
+class Value : public IValue
+{
+    OCIDefine* defp;
+    OCIParam* paramp;
+    OCIError* errhp;
+    ub2 len;
+    ub2 type;
+    ub2 nullind;
 
-        std::vector<char> data;
-        Datetime datetime;
-        long longValue;
-        uint32_t uint32Value;
-        double doubleValue;
-        Number number;
-        Blob blob;
+    std::vector<char> data;
+    Datetime datetime;
+    long longValue;
+    uint32_t uint32Value;
+    double doubleValue;
+    Number number;
+    Blob blob;
 
-        std::string colName;
+    std::string colName;
 
-        void init(Statement* stmt, OCIParam* paramp_, ub4 pos);
+    void init(Statement& stmt, OCIParam* paramp_, ub4 pos);
 
-      public:
-        Value(Statement* stmt, OCIParam* paramp_, ub4 pos);
-        Value(Statement* stmt, ub4 pos);
-        ~Value();
+public:
+    Value(Statement& stmt, OCIParam* paramp_, ub4 pos);
+    Value(Statement& stmt, ub4 pos);
+    ~Value();
 
-        virtual bool isNull() const;
-        virtual bool getBool() const;
-        virtual short getShort() const;
-        virtual int getInt() const;
-        virtual long getLong() const;
-        virtual unsigned short getUnsignedShort() const;
-        virtual unsigned getUnsigned() const;
-        virtual unsigned long getUnsignedLong() const;
-        virtual int32_t getInt32() const;
-        virtual uint32_t getUnsigned32() const;
-        virtual int64_t getInt64() const;
-        virtual uint64_t getUnsigned64() const;
-        virtual Decimal getDecimal() const;
-        virtual float getFloat() const;
-        virtual double getDouble() const;
-        virtual char getChar() const;
-        virtual void getString(std::string& ret) const;
-        virtual void getBlob(tntdb::Blob& ret) const;
-        virtual Date getDate() const;
-        virtual Time getTime() const;
-        virtual tntdb::Datetime getDatetime() const;
+    virtual bool isNull() const;
+    virtual bool getBool() const;
+    virtual short getShort() const;
+    virtual int getInt() const;
+    virtual long getLong() const;
+    virtual unsigned short getUnsignedShort() const;
+    virtual unsigned getUnsigned() const;
+    virtual unsigned long getUnsignedLong() const;
+    virtual int32_t getInt32() const;
+    virtual uint32_t getUnsigned32() const;
+    virtual int64_t getInt64() const;
+    virtual uint64_t getUnsigned64() const;
+    virtual Decimal getDecimal() const;
+    virtual float getFloat() const;
+    virtual double getDouble() const;
+    virtual char getChar() const;
+    virtual void getString(std::string& ret) const;
+    virtual void getBlob(tntdb::Blob& ret) const;
+    virtual Date getDate() const;
+    virtual Time getTime() const;
+    virtual tntdb::Datetime getDatetime() const;
 
-        const std::string& getColumnName() const  { return colName; }
-    };
-  }
+    const std::string& getColumnName() const  { return colName; }
+};
+}
 }
 
 #endif // TNTDB_ORACLE_VALUE_H

@@ -37,85 +37,71 @@ log_define("tntdb.connection")
 
 namespace tntdb
 {
-  void Connection::beginTransaction()
-  {
+void Connection::beginTransaction()
+{
     log_trace("Connection::beginTransaction()");
 
     _conn->beginTransaction();
-  }
+}
 
-  void Connection::commitTransaction()
-  {
+void Connection::commitTransaction()
+{
     log_trace("Connection::commitTransaction");
 
     _conn->commitTransaction();
-  }
+}
 
-  void Connection::rollbackTransaction()
-  {
+void Connection::rollbackTransaction()
+{
     log_trace("Connection::rollbackTransaction");
 
     _conn->rollbackTransaction();
-  }
+}
 
-  Connection::size_type Connection::execute(const std::string& query)
-  {
+Connection::size_type Connection::execute(const std::string& query)
+{
     log_trace("Connection::execute(\"" << query << "\")");
 
     return _conn->execute(query);
-  }
+}
 
-  Result Connection::select(const std::string& query)
-  {
+Result Connection::select(const std::string& query)
+{
     log_trace("Connection::select(\"" << query << "\")");
 
     return _conn->select(query);
-  }
+}
 
-  Row Connection::selectRow(const std::string& query)
-  {
+Row Connection::selectRow(const std::string& query)
+{
     log_trace("Connection::selectRow(\"" << query << "\")");
 
     return _conn->selectRow(query);
-  }
+}
 
-  Value Connection::selectValue(const std::string& query)
-  {
+Value Connection::selectValue(const std::string& query)
+{
     log_trace("Connection::selectValue(\"" << query << "\")");
 
     return _conn->selectValue(query);
-  }
+}
 
-  Statement Connection::prepare(const std::string& query)
-  {
+Statement Connection::prepare(const std::string& query)
+{
     log_trace("Connection::prepare(\"" << query << "\")");
 
     return _conn->prepare(query);
-  }
+}
 
-  Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
-  {
+Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+{
     log_trace("Connection::prepareWithLimit(\"" << query << ", " << limit << "\", \"" << offset << "\")");
 
     return _conn->prepareWithLimit(query, limit, offset);
-  }
+}
 
-  Statement Connection::prepareCached(const std::string& query, const std::string& key)
-  {
-    log_trace("Connection::prepareCached(\"" << query << "\")");
-
-    return _conn->prepareCached(query, key);
-  }
-
-  Statement Connection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
-  {
-    log_trace("Connection::prepareCachedWithLimit(\"" << query << ", " << limit << "\", \"" << offset << "\", \"" << key << "\")");
-
-    return _conn->prepareCachedWithLimit(query, limit, offset, key);
-  }
-
-  std::string IConnection::url(const std::string& url, const std::string& username, const std::string& password)
-  {
+std::string IConnection::url(const std::string& url, const std::string& username, const std::string& password)
+{
     enum {
       state_0,
       state_p,
@@ -125,123 +111,63 @@ namespace tntdb
     std::string ret;
     for (std::string::const_iterator it = url.begin(); it != url.end(); ++it)
     {
-      char ch = *it;
-      switch (state)
-      {
+        char ch = *it;
+        switch (state)
+        {
         case state_0:
-          if (ch == '%')
-            state = state_p;
-          else if (ch == '\\')
-            state = state_e;
-          else
-            ret += ch;
-          break;
+            if (ch == '%')
+              state = state_p;
+            else if (ch == '\\')
+              state = state_e;
+            else
+              ret += ch;
+            break;
 
         case state_p:
-          if (ch == 'u')
-          {
-            ret += username;
-            state = state_0;
-          }
-          else if (ch == 'p')
-          {
-            ret += password;
-            state = state_0;
-          }
-          else if (ch == '%')
-            ret += '%';
-          else if (ch == '\\')
-          {
-            ret += '%';
-            state = state_e;
-          }
-          else
-          {
-            ret += '%';
-            ret += ch;
-            state = state_0;
-          }
-          break;
+            if (ch == 'u')
+            {
+              ret += username;
+              state = state_0;
+            }
+            else if (ch == 'p')
+            {
+              ret += password;
+              state = state_0;
+            }
+            else if (ch == '%')
+              ret += '%';
+            else if (ch == '\\')
+            {
+              ret += '%';
+              state = state_e;
+            }
+            else
+            {
+              ret += '%';
+              ret += ch;
+              state = state_0;
+            }
+            break;
 
         case state_e:
-          ret += ch;
-          state = state_0;
-          break;
-      }
+            ret += ch;
+            state = state_0;
+            break;
+        }
     }
 
     switch (state)
     {
-      case state_0:
+    case state_0:
         break;
-      case state_p:
+    case state_p:
         ret += '%'; break;
-      case state_e:
+    case state_e:
         ret += '\\'; break;
     }
 
     return ret;
-  }
+}
 
-  Statement IStmtCacheConnection::prepareCached(const std::string& query, const std::string& key)
-  {
-    log_trace("IStmtCacheConnection::prepareCached(\"" << query << ", " << key << "\")");
-
-    stmtCacheType::iterator it = stmtCache.find(key);
-    if (it == stmtCache.end())
-    {
-      log_debug("statement for query \"" << key << "\" not found in cache");
-      Statement stmt = prepare(query);
-      IStatement* istmt = const_cast<IStatement*>(stmt.getImpl());
-      stmtCache.insert(stmtCacheType::value_type(key, istmt));
-      return stmt;
-    }
-    else
-    {
-      log_debug("statement for query \"" << key << "\" fetched from cache");
-      return Statement(it->second.getPointer());
-    }
-  }
-
-  Statement IStmtCacheConnection::prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset, const std::string& key)
-  {
-    log_trace("IStmtCacheConnection::prepareCachedWithLimit(\"" << query << ", " << limit << "\", \"" << offset << "\", \"" << key << "\")");
-
-    std::string lkey = key + ':' + limit + ':' + offset;
-    stmtCacheType::iterator it = stmtCache.find(lkey);
-    if (it == stmtCache.end())
-    {
-      log_debug("statement for query \"" << lkey << "\" not found in cache");
-      Statement stmt = prepareWithLimit(query, limit, offset);
-      IStatement* istmt = const_cast<IStatement*>(stmt.getImpl());
-      stmtCache.insert(stmtCacheType::value_type(lkey, istmt));
-      return stmt;
-    }
-    else
-    {
-      log_debug("statement for query \"" << lkey << "\" fetched from cache");
-      return Statement(it->second.getPointer());
-    }
-  }
-
-  void IStmtCacheConnection::clearStatementCache()
-  {
-    log_trace("IStmtCacheConnection::clearStatementCache()");
-
-    stmtCache.clear();
-  }
-
-  bool IStmtCacheConnection::clearStatementCache(const std::string& key)
-  {
-    log_trace("IStmtCacheConnection::clearStatementCache(\"" << key << "\")");
-
-    stmtCacheType::iterator it = stmtCache.find(key);
-    if (it == stmtCache.end())
-      return  false;
-
-    log_debug("remove statement for query \"" << key << "\" from cache");
-    stmtCache.erase(it);
-    return true;
-  }
 }
 

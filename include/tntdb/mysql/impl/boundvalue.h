@@ -31,56 +31,58 @@
 
 #include <tntdb/iface/ivalue.h>
 #include <tntdb/iface/irow.h>
-#include <cxxtools/smartptr.h>
 #include <mysql.h>
+#include <memory>
 
 namespace tntdb
 {
-  class Date;
-  class Time;
-  class Datetime;
-  class Decimal;
+class Date;
+class Time;
+class Datetime;
+class Decimal;
 
-  namespace mysql
-  {
-    class BoundValue : public IValue
-    {
-      public:
-        typedef unsigned size_type;
+namespace mysql
+{
+class BoundRow;
 
-      private:
-        cxxtools::SmartPtr<IRow> row;
-        MYSQL_BIND& mysql_bind;
+class BoundValue : public IValue
+{
+public:
+    typedef unsigned size_type;
 
-      public:
-        BoundValue(IRow* row_, MYSQL_BIND& bind)
-          : row(row_),
-            mysql_bind(bind)
-          { }
+private:
+    std::shared_ptr<BoundRow> _boundRow;
+    MYSQL_BIND& mysql_bind;
 
-        virtual bool isNull() const;
-        virtual bool getBool() const;
-        virtual short getShort() const;
-        virtual int getInt() const;
-        virtual long getLong() const;
-        virtual unsigned getUnsigned() const;
-        virtual unsigned short getUnsignedShort() const;
-        virtual unsigned long getUnsignedLong() const;
-        virtual int32_t getInt32() const;
-        virtual uint32_t getUnsigned32() const;
-        virtual int64_t getInt64() const;
-        virtual uint64_t getUnsigned64() const;
-        virtual Decimal getDecimal() const;
-        virtual float getFloat() const;
-        virtual double getDouble() const;
-        virtual char getChar() const;
-        virtual void getString(std::string& ret) const;
-        virtual void getBlob(Blob& ret) const;
-        virtual Date getDate() const;
-        virtual Time getTime() const;
-        virtual Datetime getDatetime() const;
-    };
-  }
+public:
+    BoundValue(std::shared_ptr<BoundRow> boundRow, MYSQL_BIND& bind);
+    explicit BoundValue(MYSQL_BIND& bind)
+        : mysql_bind(bind)
+        { }
+
+    virtual bool isNull() const;
+    virtual bool getBool() const;
+    virtual short getShort() const;
+    virtual int getInt() const;
+    virtual long getLong() const;
+    virtual unsigned getUnsigned() const;
+    virtual unsigned short getUnsignedShort() const;
+    virtual unsigned long getUnsignedLong() const;
+    virtual int32_t getInt32() const;
+    virtual uint32_t getUnsigned32() const;
+    virtual int64_t getInt64() const;
+    virtual uint64_t getUnsigned64() const;
+    virtual Decimal getDecimal() const;
+    virtual float getFloat() const;
+    virtual double getDouble() const;
+    virtual char getChar() const;
+    virtual void getString(std::string& ret) const;
+    virtual void getBlob(Blob& ret) const;
+    virtual Date getDate() const;
+    virtual Time getTime() const;
+    virtual Datetime getDatetime() const;
+};
+}
 }
 
 #endif // TNTDB_MYSQL_IMPL_BOUNDVALUE_H

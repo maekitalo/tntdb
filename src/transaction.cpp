@@ -33,72 +33,72 @@ log_define("tntdb.transaction")
 
 namespace tntdb
 {
-  Transaction::Transaction(const Connection& db_, bool starttransaction)
-    : db(db_),
-      active(false)
-  {
+Transaction::Transaction(IConnection& db, bool starttransaction)
+    : _db(db),
+      _active(false)
+{
     if (starttransaction)
-      begin();
-  }
+        begin();
+}
 
-  Transaction::~Transaction()
-  {
-    if (active)
+Transaction::~Transaction()
+{
+    if (_active)
     {
-      try
-      {
-        rollback();
-      }
-      catch (const std::exception& e)
-      {
-      }
+        try
+        {
+            rollback();
+        }
+        catch (const std::exception& e)
+        {
+        }
     }
-  }
+}
 
-  void Transaction::begin()
-  {
-    if (active)
+void Transaction::begin()
+{
+    if (_active)
     {
-      log_warn("transaction already active in begin - rollback first");
-      rollback();
+        log_warn("transaction already active in begin - rollback first");
+        rollback();
     }
 
     log_debug("begin transaction");
-    db.beginTransaction();
-    active = true;
-  }
+    _db.beginTransaction();
+    _active = true;
+}
 
-  void Transaction::commit()
-  {
-    if (active)
+void Transaction::commit()
+{
+    if (_active)
     {
-      log_debug("commit transaction");
-      db.commitTransaction();
-      active = false;
+        log_debug("commit transaction");
+        _db.commitTransaction();
+        _active = false;
     }
     else
     {
-      log_warn("transaction not active in commit");
+        log_warn("transaction not active in commit");
     }
-  }
+}
 
-  void Transaction::rollback()
-  {
-    if (active)
+void Transaction::rollback()
+{
+    if (_active)
     {
-      log_debug("rollback transaction");
-      db.rollbackTransaction();
-      active = false;
+        log_debug("rollback transaction");
+        _db.rollbackTransaction();
+        _active = false;
     }
     else
     {
-      log_warn("transaction not active in rollback");
+        log_warn("transaction not active in rollback");
     }
-  }
+}
 
-  void Transaction::lockTable(const std::string& tableName, bool exclusive)
-  {
-    db.getImpl()->lockTable(tableName, exclusive);
-  }
+void Transaction::lockTable(const std::string& tableName, bool exclusive)
+{
+    _db.lockTable(tableName, exclusive);
+}
 
 }

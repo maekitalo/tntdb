@@ -37,30 +37,35 @@
 
 namespace tntdb
 {
-  namespace oracle
-  {
-    class Number
-    {
-      OCINumber ociNumber;
+namespace oracle
+{
+class Number
+{
+    OCINumber ociNumber;
 
-    public:
-      Number();
-      Number(const Decimal &decimal, OCIError* errhp);
+public:
+    Number();
+    Number(const Decimal &decimal, OCIError* errhp);
 
-      void setLong(long data, OCIError* errhp);
-      void setUnsignedLong(unsigned long data, OCIError* errhp);
+    void setLong(long data, OCIError* errhp);
+    void setUnsignedLong(unsigned long data, OCIError* errhp);
 
-      void setInt64(int64_t data, OCIError* errhp);
-      void setUnsigned64(uint64_t data, OCIError* errhp);
+    void setInt64(int64_t data, OCIError* errhp);
+    void setUnsigned64(uint64_t data, OCIError* errhp);
 
-      void setDecimal(const Decimal &decimal, OCIError* errhp);
-      static Decimal getDecimal(const OCINumber* handle, OCIError* errhp);
-      Decimal getDecimal(OCIError* errhp) const
-      { return getDecimal(const_cast<OCINumber*>(&ociNumber), errhp); }
+    void setDecimal(const Decimal &decimal, OCIError* errhp);
+    static Decimal getDecimal(const OCINumber* handle, OCIError* errhp);
+    Decimal getDecimal(OCIError* errhp) const   { return getDecimal(&ociNumber, errhp); }
 
-      unsigned char* getHandle() { return ociNumber.OCINumberPart; }
-    };
-  }
+    static float getFloat(const OCINumber* handle, OCIError* errhp);
+    float getFloat(OCIError* errhp) const       { return getFloat(&ociNumber, errhp); }
+
+    static double getDouble(const OCINumber* handle, OCIError* errhp);
+    double getDouble(OCIError* errhp) const     { return getDouble(&ociNumber, errhp); }
+
+    void* getHandle() { return &ociNumber; }
+};
+}
 }
 
 #endif

@@ -37,18 +37,17 @@ log_define("tntdb.postgresql.cursor")
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    Cursor::Cursor(Statement* statement, unsigned fetchSize_)
-      : tntdbStmt(statement),
-        stmt(statement),
-        fetchSize(fetchSize_)
-    { }
+namespace postgresql
+{
+Cursor::Cursor(Statement& statement, unsigned fetchSize_)
+  : stmt(statement),
+    fetchSize(fetchSize_)
+{ }
 
-    Cursor::~Cursor()
+Cursor::~Cursor()
+{
+    if (!cursorName.empty())
     {
-      if (!cursorName.empty())
-      {
         std::string sql = "CLOSE " + cursorName;
 
         log_debug("PQexec(" << getPGConn() << ", \"" << sql << "\")");
@@ -59,57 +58,57 @@ namespace tntdb
 
         log_debug("PQclear(" << result << ')');
         PQclear(result);
-      }
     }
+}
 
-    Row Cursor::fetch()
+Row Cursor::fetch()
+{
+    if (cursorName.empty())
     {
-      if (cursorName.empty())
-      {
         // create cursorname
         std::ostringstream s;
         s << "tntdbcur" << this;
 
         std::string sql = "DECLARE " + s.str()
           + " CURSOR WITH HOLD FOR "
-          + stmt->getQuery();
+          + stmt.getQuery();
 
         // declare cursor
         log_debug("PQexecParams(" << getPGConn() << ", \"" << sql
-          << "\", " << stmt->getNParams() << ", 0, paramValues, paramLengths, 0, 0)");
+          << "\", " << stmt.getNParams() << ", 0, paramValues, paramLengths, 0, 0)");
         PGresult* result = PQexecParams(getPGConn(), sql.c_str(),
-          stmt->getNParams(), 0,
-          stmt->getParamValues(), stmt->getParamLengths(),
-          stmt->getParamFormats(), 0);
+          stmt.getNParams(), 0,
+          stmt.getParamValues(), stmt.getParamLengths(),
+          stmt.getParamFormats(), 0);
 
         if (isError(result))
         {
-          log_error(PQresultErrorMessage(result));
-          throw PgSqlError(sql, "PQexecParams", result, true);
+            log_error(PQresultErrorMessage(result));
+            throw PgSqlError(sql, "PQexecParams", result, true);
         }
 
         log_debug("PQclear(" << result << ')');
         PQclear(result);
 
         cursorName = s.str();
-      }
+    }
 
-      if (!currentResult || currentRow >= currentResult.size())
-      {
+    if (!currentResult || currentRow >= currentResult.size())
+    {
         log_debug("fetch cursor");
 
         std::ostringstream sql;
         sql << "FETCH " << fetchSize << " FROM " + cursorName;
-        currentResult = stmt->getConnection()->select(sql.str());
+        currentResult = stmt.getConnection()->select(sql.str());
         log_debug(currentResult.size() << " rows fetched");
 
         currentRow = 0;
 
         if (currentResult.empty())
-          return Row();
-      }
-
-      return currentResult[currentRow++];
+            return Row();
     }
-  }
+
+    return currentResult[currentRow++];
+}
+}
 }

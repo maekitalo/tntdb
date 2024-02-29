@@ -32,160 +32,151 @@
 #include <string>
 #include <limits>
 #include <iosfwd>
-#include <tntdb/config.h>
 
 namespace tntdb
 {
-  class Decimal
-  {
-    public:
-#ifdef HAVE_LONG_LONG
-      typedef long long LongType;
-#else
-      typedef long LongType;
-#endif
-#ifdef HAVE_UNSIGNED_LONG_LONG
-      typedef unsigned long long UnsignedLongType;
-#else
-      typedef unsigned long UnsignedLongType;
-#endif
+class Decimal
+{
+public:
+    typedef long long LongType;
+    typedef unsigned long long UnsignedLongType;
 
-    private:
+private:
 
-      // inf: _mantissa is empty, _exponent = numeric_limits<short>::max()
-      // nan: _mantissa is empty, _exponent==0
-      std::string _mantissa;  // just '0'-'9'
-      short _exponent;
-      bool _negative;
+    // inf: _mantissa is empty, _exponent = numeric_limits<short>::max()
+    // nan: _mantissa is empty, _exponent==0
+    std::string _mantissa;  // just '0'-'9'
+    short _exponent;
+    bool _negative;
 
-      Decimal(const std::string& mantissa, short exponent, bool negative)
-        : _mantissa(mantissa),
-          _exponent(exponent),
-          _negative(negative)
-        { }
+    Decimal(const std::string& mantissa, short exponent, bool negative)
+      : _mantissa(mantissa),
+        _exponent(exponent),
+        _negative(negative)
+      { }
 
-      friend class Parser;
+    friend class Parser;
 
-      LongType _getInteger(LongType min, LongType max, short exponent) const;
-      UnsignedLongType _getUnsigned(UnsignedLongType max, short exponent) const;
+    LongType _getInteger(LongType min, LongType max, short exponent) const;
+    UnsignedLongType _getUnsigned(UnsignedLongType max, short exponent) const;
 
-      template <typename IntType> IntType _getInteger(short exponent) const
-      {
+    template <typename IntType> IntType _getInteger(short exponent) const
+    {
         return _getInteger(std::numeric_limits<IntType>::min(),
                            std::numeric_limits<IntType>::max(),
                            exponent);
-      }
+    }
 
-      template <typename UnsignedType> UnsignedType _getUnsigned(short exponent) const
-        { return _getUnsigned(std::numeric_limits<UnsignedLongType>::max(), exponent); }
+    template <typename UnsignedType> UnsignedType _getUnsigned(short exponent) const
+      { return _getUnsigned(std::numeric_limits<UnsignedLongType>::max(), exponent); }
 
-      void _getInteger(short& ret, short exponent) const              { ret = _getInteger<short>(exponent); }
-      void _getInteger(int& ret, short exponent) const                { ret = _getInteger<int>(exponent); }
-      void _getInteger(long& ret, short exponent) const               { ret = _getInteger<long>(exponent); }
+    void _getInteger(short& ret, short exponent) const              { ret = _getInteger<short>(exponent); }
+    void _getInteger(int& ret, short exponent) const                { ret = _getInteger<int>(exponent); }
+    void _getInteger(long& ret, short exponent) const               { ret = _getInteger<long>(exponent); }
 #ifdef HAVE_LONG_LONG
-      void _getInteger(long long& ret, short exponent) const          { ret = _getInteger<long long>(exponent); }
+    void _getInteger(long long& ret, short exponent) const          { ret = _getInteger<long long>(exponent); }
 #endif
-      void _getInteger(unsigned short& ret, short exponent) const     { ret = _getUnsigned<unsigned short>(exponent); }
-      void _getInteger(unsigned int& ret, short exponent) const       { ret = _getUnsigned<unsigned int>(exponent); }
-      void _getInteger(unsigned long& ret, short exponent) const      { ret = _getUnsigned<unsigned long>(exponent); }
+    void _getInteger(unsigned short& ret, short exponent) const     { ret = _getUnsigned<unsigned short>(exponent); }
+    void _getInteger(unsigned int& ret, short exponent) const       { ret = _getUnsigned<unsigned int>(exponent); }
+    void _getInteger(unsigned long& ret, short exponent) const      { ret = _getUnsigned<unsigned long>(exponent); }
 #ifdef HAVE_UNSIGNED_LONG_LONG
-      void _getInteger(unsigned long long& ret, short exponent) const { ret = _getUnsigned<unsigned long long>(exponent); }
+    void _getInteger(unsigned long long& ret, short exponent) const { ret = _getUnsigned<unsigned long long>(exponent); }
 #endif
 
-      void _setInteger(LongType l, short exponent);
-      void _setUnsigned(UnsignedLongType l, short exponent);
+    void _setInteger(LongType l, short exponent);
+    void _setUnsigned(UnsignedLongType l, short exponent);
 
-    public:
-      class Parser;
+public:
+    class Parser;
 
-      Decimal();
+    Decimal();
 
-      explicit Decimal(long double value)
-        { setDouble(value); }
+    explicit Decimal(long double value)
+      { setDouble(value); }
 
-      explicit Decimal(const std::string& value);
+    explicit Decimal(const std::string& value);
 
-      Decimal(long mantissa, short exponent)
-        { setInteger(mantissa, exponent); }
+    Decimal(long mantissa, short exponent)
+      { setInteger(mantissa, exponent); }
 
-      static Decimal infinity()
-        { return Decimal(std::string(), std::numeric_limits<short>::max(), false); }
+    static Decimal infinity()
+      { return Decimal(std::string(), std::numeric_limits<short>::max(), false); }
 
-      static Decimal nan()
-        { return Decimal(std::string(), 0, false); }
+    static Decimal nan()
+      { return Decimal(std::string(), 0, false); }
 
-      const std::string& mantissa() const
-        { return _mantissa; }
+    const std::string& mantissa() const
+      { return _mantissa; }
 
-      short exponent() const
-        { return _exponent; }
+    short exponent() const
+      { return _exponent; }
 
-      bool negative() const
-        { return _negative; }
+    bool negative() const
+      { return _negative; }
 
-      bool isInfinity(bool positiveInfinity = true) const
-        { return _negative != positiveInfinity && _mantissa.empty() && _exponent == std::numeric_limits<short>::max(); }
+    bool isInfinity(bool positiveInfinity = true) const
+      { return _negative != positiveInfinity && _mantissa.empty() && _exponent == std::numeric_limits<short>::max(); }
 
-      bool isPositiveInfinity() const
-        { return isInfinity(true); }
+    bool isPositiveInfinity() const
+      { return isInfinity(true); }
 
-      bool isNegativeInfinity() const
-        { return isInfinity(false); }
+    bool isNegativeInfinity() const
+      { return isInfinity(false); }
 
-      bool isNaN() const
-        { return _mantissa.empty() && _exponent == 0; }
+    bool isNaN() const
+      { return _mantissa.empty() && _exponent == 0; }
 
-      bool isZero() const
-        { return _mantissa == "0"; }
+    bool isZero() const
+      { return _mantissa == "0"; }
 
-      void setDouble(long double value);
+    void setDouble(long double value);
 
-      long double getDouble() const;
+    long double getDouble() const;
 
-      void setInteger(short l, short exponent = 0)              { _setInteger(l, exponent); }
-      void setInteger(int l, short exponent = 0)                { _setInteger(l, exponent); }
-      void setInteger(long l, short exponent = 0)               { _setInteger(l, exponent); }
-      void setInteger(long long l, short exponent = 0)          { _setInteger(l, exponent); }
-      void setInteger(unsigned short l, short exponent = 0)     { _setUnsigned(l, exponent); }
-      void setInteger(unsigned int l, short exponent = 0)       { _setUnsigned(l, exponent); }
-      void setInteger(unsigned long l, short exponent = 0)      { _setUnsigned(l, exponent); }
-      void setInteger(unsigned long long l, short exponent = 0) { _setUnsigned(l, exponent); }
+    void setInteger(short l, short exponent = 0)              { _setInteger(l, exponent); }
+    void setInteger(int l, short exponent = 0)                { _setInteger(l, exponent); }
+    void setInteger(long l, short exponent = 0)               { _setInteger(l, exponent); }
+    void setInteger(long long l, short exponent = 0)          { _setInteger(l, exponent); }
+    void setInteger(unsigned short l, short exponent = 0)     { _setUnsigned(l, exponent); }
+    void setInteger(unsigned int l, short exponent = 0)       { _setUnsigned(l, exponent); }
+    void setInteger(unsigned long l, short exponent = 0)      { _setUnsigned(l, exponent); }
+    void setInteger(unsigned long long l, short exponent = 0) { _setUnsigned(l, exponent); }
 
-      template <typename IntType>
-      IntType getInteger(short exponent = 0) const
-      {
+    template <typename IntType>
+    IntType getInteger(short exponent = 0) const
+    {
         IntType ret;
         _getInteger(ret, exponent);
         return ret;
-      }
+    }
 
-      std::string toString() const;
-      std::string toStringSci() const;
-      std::string toStringFix() const;
+    std::string toString() const;
+    std::string toStringSci() const;
+    std::string toStringFix() const;
 
-      Decimal operator- () const
-        { return Decimal(_mantissa, _exponent, !_negative); }
+    Decimal operator- () const
+      { return Decimal(_mantissa, _exponent, !_negative); }
 
-      bool operator== (const Decimal& other) const
-        { return !isNaN() && _mantissa == other._mantissa && _exponent == other._exponent && _negative == other._negative; }
+    bool operator== (const Decimal& other) const
+      { return !isNaN() && _mantissa == other._mantissa && _exponent == other._exponent && _negative == other._negative; }
 
-      bool operator!= (const Decimal& other) const
-        { return !(*this == other); }
+    bool operator!= (const Decimal& other) const
+      { return !(*this == other); }
 
-      bool operator< (const Decimal& other) const;
+    bool operator< (const Decimal& other) const;
 
-      bool operator> (const Decimal& other) const
-        { return other < *this; }
+    bool operator> (const Decimal& other) const
+      { return other < *this; }
 
-      bool operator<= (const Decimal& other) const
-        { return !(other < *this); }
+    bool operator<= (const Decimal& other) const
+      { return !(other < *this); }
 
-      bool operator>= (const Decimal& other) const
-        { return !(other > *this); }
-  };
+    bool operator>= (const Decimal& other) const
+      { return !(other > *this); }
+};
 
-  std::istream& operator>> (std::istream& in, Decimal& dec);
-  std::ostream& operator<< (std::ostream& out, const Decimal& dec);
+std::istream& operator>> (std::istream& in, Decimal& dec);
+std::ostream& operator<< (std::ostream& out, const Decimal& dec);
 }
 
 #endif // TNTDB_DECIMAL_H

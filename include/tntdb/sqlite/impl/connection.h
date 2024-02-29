@@ -34,55 +34,55 @@
 
 namespace tntdb
 {
-  /**
+/**
 
-   This namespace contains the implementation of the Sqlite driver for tntdb.
+ This namespace contains the implementation of the Sqlite driver for tntdb.
 
-   The driver makes it possible to access a Sqlite3 database using tntdb.
+ The driver makes it possible to access a Sqlite3 database using tntdb.
 
-   Note that only sqlite api version 3 is supported.
+ Note that only sqlite api version 3 is supported.
 
-   To get a connection to a Sqlite3 file, the dburl to the tntdb::connect
-   function must start with "sqlite:". The remaining string is passed to the
-   `sqlite3_open` function of sqlite.
+ To get a connection to a Sqlite3 file, the dburl to the tntdb::connect
+ function must start with "sqlite:". The remaining string is passed to the
+ `sqlite3_open` function of sqlite.
 
-   A typical connection with a Sqlite3 driver looks like that:
+ A typical connection with a Sqlite3 driver looks like that:
 
-   @code
-     tntdb::Connection conn = tntdb::connect("sqlite:mydatabase.db");
-   @endcode
+ @code
+   tntdb::Connection conn = tntdb::connect("sqlite:mydatabase.db");
+ @endcode
 
-   */
+ */
 
-  namespace sqlite
-  {
-    /// Implements a connection to a Sqlite3 database file.
-    class Connection : public IStmtCacheConnection
-    {
-        sqlite3* db;
-        unsigned transactionActive;
+namespace sqlite
+{
+/// Implements a connection to a Sqlite3 database file.
+class Connection : public IConnection
+{
+    sqlite3* db;
+    unsigned transactionActive;
 
-      public:
-        explicit Connection(const char* conninfo);
-        ~Connection();
+public:
+    explicit Connection(const char* conninfo);
+    ~Connection();
 
-        void beginTransaction();
-        void commitTransaction();
-        void rollbackTransaction();
+    void beginTransaction();
+    void commitTransaction();
+    void rollbackTransaction();
 
-        size_type execute(const std::string& query);
-        tntdb::Result select(const std::string& query);
-        tntdb::Row selectRow(const std::string& query);
-        tntdb::Value selectValue(const std::string& query);
-        tntdb::Statement prepare(const std::string& query);
-        tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
-        bool ping();
-        long lastInsertId(const std::string& name);
-        void lockTable(const std::string& tablename, bool exclusive);
+    size_type execute(const std::string& query);
+    tntdb::Result select(const std::string& query);
+    tntdb::Row selectRow(const std::string& query);
+    tntdb::Value selectValue(const std::string& query);
+    tntdb::Statement prepare(const std::string& query);
+    tntdb::Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset);
+    bool ping();
+    long lastInsertId(const std::string& name);
+    void lockTable(const std::string& tablename, bool exclusive);
 
-        sqlite3* getSqlite3() const  { return db; }
-    };
-  }
+    sqlite3* getSqlite3() const  { return db; }
+};
+}
 }
 
 #endif // TNTDB_SQLITE_IMPL_CONNECTION_H

@@ -36,38 +36,37 @@
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    class Cursor : public ICursor
-    {
-        tntdb::Statement tntdbStmt;
-        Statement* stmt;
+namespace postgresql
+{
+class Cursor : public ICursor
+{
+    Statement& stmt;
 
-        std::string cursorName;
-        tntdb::Result currentResult;
-        unsigned currentRow;
+    std::string cursorName;
+    tntdb::Result currentResult;
+    unsigned currentRow;
 
-        unsigned fetchSize;
+    unsigned fetchSize;
 
-      public:
-        Cursor(Statement* statement, unsigned fetchSize);
-        ~Cursor();
+public:
+    Cursor(Statement& statement, unsigned fetchSize);
+    ~Cursor();
 
-        // method for ICursor
-        Row fetch();
+    // method for ICursor
+    Row fetch();
 
-        // specific methods
-        PGconn* getPGConn()            { return stmt->getPGConn(); }
+    // specific methods
+    PGconn* getPGConn()            { return stmt.getPGConn(); }
 
-        /**
-         * Data is fetched in blocks. The fetchsize specifies, how many blocks
-         * are fetched at once. This is fully transparent to the user, so there
-         * is normally no need to change the default value, which is 100.
-         */
-        void setFetchSize(unsigned fs)  { fetchSize = fs; }
-        unsigned getFetchSize() const   { return fetchSize; }
-    };
-  }
+    /**
+     * Data is fetched in blocks. The fetchsize specifies, how many blocks
+     * are fetched at once. This is fully transparent to the user, so there
+     * is normally no need to change the default value, which is 100.
+     */
+    void setFetchSize(unsigned fs)  { fetchSize = fs; }
+    unsigned getFetchSize() const   { return fetchSize; }
+};
+}
 }
 
 #endif // TNTDB_POSTGRESQL_IMPL_CURSOR_H

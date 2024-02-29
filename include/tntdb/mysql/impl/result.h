@@ -30,32 +30,32 @@
 #define TNTDB_MYSQL_IMPL_RESULT_H
 
 #include <tntdb/iface/iresult.h>
-#include <tntdb/bits/connection.h>
 #include <mysql.h>
+#include <memory>
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    class Result : public IResult
-    {
-        tntdb::Connection conn;
-        MYSQL* mysql;
-        MYSQL_RES* result;
-        size_type field_count;
+namespace mysql
+{
+class ResultRow;
+class Result : public IResult
+{
+    MYSQL* mysql;
+    MYSQL_RES* result;
+    size_type field_count;
 
-      public:
-        Result(const tntdb::Connection& c, MYSQL* m, MYSQL_RES* r);
-        ~Result();
+public:
+    Result(MYSQL* m, MYSQL_RES* r);
+    ~Result();
 
-        MYSQL_RES* getMysqlRes() const  { return result; }
+    MYSQL_RES* getMysqlRes() const  { return result; }
+    std::shared_ptr<ResultRow> getMysqlRow(size_type tup_num) const;
 
-        Row getRow(size_type tup_num) const;
-        size_type size() const;
-        size_type getFieldCount() const;
-    };
-  }
+    Row getRow(size_type tup_num) const;
+    size_type size() const;
+    size_type getFieldCount() const;
+};
+}
 }
 
 #endif // TNTDB_MYSQL_IMPL_RESULT_H
-

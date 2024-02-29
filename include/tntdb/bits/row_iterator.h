@@ -34,98 +34,102 @@
 
 namespace tntdb
 {
-  class Row::const_iterator
-    : public std::iterator<std::random_access_iterator_tag, Value>
-  {
-    public:
-      typedef const value_type& const_reference;
-      typedef const value_type* const_pointer;
+class Row::const_iterator
+{
+public:
+    using iterator_category = std::random_access_iterator_tag;
+    using difference_type = int;
+    using value_type = Value;
+    using pointer = value_type*;
+    using reference = value_type&;
+    using const_pointer = const value_type*;
+    using const_reference = const value_type&;
 
-    private:
-      const IRow* row;
-      size_type offset;
-      Value current;
+private:
+    const IRow* _row;
+    size_type _offset;
+    Value _current;
 
-      void setOffset(size_type off)
-      {
-        if (off != offset)
+    void setOffset(size_type off)
+    {
+        if (off != _offset)
         {
-          offset = off;
-          if (offset < row->size())
-            current = Value(row->getValueByNumber(offset));
+            _offset = off;
+            if (_offset < _row->size())
+                _current = Value(_row->getValueByNumber(_offset));
         }
-      }
+    }
 
-    public:
-      const_iterator(const Row& row_, size_type offset_)
-        : row(row_.getImpl()),
-          offset(offset_)
-      {
-        if (offset < row->size())
-          current = Value(row->getValueByNumber(offset));
-      }
+public:
+    const_iterator(const Row& row_, size_type offset_)
+      : _row(row_.getImpl()),
+        _offset(offset_)
+    {
+        if (_offset < _row->size())
+            _current = Value(_row->getValueByNumber(_offset));
+    }
 
-      bool operator== (const const_iterator& it) const
-        { return offset == it.offset; }
+    bool operator== (const const_iterator& it) const
+      { return _offset == it._offset; }
 
-      bool operator!= (const const_iterator& it) const
-        { return !operator== (it); }
+    bool operator!= (const const_iterator& it) const
+      { return !operator== (it); }
 
-      const_iterator& operator++()
-        { setOffset(offset + 1); return *this; }
+    const_iterator& operator++()
+      { setOffset(_offset + 1); return *this; }
 
-      const_iterator operator++(int)
-        {
-          const_iterator ret = *this;
-          setOffset(offset + 1);
-          return ret;
-        }
+    const_iterator operator++(int)
+    {
+        const_iterator ret = *this;
+        setOffset(_offset + 1);
+        return ret;
+    }
 
-      const_iterator operator--()
-        { setOffset(offset - 1); return *this; }
+    const_iterator operator--()
+      { setOffset(_offset - 1); return *this; }
 
-      const_iterator operator--(int)
-        {
-          const_iterator ret = *this;
-          setOffset(offset - 1);
-          return ret;
-        }
+    const_iterator operator--(int)
+    {
+        const_iterator ret = *this;
+        setOffset(_offset - 1);
+        return ret;
+    }
 
-      const_reference operator*() const
-        { return current; }
+    const_reference operator*() const
+      { return _current; }
 
-      const_pointer operator->() const
-        { return &current; }
+    const_pointer operator->() const
+      { return &_current; }
 
-      const_iterator& operator+= (difference_type n)
-        {
-          setOffset(offset + n);
-          return *this;
-        }
+    const_iterator& operator+= (difference_type n)
+    {
+        setOffset(_offset + n);
+        return *this;
+    }
 
-      const_iterator operator+ (difference_type n) const
-        {
-          const_iterator it(*this);
-          it += n;
-          return it;
-        }
+    const_iterator operator+ (difference_type n) const
+    {
+        const_iterator it(*this);
+        it += n;
+        return it;
+    }
 
-      const_iterator& operator-= (difference_type n)
-        {
-          setOffset(offset - n);
-          return *this;
-        }
+    const_iterator& operator-= (difference_type n)
+    {
+        setOffset(_offset - n);
+        return *this;
+    }
 
-      const_iterator operator- (difference_type n) const
-        {
-          const_iterator it(*this);
-          it -= n;
-          return it;
-        }
+    const_iterator operator- (difference_type n) const
+    {
+        const_iterator it(*this);
+        it -= n;
+        return it;
+    }
 
-      difference_type operator- (const const_iterator& it) const
-        { return offset - it.offset; }
-  };
+    difference_type operator- (const const_iterator& it) const
+      { return _offset - it._offset; }
+};
 }
 
 #endif // TNTDB_BITS_ROW_ITERATOR_H

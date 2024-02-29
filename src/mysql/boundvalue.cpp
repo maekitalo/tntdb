@@ -27,6 +27,7 @@
  */
 
 #include <tntdb/mysql/impl/boundvalue.h>
+#include <tntdb/mysql/impl/boundrow.h>
 #include <tntdb/mysql/bindutils.h>
 #include <tntdb/date.h>
 #include <tntdb/time.h>
@@ -35,112 +36,117 @@
 
 namespace tntdb
 {
-  namespace mysql
-  {
-    bool BoundValue::isNull() const
-    {
-      return mysql::isNull(mysql_bind);
-    }
+namespace mysql
+{
+BoundValue::BoundValue(std::shared_ptr<BoundRow> boundRow, MYSQL_BIND& bind)
+  : _boundRow(boundRow),
+    mysql_bind(bind)
+{ }
 
-    bool BoundValue::getBool() const
-    {
-      return mysql::getBool(mysql_bind);
-    }
+bool BoundValue::isNull() const
+{
+    return mysql::isNull(mysql_bind);
+}
 
-    short BoundValue::getShort() const
-    {
-      return mysql::getShort(mysql_bind);
-    }
+bool BoundValue::getBool() const
+{
+    return mysql::getBool(mysql_bind);
+}
 
-    int BoundValue::getInt() const
-    {
-      return mysql::getInt(mysql_bind);
-    }
+short BoundValue::getShort() const
+{
+    return mysql::getShort(mysql_bind);
+}
 
-    long BoundValue::getLong() const
-    {
-      return mysql::getInt(mysql_bind);
-    }
+int BoundValue::getInt() const
+{
+    return mysql::getInt(mysql_bind);
+}
 
-    unsigned short BoundValue::getUnsignedShort() const
-    {
-      return mysql::getUnsignedShort(mysql_bind);
-    }
+long BoundValue::getLong() const
+{
+    return mysql::getInt(mysql_bind);
+}
 
-    unsigned BoundValue::getUnsigned() const
-    {
-      return mysql::getUnsigned(mysql_bind);
-    }
+unsigned short BoundValue::getUnsignedShort() const
+{
+    return mysql::getUnsignedShort(mysql_bind);
+}
 
-    unsigned long BoundValue::getUnsignedLong() const
-    {
-      return mysql::getUnsignedLong(mysql_bind);
-    }
+unsigned BoundValue::getUnsigned() const
+{
+    return mysql::getUnsigned(mysql_bind);
+}
 
-    int32_t BoundValue::getInt32() const
-    {
-      return mysql::getInt32(mysql_bind);
-    }
+unsigned long BoundValue::getUnsignedLong() const
+{
+    return mysql::getUnsignedLong(mysql_bind);
+}
 
-    uint32_t BoundValue::getUnsigned32() const
-    {
-      return mysql::getUnsigned32(mysql_bind);
-    }
+int32_t BoundValue::getInt32() const
+{
+    return mysql::getInt32(mysql_bind);
+}
 
-    int64_t BoundValue::getInt64() const
-    {
-      return mysql::getInt64(mysql_bind);
-    }
+uint32_t BoundValue::getUnsigned32() const
+{
+    return mysql::getUnsigned32(mysql_bind);
+}
 
-    uint64_t BoundValue::getUnsigned64() const
-    {
-      return mysql::getUnsigned64(mysql_bind);
-    }
+int64_t BoundValue::getInt64() const
+{
+    return mysql::getInt64(mysql_bind);
+}
 
-    Decimal BoundValue::getDecimal() const
-    {
-      return mysql::getDecimal(mysql_bind);
-    }
+uint64_t BoundValue::getUnsigned64() const
+{
+    return mysql::getUnsigned64(mysql_bind);
+}
 
-    float BoundValue::getFloat() const
-    {
-      return mysql::getFloat(mysql_bind);
-    }
+Decimal BoundValue::getDecimal() const
+{
+    return mysql::getDecimal(mysql_bind);
+}
 
-    double BoundValue::getDouble() const
-    {
-      return mysql::getDouble(mysql_bind);
-    }
+float BoundValue::getFloat() const
+{
+    return mysql::getFloat(mysql_bind);
+}
 
-    char BoundValue::getChar() const
-    {
-      return mysql::getChar(mysql_bind);
-    }
+double BoundValue::getDouble() const
+{
+    return mysql::getDouble(mysql_bind);
+}
 
-    void BoundValue::getString(std::string& ret) const
-    {
-      mysql::getString(mysql_bind, ret);
-    }
+char BoundValue::getChar() const
+{
+    return mysql::getChar(mysql_bind);
+}
 
-    void BoundValue::getBlob(Blob& ret) const
-    {
-      mysql::getBlob(mysql_bind, ret);
-    }
+void BoundValue::getString(std::string& ret) const
+{
+    mysql::getString(mysql_bind, ret);
+}
 
-    Date BoundValue::getDate() const
-    {
-      return mysql::getDate(mysql_bind);
-    }
+void BoundValue::getBlob(Blob& ret) const
+{
+    mysql::getBlob(mysql_bind, ret);
+}
 
-    Time BoundValue::getTime() const
-    {
-      return mysql::getTime(mysql_bind);
-    }
+Date BoundValue::getDate() const
+{
+    return mysql::getDate(mysql_bind);
+}
 
-    Datetime BoundValue::getDatetime() const
-    {
-      return mysql::getDatetime(mysql_bind);
-    }
+Time BoundValue::getTime() const
+{
+    return mysql::getTime(mysql_bind);
+}
 
-  }
+Datetime BoundValue::getDatetime() const
+{
+    return mysql::getDatetime(mysql_bind);
+}
+
+}
 }

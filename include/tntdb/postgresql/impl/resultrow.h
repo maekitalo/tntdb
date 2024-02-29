@@ -35,30 +35,32 @@
 
 namespace tntdb
 {
-  namespace postgresql
-  {
-    class Result;
+class IResult;
 
-    /// Row of a result-set of type Result
-    class ResultRow : public IRow
-    {
-        tntdb::Result tntdbResult; // keeps a reference to the result
-        Result* result; // redundant type-safe pointer to tntdbResult
-                        // (tntdbResult.getImpl() == result)
-        size_type rownumber;
+namespace postgresql
+{
+class Result;
 
-      public:
-        ResultRow(Result* result, size_type rownumber);
+/// Row of a result-set of type Result
+class ResultRow : public IRow
+{
+    std::shared_ptr<Result> _resultref;
+    const Result& _result;
+    size_type _rownumber;
 
-        unsigned size() const;
-        Value getValueByNumber(size_type field_num) const;
-        Value getValueByName(const std::string& field_name) const;
-        std::string getColumnName(size_type field_num) const;
+public:
+    ResultRow(const std::shared_ptr<Result>& resultref, size_type rownumber);
+    ResultRow(const Result& result, size_type rownumber);
 
-        size_type getRowNumber() const   { return rownumber; }
-        PGresult* getPGresult() const;
-    };
-  }
+    unsigned size() const;
+    Value getValueByNumber(size_type field_num) const;
+    Value getValueByName(const std::string& field_name) const;
+    std::string getColumnName(size_type field_num) const;
+
+    size_type getRowNumber() const   { return _rownumber; }
+    PGresult* getPGresult() const;
+};
+}
 }
 
 #endif // TNTDB_POSTGRESQL_IMPL_RESULTROW_H

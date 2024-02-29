@@ -42,134 +42,128 @@ log_define("tntdb.replicate.connection")
 
 namespace tntdb
 {
-  namespace replicate
-  {
-    Connection::Connection(const std::string& url, const std::string& username, const std::string& password)
+namespace replicate
+{
+Connection::Connection(const std::string& url, const std::string& username, const std::string& password)
+{
+    const char* conninfo = url.c_str();
+    const char* b = conninfo;
+    const char* e = conninfo;
+    std::vector<std::string> urls;
+    while (*e)
     {
-      const char* conninfo = url.c_str();
-      const char* b = conninfo;
-      const char* e = conninfo;
-      std::vector<std::string> urls;
-      while (*e)
-      {
         if (*e == '|')
         {
-          urls.push_back(std::string(b, e));
-          b = e+1;
+            urls.push_back(std::string(b, e));
+            b = e+1;
         }
         ++e;
-      }
+    }
 
-      urls.push_back(std::string(b, e));
+    urls.push_back(std::string(b, e));
 
-      std::string primaryUrl = urls[0];
+    std::string primaryUrl = urls[0];
 
-      std::sort(urls.begin(), urls.end());
+    std::sort(urls.begin(), urls.end());
 
-      for (std::vector<std::string>::const_iterator it = urls.begin(); it != urls.end(); ++it)
-      {
+    for (std::vector<std::string>::const_iterator it = urls.begin(); it != urls.end(); ++it)
+    {
         log_debug("connect to " << *it);
         connections.push_back(connect(*it, username, password));
         if (!primaryConnection && *it == primaryUrl)
         {
-          log_debug("primary connection " << *it);
-          primaryConnection = connections.back();
+            log_debug("primary connection " << *it);
+            primaryConnection = connections.back();
         }
-      }
-
-      log_debug(connections.size() << " connections");
     }
 
-    Connection::~Connection()
-    {
-      clearStatementCache();
-    }
+    log_debug(connections.size() << " connections");
+}
 
-    void Connection::beginTransaction()
-    {
-      for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
+void Connection::beginTransaction()
+{
+    for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
         it->beginTransaction();
-    }
+}
 
-    void Connection::commitTransaction()
-    {
-      for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
+void Connection::commitTransaction()
+{
+    for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
         it->commitTransaction();
-    }
+}
 
-    void Connection::rollbackTransaction()
-    {
-      for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
+void Connection::rollbackTransaction()
+{
+    for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
         it->rollbackTransaction();
-    }
+}
 
-    Connection::size_type Connection::execute(const std::string& query)
+Connection::size_type Connection::execute(const std::string& query)
+{
+    Transaction transaction(*this);
+
+    size_type ret = connections[0].execute(query);
+
+    for (Connections::size_type n = 1; n < connections.size(); ++n)
     {
-      tntdb::Connection c(this);
-      Transaction transaction(c);
-
-      size_type ret = connections[0].execute(query);
-
-      for (Connections::size_type n = 1; n < connections.size(); ++n)
-      {
         try
         {
-          connections[n].execute(query);
+            connections[n].execute(query);
         }
         catch (const tntdb::Error& e)
         {
-          std::ostringstream msg;
-          msg << "replication failed on " << (n + 1) << ". connection: " << e.what();
-          throw tntdb::Error(msg.str());
+            std::ostringstream msg;
+            msg << "replication failed on " << (n + 1) << ". connection: " << e.what();
+            throw tntdb::Error(msg.str());
         }
-      }
-
-      transaction.commit();
-      return ret;
     }
 
-    tntdb::Result Connection::select(const std::string& query)
-    {
-      return connections.begin()->select(query);
-    }
+    transaction.commit();
+    return ret;
+}
 
-    tntdb::Row Connection::selectRow(const std::string& query)
-    {
-      return connections.begin()->selectRow(query);
-    }
+tntdb::Result Connection::select(const std::string& query)
+{
+    return connections.begin()->select(query);
+}
 
-    tntdb::Value Connection::selectValue(const std::string& query)
-    {
-      return connections.begin()->selectValue(query);
-    }
+tntdb::Row Connection::selectRow(const std::string& query)
+{
+    return connections.begin()->selectRow(query);
+}
 
-    tntdb::Statement Connection::prepare(const std::string& query)
-    {
-      return tntdb::Statement(new Statement(this, query));
-    }
+tntdb::Value Connection::selectValue(const std::string& query)
+{
+    return connections.begin()->selectValue(query);
+}
 
-    tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
-    {
-      return tntdb::Statement(new Statement(this, query, limit, offset));
-    }
+tntdb::Statement Connection::prepare(const std::string& query)
+{
+    return tntdb::Statement(std::make_shared<Statement>(*this, query));
+}
 
-    bool Connection::ping()
-    {
-      for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
+tntdb::Statement Connection::prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset)
+{
+    return tntdb::Statement(std::make_shared<Statement>(*this, query, limit, offset));
+}
+
+bool Connection::ping()
+{
+    for (Connections::iterator it = connections.begin(); it != connections.end(); ++it)
         if (!it->ping())
-          return false;
-      return true;
-    }
+            return false;
+    return true;
+}
 
-    long Connection::lastInsertId(const std::string& name)
-    {
-      return connections.begin()->lastInsertId(name);
-    }
+long Connection::lastInsertId(const std::string& name)
+{
+    return connections.begin()->lastInsertId(name);
+}
 
-    void Connection::lockTable(const std::string& tablename, bool exclusive)
-    {
-      connections.begin()->getImpl()->lockTable(tablename, exclusive);
-    }
+void Connection::lockTable(const std::string& tablename, bool exclusive)
+{
+    connections.begin()->getImpl()->lockTable(tablename, exclusive);
+}
 
-  }
+}
 }
