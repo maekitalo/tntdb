@@ -12,7 +12,7 @@ them around at your own will. Resources are freed, when the last object goes
 out of scope.
 
 Errorhandling is done exclusively with exceptionhandling. Just wrap your code
-with a single try-catch and you have full errorhandling. All exceptions are 
+with a single try-catch and you have full errorhandling. All exceptions are
 derived from std::exception.
 
 STL is used where possible and also STL-like and -compatible interfaces are
@@ -56,4 +56,4 @@ To enable Oracle-support (disabled by default) do
 HOWTO
 =====
 
-A documentation can be found [here] (doc/tntdb.markdown)
+A documentation can be found [here](doc/tntdb.markdown)

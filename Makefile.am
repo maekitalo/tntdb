@@ -13,7 +13,8 @@ SUBDIRS = \
     doc
 
 EXTRA_DIST = \
-    COPYING
+    COPYING \
+    README.md
 
 pkgconfigdir = $(libdir)/pkgconfig/
 

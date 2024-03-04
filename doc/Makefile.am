@@ -1,5 +1,6 @@
 EXTRA_DIST = @PACKAGE@.doxygen.in \
-	main.page
+	main.page \
+	tntdb.markdown
 
 if MAKE_DOXYGEN
 
