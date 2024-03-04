@@ -716,17 +716,3 @@ use, `connectCached` just creates a new one.
       // because it is hold by 'conn'
     conn = tntdb::Connection();
     tntdb::dropCached();  // closes the connection, because we released it
-
-Statementcache
---------------
-
-As told previously statement-reuse improves performance quite heavily. It is
-advisable to try to use prepared statements where possible. In the case of a
-connectionpool it is quite difficult to maintain prepared statements, because
-they are specific to the connection.
-
-Tntdb helps here by putting a statementcache into the connection-class. When
-calls to `tntdb::Connection::prepare` is replaced with
-`tntdb::Connection::prepareCached`, tntdb looks into the connection, if the same
-statement is already prepared earlier and returns this when needed and calls
-prepare and fills the statement-cache with this new statement otherwise.
