@@ -19,3 +19,5 @@ EXTRA_DIST = \
 pkgconfigdir = $(libdir)/pkgconfig/
 
 pkgconfig_DATA = pkgconfig/tntdb.pc
+
+EXTRA_DIST = README.md
