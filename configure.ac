@@ -17,21 +17,6 @@ AC_PROG_CXX
 AC_LANG(C++)
 AX_CXX_COMPILE_STDCXX_11(noext, optional)
 
-ACX_PTHREAD
-
-CC="$PTHREAD_CC"
-CXX="$PTHREAD_CXX"
-CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-CXXFLAGS="$CXXFLAGS $PTHREAD_CXXFLAGS"
-LIBS="$LIBS $PTHREAD_LIBS"
-
-AX_COMPILER_VENDOR
-AS_IF([test "$ax_cv_cxx_compiler_vendor" = "ibm"],
-      [CPPFLAGS="$CPPFLAGS -qrtti -qlanglvl=newexcp -D__NOLOCK_ON_INPUT -D__NOLOCK_ON_OUTPUT"],
-      AX_CHECK_COMPILE_FLAG([-Wno-long-long], [CPPFLAGS="$CPPFLAGS -Wno-long-long"])
-      AX_CHECK_COMPILE_FLAG([-Wall], [CPPFLAGS="$CPPFLAGS -Wall"])
-      AX_CHECK_COMPILE_FLAG([-pedantic], [CPPFLAGS="$CPPFLAGS -pedantic"]))
-
 AC_MSG_CHECKING([for sighandler_t])
 AC_COMPILE_IFELSE(
   [AC_LANG_SOURCE([

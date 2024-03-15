@@ -19,7 +19,6 @@
 !/m4/ax_compiler_vendor.m4
 !/m4/ax_lib_oracle_oci.m4
 !/m4/ax_cxx_compile_stdcxx_11.m4
-!/m4/acx_pthread.m4
 
 .deps
 .libs
