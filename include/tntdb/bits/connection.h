@@ -34,12 +34,6 @@
 #include <string>
 #include <memory>
 
-#if __cplusplus >= 201403L
-#define DEPRECATED [[deprecated]]
-#else
-#define DEPRECATED
-#endif
-
 namespace tntdb
 {
 class Result;
@@ -140,57 +134,6 @@ public:
         The offset is optional. When an empty string is passed to offset, just the limit is used.
      */
     Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string());
-
-    /** Create a new Statement object with the given query and store it in a cache
-
-        When called again with the same query, the cached object is returned
-     */
-    DEPRECATED
-    Statement prepareCached(const std::string& query)
-      { return prepare(query); }
-
-    /** Create a new Statement object with the given query and caching key
-
-        Per default, prepareCached() uses the query as key which identifies
-        a Statement object in the cache. With this method you can provide
-        your own key (because shorter keys mean faster lookup in the cache).
-        Be aware though that when using this, you have to ensure the same
-        key won't be used twice.
-     */
-    DEPRECATED
-    Statement prepareCached(const std::string& query, const std::string&)
-      { return prepare(query); }
-
-    /** Create a new Statement object with the given query added by a range limitation.
-
-        This is like `prepareWithLimit` but the prepared statement cache is used.
-     */
-    DEPRECATED
-    Statement prepareCachedWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string())
-      { return prepareWithLimit(query, limit, offset); }
-
-    /** Create a new Statement object with the given query added by a range limitation.
-
-        This is like `prepareWithLimit` but the prepared statement cache is
-        used. Like in `prepareCached` an optional key can be used.
-     */
-    DEPRECATED
-    Statement prepareCachedWithLimit(const std::string& query, const
-    std::string& limit, const std::string& offset, const std::string&)
-      { return prepareWithLimit(query, limit, offset); }
-
-    /// Clear the Statement cache used from prepareCached()
-    DEPRECATED
-    void clearStatementCache()
-      { }
-
-    /** Remove a query from the statement cache
-
-        The return value is true if the given key was found in the cache, false otherwise.
-     */
-    DEPRECATED
-    bool clearStatementCache(const std::string&)
-      { return true; }
 
     /// Check whether the connection is alive
     bool ping()                        { return _conn->ping(); }

@@ -36,6 +36,7 @@
 #include <iostream>
 #include <cxxtools/log.h>
 #include <tntdb/connect.h>
+#include <tntdb/pscconnection.h>
 #include <tntdb/statement.h>
 #include <tntdb/transaction.h>
 
@@ -52,7 +53,7 @@ int main(int argc, char* argv[])
     }
 
     const std::string database = argv[1];
-    tntdb::Connection db = tntdb::connect(database);
+    tntdb::PSCConnection db = tntdb::connect(database);
 
     // insert
     tntdb::Statement ins = db.prepare("insert into foo(a, b)"
