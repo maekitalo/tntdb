@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
         //
         // The functions cxxtools::Json, cxxtools::xml::Xml and cxxtools::Csv return
         // a object, which has a output operator, which outputs the data
-        // to the requeste format. To extract the data, the deserialization operator
+        // to the requested format. To extract the data, the deserialization operators
         // defined in <tntdb/serialization.h> are used to convert the database output
         // to a cxxtools::SerializationInfo, which is used to generate the output.
         //
