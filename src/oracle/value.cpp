@@ -125,7 +125,7 @@ Value::Value(Statement& stmt, ub4 pos)
     sword ret;
 
     /* get parameter-info */
-    log_debug("OCIParamGet(" << static_cast<void*>(stmt.getHandle()) << ')');
+    log_finer("OCIParamGet(" << static_cast<void*>(stmt.getHandle()) << ')');
     ret = OCIParamGet(stmt.getHandle(), OCI_HTYPE_STMT, errhp,
         reinterpret_cast<void**>(&paramp), pos + 1);
     stmt.getConnection().checkError(ret, "OCIParamGet");
@@ -170,28 +170,28 @@ void Value::init(Statement& stmt, OCIParam* paramp, ub4 pos)
         case SQLT_TIMESTAMP:
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
-            log_debug("OCIDefineByPos(SQLT_TIMESTAMP)");
+            log_finer("OCIDefineByPos(SQLT_TIMESTAMP)");
             ret = OCIDefineByPos(stmt.getHandle(), &defp,
             errhp, pos + 1, &datetime.getReference(&stmt.getConnection()),
             sizeof(OCIDateTime*), SQLT_TIMESTAMP, &nullind, &len, 0, OCI_DEFAULT);
             break;
 
         case SQLT_INT:
-            log_debug("OCIDefineByPos(SQLT_INT)");
+            log_finer("OCIDefineByPos(SQLT_INT)");
             ret = OCIDefineByPos(stmt.getHandle(), &defp,
             errhp, pos + 1, &longValue,
             sizeof(longValue), SQLT_INT, &nullind, &len, 0, OCI_DEFAULT);
             break;
 
         case SQLT_UIN:
-            log_debug("OCIDefineByPos(SQLT_UIN)");
+            log_finer("OCIDefineByPos(SQLT_UIN)");
             ret = OCIDefineByPos(stmt.getHandle(), &defp,
             errhp, pos + 1, &uint32Value,
             sizeof(uint32Value), SQLT_UIN, &nullind, &len, 0, OCI_DEFAULT);
             break;
 
         case SQLT_FLT:
-            log_debug("OCIDefineByPos(SQLT_FLT)");
+            log_finer("OCIDefineByPos(SQLT_FLT)");
             ret = OCIDefineByPos(stmt.getHandle(), &defp,
             errhp, pos + 1, &doubleValue,
             sizeof(doubleValue), SQLT_FLT, &nullind, &len, 0, OCI_DEFAULT);
@@ -199,21 +199,21 @@ void Value::init(Statement& stmt, OCIParam* paramp, ub4 pos)
 
         case SQLT_NUM:
         case SQLT_VNU:
-            log_debug("OCIDefineByPos(SQLT_VNU)");
+            log_finer("OCIDefineByPos(SQLT_VNU)");
             ret = OCIDefineByPos(stmt.getHandle(), &defp,
             errhp, pos + 1, number.getHandle(),
             OCI_NUMBER_SIZE, SQLT_VNU, &nullind, &len, 0, OCI_DEFAULT);
             break;
 
         case SQLT_BLOB:
-            log_debug("OCIDefineByPos(SQLT_LOB)");
+            log_finer("OCIDefineByPos(SQLT_LOB)");
             ret = OCIDefineByPos(stmt.getHandle(), &defp,
             errhp, pos + 1, &blob.getHandle(&stmt.getConnection()),
             0, SQLT_BLOB, &nullind, &len, 0, OCI_DEFAULT);
             break;
 
         default:
-            log_debug("OCIDefineByPos(SQLT_AFC)");
+            log_finer("OCIDefineByPos(SQLT_AFC)");
             data.resize(len + 16);
             ret = OCIDefineByPos(stmt.getHandle(), &defp,
             errhp, pos + 1, &data[0],
@@ -624,7 +624,7 @@ char Value::getChar() const
 
 void Value::getString(std::string& ret) const
 {
-    log_debug("Value::getString with type=" << type << " name=" << colName
+    log_finer("Value::getString with type=" << type << " name=" << colName
       << " size=" << len);
 
     if (type != SQLT_AFC && type != SQLT_CHR && isNull())
@@ -660,7 +660,7 @@ void Value::getString(std::string& ret) const
 
 void Value::getBlob(tntdb::Blob& ret) const
 {
-    log_debug("get blob from type " << type);
+    log_finer("get blob from type " << type);
 
     if (isNull())
         throw NullValue();

@@ -128,7 +128,7 @@ MultiValue::MultiValue(Statement& stmt, ub4 pos, unsigned n)
 
     /* get parameter-info */
     OCIParam* paramp = 0;
-    log_debug("OCIParamGet(" << static_cast<void*>(stmt.getHandle()) << ')');
+    log_finer("OCIParamGet(" << static_cast<void*>(stmt.getHandle()) << ')');
     ret = OCIParamGet(stmt.getHandle(), OCI_HTYPE_STMT,
         _conn.getErrorHandle(),
         reinterpret_cast<void**>(&paramp), pos + 1);
@@ -184,11 +184,11 @@ void MultiValue::init(Statement& stmt, OCIParam* paramp, ub4 pos)
         case SQLT_TIMESTAMP_TZ:
         case SQLT_TIMESTAMP_LTZ:
             {
-                log_debug("OCIDefineByPos(SQLT_TIMESTAMP)");
+                log_finer("OCIDefineByPos(SQLT_TIMESTAMP)");
 
                 _data = new char[_n * sizeof(OCIDateTime*)];
                 OCIDateTime** p = reinterpret_cast<OCIDateTime**>(_data);
-                log_debug("OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP) (" << _n << " times)");
+                log_finer("OCIDescriptorAlloc(OCI_DTYPE_TIMESTAMP) (" << _n << " times)");
                 for (unsigned n = 0; n < _n; ++n)
                 {
                     ret = OCIDescriptorAlloc(_conn.getEnvHandle(),
@@ -203,7 +203,7 @@ void MultiValue::init(Statement& stmt, OCIParam* paramp, ub4 pos)
             break;
 
         case SQLT_INT:
-            log_debug("OCIDefineByPos(SQLT_INT)");
+            log_finer("OCIDefineByPos(SQLT_INT)");
             _data = new char[_n * sizeof(long)];
             ret = OCIDefineByPos(stmt.getHandle(), &_defp,
                 _conn.getErrorHandle(), pos + 1, _data,
@@ -211,7 +211,7 @@ void MultiValue::init(Statement& stmt, OCIParam* paramp, ub4 pos)
             break;
 
         case SQLT_UIN:
-            log_debug("OCIDefineByPos(SQLT_UIN)");
+            log_finer("OCIDefineByPos(SQLT_UIN)");
             _data = new char[_n * sizeof(unsigned long)];
             ret = OCIDefineByPos(stmt.getHandle(), &_defp,
                 _conn.getErrorHandle(), pos + 1, _data,
@@ -219,7 +219,7 @@ void MultiValue::init(Statement& stmt, OCIParam* paramp, ub4 pos)
             break;
 
         case SQLT_FLT:
-            log_debug("OCIDefineByPos(SQLT_FLT)");
+            log_finer("OCIDefineByPos(SQLT_FLT)");
             _data = new char[_n * sizeof(double)];
             ret = OCIDefineByPos(stmt.getHandle(), &_defp,
                 _conn.getErrorHandle(), pos + 1, _data,
@@ -228,7 +228,7 @@ void MultiValue::init(Statement& stmt, OCIParam* paramp, ub4 pos)
 
         case SQLT_NUM:
         case SQLT_VNU:
-            log_debug("OCIDefineByPos(SQLT_VNU)");
+            log_finer("OCIDefineByPos(SQLT_VNU)");
             _data = new char[_n * OCI_NUMBER_SIZE];
             std::fill(_data, _data + _n * OCI_NUMBER_SIZE, 0);
             ret = OCIDefineByPos(stmt.getHandle(), &_defp,
@@ -238,12 +238,12 @@ void MultiValue::init(Statement& stmt, OCIParam* paramp, ub4 pos)
 
         case SQLT_BLOB:
             {
-                log_debug("OCIDefineByPos(SQLT_LOB)");
+                log_finer("OCIDefineByPos(SQLT_LOB)");
 
                 _data = new char[_n * sizeof(OCILobLocator*)];
 
                 OCIDateTime** p = reinterpret_cast<OCIDateTime**>(_data);
-                log_debug("OCIDescriptorAlloc(OCI_DTYPE_LOB) (" << _n << " times)");
+                log_finer("OCIDescriptorAlloc(OCI_DTYPE_LOB) (" << _n << " times)");
                 for (unsigned n = 0; n < _n; ++n)
                 {
                     ret = OCIDescriptorAlloc(_conn.getEnvHandle(),
@@ -258,7 +258,7 @@ void MultiValue::init(Statement& stmt, OCIParam* paramp, ub4 pos)
             break;
 
         case SQLT_BIN:
-            log_debug("OCIDefineByPos(SQLT_BIN)");
+            log_finer("OCIDefineByPos(SQLT_BIN)");
             _data = new char[(_collen + 16) * _n];
             ret = OCIDefineByPos(stmt.getHandle(), &_defp,
                 _conn.getErrorHandle(), pos + 1, _data,
@@ -266,7 +266,7 @@ void MultiValue::init(Statement& stmt, OCIParam* paramp, ub4 pos)
             break;
 
         default:
-            log_debug("OCIDefineByPos(SQLT_AFC)");
+            log_finer("OCIDefineByPos(SQLT_AFC)");
             _data = new char[(_collen + 16) * _n];
             ret = OCIDefineByPos(stmt.getHandle(), &_defp,
                 _conn.getErrorHandle(), pos + 1, _data,
@@ -292,7 +292,7 @@ MultiValue::~MultiValue()
             case SQLT_TIMESTAMP_LTZ:
                 {
                     OCIDateTime** p = reinterpret_cast<OCIDateTime**>(_data);
-                    log_debug("OCIDescriptorFree(desc, OCI_DTYPE_TIMESTAMP) (" << _n << " times)");
+                    log_finer("OCIDescriptorFree(desc, OCI_DTYPE_TIMESTAMP) (" << _n << " times)");
                     for (unsigned n = 0; n < _n; ++n)
                         OCIDescriptorFree(p[n], OCI_DTYPE_TIMESTAMP);
                 }
@@ -301,7 +301,7 @@ MultiValue::~MultiValue()
             case SQLT_BLOB:
                 {
                     OCILobLocator** p = reinterpret_cast<OCILobLocator**>(_data);
-                    log_debug("OCIDescriptorFree(desc, OCI_DTYPE_LOB) (" << _n << " times)");
+                    log_finer("OCIDescriptorFree(desc, OCI_DTYPE_LOB) (" << _n << " times)");
                     for (unsigned n = 0; n < _n; ++n)
                         OCIDescriptorFree(p[n], OCI_DTYPE_LOB);
                 }
@@ -317,14 +317,14 @@ MultiValue::~MultiValue()
 
 bool MultiValue::isNull(unsigned n) const
 {
-    log_debug("isNull(" << n << ')');
+    log_trace("isNull(" << n << ')');
 
     return _nullind[n] != 0;
 }
 
 bool MultiValue::getBool(unsigned n) const
 {
-    log_debug("getBool(" << n << "), type=" << _type);
+    log_trace("getBool(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -366,7 +366,7 @@ bool MultiValue::getBool(unsigned n) const
 
 short MultiValue::getShort(unsigned n) const
 {
-    log_debug("getShort(" << n << "), type=" << _type);
+    log_trace("getShort(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -403,7 +403,7 @@ short MultiValue::getShort(unsigned n) const
 
 int MultiValue::getInt(unsigned n) const
 {
-    log_debug("getInt(" << n << "), type=" << _type);
+    log_trace("getInt(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -440,7 +440,7 @@ int MultiValue::getInt(unsigned n) const
 
 long MultiValue::getLong(unsigned n) const
 {
-    log_debug("getLong(" << n << "), type=" << _type);
+    log_trace("getLong(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -477,14 +477,14 @@ long MultiValue::getLong(unsigned n) const
 
 int32_t MultiValue::getInt32(unsigned n) const
 {
-    log_debug("getInt32(" << n << "), type=" << _type);
+    log_trace("getInt32(" << n << "), type=" << _type);
 
     return getInt(n);
 }
 
 unsigned short MultiValue::getUnsignedShort(unsigned n) const
 {
-    log_debug("getUnsignedShort(" << n << "), type=" << _type);
+    log_finer("getUnsignedShort(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -521,7 +521,7 @@ unsigned short MultiValue::getUnsignedShort(unsigned n) const
 
 unsigned MultiValue::getUnsigned(unsigned n) const
 {
-    log_debug("getUnsigned(" << n << "), type=" << _type);
+    log_trace("getUnsigned(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -558,7 +558,7 @@ unsigned MultiValue::getUnsigned(unsigned n) const
 
 unsigned long MultiValue::getUnsignedLong(unsigned n) const
 {
-    log_debug("getUnsignedLong(" << n << "), type=" << _type);
+    log_trace("getUnsignedLong(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -595,14 +595,14 @@ unsigned long MultiValue::getUnsignedLong(unsigned n) const
 
 uint32_t MultiValue::getUnsigned32(unsigned n) const
 {
-    log_debug("getUnsigned32(" << n << "), type=" << _type);
+    log_trace("getUnsigned32(" << n << "), type=" << _type);
 
     return getUnsigned(n);
 }
 
 int64_t MultiValue::getInt64(unsigned n) const
 {
-    log_debug("getInt64(" << n << "), type=" << _type);
+    log_trace("getInt64(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -639,7 +639,7 @@ int64_t MultiValue::getInt64(unsigned n) const
 
 uint64_t MultiValue::getUnsigned64(unsigned n) const
 {
-    log_debug("getUnsigned64(" << n << "), type=" << _type);
+    log_trace("getUnsigned64(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -676,7 +676,7 @@ uint64_t MultiValue::getUnsigned64(unsigned n) const
 
 Decimal MultiValue::getDecimal(unsigned n) const
 {
-    log_debug("getDecimal(" << n << "), type=" << _type);
+    log_trace("getDecimal(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -707,7 +707,7 @@ Decimal MultiValue::getDecimal(unsigned n) const
 
 float MultiValue::getFloat(unsigned n) const
 {
-    log_debug("getFloat(" << n << "), type=" << _type);
+    log_trace("getFloat(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -744,7 +744,7 @@ float MultiValue::getFloat(unsigned n) const
 
 double MultiValue::getDouble(unsigned n) const
 {
-    log_debug("getDouble(" << n << "), type=" << _type);
+    log_trace("getDouble(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -781,7 +781,7 @@ double MultiValue::getDouble(unsigned n) const
 
 char MultiValue::getChar(unsigned n) const
 {
-    log_debug("getChar(" << n << "), type=" << _type);
+    log_trace("getChar(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -806,7 +806,7 @@ char MultiValue::getChar(unsigned n) const
 
 void MultiValue::getString(unsigned n, std::string& ret) const
 {
-    log_debug("getString(" << n << "), type=" << _type);
+    log_trace("getString(" << n << "), type=" << _type);
 
     if (_type != SQLT_AFC && _type != SQLT_CHR && _nullind[n] != 0)
         throw NullValue();
@@ -841,7 +841,7 @@ void MultiValue::getString(unsigned n, std::string& ret) const
 
 void MultiValue::getBlob(unsigned n, tntdb::Blob& ret) const
 {
-    log_debug("getBlob(" << n << "), type=" << _type);
+    log_trace("getBlob(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -870,7 +870,7 @@ void MultiValue::getBlob(unsigned n, tntdb::Blob& ret) const
 
 Date MultiValue::getDate(unsigned n) const
 {
-    log_debug("getDate(" << n << "), type=" << _type);
+    log_trace("getDate(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -890,7 +890,7 @@ Date MultiValue::getDate(unsigned n) const
 
 Time MultiValue::getTime(unsigned n) const
 {
-    log_debug("getTime(" << n << "), type=" << _type);
+    log_trace("getTime(" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();
@@ -910,7 +910,7 @@ Time MultiValue::getTime(unsigned n) const
 
 tntdb::Datetime MultiValue::getDatetime(unsigned n) const
 {
-    log_debug("Datetime (" << n << "), type=" << _type);
+    log_trace("Datetime (" << n << "), type=" << _type);
 
     if (_nullind[n] != 0)
         throw NullValue();

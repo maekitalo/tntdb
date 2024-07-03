@@ -90,7 +90,7 @@ void Statement::clear()
 
 void Statement::setNull(const std::string& col)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setNull(\"" << col << "\")");
+    log_trace("OCIStmt(" << getHandle() << ").setNull(\"" << col << "\")");
 
     Bind &b = getBind(col);
     b.setNull();
@@ -116,7 +116,7 @@ void Statement::setNull(const std::string& col)
 
 void Statement::setBool(const std::string& col, bool data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setBool(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setBool(\"" << col << "\", " << data << ')');
     Bind &b = getBind(col);
     b.setData(reinterpret_cast<char*>(&data), sizeof(bool));
 
@@ -142,7 +142,7 @@ void Statement::setBool(const std::string& col, bool data)
 
 void Statement::setShort(const std::string& col, short data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setShort(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setShort(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.setData(reinterpret_cast<char*>(&data), sizeof(short));
@@ -169,7 +169,7 @@ void Statement::setShort(const std::string& col, short data)
 
 void Statement::setInt(const std::string& col, int data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setInt(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setInt(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.setData(reinterpret_cast<char*>(&data), sizeof(int));
@@ -196,7 +196,7 @@ void Statement::setInt(const std::string& col, int data)
 
 void Statement::setLong(const std::string& col, long data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setLong(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setLong(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.number.setLong(data, _conn.getErrorHandle());
@@ -222,7 +222,7 @@ void Statement::setLong(const std::string& col, long data)
 
 void Statement::setUnsignedShort(const std::string& col, unsigned short data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setUnsignedShort(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setUnsignedShort(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.setData(reinterpret_cast<char*>(&data), sizeof(unsigned short));
@@ -249,7 +249,7 @@ void Statement::setUnsignedShort(const std::string& col, unsigned short data)
 
 void Statement::setUnsigned(const std::string& col, unsigned data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setUnsigned(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setUnsigned(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.setData(reinterpret_cast<char*>(&data), sizeof(unsigned));
@@ -276,7 +276,7 @@ void Statement::setUnsigned(const std::string& col, unsigned data)
 
 void Statement::setUnsignedLong(const std::string& col, unsigned long data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setUnsignedLong(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setUnsignedLong(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.number.setUnsignedLong(data, _conn.getErrorHandle());
@@ -302,19 +302,19 @@ void Statement::setUnsignedLong(const std::string& col, unsigned long data)
 
 void Statement::setInt32(const std::string& col, int32_t data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setInt32(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setInt32(\"" << col << "\", " << data << ')');
     return setInt(col, data);
 }
 
 void Statement::setUnsigned32(const std::string& col, uint32_t data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setUnsigned32(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setUnsigned32(\"" << col << "\", " << data << ')');
     return setUnsigned(col, data);
 }
 
 void Statement::setInt64(const std::string& col, int64_t data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setInt64(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setInt64(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.number.setInt64(data, _conn.getErrorHandle());
@@ -341,7 +341,7 @@ void Statement::setInt64(const std::string& col, int64_t data)
 
 void Statement::setUnsigned64(const std::string& col, uint64_t data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setUnsigned64(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setUnsigned64(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.number.setUnsigned64(data, _conn.getErrorHandle());
@@ -367,7 +367,7 @@ void Statement::setUnsigned64(const std::string& col, uint64_t data)
 
 void Statement::setDecimal(const std::string& col, const Decimal& decimal)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setDecimal(\"" << col << "\", " << decimal << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setDecimal(\"" << col << "\", " << decimal << ')');
 
     Bind &b = getBind(col);
     b.number.setDecimal(decimal, _conn.getErrorHandle());
@@ -393,7 +393,7 @@ void Statement::setDecimal(const std::string& col, const Decimal& decimal)
 
 void Statement::setFloat(const std::string& col, float data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setFloat(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setFloat(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.setData(reinterpret_cast<char*>(&data), sizeof(float));
@@ -420,7 +420,7 @@ void Statement::setFloat(const std::string& col, float data)
 
 void Statement::setDouble(const std::string& col, double data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setDouble(\"" << col << "\", " << data << ')');
+    log_trace("OCIStmt(" << getHandle() << ").setDouble(\"" << col << "\", " << data << ')');
 
     Bind &b = getBind(col);
     b.setData(reinterpret_cast<char*>(&data), sizeof(double));
@@ -447,7 +447,7 @@ void Statement::setDouble(const std::string& col, double data)
 
 void Statement::setChar(const std::string& col, char data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setChar(\"" << col << "\", '" << data << "')");
+    log_trace("OCIStmt(" << getHandle() << ").setChar(\"" << col << "\", '" << data << "')");
 
     Bind &b = getBind(col);
     b.setData(&data, 1);
@@ -474,7 +474,7 @@ void Statement::setChar(const std::string& col, char data)
 
 void Statement::setString(const std::string& col, const std::string& data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setString(\"" << col << "\", \"" << data << "\")");
+    log_trace("OCIStmt(" << getHandle() << ").setString(\"" << col << "\", \"" << data << "\")");
 
     Bind &b = getBind(col);
     b.setData(data);
@@ -501,7 +501,7 @@ void Statement::setString(const std::string& col, const std::string& data)
 
 void Statement::setBlob(const std::string& col, const tntdb::Blob& data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setBlob(\"" << col << "\", data(" << data.size() << "))");
+    log_trace("OCIStmt(" << getHandle() << ").setBlob(\"" << col << "\", data(" << data.size() << "))");
 
     Bind &b = getBind(col);
     b.setData(data.data(), data.size());
@@ -528,7 +528,7 @@ void Statement::setBlob(const std::string& col, const tntdb::Blob& data)
 
 void Statement::setDate(const std::string& col, const Date& data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setDate(\"" << col << "\", \"" << data.getIso() << "\")");
+    log_trace("OCIStmt(" << getHandle() << ").setDate(\"" << col << "\", \"" << data.getIso() << "\")");
 
     Bind &b = getBind(col);
     b.datetime.assign(&_conn, data);
@@ -554,7 +554,7 @@ void Statement::setDate(const std::string& col, const Date& data)
 
 void Statement::setTime(const std::string& col, const Time& data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setTime(\"" << col << "\", \"" << data.getIso() << "\")");
+    log_trace("OCIStmt(" << getHandle() << ").setTime(\"" << col << "\", \"" << data.getIso() << "\")");
 
     Bind &b = getBind(col);
     b.datetime.assign(&_conn, data);
@@ -580,7 +580,7 @@ void Statement::setTime(const std::string& col, const Time& data)
 
 void Statement::setDatetime(const std::string& col, const tntdb::Datetime& data)
 {
-    log_debug("OCIStmt(" << getHandle() << ").setDatetime(\"" << col << "\", \"" << data.getIso() << "\")");
+    log_trace("OCIStmt(" << getHandle() << ").setDatetime(\"" << col << "\", \"" << data.getIso() << "\")");
 
     Bind &b = getBind(col);
     b.datetime.assign(&_conn, data);
