@@ -14,6 +14,7 @@ libtntdb_la_SOURCES = \
 	error.cpp \
 	librarymanager.cpp \
 	poolconnection.cpp \
+	pscconnection.cpp \
 	result.cpp \
 	resultimpl.cpp \
 	row.cpp \

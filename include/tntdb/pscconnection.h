@@ -40,30 +40,13 @@ public:
 
         When called again with the same query, the cached object is returned
      */
-    Statement prepare(const std::string& query)
-    {
-        auto it = _stmtCache->find(query);
-        if (it != _stmtCache->end())
-            return it->second;
-        auto stmt = Connection::prepare(query);
-        _stmtCache->emplace(query, stmt);
-        return stmt;
-    }
+    Statement prepare(const std::string& query);
 
     /** Create a new Statement object with the given query added by a range limitation.
 
         This is like `prepareWithLimit` but the prepared statement cache is used.
      */
-    Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string())
-    {
-        auto key = query + '\0' + limit + '\0' + offset;
-        auto it = _stmtCache->find(key);
-        if (it != _stmtCache->end())
-            return it->second;
-        auto stmt = Connection::prepareWithLimit(query, limit, offset);
-        _stmtCache->emplace(key, stmt);
-        return stmt;
-    }
+    Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string());
 
     /// Clear the Statement cache used from prepare()
     void clearStatementCache()      { _stmtCache->clear(); }
