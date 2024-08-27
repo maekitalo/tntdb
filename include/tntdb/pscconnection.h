@@ -8,7 +8,7 @@
 namespace tntdb
 {
 /* PSCConnection is short for PreparedStatementCacheConnection.
-   It extends a Connectioni with a prepared statement cache.
+   It extends a Connection with a prepared statement cache.
 
    Statements, which are prepared with this connection are stored in a cache.
    When the very same sql statement is prepared again, the stored handle is
