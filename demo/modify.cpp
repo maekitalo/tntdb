@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 {
   try
   {
-    log_init();  // logging should be initialized always
+    log_init(argc, argv);  // logging should be initialized always
 
     if (argc < 2)
     {

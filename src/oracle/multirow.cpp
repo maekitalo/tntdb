@@ -44,7 +44,7 @@ MultiRow::MultiRow(Statement& stmt, unsigned rowcount)
         0, OCI_ATTR_PARAM_COUNT, stmt.getConnection().getErrorHandle());
     stmt.getConnection().checkError(ret, "OCIAttrGet(OCI_ATTR_PARAM_COUNT)");
 
-    log_debug("define " << columncount << " parameters");
+    log_finer("define " << columncount << " parameters");
     _columns.resize(columncount);
     for (ub4 pos = 0; pos < columncount; ++pos)
         _columns[pos] = std::make_shared<MultiValue>(stmt, pos, rowcount);
@@ -52,7 +52,7 @@ MultiRow::MultiRow(Statement& stmt, unsigned rowcount)
 
 MultiRow::MultiRow(Statement& stmt, unsigned rowcount, unsigned columncount)
 {
-    log_debug("define " << columncount << " parameters");
+    log_finer("define " << columncount << " parameters");
     _columns.resize(columncount);
     for (ub4 pos = 0; pos < columncount; ++pos)
         _columns[pos] = std::make_shared<MultiValue>(stmt, pos, rowcount);
@@ -60,13 +60,13 @@ MultiRow::MultiRow(Statement& stmt, unsigned rowcount, unsigned columncount)
 
 std::shared_ptr<MultiValue> MultiRow::getValuesByNumber(unsigned field_num) const
 {
-    log_debug("getValuesByNumber(" << field_num << ')');
+    log_finer("getValuesByNumber(" << field_num << ')');
     return _columns.at(field_num);
 }
 
 std::shared_ptr<MultiValue> MultiRow::getValuesByName(const std::string& field_name) const
 {
-    log_debug("getValuesByName(" << field_name << ')');
+    log_finer("getValuesByName(" << field_name << ')');
     return getValuesByNumber(getColIndexByName(field_name));
 }
 

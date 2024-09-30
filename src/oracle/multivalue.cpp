@@ -174,7 +174,7 @@ void MultiValue::init(Statement& stmt, OCIParam* paramp, ub4 pos)
         _conn.getErrorHandle());
     _conn.checkError(ret, "OCIAttrGet(OCI_ATTR_DATA_SIZE)");
 
-    log_debug("column name=\"" << _colName << "\" type=" << _type << " size=" << _collen);
+    log_finer("column name=\"" << _colName << "\" type=" << _type << " size=" << _collen);
 
     /* define outputvariable */
     switch (_type)
