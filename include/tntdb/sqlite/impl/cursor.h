@@ -40,10 +40,10 @@ class Statement;
 
 class Cursor : public ICursor
 {
-    sqlite3_stmt* _stmt;
+    Statement* _stmt;
 
 public:
-    explicit Cursor(sqlite3_stmt* stmt);
+    explicit Cursor(Statement* stmt);
 
     // method for ICursor
     Row fetch();

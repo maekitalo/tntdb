@@ -547,7 +547,8 @@ Value Statement::selectValue()
 
 std::shared_ptr<ICursor> Statement::createCursor(unsigned fetchsize)
 {
-    return std::make_shared<Cursor>(getBindStmt());
+    getBindStmt();
+    return std::make_shared<Cursor>(this);
 }
 
 }

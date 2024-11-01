@@ -41,6 +41,8 @@ class Cursor;
 
 class Statement : public IStatement
 {
+    friend class Cursor;
+
     sqlite3_stmt* _stmt;
     Connection& _conn;
     std::string _query;

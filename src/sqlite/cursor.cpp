@@ -38,20 +38,23 @@ namespace tntdb
 {
 namespace sqlite
 {
-Cursor::Cursor(sqlite3_stmt* stmt)
+Cursor::Cursor(Statement* stmt)
   : _stmt(stmt)
 { }
 
 Row Cursor::fetch()
 {
-    log_debug("sqlite3_step(" << _stmt << ')');
-    int ret = ::sqlite3_step(_stmt);
+    _stmt->_needReset = true;
+    sqlite3_stmt* stmt = _stmt->_stmt;
+
+    log_debug("sqlite3_step(" << stmt << ')');
+    int ret = ::sqlite3_step(stmt);
     if (ret == SQLITE_DONE)
         return Row();
     else if (ret != SQLITE_ROW)
-        throw Execerror("sqlite3_step", _stmt, ret);
+        throw Execerror("sqlite3_step", stmt, ret);
 
-    return Row(std::make_shared<StmtRow>(_stmt));
+    return Row(std::make_shared<StmtRow>(stmt));
 }
 }
 }
