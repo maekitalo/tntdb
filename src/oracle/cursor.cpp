@@ -86,17 +86,15 @@ tntdb::Row Cursor::fetch()
         _conn.checkError(ret, "OCIAttrGet(OCI_ATTR_ROWS_FETCHED)");
         log_debug(_rowcount << " rows fetched");
 
-        if (_rowcount == 0)
-        {
-            _row = 0;
-            return tntdb::Row();
-        }
-        else
+        if (_rowcount > 0)
         {
             _row->row(0);
             return tntdb::Row(_row);
         }
     }
+
+    _row = 0;
+    return tntdb::Row();
 }
 }
 }
