@@ -144,18 +144,22 @@ public:
     bool getValue(T& ret) const
       { return *this >> ret; }
 
+#if __cplusplus >= 201703L
     template <typename T>
     bool getValue(T&& ret) const
       { return *this >> std::move(ret); }
+#endif
 
     /// Shorter name for getValue.
     template <typename T>
     bool get(T& ret) const
       { return *this >> ret; }
 
+#if __cplusplus >= 201703L
     template <typename T>
     bool get(T&& ret) const
       { return *this >> std::move(ret); }
+#endif
 
     /// Returns true, if this class is not connected to a actual statement.
     bool operator!() const              { return !_value; }

@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if __cplusplus >= 201703L
 
 #include "testbase.h"
 #include <cxxtools/unit/registertest.h>
@@ -106,3 +107,5 @@ public:
 };
 
 cxxtools::unit::RegisterTest<JsonTest> register_JsonTest;
+
+#endif

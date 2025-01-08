@@ -109,8 +109,8 @@ Connection ConnectionPools::connect(const std::string& url, const std::string& u
         if (it == _pools.end())
         {
             log_debug("create pool for url \"" << url << "\" user \"" << username << "\" with " << _maxcount << " connections");
-            PoolType* pool = new PoolType(url, username, password, _maxcount);
-            it = _pools.emplace(ConnectionParameter(url, username, password), pool).first;
+            std::unique_ptr<PoolType> pool(new PoolType(url, username, password, _maxcount));
+            it = _pools.emplace(ConnectionParameter(url, username, password), std::move(pool)).first;
         }
         else
             log_debug("pool for url \"" << url << "\" found");

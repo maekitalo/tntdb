@@ -48,7 +48,7 @@ std::shared_ptr<Statement::Bind> Statement::getBindPtr(const std::string& col)
 {
     BindMapType::iterator it = bindMap.find(col);
     if (it == bindMap.end())
-        it = bindMap.insert(BindMapType::value_type(col, new Bind())).first;
+        it = bindMap.emplace(col, std::make_shared<Bind>()).first;
     return it->second;
 }
 

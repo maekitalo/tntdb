@@ -27,6 +27,8 @@
  */
 
 
+#if __cplusplus >= 201703L
+
 #include "testbase.h"
 #include <cxxtools/unit/registertest.h>
 #include <cxxtools/log.h>
@@ -106,3 +108,5 @@ public:
 };
 
 cxxtools::unit::RegisterTest<BinTest> register_BinTest;
+
+#endif
