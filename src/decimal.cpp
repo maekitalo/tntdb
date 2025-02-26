@@ -429,80 +429,90 @@ namespace
         return ret;
     }
 
-    void Decimal::setDouble(long double value)
+    template <typename Float>
+    void _setDouble(std::string& mantissa, short& exponent, bool& negative, Float value)
     {
         if (value == 0)
         {
-            _negative = false;
-            _mantissa = "0";
-            _exponent = 0;
+            negative = false;
+            mantissa = "0";
+            exponent = 0;
         }
         else if (value == 1)    // because it is so common
         {
-            _negative = false;
-            _mantissa = "1";
-            _exponent = 1;
+            negative = false;
+            mantissa = "1";
+            exponent = 1;
         }
-        else if (value == std::numeric_limits<long double>::infinity())
+        else if (value == std::numeric_limits<Float>::infinity())
         {
-            _negative = false;
-            _exponent = std::numeric_limits<short>::max();
+            negative = false;
+            exponent = std::numeric_limits<short>::max();
         }
-        else if (value == -std::numeric_limits<long double>::infinity())
+        else if (value == -std::numeric_limits<Float>::infinity())
         {
-            _negative = true;
-            _exponent = std::numeric_limits<short>::max();
+            negative = true;
+            exponent = std::numeric_limits<short>::max();
         }
         else if (value != value) // check for nan
         {
-            _negative = false;
-            _exponent = 0;
+            negative = false;
+            exponent = 0;
         }
         else
         {
-            long double v = value;
-            _negative = v < 0;
-            if (_negative)
+            Float v = value;
+            negative = v < 0;
+            if (negative)
                 v = -v;
 
-            _exponent = static_cast<short>(std::floor(std::log10(v))) + 1;
+            exponent = static_cast<short>(std::floor(std::log10(v))) + 1;
 
-            if (_exponent > std::numeric_limits<long double>::max_exponent10)
+            if (exponent > std::numeric_limits<Float>::max_exponent10)
             {
                 v /= 10;
-                v /= std::pow(static_cast<long double>(10), static_cast<int>(_exponent - 1));
+                v /= std::pow(static_cast<Float>(10), static_cast<int>(exponent - 1));
             }
-            else if (_exponent < -std::numeric_limits<long double>::max_exponent10)
+            else if (exponent < -std::numeric_limits<Float>::max_exponent10)
             {
                 v *= 10;
-                v /= std::pow(static_cast<long double>(10), static_cast<int>(_exponent + 1));
+                v /= std::pow(static_cast<Float>(10), static_cast<int>(exponent + 1));
             }
             else
-                v /= std::pow(static_cast<long double>(10), static_cast<int>(_exponent));
+                v /= std::pow(static_cast<Float>(10), static_cast<int>(exponent));
 
-            for (int n = 0; n <= std::numeric_limits<long double>::digits10; ++n)
+            for (int n = 0; n <= std::numeric_limits<Float>::digits10; ++n)
             {
                 unsigned short d = static_cast<unsigned short>(v * 10);
                 v = v * 10 - d;
-                _mantissa += static_cast<char>(d + '0');
+                mantissa += static_cast<char>(d + '0');
             }
 
             unsigned short d = static_cast<unsigned short>(v * 10);
             if (d >= 5)
             {
-                while (!_mantissa.empty() && _mantissa.back() == '9')
-                    _mantissa.pop_back();
-                if (_mantissa.empty())
-                    _mantissa = "0";
+                while (!mantissa.empty() && mantissa.back() == '9')
+                    mantissa.pop_back();
+                if (mantissa.empty())
+                    mantissa = "0";
                 else
-                    ++_mantissa[_mantissa.size()-1];
+                    ++mantissa[mantissa.size()-1];
             }
 
-            stripZeros(_mantissa);
+            stripZeros(mantissa);
         }
 
-        log_debug("double value=" << value << " => negative=" << _negative << " mantissa=" << _mantissa << " exponent=" << _exponent);
+        log_debug("double value=" << value << " => negative=" << negative << " mantissa=" << mantissa << " exponent=" << exponent);
     }
+
+    Decimal::Decimal(float value)
+    { _setDouble(_mantissa, _exponent, _negative, value); }
+
+    Decimal::Decimal(double value)
+    { _setDouble(_mantissa, _exponent, _negative, value); }
+
+    Decimal::Decimal(long double value)
+    { _setDouble(_mantissa, _exponent, _negative, value); }
 
     Decimal::Decimal(const std::string& value)
         : _exponent(0),

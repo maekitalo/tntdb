@@ -91,13 +91,27 @@ public:
 
     Decimal();
 
-    explicit Decimal(long double value)
-      { setDouble(value); }
+    explicit Decimal(short value, short exponent = 0)
+    { _setInteger(value, exponent); }
+    explicit Decimal(int value, short exponent = 0)
+    { _setInteger(value, exponent); }
+    explicit Decimal(unsigned int value, short exponent = 0)
+    { _setInteger(value, exponent); }
+    explicit Decimal(unsigned short value, short exponent = 0)
+    { _setInteger(value, exponent); }
+    explicit Decimal(long value, short exponent = 0)
+    { _setInteger(value, exponent); }
+    explicit Decimal(unsigned long value, short exponent = 0)
+    { _setInteger(value, exponent); }
+    explicit Decimal(long long value, short exponent = 0)
+    { _setInteger(value, exponent); }
+    explicit Decimal(unsigned long long value, short exponent = 0)
+    { _setInteger(value, exponent); }
 
+    explicit Decimal(float value);
+    explicit Decimal(double value);
+    explicit Decimal(long double value);
     explicit Decimal(const std::string& value);
-
-    Decimal(long mantissa, short exponent)
-      { setInteger(mantissa, exponent); }
 
     static Decimal infinity()
       { return Decimal(std::string(), std::numeric_limits<short>::max(), false); }
@@ -128,8 +142,6 @@ public:
 
     bool isZero() const
       { return _mantissa == "0"; }
-
-    void setDouble(long double value);
 
     long double getDouble() const;
 
