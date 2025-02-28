@@ -481,7 +481,7 @@ namespace
             else
                 v /= std::pow(static_cast<Float>(10), static_cast<int>(exponent));
 
-            for (int n = 0; n <= std::numeric_limits<Float>::digits10; ++n)
+            for (int n = 0; n < std::numeric_limits<Float>::digits10; ++n)
             {
                 unsigned short d = static_cast<unsigned short>(v * 10);
                 v = v * 10 - d;
