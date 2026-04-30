@@ -82,6 +82,9 @@ class Statement : public IStatement
     std::vector<int> paramFormats;
 
     // helper-methods for setting values
+
+    unsigned hostvarId(const std::string& col);
+
     template <typename T>
     void setValue(const std::string& col, T data);
 

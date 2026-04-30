@@ -107,7 +107,7 @@ int Statement::getBindIndex(const std::string& col)
     log_debug("sqlite3_bind_parameter_index(" << _stmt << ", :" << col  << ')');
     int idx = ::sqlite3_bind_parameter_index(_stmt, (':' + col).c_str());
     if (idx == 0)
-        log_warn("hostvariable :" << col << " not found");
+        throw HostvarNotFound(col);
     return idx;
 }
 

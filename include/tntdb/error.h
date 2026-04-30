@@ -89,6 +89,17 @@ public:
 
     const std::string& getField() const { return field; }
 };
+
+class HostvarNotFound : public Error
+{
+    std::string _hostvar;
+
+public:
+    explicit HostvarNotFound(const std::string& hostvar);
+    ~HostvarNotFound() throw() { }
+
+    const std::string& getHostvar() const { return _hostvar; }
+};
 }
 
 #endif // TNTDB_ERROR_H

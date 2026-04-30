@@ -61,4 +61,10 @@ namespace tntdb
       field(field_)
   {
   }
+
+  HostvarNotFound::HostvarNotFound(const std::string& hostvar)
+    : Error("hostvariable \"" + hostvar + "\" not found"),
+      _hostvar(hostvar)
+  {
+  }
 }

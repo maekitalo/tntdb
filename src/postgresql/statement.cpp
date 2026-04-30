@@ -179,100 +179,78 @@ PGresult* Statement::execPrepared()
     return result;
 }
 
-template <typename T>
-void Statement::setValue(const std::string& col, T data)
+unsigned Statement::hostvarId(const std::string& col)
 {
     hostvarMapType::const_iterator it = hostvarMap.find(col);
     if (it == hostvarMap.end())
-        log_warn("hostvariable :" << col << " not found");
-    else
-    {
-        std::string v = cxxtools::convert<std::string>(data);
-        values[it->second].setValue(v);
-        paramFormats[it->second] = 0;
-    }
+        throw HostvarNotFound(col);
+
+    return it->second;
+}
+
+template <typename T>
+void Statement::setValue(const std::string& col, T data)
+{
+    unsigned hv = hostvarId(col);
+    std::string v = cxxtools::convert<std::string>(data);
+    values[hv].setValue(v);
+    paramFormats[hv] = 0;
 }
 
 template <>
 void Statement::setValue(const std::string& col, float data)
 {
-    hostvarMapType::const_iterator it = hostvarMap.find(col);
-    if (it == hostvarMap.end())
-        log_warn("hostvariable :" << col << " not found");
-    else
-    {
-        std::ostringstream v;
-        v.precision(24);
-        v << data;
-        values[it->second].setValue(v.str());
-        paramFormats[it->second] = 0;
-    }
+    unsigned hv = hostvarId(col);
+    std::ostringstream v;
+    v.precision(24);
+    v << data;
+    values[hv].setValue(v.str());
+    paramFormats[hv] = 0;
 }
 
 template <>
 void Statement::setValue(const std::string& col, double data)
 {
-    hostvarMapType::const_iterator it = hostvarMap.find(col);
-    if (it == hostvarMap.end())
-        log_warn("hostvariable :" << col << " not found");
-    else
-    {
-        std::ostringstream v;
-        v.precision(24);
-        v << data;
-        values[it->second].setValue(v.str());
-        paramFormats[it->second] = 0;
-    }
+    unsigned hv = hostvarId(col);
+    std::ostringstream v;
+    v.precision(24);
+    v << data;
+    values[hv].setValue(v.str());
+    paramFormats[hv] = 0;
 }
 
 template <>
 void Statement::setValue(const std::string& col, Decimal data)
 {
-    hostvarMapType::const_iterator it = hostvarMap.find(col);
-    if (it == hostvarMap.end())
-        log_warn("hostvariable :" << col << " not found");
-    else
-    {
-        std::ostringstream v;
-        v.precision(24);
-        v << data;
-        values[it->second].setValue(v.str());
-        paramFormats[it->second] = 0;
-    }
+    unsigned hv = hostvarId(col);
+    std::ostringstream v;
+    v.precision(24);
+    v << data;
+    values[hv].setValue(v.str());
+    paramFormats[hv] = 0;
 }
 
 template <typename T>
 void Statement::setStringValue(const std::string& col, T data, bool binary)
 {
-    hostvarMapType::const_iterator it = hostvarMap.find(col);
-    if (it == hostvarMap.end())
-        log_warn("hostvariable :" << col << " not found");
-    else
-    {
-        values[it->second].setValue(data);
-        paramFormats[it->second] = binary;
-    }
+    unsigned hv = hostvarId(col);
+    values[hv].setValue(data);
+    paramFormats[hv] = binary;
 }
 
 template <typename T>
 void Statement::setIsoValue(const std::string& col, T data)
 {
-    hostvarMapType::const_iterator it = hostvarMap.find(col);
-    if (it == hostvarMap.end())
-        log_warn("hostvariable :" << col << " not found");
-    else
-    {
-        values[it->second].setValue(data.getIso());
-        paramFormats[it->second] = 0;
-    }
+    unsigned hv = hostvarId(col);
+    values[hv].setValue(data.getIso());
+    paramFormats[hv] = 0;
 }
 
 #ifndef HAVE_PQPREPARE
 void Statement::setType(const std::string& col, const std::string& type)
 {
-    hostvarMapType::const_iterator it = hostvarMap.find(col);
-    if (it != hostvarMap.end())
-        values[it->second].setType(type);
+    unsigned hv = hostvarId(col);
+    values[hv].setType(type);
 }
 #endif
 
@@ -287,28 +265,18 @@ void Statement::setNull(const std::string& col)
 {
     log_debug("setNull(\"" << col << "\")");
 
-    hostvarMapType::const_iterator it = hostvarMap.find(col);
-    if (it == hostvarMap.end())
-        log_warn("hostvariable :" << col << " not found");
-    else
-    {
-        values[it->second].setNull();
-        paramFormats[it->second] = 0;
-    }
+    unsigned hv = hostvarId(col);
+    values[hv].setNull();
+    paramFormats[hv] = 0;
 }
 
 void Statement::setBool(const std::string& col, bool data)
 {
     log_debug("setBool(\"" << col << "\", " << data << ')');
 
-    hostvarMapType::const_iterator it = hostvarMap.find(col);
-    if (it == hostvarMap.end())
-        log_warn("hostvariable :" << col << " not found");
-    else
-    {
-        values[it->second].setValue(data ? "1" : "0");
-        paramFormats[it->second] = 0;
-    }
+    unsigned hv = hostvarId(col);
+    values[hv].setValue(data ? "1" : "0");
+    paramFormats[hv] = 0;
 
     SET_TYPE(col, "bool");
 }

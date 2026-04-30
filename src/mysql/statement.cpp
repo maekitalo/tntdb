@@ -187,7 +187,7 @@ void Statement::setNull(const std::string& col)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setBool(const std::string& col, bool data)
@@ -203,7 +203,7 @@ void Statement::setBool(const std::string& col, bool data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setShort(const std::string& col, short data)
@@ -219,7 +219,7 @@ void Statement::setShort(const std::string& col, short data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setInt(const std::string& col, int data)
@@ -235,7 +235,7 @@ void Statement::setInt(const std::string& col, int data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setLong(const std::string& col, long data)
@@ -251,7 +251,7 @@ void Statement::setLong(const std::string& col, long data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setUnsignedShort(const std::string& col, unsigned short data)
@@ -267,7 +267,7 @@ void Statement::setUnsignedShort(const std::string& col, unsigned short data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setUnsigned(const std::string& col, unsigned data)
@@ -283,7 +283,7 @@ void Statement::setUnsigned(const std::string& col, unsigned data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setUnsignedLong(const std::string& col, unsigned long data)
@@ -299,7 +299,7 @@ void Statement::setUnsignedLong(const std::string& col, unsigned long data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setInt32(const std::string& col, int32_t data)
@@ -315,7 +315,7 @@ void Statement::setInt32(const std::string& col, int32_t data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setUnsigned32(const std::string& col, uint32_t data)
@@ -331,7 +331,7 @@ void Statement::setUnsigned32(const std::string& col, uint32_t data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setInt64(const std::string& col, int64_t data)
@@ -347,7 +347,7 @@ void Statement::setInt64(const std::string& col, int64_t data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setUnsigned64(const std::string& col, uint64_t data)
@@ -363,7 +363,7 @@ void Statement::setUnsigned64(const std::string& col, uint64_t data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setDecimal(const std::string& col, const Decimal& data)
@@ -379,7 +379,7 @@ void Statement::setDecimal(const std::string& col, const Decimal& data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setFloat(const std::string& col, float data)
@@ -395,7 +395,7 @@ void Statement::setFloat(const std::string& col, float data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setDouble(const std::string& col, double data)
@@ -411,7 +411,7 @@ void Statement::setDouble(const std::string& col, double data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setChar(const std::string& col, char data)
@@ -427,7 +427,7 @@ void Statement::setChar(const std::string& col, char data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setString(const std::string& col, const std::string& data)
@@ -443,7 +443,7 @@ void Statement::setString(const std::string& col, const std::string& data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setBlob(const std::string& col, const Blob& data)
@@ -459,7 +459,7 @@ void Statement::setBlob(const std::string& col, const Blob& data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setDate(const std::string& col, const Date& data)
@@ -476,7 +476,7 @@ void Statement::setDate(const std::string& col, const Date& data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setTime(const std::string& col, const Time& data)
@@ -493,7 +493,7 @@ void Statement::setTime(const std::string& col, const Time& data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 void Statement::setDatetime(const std::string& col, const Datetime& data)
@@ -510,7 +510,7 @@ void Statement::setDatetime(const std::string& col, const Datetime& data)
     }
 
     if (!found)
-        log_warn("hostvar \"" << col << "\" not found");
+        throw HostvarNotFound(col);
 }
 
 Statement::size_type Statement::execute()
