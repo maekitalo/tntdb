@@ -69,7 +69,7 @@ void Datetime::ociAssign(OCIDateTime* src)
 
 void Datetime::ociGetDate(sb2 &year, ub1 &month, ub1 &day) const
 {
-    log_debug("OCIDateTimeGetDate(" << datetime << ')');
+    log_finer("OCIDateTimeGetDate(" << datetime << ')');
     sword ret = OCIDateTimeGetDate(conn->getEnvHandle(),
       conn->getErrorHandle(), datetime, &year, &month, &day);
     conn->checkError(ret, "OCIDateTimeGetDate");
@@ -77,7 +77,7 @@ void Datetime::ociGetDate(sb2 &year, ub1 &month, ub1 &day) const
 
 void Datetime::ociGetTime(ub1 &hour, ub1 &min, ub1 &sec, ub4 &fsec) const
 {
-    log_debug("OCIDateTimeGetTime(" << datetime << ')');
+    log_finer("OCIDateTimeGetTime(" << datetime << ')');
     sword ret = OCIDateTimeGetTime(conn->getEnvHandle(), conn->getErrorHandle(),
       datetime, &hour, &min, &sec, &fsec);
     conn->checkError(ret, "OCIDateTimeGetTime");
@@ -94,7 +94,7 @@ Datetime::Datetime(Connection* conn_, OCIDateTime* datetime_, bool release_)
 Datetime::Datetime(Connection* conn_, const tntdb::Datetime& s)
   : conn(conn_), datetime(0), release(true)
 {
-    log_debug("create oracle::Datetime from tntdb::Datetime");
+    log_finer("create oracle::Datetime from tntdb::Datetime");
 
     ociDescriptorAlloc();
     ociConstruct(s.getYear(), s.getMonth(), s.getDay(),
@@ -104,7 +104,7 @@ Datetime::Datetime(Connection* conn_, const tntdb::Datetime& s)
 Datetime::Datetime(Connection* conn_, const tntdb::Date& s)
   : conn(conn_), datetime(0), release(true)
 {
-    log_debug("create oracle::Datetime from tntdb::Date");
+    log_finer("create oracle::Datetime from tntdb::Date");
 
     ociDescriptorAlloc();
     ociConstruct(s.getYear(), s.getMonth(), s.getDay(), 0, 0, 0, 0);
@@ -113,7 +113,7 @@ Datetime::Datetime(Connection* conn_, const tntdb::Date& s)
 Datetime::Datetime(Connection* conn_, const tntdb::Time& s)
   : conn(conn_), datetime(0), release(true)
 {
-    log_debug("create oracle::Datetime from tntdb::Time");
+    log_finer("create oracle::Datetime from tntdb::Time");
 
     ociDescriptorAlloc();
     ociConstruct(1, 1, 1,
@@ -123,7 +123,7 @@ Datetime::Datetime(Connection* conn_, const tntdb::Time& s)
 Datetime::Datetime(const Datetime& src)
   : conn(src.conn), datetime(0), release(true)
 {
-    log_debug("copy oracle::Datetime");
+    log_finer("copy oracle::Datetime");
 
     if (src.datetime)
     {
@@ -134,7 +134,7 @@ Datetime::Datetime(const Datetime& src)
 
 Datetime& Datetime::operator= (const Datetime& src)
 {
-    log_debug("assign oracle::Datetime");
+    log_finer("assign oracle::Datetime");
 
     conn = src.conn;
 
@@ -143,7 +143,7 @@ Datetime& Datetime::operator= (const Datetime& src)
         if (datetime == 0 || !release)
         {
             // we have no handle or don't own it - create new one
-            log_debug("allocate new descriptor");
+            log_finer("allocate new descriptor");
             ociDescriptorAlloc();
             release = true;
         }
@@ -155,7 +155,7 @@ Datetime& Datetime::operator= (const Datetime& src)
         if (release)
         {
             // free
-            log_debug("release old descriptor");
+            log_finer("release old descriptor");
             ociDescriptorFree();
         }
 
@@ -167,14 +167,14 @@ Datetime& Datetime::operator= (const Datetime& src)
 
 void Datetime::assign(Connection* conn_, const tntdb::Datetime& s)
 {
-    log_debug("assign tntdb::Datetime");
+    log_finer("assign tntdb::Datetime");
 
     conn = conn_;
 
     if (datetime == 0 || !release)
     {
         // we have no handle or don't own it - create new one
-        log_debug("allocate new descriptor");
+        log_finer("allocate new descriptor");
         ociDescriptorAlloc();
         release = true;
     }
@@ -185,14 +185,14 @@ void Datetime::assign(Connection* conn_, const tntdb::Datetime& s)
 
 void Datetime::assign(Connection* conn_, const tntdb::Date& s)
 {
-    log_debug("assign tntdb::Date");
+    log_finer("assign tntdb::Date");
 
     conn = conn_;
 
     if (datetime == 0 || !release)
     {
         // we have no handle or don't own it - create new one
-        log_debug("allocate new descriptor");
+        log_finer("allocate new descriptor");
         ociDescriptorAlloc();
         release = true;
     }
@@ -202,14 +202,14 @@ void Datetime::assign(Connection* conn_, const tntdb::Date& s)
 
 void Datetime::assign(Connection* conn_, const tntdb::Time& s)
 {
-    log_debug("assign tntdb::Time");
+    log_finer("assign tntdb::Time");
 
     conn = conn_;
 
     if (datetime == 0 || !release)
     {
         // we have no handle or don't own it - create new one
-        log_debug("allocate new descriptor");
+        log_finer("allocate new descriptor");
         ociDescriptorAlloc();
         release = true;
     }
