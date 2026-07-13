@@ -1,8 +1,8 @@
-AC_INIT(tntdb, 4.1, [Tommi Maekitalo <tommi@tntnet.org>])
+AC_INIT(tntdb, 4.2, [Tommi Maekitalo <tommi@tntnet.org>])
 AM_INIT_AUTOMAKE
 LT_INIT([disable-static])
 
-abi_current=7
+abi_current=8
 abi_revision=0
 abi_age=0
 sonumber=${abi_current}:${abi_revision}:${abi_age}
