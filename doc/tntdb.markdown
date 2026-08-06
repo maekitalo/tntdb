@@ -112,7 +112,10 @@ or alternatively, but with the same result:
       
 ### The oracle driver
 
-To install the oracle driver on linux download the following libraries from
+The Oracle driver is **not** compiled by default when tntdb is compiled, since the
+Oracle client libraries are not free. To enable Oracle support, configure TNTDB with the 
+--with-oracle option and install the required Oracle Instant Client packages beforehand.
+To install the oracle driver on linux, download the following libraries from
 Oracle (you will have to register but they are free of charge):
 
     oracle-instantclientVERS-basic-VERS.x86_64.rpm
@@ -122,9 +125,7 @@ where VERS stand for the version number e.g. 11.2
 
 Install them with your package manager.
  
-The Oracle driver is not compiled by default when tntdb is compiled, since the
-Oracle client libraries are not free. You have to explicitly enable it using the
-configure switch --with-oracle. Since the includes and libs of oracle are
+Since the includes and libs of oracle are
 normally not installed to standard paths, you need to tell the compiler where to
 find the includes and the linker where to find the libraries. This is done by
 setting the CPPFLAGS and LDFLAGS.
@@ -133,16 +134,16 @@ The call to configure may look like this:
 
     ./configure --with-oracle --without-mysql CPPFLAGS=-I/usr/include/oracle/11.2/client64 LDFLAGS=-L/usr/lib/oracle/11.2/client64/lib
 
-The connection string has to start with the prefix "oracle:". The username and
-password are extracted. They must be passed semicolon separated "user=username"
+The connection string has to start with the prefix "oracle:", the parameters username and
+password must be passed semicolon separated as "user=username"
 and "passwd=password". The rest of the string is passed to the OCI function
 `OCIServerAttach`. Here is an example for the Oracle Express Edition:
 
     tntdb::Connection conn =
       tntdb::connect("oracle:XE;user=hr;passwd=hr");
 
-If your Oracle dbms runs on the machine with ip 192.168.0.100 on port 1521 and 
-the service id is MYDB then the connection is created using:
+If your Oracle dbms runs at IP adress 192.168.0.100 on port 1521 and 
+the service name is MYDB then the connection is created using:
 
     tntdb::Connection conn =
       tntdb::connect("oracle:192.168.0.100:1521/MYDB;user=hr;passwd=hr");
