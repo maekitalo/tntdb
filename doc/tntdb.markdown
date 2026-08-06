@@ -151,39 +151,44 @@ the service name is MYDB then the connection is created using:
 
 ### The replication driver
 
-The replication driver is a special case. It do not handle a specific database
+The replication driver is a special case, since it does not handle a specific database
 but implements a simple replication at the application level. To use it, the
 connection string must start with "replicate:" followed by a list of connection
 strings separated by '|'.
 
 A connection is established to each database.
 
-Statements, which just reads data, use the first connection in the list.
+Statements that just read data use the first connection in the list.
 
-Statements, which modify data, executes the statement on each connection. Before
+Statements that modify data execute the statement on each connection. Before
 the actual statement is executed, a transaction is started on each connection
-unless there is already a active transaction. If the statement fails on one
+unless there is already an active transaction. If the statement fails on one
 connection, all transactions are rolled back to ensure consistency.
 
-For modification statement the connection urls are ordered alphabetically to
+For modification statements the connection urls are ordered alphabetically to
 prevent deadlocks when different applications use the replication driver with
 different ordering of database urls.
 
 Note that the connections of the replication driver do not need to use the same
-database drivers but you can mix different drivers. For example you can
-replicate between a local sqlite and a postgresql database. Of course you are
-limited to use sql statements, which each database understand.
+database drivers but can use a mix of different drivers, for example you can
+replicate between a local SQLite and a PostgreSQL database. 
+When replicating between different databases you are
+limited to using sql statements which all involved databases understand.
 
-And here is a example connect for the replication driver:
+Example connect for the replication driver between a SQLite and PostgreSQL Database:
 
     tntdb::Connection conn =
       tntdb::connect("replicate:sqlite:mydatabase.db|postgresql:dbname=DS2 user=web password=web");
 
-This connection reads data from a local sqlite database file and writes to the
-sqlite and postgresql database.
+This connection reads data from a local SQLite database file and writes to the
+sqlite and PostgreSQL database.
 
-Note that this is not really a full scale replication solution. It tries to do
-its best to keep the replication up to date as good as possible but not better.
+#### Replication semantics and limits
+
+The replication driver is a synchronous, application-level fan-out mechanism.
+It is useful to keep multiple databases in sync for simple setups, but it is
+not a database-native replication system.
+
 
 Execute query
 -------------
