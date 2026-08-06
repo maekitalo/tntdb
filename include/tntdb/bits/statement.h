@@ -193,6 +193,11 @@ public:
     template <typename T>
     Statement& set(const std::string& col, const T& data);
 
+    /// Shorthand operator for `set`.
+    template <typename T>
+    Statement& operator()(const std::string& col, const T& data)
+        { return set(col, data); }
+
     /** Set multiple numbered parameters to the values specified by the iterator range
 
         The method expects, that the statement has columns with the specified column name
@@ -249,9 +254,8 @@ public:
      */
     size_type execute();
 
-    template <typename Object>
-    size_type execute(const Object& obj)
-      { return set(obj).execute(); }
+    /// Shorthand operator for `execute`.
+    size_type operator() ()   { return execute(); }
 
     /** Execute the query and return the result
 
@@ -264,12 +268,16 @@ public:
         If the result is empty, a NotFound exception is thrown. Additional rows are ignored.
      */
     Row selectRow();
+
     /** Execute the query and return the first value from the first row of the result
 
         If the result is empty, a NotFound exception is thrown. Additional values are ignored.
      */
     Value selectValue();
     /// @}
+
+    template <typename T>
+    bool operator() (T& ret);
 
     /// Create a database cursor and fetch the first row of the query result
     const_iterator begin(unsigned fetchsize = 100) const;

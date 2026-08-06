@@ -43,116 +43,90 @@
 
 int main(int argc, char* argv[])
 {
-  try
-  {
-    log_init();  // logging should be initialized always
-
-    if (argc < 2)
+    try
     {
-      std::cerr << "Usage: " << argv[0] << " dburl" << std::endl;
-      return -1;
+        log_init(argc, argv);  // logging should be initialized always
+
+        if (argc < 2)
+        {
+            std::cerr << "Usage: " << argv[0] << " dburl" << std::endl;
+            return -1;
+        }
+
+        const std::string database = argv[1];
+        auto db = tntdb::connect(database);
+
+        // selecting a single value
+        //
+        // tntdb::Connection::selectValue executes the statement and selects the
+        // first value of the first row as a tntdb::Value
+        //
+        // tntdb::Value::get(T&) extracts the value and fills the passed variable
+        // It returns a bool whether the value was not null (which is ignored here)
+        unsigned count;
+        db.selectValue("select count(*)"
+                       "  from foo")      // returns a tntdb::Value
+          .get(count);                    // extracts unsigned value from tntdb::Value
+
+        // selecting multiple values of a row
+        //
+        // tntdb::Statement::selectRow() selects the first row as tntdb::Row.
+        // tntdb::Row::get(T&) extracts the value and returns a tntdb::RowReader,
+        // tntdb::RowReader::get(T&) extracts the current column, increases the
+        // column counter by 1 and returns the row reader.
+        unsigned max, min;
+        db.selectRow("select max(a), min(a) from foo")
+          .get(max)
+          .get(min);
+
+        // reading a result set
+        // Note that a tntdb::Result helds the whole result in memory, which may not be what you want.
+        // Use tntdb::Statement to fetch step by step.
+        auto result = db.select("select a, b from foo");
+        for (auto row: result)
+        {
+            unsigned a;
+            std::string b;
+
+            row.get(a)
+               .get(b);
+
+            // if a or b may be null:
+            bool a_isnull, b_isnull;
+            row.get(a, a_isnull)
+               .get(b, b_isnull);
+
+            // or using std::optional which handles nullable values nicely
+            {
+                std::optional<unsigned> a;
+                std::optional<std::string> b;
+                row.get(a)
+                   .get(b);
+            }
+        }
+
+        // better than a tntdb::Result is to use a cursor
+        // Iterating a statement creates a cursor over the results.
+        // The result is not held in memory in this case.
+        auto stmt = db.prepare(R"SQL("
+          select a, b
+            from foo"
+          where a > :a
+        )SQL");
+        stmt.set("a", 42);
+
+        for (auto row: stmt)
+        {
+            unsigned a;
+            std::string b;
+
+            row.get(a)
+               .get(b);
+        }
     }
-
-    const std::string database = argv[1];
-    tntdb::Connection db = tntdb::connect(database);
-
-    // selecting a single value
-    unsigned count;
-    db.selectValue("select count(*)"
-                   "  from foo")      // returns a tntdb::Value
-      .get(count);                    // extracts unsigned value from tntdb::Value
-
-    // selecting multiple values
-    unsigned max, min;
-    tntdb::Row row = db.selectRow("select max(a) as max, min(a) as min"
-                                  "  from foo");
-    row["max"].get(max);
-    row["min"].get(min);
-
-    // reading multiple values from a row with tntdb::RowReader
-    db.selectRow("select max(a), min(a)"
-                 "  from foo")            // returns a tntdb::Row
-      .get(max)                           // extracts unsigned and returns a tntdb::RowReader
-      .get(min);
-
-    // reading a result set
-    // Note that a tntdb::Result helds the whole result in memory, which may not be what you want.
-    // Use tntdb::Statement to fetch step by step.
-    tntdb::Result result = db.select("select a, b"
-                                     " from foo");
-    for (tntdb::Result::const_iterator it = result.begin(); it != result.end(); ++it)
+    catch (const std::exception& e)
     {
-      tntdb::Row r = *it;  // dereferencing returns a tntdb::Row
-      unsigned a;
-      std::string b;
-
-      bool a_isnull = r["a"].get(a);  // get returns a boolean wether the value was null
-      bool b_isnull = r["b"].get(b);
-
-      // as an alternative we can use index
-      r[0].get(a);
-      r[1].get(b);
-
-      // or again tntdb::RowReader
-      r.get(a)
-       .get(b);
-
-      // a or b may be null:
-      r.get(a, a_isnull)
-       .get(b, b_isnull);
+        std::cerr << e.what() << std::endl;
     }
-
-    // using tntdb::Statement
-
-    // fetching value
-    db.prepare("select count(*)"
-               "  from foo"
-               " where a > :a")  // returns tntdb::Statement
-      .set("a", 42)                                      // sets :a to a value
-      .selectValue()                                     // returns a tntdb::Value
-      .get(count);                                       // extracts unsigned value from tntdb::Value
-
-    // fetching multiple values
-    row = db.prepare("select max(a) as max, min(a) as min"
-                     "  from foo"
-                     " where a > :a")
-            .set("a", 42)
-            .selectRow();
-    row["max"].get(max);
-    row["min"].get(min);
-
-    // reading multiple values from a row with tntdb::RowReader
-    db.prepare("select max(a), min(a)"
-               "  from foo"
-               " where a > :a")
-      .set("a", 42)                                      // sets :a to a value
-      .selectRow()
-      .get(max)                                     // extracts unsigned and returns a tntdb::RowReader
-      .get(min);
-
-    // reading data step by step
-    tntdb::Statement stmt = db.prepare("select a, b"
-                                       "  from foo"
-                                       " where a > :a");
-    stmt.set("a", 42);
-    for (tntdb::Statement::const_iterator it = stmt.begin(); it != stmt.end(); ++it)
-    {
-      tntdb::Row r = *it;  // dereferencing returns a tntdb::Row
-      unsigned a;
-      std::string b;
-
-      // the row can be read just like in tntdb::Result
-      bool a_isnull = r["a"].get(a);  // get returns a boolean wether the value was null
-      bool b_isnull = r["b"].get(b);
-
-      // the iterator can also return a RowReader
-      it.get(a, a_isnull)
-        .get(b, b_isnull);
-    }
-  }
-  catch (const std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
 }
 

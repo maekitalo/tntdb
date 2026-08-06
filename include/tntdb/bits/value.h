@@ -155,6 +155,11 @@ public:
     bool get(T& ret) const
       { return *this >> ret; }
 
+    /// Shorthand operator for `get`.
+    template <typename T>
+    bool operator() (T& ret) const
+      { return *this >> ret; }
+
 #if __cplusplus >= 201703L
     template <typename T>
     bool get(T&& ret) const

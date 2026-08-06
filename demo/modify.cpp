@@ -42,67 +42,67 @@
 
 int main(int argc, char* argv[])
 {
-  try
-  {
-    log_init(argc, argv);  // logging should be initialized always
-
-    if (argc < 2)
+    try
     {
-      std::cerr << "Usage: " << argv[0] << " dburl" << std::endl;
-      return -1;
+        log_init(argc, argv);  // logging should be initialized always
+
+        if (argc < 2)
+        {
+            std::cerr << "Usage: " << argv[0] << " dburl" << std::endl;
+            return -1;
+        }
+
+        const std::string database = argv[1];
+        tntdb::PSCConnection db = tntdb::connect(database);
+
+        // insert
+        tntdb::Statement ins = db.prepare("insert into foo(a, b)"
+                                          " values (:a, :b)");
+        ins.set("a", 42)
+           .set("b", "Hi there")
+           .execute();
+
+        // update
+        tntdb::Statement upd = db.prepare("update foo"
+                                          "   set b = :b"
+                                          " where a = :a");
+        upd.set("a", 42)
+           .set("b", "Hello")
+           .execute();
+
+        // delete
+        tntdb::Statement del = db.prepare("delete from foo"
+                                          " where a = :a");
+        upd.set("a", 42)
+           .execute();
+
+        // using a transaction
+        {
+            // We define the transaction object in a scope.
+            //
+            // The transaction will be rolled back automatically in case the
+            // end of the block is reached and no commit or rollback is called.
+            // This happens typically when a exception is thrown.
+            //
+            // Note that when the rollback fails in the destructor errors are lost.
+
+            tntdb::Transaction transaction(db);
+            tntdb::Statement ins = db.prepare("insert into foo(a, b)"
+                                              " values (:a, :b)");
+            ins.set("a", 42)
+               .set("b", "Hi there")
+               .execute();
+
+            ins.set("a", 43)
+               .set("b", "Hello")
+               .execute();
+
+            transaction.commit();
+        }
     }
-
-    const std::string database = argv[1];
-    tntdb::PSCConnection db = tntdb::connect(database);
-
-    // insert
-    tntdb::Statement ins = db.prepare("insert into foo(a, b)"
-                                      " values (:a, :b)");
-    ins.set("a", 42)
-       .set("b", "Hi there")
-       .execute();
-
-    // update
-    tntdb::Statement upd = db.prepare("update foo"
-                                      "   set b = :b"
-                                      " where a = :a");
-    upd.set("a", 42)
-       .set("b", "Hello")
-       .execute();
-
-    // delete
-    tntdb::Statement del = db.prepare("delete from foo"
-                                      " where a = :a");
-    upd.set("a", 42)
-       .execute();
-
-    // using a transaction
+    catch (const std::exception& e)
     {
-      // We define the transaction object in a scope.
-      //
-      // The transaction will be rolled back automatically in case the
-      // end of the block is reached and no commit or rollback is called.
-      // This happens typically when a exception is thrown.
-      //
-      // Note that when the rollback fails in the destructor errors are lost.
-
-      tntdb::Transaction transaction(db);
-      tntdb::Statement ins = db.prepare("insert into foo(a, b)"
-                                        " values (:a, :b)");
-      ins.set("a", 42)
-         .set("b", "Hi there")
-         .execute();
-
-      ins.set("a", 43)
-         .set("b", "Hello")
-         .execute();
-
-      transaction.commit();
+        std::cerr << e.what() << std::endl;
     }
-  }
-  catch (const std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
 }
 

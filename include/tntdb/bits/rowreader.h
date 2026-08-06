@@ -86,11 +86,21 @@ public:
     RowReader& get(T& ret)
     { _row[_fieldNum++].get(ret); return *this; }
 
+    /// shorthand operator for `get`.
+    template <typename T>
+    RowReader& operator() (T& ret)
+    { _row[_fieldNum++].get(ret); return *this; }
+
     /// Reads the current column value and a null indicator and increments the
     /// field counter. If the value is null, the null indicator is set to false
     /// and the actual value of the passed variable is not changed.
     template <typename T>
     RowReader& get(T& ret, bool& nullInd)
+    { nullInd = _row[_fieldNum++].get(ret); return *this; }
+
+    /// shorthand operator for `get`.
+    template <typename T>
+    RowReader& operator() (T& ret, bool& nullInd)
     { nullInd = _row[_fieldNum++].get(ret); return *this; }
 
     /// Reads the current value into a tntdb::Value and increments the field

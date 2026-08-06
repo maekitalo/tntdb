@@ -42,6 +42,9 @@ public:
      */
     Statement prepare(const std::string& query);
 
+    /// Shorthand operator for `prepare`.
+    Statement operator() (const std::string& query) { return prepare(query); }
+
     /** Create a new Statement object with the given query added by a range limitation.
 
         This is like `prepareWithLimit` but the prepared statement cache is used.

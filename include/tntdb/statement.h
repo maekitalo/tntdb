@@ -54,6 +54,9 @@ template <typename T>
 RowReader Statement::const_iterator::get(T& ret, bool& nullInd) const
 { return RowReader(current).get(ret, nullInd); }
 
+template <typename T>
+bool Statement::operator() (T& ret)
+{ return selectValue().get(ret); }
 }
 
 #endif // TNTDB_SQL_STATEMENT_H

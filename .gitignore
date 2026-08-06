@@ -40,6 +40,8 @@ stamp-h1
 **/demo/serial
 **/demo/serialize
 **/demo/sqlcmd
+**/demo/modifyop
+**/demo/selectop
 **/doc/tntdb.doxygen
 **/include/tntdb/config.h
 **/src/config.h

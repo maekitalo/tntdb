@@ -125,8 +125,11 @@ public:
      */
     Value selectValue(const std::string& query);
 
-    /// Create a new Statement object with the given query
+    /// Create a new Statement object with the given query.
     Statement prepare(const std::string& query);
+
+    /// Shorthand operator for `prepare`.
+    Statement operator() (const std::string& query) { return prepare(query); }
 
     /** Create a new Statement object with the given query added by a range limitation.
 
@@ -134,6 +137,8 @@ public:
         The offset is optional. When an empty string is passed to offset, just the limit is used.
      */
     Statement prepareWithLimit(const std::string& query, const std::string& limit, const std::string& offset = std::string());
+    Statement operator() (const std::string& query, const std::string& limit, const std::string& offset = std::string())
+    { return prepareWithLimit(query, limit, offset); }
 
     /// Check whether the connection is alive
     bool ping()                        { return _conn->ping(); }
