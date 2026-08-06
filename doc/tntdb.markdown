@@ -193,10 +193,8 @@ not a database-native replication system.
 Execute query
 -------------
 
-To execute sql statements which do not return data (normally update, insert or
-delete statements) `tntdb::Connection` has a method `execute`. It expects a
-`std::string` with a sql-statement, which does not return data. It returns the
-number of affected rows.
+For executing SQL-statements that do not return data (like 'update', 'insert' or 'delete' statements) `tntdb::Connection` has the the method `execute`.
+As parameters it expects a `std::string` with an SQL-statement that does not return data and returns the number of affected rows as `unsigned`.
 
 ### Example:
 
