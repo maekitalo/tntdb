@@ -48,8 +48,8 @@ The example above loads the sqlite-driver-library and opens a connection to the
 databasefile "mydb.db". At the end of the program the class `tntdb::Connection`
 goes out of scope, which closes the connection automatically.
 
-When the database could not be opened a exception is thrown. In the above
-example it is unhandled, which makes the program to abort. This is not so nice,
+When the database can not be opened, an exception is thrown. In the above
+example it is unhandled, causing the program to abort. This is not nice,
 so we add exceptionhandling in the second example:
 
     #include <tntdb/connection.h>
@@ -66,7 +66,7 @@ so we add exceptionhandling in the second example:
       }
     }
 
-This is a complete example, which just checks, if the database is accessible.
+This is a complete example, which just checks if the database is accessible.
 
 Let's look a little deeper into the driver dependent part.
 
@@ -94,20 +94,28 @@ Here is an example:
 The part after the prefix "mysql:" is split into the parameters needed for
 `mysql_real_connect`. The string is interpreted as a list of parameters
 separated by semicolon. Each parameter is a name value pair separated by '='.
-The keys are post, flags, app, host, user, passwd, db and unix socket. For
-passwd the word password is also accepted. Db may be replaced with dbname or
-database. All other keys throw an error. The value may be enclosed in ' or ".
-The backslash character disables any special meaning of the next character.
+Valid name keys are 'post', 'flags', 'app', 'host', 'user', 'passwd', 'db' and 'unix socket'. For
+'passwd' the word 'password' is also accepted, 'db' may be replaced with 'dbname' or
+'database'. All other keys throw an error. The value may be enclosed in ' or ".
+The backslash character ( \\ ) disables any special meaning of the next character.
 
 Ok - this is the definition. It is much easier to understand, if you see an
 example:
 
     tntdb::Connection conn =
       tntdb::connect("mysql:dbname=DS2;user=web;passwd=web");
+      
+or alternatively, but with the same result:
 
+    tntdb::Connection conn =
+      tntdb::connect("mysql:database='DS2';user='web';password='web'");
+      
 ### The oracle driver
 
-To install the oracle driver on linux download the following libraries from
+The Oracle driver is **not** compiled by default when tntdb is compiled, since the
+Oracle client libraries are not free. To enable Oracle support, configure TNTDB with the 
+--with-oracle option and install the required Oracle Instant Client packages beforehand.
+To install the oracle driver on linux, download the following libraries from
 Oracle (you will have to register but they are free of charge):
 
     oracle-instantclientVERS-basic-VERS.x86_64.rpm
@@ -117,9 +125,7 @@ where VERS stand for the version number e.g. 11.2
 
 Install them with your package manager.
  
-The Oracle driver is not compiled by default when tntdb is compiled, since the
-Oracle client libraries are not free. You have to explicitly enable it using the
-configure switch --with-oracle. Since the includes and libs of oracle are
+Since the includes and libs of oracle are
 normally not installed to standard paths, you need to tell the compiler where to
 find the includes and the linker where to find the libraries. This is done by
 setting the CPPFLAGS and LDFLAGS.
@@ -128,16 +134,16 @@ The call to configure may look like this:
 
     ./configure --with-oracle --without-mysql CPPFLAGS=-I/usr/include/oracle/11.2/client64 LDFLAGS=-L/usr/lib/oracle/11.2/client64/lib
 
-The connection string has to start with the prefix "oracle:". The username and
-password are extracted. They must be passed semicolon separated "user=username"
+The connection string has to start with the prefix "oracle:", the parameters username and
+password must be passed semicolon separated as "user=username"
 and "passwd=password". The rest of the string is passed to the OCI function
 `OCIServerAttach`. Here is an example for the Oracle Express Edition:
 
     tntdb::Connection conn =
       tntdb::connect("oracle:XE;user=hr;passwd=hr");
 
-If your Oracle dbms runs on the machine with ip 192.168.0.100 on port 1521 and 
-the service id is MYDB then the connection is created using:
+If your Oracle dbms runs at IP adress 192.168.0.100 on port 1521 and 
+the service name is MYDB then the connection is created using:
 
     tntdb::Connection conn =
       tntdb::connect("oracle:192.168.0.100:1521/MYDB;user=hr;passwd=hr");
@@ -145,47 +151,50 @@ the service id is MYDB then the connection is created using:
 
 ### The replication driver
 
-The replication driver is a special case. It do not handle a specific database
+The replication driver is a special case, since it does not handle a specific database
 but implements a simple replication at the application level. To use it, the
 connection string must start with "replicate:" followed by a list of connection
 strings separated by '|'.
 
 A connection is established to each database.
 
-Statements, which just reads data, use the first connection in the list.
+Statements that just read data use the first connection in the list.
 
-Statements, which modify data, executes the statement on each connection. Before
+Statements that modify data execute the statement on each connection. Before
 the actual statement is executed, a transaction is started on each connection
-unless there is already a active transaction. If the statement fails on one
+unless there is already an active transaction. If the statement fails on one
 connection, all transactions are rolled back to ensure consistency.
 
-For modification statement the connection urls are ordered alphabetically to
+For modification statements the connection urls are ordered alphabetically to
 prevent deadlocks when different applications use the replication driver with
 different ordering of database urls.
 
 Note that the connections of the replication driver do not need to use the same
-database drivers but you can mix different drivers. For example you can
-replicate between a local sqlite and a postgresql database. Of course you are
-limited to use sql statements, which each database understand.
+database drivers but can use a mix of different drivers, for example you can
+replicate between a local SQLite and a PostgreSQL database. 
+When replicating between different databases you are
+limited to using sql statements which all involved databases understand.
 
-And here is a example connect for the replication driver:
+Example connect for the replication driver between a SQLite and PostgreSQL Database:
 
     tntdb::Connection conn =
       tntdb::connect("replicate:sqlite:mydatabase.db|postgresql:dbname=DS2 user=web password=web");
 
-This connection reads data from a local sqlite database file and writes to the
-sqlite and postgresql database.
+This connection reads data from a local SQLite database file and writes to the
+sqlite and PostgreSQL database.
 
-Note that this is not really a full scale replication solution. It tries to do
-its best to keep the replication up to date as good as possible but not better.
+#### Replication semantics and limits
+
+The replication driver is a synchronous, application-level fan-out mechanism.
+It is useful to keep multiple databases in sync for simple setups, but it is
+not a database-native replication system.
+
 
 Execute query
 -------------
 
-To execute sql statements which do not return data (normally update, insert or
-delete statements) `tntdb::Connection` has a method `execute`. It expects a
-`std::string` with a sql-statement, which does not return data. It returns the
-number of affected rows.
+For executing SQL-statements that do not return data (like 'update', 'insert' or 'delete' statements) `tntdb::Connection` has the the method `execute`.
+As parameters it expects a `std::string` with an SQL-statement that does not return data and returns the number of affected rows as `unsigned`.
 
 ### Example:
 
@@ -213,17 +222,24 @@ number of affected rows.
 Selecting data
 --------------
 
-A database is not just for storing data, but it also need to fetch the data.
-Tntdb offers several ways to read the data from the database. The most general
-is the method `tntdb::Connection::select()`, which expects a query and returns
-a object of class `tntdb::Result`.
+Since a database is not just used for storing but also for fetching data,
+tntdb offers several ways to read data from the database. The most generic way
+is the method `tntdb::Connection::select()`, which expects a query as `std::string` and returns
+an object of class `tntdb::Result`.
+
+`tntdb::Connection::select()` expects a row-producing query. It does not parse
+or enforce SQL statement type before passing the query to the database driver.
+If a non-select statement is passed (e.g. `delete`), behavior is
+driver-dependent: the statement may execute and then either return an empty
+result or throw an exception. Therefore use `execute()` for modifying
+statements and reserve `select()` for read-only queries.
 
 `tntdb::Result` is a collection of rows. Rows are represented by the class
 `tntdb::Row` and these rows are also collections of type `tntdb::Value`. Both
-collections (Result and Row) can be accessed with a iterator or through a
+collections (Result and Row) can be accessed with an iterator or through an
 index. The class `Value` offers methods for returning the data in different
-types. Tntdb does not tell, which type the column is. Value just does its best
-to convert the data to the requested type. The User has to know, which data the
+types. Tntdb can not tell which datatype the column holds. `Value` just does its best
+to convert the data to the requested type. The User has to know which datatype the
 column holds.
 
 Fields in a row can be read using the number of occurence but also by using
