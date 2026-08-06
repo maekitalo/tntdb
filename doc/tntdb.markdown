@@ -48,8 +48,8 @@ The example above loads the sqlite-driver-library and opens a connection to the
 databasefile "mydb.db". At the end of the program the class `tntdb::Connection`
 goes out of scope, which closes the connection automatically.
 
-When the database could not be opened a exception is thrown. In the above
-example it is unhandled, which makes the program to abort. This is not so nice,
+When the database can not be opened, an exception is thrown. In the above
+example it is unhandled, causing the program to abort. This is not nice,
 so we add exceptionhandling in the second example:
 
     #include <tntdb/connection.h>
@@ -66,7 +66,7 @@ so we add exceptionhandling in the second example:
       }
     }
 
-This is a complete example, which just checks, if the database is accessible.
+This is a complete example, which just checks if the database is accessible.
 
 Let's look a little deeper into the driver dependent part.
 
@@ -94,17 +94,22 @@ Here is an example:
 The part after the prefix "mysql:" is split into the parameters needed for
 `mysql_real_connect`. The string is interpreted as a list of parameters
 separated by semicolon. Each parameter is a name value pair separated by '='.
-The keys are post, flags, app, host, user, passwd, db and unix socket. For
-passwd the word password is also accepted. Db may be replaced with dbname or
-database. All other keys throw an error. The value may be enclosed in ' or ".
-The backslash character disables any special meaning of the next character.
+Valid name keys are 'post', 'flags', 'app', 'host', 'user', 'passwd', 'db' and 'unix socket'. For
+'passwd' the word 'password' is also accepted, 'db' may be replaced with 'dbname' or
+'database'. All other keys throw an error. The value may be enclosed in ' or ".
+The backslash character ( \\ ) disables any special meaning of the next character.
 
 Ok - this is the definition. It is much easier to understand, if you see an
 example:
 
     tntdb::Connection conn =
       tntdb::connect("mysql:dbname=DS2;user=web;passwd=web");
+      
+or alternatively, but with the same result:
 
+    tntdb::Connection conn =
+      tntdb::connect("mysql:database='DS2';user='web';password='web'");
+      
 ### The oracle driver
 
 To install the oracle driver on linux download the following libraries from
