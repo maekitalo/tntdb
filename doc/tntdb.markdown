@@ -236,10 +236,10 @@ statements and reserve `select()` for read-only queries.
 
 `tntdb::Result` is a collection of rows. Rows are represented by the class
 `tntdb::Row` and these rows are also collections of type `tntdb::Value`. Both
-collections (Result and Row) can be accessed with a iterator or through a
+collections (Result and Row) can be accessed with an iterator or through an
 index. The class `Value` offers methods for returning the data in different
-types. Tntdb does not tell, which type the column is. Value just does its best
-to convert the data to the requested type. The User has to know, which data the
+types. Tntdb can not tell which datatype the column holds. `Value` just does its best
+to convert the data to the requested type. The User has to know which datatype the
 column holds.
 
 Fields in a row can be read using the number of occurence but also by using
