@@ -222,10 +222,17 @@ As parameters it expects a `std::string` with an SQL-statement that does not ret
 Selecting data
 --------------
 
-A database is not just for storing data, but it also need to fetch the data.
-Tntdb offers several ways to read the data from the database. The most general
-is the method `tntdb::Connection::select()`, which expects a query and returns
-a object of class `tntdb::Result`.
+Since a database is not just used for storing but also for fetching data,
+tntdb offers several ways to read data from the database. The most generic way
+is the method `tntdb::Connection::select()`, which expects a query as `std::string` and returns
+an object of class `tntdb::Result`.
+
+`tntdb::Connection::select()` expects a row-producing query. It does not parse
+or enforce SQL statement type before passing the query to the database driver.
+If a non-select statement is passed (e.g. `delete`), behavior is
+driver-dependent: the statement may execute and then either return an empty
+result or throw an exception. Therefore use `execute()` for modifying
+statements and reserve `select()` for read-only queries.
 
 `tntdb::Result` is a collection of rows. Rows are represented by the class
 `tntdb::Row` and these rows are also collections of type `tntdb::Value`. Both
