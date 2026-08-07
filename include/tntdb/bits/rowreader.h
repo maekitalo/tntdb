@@ -153,6 +153,14 @@ template <typename T>
 RowReader Row::get(T& ret, bool& nullInd) const
 { return RowReader(*this).get(ret, nullInd); }
 
+template <typename T>
+RowReader Row::operator() (T& ret) const
+{ return get(ret); }
+
+template <typename T>
+RowReader Row::operator() (T& ret, bool& nullInd) const
+{ return get(ret, nullInd); }
+
 }
 
 #endif // TNTDB_ROWREADER_H
