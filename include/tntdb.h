@@ -32,6 +32,7 @@
 #include <tntdb/blob.h>
 #include <tntdb/connect.h>
 #include <tntdb/connection.h>
+#include <tntdb/pscconnection.h>
 #include <tntdb/connectionpool.h>
 #include <tntdb/date.h>
 #include <tntdb/datetime.h>
