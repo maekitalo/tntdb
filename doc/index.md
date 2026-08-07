@@ -132,7 +132,7 @@ See [Custom data types](customtypes.md) for details.
 Transactions are supported by the class `tntdb::Transaction`. The object is
 typically instantiated with a connection parameter on the stack in which case
 the transaction is started. Using `tntdb::Transaction::commit` the transaction
-is committed. If the transaction is not explictly ended before the destructor,
+is committed. If the transaction is not explicitly ended before the destructor,
 a rollback is issued there.
 
 See [Transactions](transaction.md) for details.
@@ -149,4 +149,68 @@ a row.
 
 For logging cxxtools is used.
 
-See [Loggin with cxxtools](loggin.md) for details.
+See [Logging with cxxtools](logging.md) for details.
+
+## Prepared statement cache connection
+
+Typically prepared statements are used when executing statements. Preparing
+statements costs a little and reusing the same statement with different
+parameters may speed up the application a little.
+
+This can be done by storing the prepared statement in a variable or
+using the tntdb statement cache, which does this automatically.
+
+The class `tntdb::PSCConnection` (Prepared Statement Cache Connection) is
+derived from `tntdb::Connection` and does this. The prepare method will look up
+the statement in a map and if it was prepared previously the statement is
+returned. Otherwise it will prepare it and put it into the cache.
+
+### Example
+
+```cpp
+    tntdb::PSCConnection conn = tntdb::connect("...");
+    auto stmt = conn.prepare("...");    // this uses the cache
+```
+
+## Using serial columns
+
+If tables are designed, you have to create a primary key to identify uniquely a
+specific row in the table. Sometimes it is enough to use just some arbitrary
+unique number. Databases has support for a automatically generated primary key.
+It actually depends on the database, how to create such columns. Since tntdb
+has no support for ddl statements (create table ...), there is actually no need
+to abstract the creation of these columns. But in applications it is often
+needed to know, which number was given to the last inserted row. This is also
+depends on the actual database software used.
+
+Tntdb helps retrieving that last insert id. There is a method `long
+tntdb::Connection::lastInsertId(const std::string& name)`.
+
+There is one problem. Some databases (postgresql, oracle) use named sequences
+and a single table may have multiple of them. So to fetch the actual id, we
+need to tell the driver, which sequence we want to know. The sequence is
+identified by name. Other databases (mysql, sqlite) do not have a identifier.
+They will simply ignore the passed name.
+
+This name is by default an empty string, which requests the last incremented
+serial number in the current transaction.
+
+Here is a example. We assume a table foo with 2 columns: id and name. The id is
+the primary auto incremented key. In postgresql or oracle the sequence is
+created with the name `foo_id_seq`:
+
+```cpp
+    void insertData(tntdb::Connection conn)
+    {
+        tntdb::Statement ins = conn.prepare(
+          "insert into foo (name)"
+          "  values(:name)");
+
+        ins.set("name", "some name")
+           .execute();
+
+        std::cout << "id: " << conn.lastInsertId("foo_id_seq") << std::endl;
+        // or mostly you can just omit the serial name
+        std::cout << "id: " << conn.lastInsertId() << std::endl;
+    }
+```
