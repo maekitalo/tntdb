@@ -5,8 +5,10 @@ EXTRA_DIST = @PACKAGE@.doxygen.in \
 	customtypes.md \
 	datetime.md \
 	index.md \
+	logging.md \
 	modify.md \
-	select.md
+	select.md \
+	transaction.md
 
 if MAKE_DOXYGEN
 
