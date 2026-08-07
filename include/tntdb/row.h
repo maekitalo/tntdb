@@ -44,14 +44,6 @@ inline Row::const_iterator begin(const Row& stmt)
 inline Row::const_iterator end(const Row& stmt)
 { return stmt.end(); }
 
-template <typename T>
-RowReader Row::operator() (T& ret) const
-{ return get(ret); }
-
-template <typename T>
-RowReader Row::operator()(T& ret, bool& nullInd) const
-{ return get(ret, nullInd); }
-
 }
 
 #endif // TNTDB_ROW_H
