@@ -33,9 +33,9 @@ As an alternative there is a header `<tntdb.h>`, which includes allof them.
 
 ## Connecting to a database
 
-To get a connection a single function `tntdb::connect` is offered. It expects a
-url as a parameter. The url starts always with the driver name and a colon. The
-rest is driver specific. Here is an example to get a connection to a postgresql
+To get a connection a single function `tntdb::connect` is offered. It expects an
+url as a parameter. The url always starts with the driver name and a colon, the
+suffix is driver specific. Here is an example to get a connection to a postgresql
 database:
 
 ```cpp
@@ -90,14 +90,14 @@ See [Executing modification statements](modify.md) for details.
 
 ## Using date, time and datetime
 
-Since date, time and datetime are somewhat difficult to handle database indipenently
+Since date, time and datetime are somewhat difficult to handle database independently,
 Tntdb offers simple types for that:
 
     - tntdb::Date
     - tntdb::Time
     - tntdb::Datetime
 
-Note that those are just interface classes and not check for valid values.
+Note that those are just interface classes and do not check for valid values.
 To insert e.g. a date into a database we use tntdb::Date:
 
 ```cpp
@@ -116,33 +116,33 @@ decimal numbers.
 
 ## Blobs
 
-Tntdb supports also blobs (binary large objects) with a helper class `tntdb::Blob`.
+Tntdb also supports blobs (binary large objects) with a helper class `tntdb::Blob`.
 
 See [Blobs](blobs.md) for details.
 
 ## Custom data types
 
-Tntdb allows to implement custom conversions for own datatypes, so that they
+Tntdb allows the implementation of custom conversions for own datatypes, so that they
 can be easily used in tntdb. Note that only single values are supported.
 
 See [Custom data types](customtypes.md) for details.
 
 ## Transactions
 
-Transactions are supported by the class `tntdb::Transaction`. The object is
+Transactions are supported by the class `tntdb::Transaction`. A transaction object is
 typically instantiated with a connection parameter on the stack in which case
 the transaction is started. Using `tntdb::Transaction::commit` the transaction
 is committed. If the transaction is not explicitly ended before the destructor,
-a rollback is issued there.
+a rollback is issued.
 
 See [Transactions](transaction.md) for details.
 
 ## Error handling
 
-In case of errors a exception of type `tntdb::Error` is thrown, which is
+In case of errors an exception of type `tntdb::Error` is thrown, which is
 derived from `std::runtime_error`. Normally the exception is caused by the
-driver itself. A special case is the error `tntdb::NotFound`, which is throw by
-directly from Tntdb. It is throw, if `selectRow` or `selectValue` fail to fetch
+driver itself. A special case is the error `tntdb::NotFound`, which is thrown
+directly from Tntdb. It is thrown if `selectRow` or `selectValue` fail to fetch
 a row.
 
 ## Logging
@@ -153,17 +153,18 @@ See [Logging with cxxtools](logging.md) for details.
 
 ## Prepared statement cache connection
 
-Typically prepared statements are used when executing statements. Preparing
-statements costs a little and reusing the same statement with different
-parameters may speed up the application a little.
+Typically, prepared statements are used when executing statements. Preparing
+statements incurs a small overhead, and reusing the same statement with different
+parameters may slightly improve application performance compared to preparing a
+new statement for each execution.
 
 This can be done by storing the prepared statement in a variable or
 using the tntdb statement cache, which does this automatically.
 
 The class `tntdb::PSCConnection` (Prepared Statement Cache Connection) is
-derived from `tntdb::Connection` and does this. The prepare method will look up
-the statement in a map and if it was prepared previously the statement is
-returned. Otherwise it will prepare it and put it into the cache.
+derived from `tntdb::Connection` and provides this functionality. The `prepare` method
+looks up the statement in a map, and if it was prepared previously, the statement is
+returned. Otherwise, it is prepared and put it into the cache.
 
 ### Example
 
@@ -174,26 +175,26 @@ returned. Otherwise it will prepare it and put it into the cache.
 
 ## Using serial columns
 
-If tables are designed, you have to create a primary key to identify uniquely a
+When designing tables, you need a primary key to uniquely identify a
 specific row in the table. Sometimes it is enough to use just some arbitrary
-unique number. Databases has support for a automatically generated primary key.
-It actually depends on the database, how to create such columns. Since tntdb
-has no support for ddl statements (create table ...), there is actually no need
+unique number and most databases support automatically generated primary keys.
+The way such primary key columns are generated is database-dependent.
+Since tntdb has no support for ddl statements (create table ...), there is no need
 to abstract the creation of these columns. But in applications it is often
-needed to know, which number was given to the last inserted row. This is also
-depends on the actual database software used.
+necessary to obtain the identifier assigned to the last inserted row. How and if
+this value is returned also depends on the actual database software used.
 
-Tntdb helps retrieving that last insert id. There is a method `long
+Tntdb helps retrieving that last insert id with the method `long
 tntdb::Connection::lastInsertId(const std::string& name)`.
 
-There is one problem. Some databases (postgresql, oracle) use named sequences
-and a single table may have multiple of them. So to fetch the actual id, we
-need to tell the driver, which sequence we want to know. The sequence is
-identified by name. Other databases (mysql, sqlite) do not have a identifier.
-They will simply ignore the passed name.
+Some databases (postgresql, oracle) use named sequences
+and a single table might have multiple of them. So to fetch the actual id, we
+need to tell the driver which sequence we want to know. The sequence is
+identified by name. Other databases (mysql, sqlite) do require such an identifier and
+will simply ignore the supplied name.
 
-This name is by default an empty string, which requests the last incremented
-serial number in the current transaction.
+By default, this name is an empty string, which requests the last incremented
+serial number in the current connection.
 
 Here is a example. We assume a table foo with 2 columns: id and name. The id is
 the primary auto incremented key. In postgresql or oracle the sequence is
