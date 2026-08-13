@@ -3,12 +3,12 @@
 The syntax of date and time varies between different databases and is
 sometimes very confusing. To help here Tntdb offers classes:
 
-    - tntdb::Date
-    - tntdb::Time
-    - tntdb::Datetime
+    - `tntdb::Date`
+    - `tntdb::Time`
+    - `tntdb::Datetime`
 
-The classes have just as much functionality as needed to work with times in the
-database. A constructor and getters for the components. Time has milliseconds
+The classes have just enough functionality to work with dates and times in the
+database, a constructor and getters for the components. `tntdb::Time` has milliseconds
 precision.
 
 Example to insert and retrieve a date:
@@ -26,4 +26,4 @@ Example to insert and retrieve a date:
        .execute();
 ```
 
-Similar with `tntdb::Datetime` and `tntdb::Time`.
+This process is similar for `tntdb::Datetime` and `tntdb::Time`.
