@@ -1,6 +1,8 @@
 EXTRA_DIST = @PACKAGE@.doxygen.in \
 	main.page \
-	tntdb.markdown \
+	tntdb.markdown
+
+dist_doc_DATA = \
 	connect.md \
 	customtypes.md \
 	datetime.md \
