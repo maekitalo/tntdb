@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
         // column counter by 1 and returns the row reader.
         unsigned max, min;
         db("select max(a), min(a) from foo").selectRow()
-          (max)
-          (min);
+          >> max
+          >> min;
 
         // tndb::Statement::select(const std::string&) executes the statement
         // and returns a tntdb::Result, which can be iterated. Each iteration
@@ -64,20 +64,15 @@ int main(int argc, char* argv[])
             unsigned a;
             std::string b;
 
-            row(a)
-             (b);
-
-            // if a or b may be null:
-            bool a_isnull, b_isnull;
-            row(a, a_isnull)
-               (b, b_isnull);
+            row >> a
+                >> b;
 
             // or using std::optional which handles nullable values nicely
             {
                 std::optional<unsigned> a;
                 std::optional<std::string> b;
-                row(a)
-                   (b);
+                row >> a
+                    >> b;
             }
         }
 
@@ -108,7 +103,7 @@ int main(int argc, char* argv[])
             unsigned a;
             std::string b;
 
-            row(a)(b);  // fetch values
+            row >> a >> b;  // fetch values
         }
     }
     catch (const std::exception& e)

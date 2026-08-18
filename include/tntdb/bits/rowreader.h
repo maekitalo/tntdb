@@ -98,11 +98,6 @@ public:
     RowReader& get(T& ret, bool& nullInd)
     { nullInd = _row[_fieldNum++].get(ret); return *this; }
 
-    /// shorthand operator for `get`.
-    template <typename T>
-    RowReader& operator() (T& ret, bool& nullInd)
-    { nullInd = _row[_fieldNum++].get(ret); return *this; }
-
     /// Reads the current value into a tntdb::Value and increments the field
     /// counter.
     RowReader& get(tntdb::Value& v)
@@ -152,14 +147,6 @@ RowReader Row::get(T& ret) const
 template <typename T>
 RowReader Row::get(T& ret, bool& nullInd) const
 { return RowReader(*this).get(ret, nullInd); }
-
-template <typename T>
-RowReader Row::operator() (T& ret) const
-{ return get(ret); }
-
-template <typename T>
-RowReader Row::operator() (T& ret, bool& nullInd) const
-{ return get(ret, nullInd); }
 
 }
 

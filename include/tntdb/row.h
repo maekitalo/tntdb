@@ -44,6 +44,16 @@ inline Row::const_iterator begin(const Row& stmt)
 inline Row::const_iterator end(const Row& stmt)
 { return stmt.end(); }
 
+/// shorthand operator for `get`.
+template <typename T>
+RowReader operator >>(const Row& row, T& ret)
+{ return row.get(ret); }
+
+/// shorthand operator for `get`.
+template <typename T>
+RowReader operator >>(RowReader reader, T& ret)
+{ return reader.get(ret); }
+
 }
 
 #endif // TNTDB_ROW_H
