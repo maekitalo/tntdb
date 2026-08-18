@@ -17,7 +17,7 @@ As a very simple example we want to store an enum like:
     enum class Operation : int { PLUS, MINUS, MULTIPLY, DIVIDE }
 ```
 
-To insert an `Oerpation` object into the database we write:
+To insert an `Operation` object into the database we write:
 
 ```cpp
     Operation op = Operation::PLUS;
