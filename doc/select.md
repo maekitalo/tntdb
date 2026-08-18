@@ -45,8 +45,8 @@ counter. This makes it easy to loop through all values in a row.
 Shorthand operators are available as syntactic sugar:
 
 ```cpp
-    row(integerValue)
-       (stringValue);
+    row >> integerValue
+        >> stringValue;
 ```
 
 
@@ -81,6 +81,12 @@ selectValue:
     auto row = conn.selectValue("select count(*) from foo");
     unsigned count;
     row.get(count);
+```
+
+or shorter using operator:
+
+```cpp
+    row >> count;
 ```
 
 ## Using prepared statements

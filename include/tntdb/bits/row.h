@@ -206,13 +206,6 @@ public:
     template <typename T>
     RowReader get(T& ret, bool& nullInd) const;
 
-    /// shorthand operator for `get`.
-    template <typename T>
-    RowReader operator() (T& ret) const;
-
-    /// shorthand operator for `get`.
-    template <typename T>
-    RowReader operator()(T& ret, bool& nullInd) const;
 };
 }
 
