@@ -1,32 +1,32 @@
 # Selecting data
 
-A result from a select statement is represeted by 3 classes: tntdb::Result,
-tntdb::Row and tntdb::Value. The result is a collection of rows, which is a
-collection of values. The result and row both act like a vector, with random
-access. Both have a operator[] to access the underlying object. Or the objects
-are iteratable using the C++ for loop.
+A result from a select statement is represented by three classes: `tntdb::Result`,
+`tntdb::Row`, and `tntdb::Value`. The result is a collection of rows, and each row is
+a collection of values. `tntdb::Result` and `tntdb::Row` both act like a vector with random
+access. Both have a operator `[]` to access the underlying object, alternatively the objects
+can be iterated using the C++ for loop.
 
-Most of the methods have nowadays shorthand operators for syntactic sugar
+Most methods also provide shorthand operators for syntactic sugar and
 shorter expressions.
 
 ## Value
 
-The value helds a single value or may also be null. The best way to fetch the
-actual value from a tntdb::Value is to use the method `get`, which expects a
+A `tntdb::Value` holds a single value that may also be `null`. The best way to fetch the
+actual value from a `tntdb::Value` is to use the method `get`, which expects a
 reference to a variable as a parameter where the value is stored. It returns a
-bool, which is true, if the actual value was not null.
+bool, which is true if the actual value was not null.
 
 ```cpp
     tntdb::Value value = ...;
     int integerValue;
-    value.get(aIntegerValue);
+    value.get(integerValue);
 
     tntdb::Value anotherValue = ...;
     std::string stringValue;
     anotherValue.get(stringValue);
 ```
 
-A row has also a get method, which expects a reference and optionally another
+A row also has a get method, which expects a reference and optionally another
 reference to a bool, which is filled with true, if the value is not null or
 false if the value is null. The method returns a special helper object
 `tntdb::RowReader` which has the same get methods and maintains a column
