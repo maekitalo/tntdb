@@ -101,10 +101,7 @@ inline void dropCached(const std::string& url, unsigned keep)
 
 /** Set the maximum pool size for new connection pools
 
-    When the maximum number of connections to a specific url is reached,
-    connectCached blocks until a connection is available.
-
-    This setting do not affect pools with active connections. You have to
+    This setting does not affect pools with active connections. You have to
     release all connections and clear the pool of all connections to your
     database with dropCached(url) for this setting to take effect.
  */

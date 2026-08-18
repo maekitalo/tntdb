@@ -1,6 +1,14 @@
 EXTRA_DIST = @PACKAGE@.doxygen.in \
 	main.page \
-	tntdb.markdown
+	tntdb.markdown \
+	connect.md \
+	customtypes.md \
+	datetime.md \
+	index.md \
+	logging.md \
+	modify.md \
+	select.md \
+	transaction.md
 
 if MAKE_DOXYGEN
 
