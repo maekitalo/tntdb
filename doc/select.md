@@ -1,156 +1,153 @@
 # Selecting data
 
-A result from a select statement is represented by three classes: `tntdb::Result`,
-`tntdb::Row`, and `tntdb::Value`. The result is a collection of rows, and each row is
-a collection of values. `tntdb::Result` and `tntdb::Row` both act like a vector with random
-access. Both have a operator `[]` to access the underlying object, alternatively the objects
-can be iterated using the C++ for loop.
+A query result is represented by three classes: `tntdb::Result`, `tntdb::Row`,
+and `tntdb::Value`. A result contains rows, and each row contains values. Both
+`tntdb::Result` and `tntdb::Row` provide indexed access and can be iterated
+using a C++ range-based `for` loop.
 
-Most methods also provide shorthand operators for syntactic sugar and
-shorter expressions.
+Tntdb also provides shorthand operators for frequently used operations.
 
 ## Value
 
-A `tntdb::Value` holds a single value that may also be `null`. The best way to fetch the
-actual value from a `tntdb::Value` is to use the method `get`, which expects a
-reference to a variable as a parameter where the value is stored. It returns a
-bool, which is true if the actual value was not null.
+A `tntdb::Value` represents a single database value, which may be SQL `NULL`.
+The `get()` method stores the value in the supplied variable and returns `true`
+when the database value is not `NULL`.
 
 ```cpp
-    tntdb::Value value = ...;
-    int integerValue;
-    value.get(integerValue);
+tntdb::Value value = ...;
+int integerValue;
 
-    tntdb::Value anotherValue = ...;
-    std::string stringValue;
-    anotherValue.get(stringValue);
+if (value.get(integerValue))
+{
+    // integerValue contains the database value
+}
+
+std::string stringValue;
+anotherValue.get(stringValue);
 ```
 
-A row also has a get method, which expects a reference and optionally another
-reference to a bool, which is filled with true, if the value is not null or
-false if the value is null. The method returns a special helper object
-`tntdb::RowReader` which has the same get methods and maintains a column
-counter. This makes it easy to loop through all values in a row.
+## Reading a row
+
+`tntdb::Row::get()` returns a `tntdb::RowReader`, which keeps track of the
+current column. This makes it convenient to read several columns in sequence.
 
 ```cpp
-    tntdb::Row::row = ...;
+tntdb::Row row = ...;
+int integerValue;
+std::string stringValue;
 
-    int integerValue;
-    std::string stringValue;
-
-    row.get(integerValue)
-       .get(stringValue);
+row.get(integerValue)
+   .get(stringValue);
 ```
 
-Shorthand operators are available as syntactic sugar:
+The extraction operator provides a shorter equivalent:
 
 ```cpp
-    row >> integerValue
-        >> stringValue;
+row >> integerValue
+    >> stringValue;
 ```
 
+## Selecting a result
 
-## selecting Result
-
-A resultset is a collection of rows with columns. This is represented in Tntdb
-with a class tntdb::Result. To get a result the method `select` of
-tntdb::Connection can be used.
+Use `tntdb::Connection::select()` to materialize a complete result set:
 
 ```cpp
-    auto result = conn.select("select col1, col2 from foo");
-    for (auto row: result)
-    {
-        ... do something with row
-    }
+auto result = conn.select("select col1, col2 from foo");
 
+for (auto row : result)
+{
+    // process row
+}
 ```
 
-If a statement returns just one single row, the method selectRow can be used.
-It fetches just the first row or, if none is found throws `tntdb::NotFound`:
+If exactly one row is expected, use `selectRow()`. It returns the first row and
+throws `tntdb::NotFound` if no row is found.
 
 ```cpp
-    auto row = conn.selectRow("select col1, col2 from foo where id = 5");
-    row.get(col1)
-       .get(col2);
+auto row = conn.selectRow("select col1, col2 from foo where id = 5");
+row.get(col1)
+   .get(col2);
 ```
 
-If just a single row with a single column is expected there is a method
-selectValue:
+If a single value is expected, use `selectValue()`:
 
 ```cpp
-    auto row = conn.selectValue("select count(*) from foo");
-    unsigned count;
-    row.get(count);
+auto value = conn.selectValue("select count(*) from foo");
+unsigned count;
+value.get(count);
 ```
 
-or shorter using operator:
+or, using the shorthand operator:
 
 ```cpp
-    row >> count;
+value >> count;
 ```
 
-## Using prepared statements
+## Prepared statements
 
-Mostly the better option for using sql is to use prepared statements. They are
-parsed just once and may contain variables, which can be filled before
-execution. A prepares statement is represented by the class `tntdb::Statement`
-and is created with the method `prepare` of `tntdb::Connection`.
+Prepared statements are recommended whenever values are supplied separately
+from the SQL text. They avoid SQL string concatenation and help prevent SQL
+injection.
 
-The use of variables is strongly encouraged to prevent sql injection. Tntdb
-takes care of passing the values as needed either by escaping the values
-properly or using native features of the underlying database.
-
-Tntdb uses always named variables. Those are specified by a name prefixed by a
-colon. The actual value of the statement can then be set using the method `set`
-method of `tntdb::Statement`. The class has also the methods `selectRow` and
-`selectValue` similar to the once in `tntdb::Connection`.
+A prepared statement is represented by `tntdb::Statement` and created with
+`tntdb::Connection::prepare()`. Tntdb uses named parameters, prefixed by a
+colon.
 
 ```cpp
-    auto stmt = conn.prepare("select col1, col2 from foo where id = :id");
-    stmt.set("id", 5);
-    auto row = stmt.selectRow();
+auto stmt = conn.prepare("select col1, col2 from foo where id = :id");
+stmt.set("id", 5);
+auto row = stmt.selectRow();
 ```
 
-To fetch all rows using a cursor the statement can be iterated with a C++ for
-loop. When the iteration is started, the statement is executed and the first
-row is fetched. With each iteration the next row is returned.
+`selectRow()` and `selectValue()` are also available on `tntdb::Statement`.
+
+## Iterating over a statement
+
+A statement can be iterated directly. Iteration executes the statement and
+fetches rows as needed instead of keeping the complete result in memory.
 
 ```cpp
-    auto stmt = conn.prepare("select col1, col2 from foo");
-    for (auto row: result)
-    {
-        ... do something with row
-    }
+auto stmt = conn.prepare("select col1, col2 from foo");
+
+for (auto row : stmt)
+{
+    // process row
+}
 ```
 
-The great advantage compared to tntdb::Result is, that the result is not held
-in memory. Just the current row is visible (although the driver will fetch
-multiple rows at once internally for better performance).
+The driver may fetch multiple rows internally for efficiency, but only the
+current row is exposed through the iterator.
 
-Some shorthand operators makes it even shorter:
+### Result or statement?
 
-And also for setting the variables:
+Use `tntdb::Result` when you want the complete result set materialized and
+available for random access. Iterate a `tntdb::Statement` when you want
+cursor-style processing without retaining the complete result set in memory.
+
+## Shorthand syntax
+
+`tntdb::Connection` and `tntdb::Statement` provide shorthand operators:
 
 ```cpp
-    auto stmt = conn("select col1, col2 from foo where id = :id");
-    stmt("id", 5);
-    auto row = stmt.selectRow();
+auto stmt = conn("select col1, col2 from foo where id = :id");
+stmt("id", 5);
+auto row = stmt.selectRow();
 ```
 
-Which can be chained to:
+The calls can be chained:
 
 ```cpp
-    auto row = conn("select col1, col2 from foo where id = :id")
-                   ("id", 5)
-                   .selectRow();
+auto row = conn("select col1, col2 from foo where id = :id")
+               ("id", 5)
+               .selectRow();
 ```
 
-Or when iterating:
+Statements can also be iterated directly:
 
 ```cpp
-    for (auot row: conn("select col1, col2 from foo where col3 > :someValue")
-                       ("someValue", 6))
-    {
-        ... do something with row
-    }
+for (auto row : conn("select col1, col2 from foo where col3 > :someValue")
+                     ("someValue", 6))
+{
+    // process row
+}
 ```

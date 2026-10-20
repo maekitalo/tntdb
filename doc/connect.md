@@ -1,96 +1,94 @@
 # Connecting to a database
 
-Connecting to a database is done using the function `tntdb::connect`. It
-expects either one or three parameters. The first parameter is the url. The url
-always starts with a driver name and a colon. The rest is passed to the driver
-and hence specific to it.
+Connections are created with `tntdb::connect()`. The first parameter is a
+database URL. It starts with a driver name followed by a colon; the remainder
+of the URL is interpreted by the selected driver.
 
-The optional second and third parameters are the username and the
-password and can be used as parameters within the database url. The token '%u' is replaced by
-the username and the token '%p' is replaced by the password before passed to
-the driver. Note that the url is logged before the repacement when debug log is
-enabled but the username and password is not.
+`tntdb::connect()` can also receive a username and password. The tokens `%u`
+and `%p` in the URL are replaced with these values before the URL is passed to
+the driver. When debug logging is enabled, the URL is logged before this
+replacement, so the supplied username and password are not logged as
+substituted values.
 
 ## Connection cache
 
-Tntdb maintains a connection cache. The function `tntdb::connectCached` works
-like `tntdb::connect` but uses a connection cache. On the first call the connect action is performed.
-As soon as the connection object is released, the connection
-is put into the pool. When at a later point `tntdb::connectCached` is called with the exact
-same parameters, it removes the connection from the pool and returns it after checking 
-the validity by issuing a ping command, which is database specific.
+`tntdb::connectCached()` behaves like `tntdb::connect()` but uses a connection
+cache. On the first call a new connection is created. When the connection
+object is released, the connection can be returned to the pool.
 
-Also when a statement issues an error at some point, the connection is marked
-as dirty and not put back into the pool for safety, since an error is a hint that
-there may be something wrong.
+A later call to `connectCached()` with the same parameters can reuse the pooled
+connection after checking it with a driver-specific ping operation.
 
-The cache can also be limited to a maximum size using `tntdb::setMaxPoolSize`.
-When the pool has reached its maximum size, connections, which are released
-are not put back to the pool.
+If a statement causes an error, the connection is marked dirty and is not
+returned to the pool.
 
-The function `tntdb::dropCached` can be used to empty the pool if needed. Note
-that this does not affect connections which are held by the application.
+The maximum pool size can be controlled using `tntdb::setMaxPoolSize()`. Once
+the pool has reached the configured size, released connections are not added to
+it.
+
+`tntdb::dropCached()` empties the pool. Connections currently held by the
+application are not affected.
 
 ## Disconnecting
 
-There is no specific disconnect function. When the database connection goes out of
-scope, the connection is terminated automatically.
+There is no explicit disconnect function. When the last connection wrapper is
+released, the underlying connection is released automatically.
 
-## Postgresql driver
+## PostgreSQL driver
 
-The PostgreSQL driver passes the url without the prefix directly to the driver
-function PQconnectdb. See the PostgreSQL documentation for details.
-
-### Example:
+The PostgreSQL driver passes the URL after the `postgresql:` prefix to
+`PQconnectdb()`.
 
 ```cpp
-    auto conn = tntdb::connect("postgresql:dbname=DS2 user=%u passwd=%p", "web", "webpw");
+auto conn = tntdb::connect(
+    "postgresql:dbname=DS2 user=%u passwd=%p",
+    "web",
+    "webpw");
 ```
 
-## MySql driver
+## MySQL driver
 
-The MySql driver uses the function `mysql\_real\_connect`. The function expects the
-connection parameters as separate entities. Tntdb parses the url to retrieve them, since
-the url is a list of name value pairs separated by semicolon. The name and value is
-separated by '='.
-
-### Example:
+The MySQL driver uses `mysql_real_connect()`. Tntdb parses the URL as
+name/value pairs separated by semicolons, with `=` separating each name from
+its value.
 
 ```cpp
-    auto conn = tntdb::connect("mysql:db=DS2;user=%u;passwd=%p", "web", "webpw");
+auto conn = tntdb::connect(
+    "mysql:db=DS2;user=%u;passwd=%p",
+    "web",
+    "webpw");
 ```
 
-## Sqlite3 driver
+## SQLite driver
 
-The Sqlite3 driver expects just a single file name as url.
-
-### Example:
+The SQLite driver expects a file name as its URL.
 
 ```cpp
-    auto conn = tntdb::connect("sqlite:mydatabase.db");
+auto conn = tntdb::connect("sqlite:mydatabase.db");
 ```
 
 ## Oracle driver
 
-The Oracle driver passes the connection string to the function OCIServerAttach.
-
-### Example:
+The Oracle driver passes the connection string to `OCIServerAttach()`.
 
 ```cpp
-    auto conn = tntdb::connect("oracle:XE;user=%u;passwd=%p", "hr", "hr");
+auto conn = tntdb::connect(
+    "oracle:XE;user=%u;passwd=%p",
+    "hr",
+    "hr");
 ```
 
-## Replicate
+## Replicate driver
 
-A very simple replication driver is offered by Tntdb.
-The connection string expects 2 or more connection strings separated by '|'.
-When SQL statements are executed, they are executed on all connections.
-Selecting data is done only on the first connection.
-
-### Example:
+Tntdb provides a simple replication driver. Its URL contains two or more
+connection strings separated by `|`. Modification statements are executed on
+all connections, while selections use the first connection.
 
 ```cpp
-    auto conn = tntdb::connect("replicate:postgresql:dbname=DS2 user=%u passwd=%p|sqlite:mydatabase.db", "web", "webpw");
+auto conn = tntdb::connect(
+    "replicate:postgresql:dbname=DS2 user=%u passwd=%p|sqlite:mydatabase.db",
+    "web",
+    "webpw");
 ```
 
-Note that if username and password are used, they must be identical in all peers.
+If username and password placeholders are used, the same credentials are supplied to all peers.

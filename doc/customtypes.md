@@ -1,147 +1,157 @@
 # Custom data types
 
-When working with prepared statements and fetching values from the database
-Tntdb supports practically all scalar types in C++. But sometimes we want to
-store some special values in a database field. We can convert the special value
-to and from existing types when inserting or extracting the value. Tntdb
-offers a convenient way to add such support.
-
-For fetching and sending values Tntdb uses special operators, which can be
-implemented for custom data types.
+Prepared statements and database values support the common scalar C++ types
+directly. Applications sometimes need to store their own types in a single
+database field. Tntdb allows custom conversions to be added so such types can
+be passed to statements and read from results naturally.
 
 ## The problem
 
-As a very simple example we want to store an enum like:
+Consider an enum stored as an integer:
 
 ```cpp
-    enum class Operation : int { PLUS, MINUS, MULTIPLY, DIVIDE }
+enum class Operation : int
+{
+    PLUS,
+    MINUS,
+    MULTIPLY,
+    DIVIDE
+};
 ```
 
-To insert an `Operation` object into the database we write:
+Without a custom conversion, inserting it requires an explicit cast:
 
 ```cpp
-    Operation op = Operation::PLUS;
+Operation op = Operation::PLUS;
 
-    auto ins = conn.prepare("insert into table (id, op) values (:id, :op)");
-    ins.set("id", 5)
-       .set("op", static_cast<int>(op))
-       .execute();
+auto ins = conn.prepare(
+    "insert into table (id, op) values (:id, :op)");
+
+ins.set("id", 5)
+   .set("op", static_cast<int>(op))
+   .execute();
 ```
 
-To retrieve an `Operation` object from the database we write:
+Retrieving it requires the reverse conversion:
 
 ```cpp
-    Operation op;
+Operation op;
+int intValue;
 
-    auto sel = conn.prepare("select op from table where id = :id");
+auto sel = conn.prepare("select op from table where id = :id");
+sel.set("id", 5)
+   .selectValue()
+   .get(intValue);
+
+op = static_cast<Operation>(intValue);
+```
+
+Tntdb allows these conversions to be expressed as operators.
+
+## Setting custom values
+
+To pass a custom type as a statement parameter, define `operator<<` for
+`tntdb::Hostvar`. The custom type is converted to one of the types already
+supported by Tntdb.
+
+```cpp
+void operator<<(tntdb::Hostvar& hv, const Operation& op)
+{
+    hv.set(static_cast<int>(op));
+}
+```
+
+The custom type can then be used directly:
+
+```cpp
+Operation op = Operation::PLUS;
+
+auto ins = conn.prepare(
+    "insert into table (id, op) values (:id, :op)");
+
+ins.set("id", 5)
+   .set("op", op)
+   .execute();
+```
+
+## Retrieving custom values
+
+To retrieve a custom type, define `operator>>` with a `const tntdb::Value&` as
+the left operand and a reference to the custom type as the right operand. The
+operator returns `false` for SQL `NULL` and `true` when a value was converted.
+
+```cpp
+bool operator>>(const tntdb::Value& value, Operation& op)
+{
+    if (value.isNull())
+        return false;
+
     int intValue;
-    sel.set("id", 5)
-       .selectValue()
-       .get(intValue);
+    value.get(intValue);
     op = static_cast<Operation>(intValue);
+    return true;
+}
 ```
 
-This works, but static casting manually before inserting or after fetching is
-a little inconvenient. To make it more natural we can define operators for that.
-
-## The solution: setting values
-
-To allow a custom type to be used as a statement parameter, we implement the operator <<.
-The operator receives a reference to a `tntdb::Hostvar` and a const reference to the
-object being stored.
-
-`tntdb::Hostvar` provides set methods for all types supported by tntdb. The custom type
-can therefore be converted to one of these supported types and stored using `set`:
+The custom type can now be read directly:
 
 ```cpp
-    void operator<< (tntdb::Hostvar& hv, const Operation& op)
-    {
-        hv.set(static_cast<int>(op));
-    }
+Operation op;
+
+auto sel = conn.prepare("select op from table where id = :id");
+sel.set("id", 5)
+   .selectValue()
+   .get(op);
 ```
 
-Now we can write:
+## A more complex example
+
+The same mechanism can serialize a small structure into a single database value:
 
 ```cpp
-    Operation op = Operation::PLUS;
+struct Rgb
+{
+    unsigned short red;
+    unsigned short green;
+    unsigned short blue;
+};
 
-    auto ins = conn.prepare("insert into table (id, op) values (:id, :op)");
-    ins.set("id", 5)
-       .set("op", op)
-       .execute();
+void operator<<(tntdb::Hostvar& hv, const Rgb& rgb)
+{
+    const std::string str = std::to_string(rgb.red)
+                          + '-'
+                          + std::to_string(rgb.green)
+                          + '-'
+                          + std::to_string(rgb.blue);
+    hv.set(str);
+}
+
+bool operator>>(const tntdb::Value& value, Rgb& rgb)
+{
+    std::string str;
+    if (!value.get(str))
+        return false;
+
+    std::sscanf(str.c_str(), "%hu-%hu-%hu",
+                &rgb.red, &rgb.green, &rgb.blue);
+    return true;
+}
 ```
 
-## The solution: retrieving values
-
-To retrieve a value we implement an operator>> which has a `const tntbd::Value&`
-as a left hand operand and a non const reference to our type as a right hand operand.
-It must return a bool to indicate whether the value was not null:
+The type can then be used with statements like any other supported value:
 
 ```cpp
-    bool operator>> (const tntdb::Value& v, Operation& op)
-    {
-        if (v.isNull())
-            return false;
-        int intValue;
-        v.get(intValue);
-        op = static_cast<Operaton>(intValue);
-        return true;
-    }
-```
+Rgb red{255, 0, 0};
 
-Now we can write:
+conn.prepare("insert into colortable (id, color) values (:id, :color)")
+    .set("id", 7)
+    .set("color", red)
+    .execute();
 
-```cpp
-    Operation op;
+Rgb theColor;
 
-    auto sel = conn.prepare("select op from table where id = :id");
-    sel.set("id", 5)
-       .selectValue()
-       .get(op);
-```
-
-## A little more complex example
-
-We define a rgb color struct containting 3 values:
-
-```cpp
-    struct Rgb 
-    {
-        unsigned short red;
-        unsigned short green;
-        unsigned short blue;
-    };
-
-    void operator<< (tntdb::Hostvar& hv, const Rgb& rgb)
-    {
-        std::string str = std::to_string(rgb.red)
-                        + std::to_string(rgb.green)
-                        + std::to_string(rgb.blue);
-        hv.set(str);
-    }
-
-    bool operator>> (const tntdb::Value& v, Rgb& rgb)
-    {
-        std::string str;
-        if (!v.get(str))
-            return false;
-        std::sscanf(rgb.c_str(), "%hu-%hu-%hu", &rgb.red, &rgb.green, &rgb.blue);
-        return true;
-    }
-```
-
-Now we can easily work with that:
-
-```cpp
-    Rgb red{255, 0, 0};
-    conn.prepare("insert into colortable (id, color) values (:id, :color))
-        .set("id", 7)
-        .set("color", red)
-        .execute();
-
-    Rgb theColor;
-    conn.prepare("select color from colortable where id = :id")
-        .set("id", 7)
-        .selectValue()
-        .get(theColor);
+conn.prepare("select color from colortable where id = :id")
+    .set("id", 7)
+    .selectValue()
+    .get(theColor);
 ```

@@ -1,29 +1,36 @@
-## Date and time support
+# Date and time support
 
-The syntax of date and time varies between different databases and is
-sometimes very confusing. To help here Tntdb offers classes:
+Date and time syntax differs between database systems. Tntdb therefore provides
+database-independent classes for date and time values.
 
-    - `tntdb::Date`
-    - `tntdb::Time`
-    - `tntdb::Datetime`
+The classes provide the functionality needed for database access, including
+constructors and getters for their components. `tntdb::Time` supports
+millisecond precision. The classes do not validate whether the supplied
+component values form a valid date or time.
 
-The classes have just enough functionality to work with dates and times in the
-database, a constructor and getters for the components. `tntdb::Time` has milliseconds
-precision.
-
-Example to insert and retrieve a date:
+## Example
 
 ```cpp
-    auto sel = conn.prepare("select max(last_update) from table");
-    tntdb::Date lastUpdate;
-    sel.selectValue()
-       .get(lastUpdate);
-    std::cout << "the last update is " << lastUpdate.getIso() << std::endl;
+auto sel = conn.prepare("select max(last_update) from table");
 
-    auto ins = conn.prepare("insert into table(id, a_date) values (:id, :aDate)");
-    ins.set("id", 5)
-       .set("aDate", tntdb::Date(2026, 8, 5))
-       .execute();
+tntdb::Date lastUpdate;
+sel.selectValue()
+   .get(lastUpdate);
+
+std::cout << "the last update is "
+          << lastUpdate.getIso()
+          << std::endl;
 ```
 
-This process is similar for `tntdb::Datetime` and `tntdb::Time`.
+A date can be passed to a prepared statement just like other supported values:
+
+```cpp
+auto ins = conn.prepare(
+    "insert into table (id, a_date) values (:id, :aDate)");
+
+ins.set("id", 5)
+   .set("aDate", tntdb::Date(2026, 8, 5))
+   .execute();
+```
+
+The same approach applies to `tntdb::Datetime` and `tntdb::Time`.

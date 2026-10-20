@@ -3,6 +3,7 @@ EXTRA_DIST = @PACKAGE@.doxygen.in \
 	tntdb.markdown
 
 dist_doc_DATA = \
+	blobs.md \
 	connect.md \
 	customtypes.md \
 	datetime.md \

@@ -1,42 +1,44 @@
 # Executing modification statements
 
-The simplest form to execute a modification statement is to use the
-method `execute` of `tntdb::Connection`:
+The simplest way to execute a modification statement is
+`tntdb::Connection::execute()`:
 
 ```cpp
-    conn.execute("update col1 = col1 + 1 where col3 > 5");
+conn.execute("update foo set col1 = col1 + 1 where col3 > 5");
 ```
 
-This is suitable if no variables are required and the input is static.
-When working with user-supplied or variable input, it is strongly encouraged
-to use prepared statements with bound parameters instead.
+This is suitable when the SQL statement is static and does not require variable
+input. For variable or user-supplied values, use prepared statements with bound
+parameters instead.
 
 ## Using prepared statements
 
-As explained in [Selecting data](select.md) Tntdb supports preparation of
-statements with variables. The class `tntdb::Statement` has a method `execute`
-returning the number of affected rows as `unsigned`.
+As described in [Selecting data](select.md), Tntdb supports prepared statements
+with named parameters. `tntdb::Statement::execute()` executes the statement and
+returns the number of affected rows as an `unsigned` value.
 
 ```cpp
-    auto upd = conn.prepare("update col1 = :newValue where id = :id");
-    upd.set("id", 5)
-       .set("newValue", "something")
-       .execute();
+auto upd = conn.prepare("update foo set col1 = :newValue where id = :id");
 
-    upd.set("id", 6)
-       .set("newValue", "something else")
-       .execute();
+upd.set("id", 5)
+   .set("newValue", "something")
+   .execute();
+
+upd.set("id", 6)
+   .set("newValue", "something else")
+   .execute();
 ```
 
-Using shorthand operators it looks like this:
+Using the shorthand operators, the same code can be written as:
 
 ```cpp
-    auto upd = conn("update col1 = :newValue where id = :id");
-    upd("id", 5)
-       ("newValue", "something")
-       ();
+auto upd = conn("update foo set col1 = :newValue where id = :id");
 
-    upd("id", 6)
-       ("newValue", "something else")
-       ();
+upd("id", 5)
+   ("newValue", "something")
+   ();
+
+upd("id", 6)
+   ("newValue", "something else")
+   ();
 ```

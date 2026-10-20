@@ -56,4 +56,4 @@ To enable Oracle-support (disabled by default) do
 HOWTO
 =====
 
-A documentation can be found [here](doc/tntdb.markdown)
+A documentation can be found [here](doc/index.md)

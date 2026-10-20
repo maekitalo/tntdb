@@ -1,217 +1,174 @@
-# Tntdb - a C++ Database access library
+# Tntdb - a C++ database access library
 
-Tntdb offers easy access to databases using SQL with C++. It supports access to
-PostgreSQL, MySql, Sqlite3 and Oracle using a driver architecture.
+Tntdb provides convenient access to SQL databases from C++. It supports
+PostgreSQL, MySQL, SQLite, and Oracle through a driver architecture.
 
-## Basic Classes
+## Quick start
 
-For each item in a relation database tntdb offers classes. The main classes are:
+```cpp
+#include <tntdb/connect.h>
 
-    - tntdb::Connection                     a database connection
-    - tntdb::Result                         a database result (rows and columns)
-    - tntdb::Row                            a single row
-    - tntdb::Value                          a single db value
-    - tntdb::Statement                      a prepared statement
-    - tntdb::Statement::const\_iterator     a database cursor
-    - tntdb::Transaction                    a database transaction
+int main()
+{
+    auto conn = tntdb::connect("postgresql:dbname=foo");
 
-All classes are wrappers, which held a shared pointer to the actual
-implementation. So when copying the copy references the very same object. When
-the last instance of a object is deleted (typically by leaving the scope) the
-actual implementation is released.
+    auto stmt = conn.prepare("select name from person where id = :id");
+    stmt.set("id", 42);
 
-To use those, each has its own header, which must be included when needed:
+    std::string name;
+    stmt.selectValue().get(name);
+}
+```
 
-    - `#include <tntdb/connection.h>`
-    - `#include <tntdb/result.h>`
-    - `#include <tntdb/row.h>`
-    - `#include <tntdb/value.h>`
-    - `#include <tntdb/statement.h>`
-    - `#include <tntdb/transaction.h>`
+## Basic classes
 
-As an alternative there is a header `<tntdb.h>`, which includes allof them.
+Tntdb provides C++ classes for the fundamental concepts of a relational
+database. Most Tntdb classes are lightweight wrappers around a shared
+implementation object. Copying such an object therefore references the same
+underlying implementation. The implementation is released when the last wrapper
+is destroyed.
+
+Each class has its own header. Alternatively, `<tntdb.h>` includes the complete
+public interface.
 
 ## Connecting to a database
 
-To get a connection a single function `tntdb::connect` is offered. It expects an
-url as a parameter. The url always starts with the driver name and a colon, the
-suffix is driver specific. Here is an example to get a connection to a postgresql
-database:
+Use `tntdb::connect()` to create a connection. It expects a database URL whose
+prefix identifies the driver; the remainder is driver-specific.
 
 ```cpp
-    auto conn = tntdb::connect("postgresql:dbname=foo");
+auto conn = tntdb::connect("postgresql:dbname=foo");
 ```
 
-The function can be found in the header `<tntdb/connect.h>`
+The function is declared in `<tntdb/connect.h>`.
 
-A very special replicate driver is also available for simple replication
-between databases.
+A special `replicate` driver is also available for simple replication between
+databases.
 
-See [Connecting to a db](connect.md) for details.
+See [Connecting to a database](connect.md) for details.
 
 ## Selecting data
 
-There are several ways to select data. You can select result sets, rows or just values.
-
-To select a result set we use tntdb::Connection::select(const std::string&) and iterate
-over it:
+Tntdb can select complete result sets, individual rows, or single values.
 
 ```cpp
-    auto result = conn.select("select firstname, lastname from person");
-    std::string firstname, lastname;
-    for (auto row: result)
-    {
-        row.get(firstname)
-           .get(lastname);
-    }
+auto result = conn.select("select firstname, lastname from person");
+
+std::string firstname;
+std::string lastname;
+
+for (auto row : result)
+{
+    row.get(firstname)
+       .get(lastname);
+}
 ```
 
 See [Selecting data](select.md) for details.
 
-## Executing statments
+## Executing statements
 
-Executing update, insert or delete is easy. A method tntdb::Connection::execute
-is offered:
+`INSERT`, `UPDATE`, and `DELETE` statements can be executed using
+`tntdb::Connection::execute()`:
 
 ```cpp
-    conn.execute("update mytable set column='value' where id=50");
+conn.execute("update mytable set column='value' where id=50");
 ```
 
-A prepared statement can be used to pass the values using variables:
+For variable values, prepared statements with bound parameters are recommended:
 
 ```cpp
-    auto upd = conn.prepare("update mytable set column=:column where id=:id");
-    upd.set("id", 50)
-       .set("column", "value")
-       .execute();
+auto upd = conn.prepare("update mytable set column=:column where id=:id");
+upd.set("id", 50)
+   .set("column", "value")
+   .execute();
 ```
 
 See [Executing modification statements](modify.md) for details.
 
-## Using date, time and datetime
+## Date, time, and datetime
 
-Since date, time and datetime are somewhat difficult to handle database independently,
-Tntdb offers simple types for that:
-
-    - tntdb::Date
-    - tntdb::Time
-    - tntdb::Datetime
-
-Note that those are just interface classes and do not check for valid values.
-To insert e.g. a date into a database we use tntdb::Date:
+Date and time syntax differs between database systems. Tntdb provides
+database-independent types for these values.
 
 ```cpp
-    auto ins = conn.prepare("insert into mytable (id, date) values (:id, :date)");
-    ins.set("id", 60)
-       .set("date", tntdb::Date(2026, 8, 6))
-       .execute();
+auto ins = conn.prepare("insert into mytable (id, date) values (:id, :date)");
+ins.set("id", 60)
+   .set("date", tntdb::Date(2026, 8, 6))
+   .execute();
 ```
 
 See [Date and time support](datetime.md) for details.
 
 ## Decimal type
 
-Similar to date, time and datetime there is a decimal type tntdb::Decimal, which represents
-decimal numbers.
+`tntdb::Decimal` represents decimal numbers in a database-independent way.
 
 ## Blobs
 
-Tntdb also supports blobs (binary large objects) with a helper class `tntdb::Blob`.
+Tntdb supports binary large objects through `tntdb::Blob`.
 
 See [Blobs](blobs.md) for details.
 
 ## Custom data types
 
-Tntdb allows the implementation of custom conversions for own datatypes, so that they
-can be easily used in tntdb. Note that only single values are supported.
+Tntdb allows applications to define conversions for custom data types so they
+can be used naturally with statements and result values. Custom conversions
+operate on individual database values.
 
 See [Custom data types](customtypes.md) for details.
 
 ## Transactions
 
-Transactions are supported by the class `tntdb::Transaction`. A transaction object is
-typically instantiated with a connection parameter on the stack in which case
-the transaction is started. Using `tntdb::Transaction::commit` the transaction
-is committed. If the transaction is not explicitly ended before the destructor,
-a rollback is issued.
+Transactions are supported by `tntdb::Transaction`. Constructing a transaction
+object starts the transaction. Calling `commit()` commits it. If the object
+leaves scope before the transaction is explicitly completed, it is rolled back.
 
 See [Transactions](transaction.md) for details.
 
 ## Error handling
 
-In case of errors an exception of type `tntdb::Error` is thrown, which is
-derived from `std::runtime_error`. Normally the exception is caused by the
-driver itself. A special case is the error `tntdb::NotFound`, which is thrown
-directly from Tntdb. It is thrown if `selectRow` or `selectValue` fail to fetch
-a row.
+Database errors are reported using `tntdb::Error`, which derives from
+`std::runtime_error`. `tntdb::NotFound` is a special exception thrown when
+`selectRow()` or `selectValue()` cannot fetch a row.
 
 ## Logging
 
-For logging cxxtools is used.
+Tntdb uses cxxtools for logging.
 
 See [Logging with cxxtools](logging.md) for details.
 
 ## Prepared statement cache connection
 
-Typically, prepared statements are used when executing statements. Preparing
-statements incurs a small overhead, and reusing the same statement with different
-parameters may slightly improve application performance compared to preparing a
-new statement for each execution.
-
-This can be done by storing the prepared statement in a variable or
-using the tntdb statement cache, which does this automatically.
-
-The class `tntdb::PSCConnection` (Prepared Statement Cache Connection) is
-derived from `tntdb::Connection` and provides this functionality. The `prepare` method
-looks up the statement in a map, and if it was prepared previously, the statement is
-returned. Otherwise, it is prepared and put it into the cache.
-
-### Example
+Preparing a statement has some overhead. A prepared statement can be stored and
+reused, or applications can use `tntdb::PSCConnection`, which provides an
+automatic prepared-statement cache.
 
 ```cpp
-    tntdb::PSCConnection conn = tntdb::connect("...");
-    auto stmt = conn.prepare("...");    // this uses the cache
+tntdb::PSCConnection conn = tntdb::connect("...");
+auto stmt = conn.prepare("..."); // uses the cache
 ```
 
-## Using serial columns
+## Serial columns and generated IDs
 
-When designing tables, you need a primary key to uniquely identify a
-specific row in the table. Sometimes it is enough to use just some arbitrary
-unique number and most databases support automatically generated primary keys.
-The way such primary key columns are generated is database-dependent.
-Since tntdb has no support for ddl statements (create table ...), there is no need
-to abstract the creation of these columns. But in applications it is often
-necessary to obtain the identifier assigned to the last inserted row. How and if
-this value is returned also depends on the actual database software used.
+Database systems use different mechanisms for automatically generated primary
+keys. Tntdb provides `tntdb::Connection::lastInsertId()` to retrieve the
+identifier assigned by the last insert operation.
 
-Tntdb helps retrieving that last insert id with the method `long
-tntdb::Connection::lastInsertId(const std::string& name)`.
-
-Some databases (postgresql, oracle) use named sequences
-and a single table might have multiple of them. So to fetch the actual id, we
-need to tell the driver which sequence we want to know. The sequence is
-identified by name. Other databases (mysql, sqlite) do require such an identifier and
-will simply ignore the supplied name.
-
-By default, this name is an empty string, which requests the last incremented
-serial number in the current connection.
-
-Here is a example. We assume a table foo with 2 columns: id and name. The id is
-the primary auto incremented key. In postgresql or oracle the sequence is
-created with the name `foo_id_seq`:
+Some databases, such as PostgreSQL and Oracle, use named sequences. MySQL and
+SQLite do not require such a sequence name and ignore it when supplied.
 
 ```cpp
-    void insertData(tntdb::Connection conn)
-    {
-        tntdb::Statement ins = conn.prepare(
-          "insert into foo (name)"
-          "  values(:name)");
+void insertData(tntdb::Connection conn)
+{
+    auto ins = conn.prepare(
+        "insert into foo (name) "
+        "values (:name)");
 
-        ins.set("name", "some name")
-           .execute();
+    ins.set("name", "some name")
+       .execute();
 
-        std::cout << "id: " << conn.lastInsertId("foo_id_seq") << std::endl;
-        // or mostly you can just omit the serial name
-        std::cout << "id: " << conn.lastInsertId() << std::endl;
-    }
+    std::cout << "id: " << conn.lastInsertId("foo_id_seq") << std::endl;
+    std::cout << "id: " << conn.lastInsertId() << std::endl;
+}
 ```
