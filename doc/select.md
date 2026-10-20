@@ -7,6 +7,13 @@ using a C++ range-based `for` loop.
 
 Tntdb also provides shorthand operators for frequently used operations.
 
+`tntdb::Connection::select()` expects a row-producing query. It does not parse
+or enforce SQL statement type before passing the query to the database driver.
+If a non-select statement is passed (e.g. `delete`), behavior is
+driver-dependent: the statement may execute and then either return an empty
+result or throw an exception. Therefore use `execute()` for modifying
+statements and reserve `select()` for read-only queries.
+
 ## Value
 
 A `tntdb::Value` represents a single database value, which may be SQL `NULL`.
@@ -25,6 +32,9 @@ if (value.get(integerValue))
 std::string stringValue;
 anotherValue.get(stringValue);
 ```
+
+If the database value is NULL, get() returns false and leaves the supplied
+variable unchanged.
 
 ## Reading a row
 
@@ -85,13 +95,26 @@ value >> count;
 
 ## Prepared statements
 
-Prepared statements are recommended whenever values are supplied separately
-from the SQL text. They avoid SQL string concatenation and help prevent SQL
-injection.
+Most of the time, queries need to be parameterized.
 
-A prepared statement is represented by `tntdb::Statement` and created with
-`tntdb::Connection::prepare()`. Tntdb uses named parameters, prefixed by a
-colon.
+SQL statements could be constructed using string concatenation, for example
+with std::ostringstream, but this is not recommended. The application would
+then have to handle special characters correctly to avoid misinterpretation
+of data and, in particular, SQL injection.
+
+Prepared statements solve this problem by separating the SQL statement from
+its parameter values. They can also improve performance when the same statement
+is executed multiple times with different parameter values. Parsing can be
+performed either on the client side or on the server side. Tntdb lets the
+driver decide how the query is prepared and which placeholders are required
+by the database.
+
+To create a prepared statement, tntdb::Connection provides prepare(), which
+takes the query as a std::string and returns a tntdb::Statement. The query can
+contain named parameters prefixed with a colon. A parameter may occur multiple
+times in a query. The Statement class provides setter methods for passing
+parameter values of different types.
+
 
 ```cpp
 auto stmt = conn.prepare("select col1, col2 from foo where id = :id");
@@ -99,7 +122,9 @@ stmt.set("id", 5);
 auto row = stmt.selectRow();
 ```
 
-`selectRow()` and `selectValue()` are also available on `tntdb::Statement`.
+`selectRow()` and `selectValue()` are also available on tntdb::Statement as
+well as execute() when [modify.md](modifing data).
+
 
 ## Iterating over a statement
 
@@ -117,6 +142,21 @@ for (auto row : stmt)
 
 The driver may fetch multiple rows internally for efficiency, but only the
 current row is exposed through the iterator.
+
+The number of rows fetched at once can be passed as a value to
+`tntdb::Statement::begin(unsigned)` if you use an explicit iterator. The
+default is 100.
+
+```cpp
+auto stmt = conn.prepare("select col1, col2 from foo");
+
+for (auto it = stmt.begin(10); it != stmt.end(); ++it)
+{
+    auto row = *it;
+    // process row
+}
+```
+
 
 ### Result or statement?
 

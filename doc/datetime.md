@@ -8,6 +8,10 @@ constructors and getters for their components. `tntdb::Time` supports
 millisecond precision. The classes do not validate whether the supplied
 component values form a valid date or time.
 
+Each of the three classes also provides the static methods localtime() and
+gmtime(), which create an object representing the current local or UTC
+date and/or time.
+
 ## Example
 
 ```cpp

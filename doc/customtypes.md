@@ -50,9 +50,10 @@ Tntdb allows these conversions to be expressed as operators.
 
 ## Setting custom values
 
-To pass a custom type as a statement parameter, define `operator<<` for
-`tntdb::Hostvar`. The custom type is converted to one of the types already
-supported by Tntdb.
+To pass a custom type as a statement parameter, define operator<< for
+tntdb::Hostvar. The custom type is converted to one of the types already
+supported by Tntdb. The class definition can be found in the header
+`<tntdb/statement.h>`:
 
 ```cpp
 void operator<<(tntdb::Hostvar& hv, const Operation& op)

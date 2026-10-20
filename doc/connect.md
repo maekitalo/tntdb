@@ -48,9 +48,14 @@ auto conn = tntdb::connect(
 
 ## MySQL driver
 
-The MySQL driver uses `mysql_real_connect()`. Tntdb parses the URL as
-name/value pairs separated by semicolons, with `=` separating each name from
-its value.
+The part after the prefix "mysql:" is split into the parameters needed for
+`mysql_real_connect`. The string is interpreted as a list of parameters
+separated by semicolon. Each parameter is a name value pair separated by '='.
+Valid name keys are 'port', 'flags', 'app', 'host', 'user', 'passwd', 'db' and
+'unix socket'. For 'passwd' the word 'password' is also accepted, 'db' may be
+replaced with 'dbname' or 'database'. All other keys throw an error. The value
+may be enclosed in ' or ". The backslash character ( \\ ) disables any special
+meaning of the next character.
 
 ```cpp
 auto conn = tntdb::connect(
@@ -84,11 +89,4 @@ Tntdb provides a simple replication driver. Its URL contains two or more
 connection strings separated by `|`. Modification statements are executed on
 all connections, while selections use the first connection.
 
-```cpp
-auto conn = tntdb::connect(
-    "replicate:postgresql:dbname=DS2 user=%u passwd=%p|sqlite:mydatabase.db",
-    "web",
-    "webpw");
-```
-
-If username and password placeholders are used, the same credentials are supplied to all peers.
+See [Replication](replicate.md) for more details.

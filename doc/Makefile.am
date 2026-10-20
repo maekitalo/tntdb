@@ -11,6 +11,7 @@ dist_doc_DATA = \
 	logging.md \
 	modify.md \
 	select.md \
+	replicate.md \
 	transaction.md
 
 if MAKE_DOXYGEN
