@@ -1,6 +1,5 @@
 EXTRA_DIST = @PACKAGE@.doxygen.in \
-	main.page \
-	tntdb.markdown
+	main.page
 
 dist_doc_DATA = \
 	blobs.md \
